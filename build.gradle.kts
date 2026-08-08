@@ -88,6 +88,7 @@ dependencies {
     jij(libs.netty.handler.proxy) { isTransitive = false }
     jij(libs.netty.codec.socks) { isTransitive = false }
     jij(libs.waybackauthlib)
+    jij(libs.cubiomes)
 }
 
 sourceSets {

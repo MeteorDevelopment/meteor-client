@@ -45,3 +45,17 @@ accessible   field   net/minecraft/client/renderer/rendertype/RenderSetup output
 
 # ProjectileEntitySimulator#hitOrDeflect
 accessible   method   net/minecraft/world/entity/projectile/Projectile shouldBounceOnWorldBorder ()Z
+
+# Chest Predictor
+accessible field net/minecraft/world/level/levelgen/structure/templatesystem/StructureTemplateManager RESOURCE_STRUCTURE_LISTER Lnet/minecraft/resources/FileToIdConverter;
+accessible field net/minecraft/world/level/levelgen/structure/pools/SinglePoolElement processors Lnet/minecraft/core/Holder;
+accessible field net/minecraft/world/level/levelgen/structure/templatesystem/BlackstoneReplaceProcessor replacements Ljava/util/Map;
+accessible field net/minecraft/world/level/levelgen/structure/templatesystem/BlockRotProcessor rottableBlocks Ljava/util/Optional;
+accessible field net/minecraft/world/level/levelgen/structure/templatesystem/BlockAgeProcessor NON_MOSSY_REPLACEMENTS [Lnet/minecraft/world/level/block/state/BlockState;
+accessible field net/minecraft/world/level/levelgen/structure/templatesystem/RuleProcessor rules Lcom/google/common/collect/ImmutableList;
+accessible field net/minecraft/world/level/levelgen/structure/templatesystem/ProcessorRule inputPredicate Lnet/minecraft/world/level/levelgen/structure/templatesystem/RuleTest;
+accessible field net/minecraft/world/level/levelgen/structure/templatesystem/BlockMatchTest block Lnet/minecraft/world/level/block/Block;
+accessible field net/minecraft/world/level/levelgen/structure/templatesystem/BlockStateMatchTest blockState Lnet/minecraft/world/level/block/state/BlockState;
+accessible field net/minecraft/world/level/levelgen/structure/templatesystem/TagMatchTest tag Lnet/minecraft/tags/TagKey;
+accessible field net/minecraft/world/level/levelgen/structure/templatesystem/RandomBlockMatchTest block Lnet/minecraft/world/level/block/Block;
+accessible field net/minecraft/world/level/levelgen/structure/templatesystem/RandomBlockStateMatchTest blockState Lnet/minecraft/world/level/block/state/BlockState;

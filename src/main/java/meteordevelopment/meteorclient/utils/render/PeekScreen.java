@@ -32,6 +32,11 @@ public class PeekScreen extends ShulkerBoxScreen {
         this.storageBlock = storageBlock;
     }
 
+    public PeekScreen(ItemStack storageBlock, SimpleContainer contents) {
+        super(new ShulkerBoxMenu(0, mc.player.getInventory(), contents), mc.player.getInventory(), storageBlock.getHoverName());
+        this.storageBlock = storageBlock;
+    }
+
     @Override
     public boolean mouseClicked(MouseButtonEvent click, boolean doubled) {
         BetterTooltips tooltips = Modules.get().get(BetterTooltips.class);
