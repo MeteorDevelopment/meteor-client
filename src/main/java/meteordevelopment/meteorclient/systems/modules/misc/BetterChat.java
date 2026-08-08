@@ -595,7 +595,8 @@ public class BetterChat extends Module {
         int msgLen = encEnd - encStart;
         StringBuilder modString = new StringBuilder();
 
-        if (msgLen < 2) {
+        // Exit early if there is definitely not an encrypted substring
+        if (msgLen < 2 || encStart == 0 || encEnd == -2 || nameTagEnd == 1) {
             return Optional.empty();
         }
 
