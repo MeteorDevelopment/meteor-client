@@ -5,220 +5,116 @@
 
 package meteordevelopment.meteorclient.systems.accounts;
 
-import com.sun.net.httpserver.HttpExchange;
-import com.sun.net.httpserver.HttpServer;
 import meteordevelopment.meteorclient.MeteorClient;
-import meteordevelopment.meteorclient.utils.network.Http;
+import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
 import net.minecraft.util.Util;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.utils.URLEncodedUtils;
+import net.raphimc.minecraftauth.MinecraftAuth;
+import net.raphimc.minecraftauth.java.JavaAuthManager;
+import net.raphimc.minecraftauth.java.model.MinecraftProfile;
+import net.raphimc.minecraftauth.java.model.MinecraftToken;
+import net.raphimc.minecraftauth.msa.data.MsaConstants;
+import net.raphimc.minecraftauth.msa.model.MsaApplicationConfig;
+import net.raphimc.minecraftauth.msa.model.MsaDeviceCode;
+import net.raphimc.minecraftauth.msa.model.MsaToken;
+import net.raphimc.minecraftauth.msa.service.impl.DeviceCodeMsaAuthService;
 
-import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.nio.charset.StandardCharsets;
-import java.util.List;
-import java.util.concurrent.Executors;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 public class MicrosoftLogin {
+    private static final MsaApplicationConfig APPLICATION_CONFIG = new MsaApplicationConfig(
+        MsaConstants.JAVA_TITLE_ID,
+        MsaConstants.SCOPE_TITLE_AUTH
+    );
+
+    private static final AtomicReference<Future<?>> loginTask = new AtomicReference<>();
+    private static final AtomicBoolean cancelled = new AtomicBoolean();
+
     private MicrosoftLogin() {
     }
 
-    public static class LoginData {
-        public String mcToken;
-        public String newRefreshToken;
-        public String uuid, username;
-
-        public LoginData() {}
-
-        public LoginData(String mcToken, String newRefreshToken, String uuid, String username) {
-            this.mcToken = mcToken;
-            this.newRefreshToken = newRefreshToken;
-            this.uuid = uuid;
-            this.username = username;
-        }
-
-        public boolean isGood() {
-            return mcToken != null;
-        }
+    public record LoginData(String mcToken, String newRefreshToken, String uuid, String username) {
     }
 
-    private static final String CLIENT_ID = "4673b348-3efa-4f6a-bbb6-34e141cdc638";
-    private static final int PORT = 9675;
-
-    private static volatile HttpServer server;
-    private static volatile Consumer<String> callback;
-
     public static String getRefreshToken(Consumer<String> callback) {
-        MicrosoftLogin.callback = callback;
+        cancelLogin();
+        cancelled.set(false);
 
-        startServer();
-        String url = "https://login.live.com/oauth20_authorize.srf?client_id=" + CLIENT_ID + "&response_type=code&redirect_uri=http://127.0.0.1:" + PORT + "&scope=XboxLive.signin%20offline_access&prompt=select_account";
-        Util.getOperatingSystem().open(url);
+        CompletableFuture<String> urlFuture = new CompletableFuture<>();
 
-        return url;
+        loginTask.set(MeteorExecutor.executor.submit(() -> {
+            try {
+                JavaAuthManager authManager = JavaAuthManager.create(MinecraftAuth.createHttpClient())
+                    .msaApplicationConfig(APPLICATION_CONFIG)
+                    .login(DeviceCodeMsaAuthService::new, (Consumer<MsaDeviceCode>) deviceCode -> {
+                        String urlString = deviceCode.getDirectVerificationUri();
+                        urlFuture.complete(urlString);
+                        Util.getOperatingSystem().open(urlString);
+                    });
+
+                MsaToken msaToken = authManager.getMsaToken().getUpToDate();
+
+                if (!cancelled.get()) {
+                    callback.accept(msaToken.getRefreshToken());
+                }
+            }catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                if (!urlFuture.isDone()) urlFuture.completeExceptionally(e);
+                if (cancelled.get()) return;
+                MeteorClient.LOG.error("Error logging into Microsoft account", e);
+                callback.accept(null);
+            } catch (Exception e) {
+                if (!urlFuture.isDone()) urlFuture.completeExceptionally(e);
+                if (cancelled.get()) return;
+                MeteorClient.LOG.error("Error logging into Microsoft account", e);
+                callback.accept(null);
+            }
+
+        }));
+
+        try {
+            return urlFuture.get();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException("Interrupted while starting Microsoft login", e);
+        } catch (ExecutionException e) {
+            throw new RuntimeException("Failed to start Microsoft login", e.getCause());
+        }
     }
 
     public static LoginData login(String refreshToken) {
-        // Refresh access token
-        AuthTokenResponse res = Http.post("https://login.live.com/oauth20_token.srf")
-            .bodyForm("client_id=" + CLIENT_ID + "&refresh_token=" + refreshToken + "&grant_type=refresh_token&redirect_uri=http://127.0.0.1:" + PORT)
-            .sendJson(AuthTokenResponse.class);
-
-        if (res == null) return new LoginData();
-
-        String accessToken = res.access_token;
-        refreshToken = res.refresh_token;
-
-        // XBL
-        XblXstsResponse xblRes = Http.post("https://user.auth.xboxlive.com/user/authenticate")
-            .bodyJson("{\"Properties\":{\"AuthMethod\":\"RPS\",\"SiteName\":\"user.auth.xboxlive.com\",\"RpsTicket\":\"d=" + accessToken + "\"},\"RelyingParty\":\"http://auth.xboxlive.com\",\"TokenType\":\"JWT\"}")
-            .sendJson(XblXstsResponse.class);
-
-        if (xblRes == null) return new LoginData();
-
-        // XSTS
-        XblXstsResponse xstsRes = Http.post("https://xsts.auth.xboxlive.com/xsts/authorize")
-            .bodyJson("{\"Properties\":{\"SandboxId\":\"RETAIL\",\"UserTokens\":[\"" + xblRes.Token + "\"]},\"RelyingParty\":\"rp://api.minecraftservices.com/\",\"TokenType\":\"JWT\"}")
-            .sendJson(XblXstsResponse.class);
-
-        if (xstsRes == null) return new LoginData();
-
-        // Minecraft
-        McResponse mcRes = Http.post("https://api.minecraftservices.com/authentication/login_with_xbox")
-            .bodyJson("{\"identityToken\":\"XBL3.0 x=" + xblRes.DisplayClaims.xui[0].uhs + ";" + xstsRes.Token + "\"}")
-            .sendJson(McResponse.class);
-
-        if (mcRes == null) return new LoginData();
-
-        // Check game ownership
-        GameOwnershipResponse gameOwnershipRes = Http.get("https://api.minecraftservices.com/entitlements/mcstore")
-            .bearer(mcRes.access_token)
-            .sendJson(GameOwnershipResponse.class);
-
-        if (gameOwnershipRes == null || !gameOwnershipRes.hasGameOwnership()) return new LoginData();
-
-        // Profile
-        ProfileResponse profileRes = Http.get("https://api.minecraftservices.com/minecraft/profile")
-            .bearer(mcRes.access_token)
-            .sendJson(ProfileResponse.class);
-
-        if (profileRes == null) return new LoginData();
-
-        return new LoginData(mcRes.access_token, refreshToken, profileRes.id, profileRes.name);
-    }
-
-    private static void startServer() {
-        if (server != null) return;
-
         try {
-            server = HttpServer.create(new InetSocketAddress("127.0.0.1", PORT), 0);
+            JavaAuthManager authManager = JavaAuthManager.create(MinecraftAuth.createHttpClient())
+                .msaApplicationConfig(APPLICATION_CONFIG)
+                .login(refreshToken);
 
-            server.createContext("/", MicrosoftLogin::handleRequest);
-            server.setExecutor(Executors.newVirtualThreadPerTaskExecutor());
-            server.start();
-        } catch (IOException e) {
-            MeteorClient.LOG.error("Error starting Microsoft login server", e);
-            stopServer();
+            MsaToken msaToken = authManager.getMsaToken().getUpToDate();
+            MinecraftToken minecraftToken = authManager.getMinecraftToken().getUpToDate();
+            MinecraftProfile profile = authManager.getMinecraftProfile().getUpToDate();
+
+            return new LoginData(
+                minecraftToken.getToken(),
+                msaToken.getRefreshToken(),
+                profile.getId().toString(),
+                profile.getName()
+            );
+        } catch (Exception e) {
+            MeteorClient.LOG.error("Error logging into Microsoft account", e);
+            return null;
         }
     }
 
-    public static void stopServer() {
-        if (server == null) return;
+    public static void cancelLogin() {
+        cancelled.set(true);
 
-        server.stop(0);
-        server = null;
+        Future<?> task = loginTask.getAndSet(null);
 
-        callback = null;
-    }
-
-    private static void handleRequest(HttpExchange req) throws IOException {
-        if (req.getRequestMethod().equals("GET")) {
-            // Login
-            List<NameValuePair> query = URLEncodedUtils.parse(req.getRequestURI(), StandardCharsets.UTF_8);
-
-            boolean ok = false;
-
-            for (NameValuePair pair : query) {
-                if (pair.getName().equals("code")) {
-                    handleCode(pair.getValue());
-
-                    ok = true;
-                    break;
-                }
-            }
-
-            if (!ok) {
-                writeText(req, "Cannot authenticate.");
-                callback.accept(null);
-            }
-            else writeText(req, "You may now close this page.");
+        if (task != null) {
+            task.cancel(true);
         }
-
-        stopServer();
-    }
-
-    private static void handleCode(String code) {
-        AuthTokenResponse res = Http.post("https://login.live.com/oauth20_token.srf")
-            .bodyForm("client_id=" + CLIENT_ID + "&code=" + code + "&grant_type=authorization_code&redirect_uri=http://127.0.0.1:" + PORT)
-            .sendJson(AuthTokenResponse.class);
-
-        if (res == null) callback.accept(null);
-        else callback.accept(res.refresh_token);
-    }
-
-    private static void writeText(HttpExchange req, String text) throws IOException {
-        byte[] responseBody = text.getBytes(StandardCharsets.UTF_8);
-        req.sendResponseHeaders(200, responseBody.length);
-        try (var out = req.getResponseBody()) {
-            out.write(responseBody);
-        }
-    }
-
-    private static class AuthTokenResponse {
-        public String access_token;
-        public String refresh_token;
-    }
-
-    private static class XblXstsResponse {
-        public String Token;
-        public DisplayClaims DisplayClaims;
-
-        private static class DisplayClaims {
-            private Claim[] xui;
-
-            private static class Claim {
-                private String uhs;
-            }
-        }
-    }
-
-    private static class McResponse {
-        public String access_token;
-    }
-
-    private static class GameOwnershipResponse {
-        private Item[] items;
-
-        private static class Item {
-            private String name;
-        }
-
-        private boolean hasGameOwnership() {
-            boolean hasProduct = false;
-            boolean hasGame = false;
-
-            for (Item item : items) {
-                if (item.name.equals("product_minecraft")) hasProduct = true;
-                else if (item.name.equals("game_minecraft")) hasGame = true;
-            }
-
-            return hasProduct && hasGame;
-        }
-    }
-
-    private static class ProfileResponse {
-        public String id;
-        public String name;
     }
 }

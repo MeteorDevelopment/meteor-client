@@ -34,6 +34,8 @@ netty = "4.1.118.Final"
 viafabricplus = "4.3.1"
 # WaybackAuthLib (https://github.com/FlorianMichael/WaybackAuthLib)
 waybackauthlib = "1.0.1"
+# MinecraftAuth (https://github.com/RaphiMC/MinecraftAuth)
+minecraftauth = "5.0.2"
 
 [libraries]
 # Fabric base
@@ -58,6 +60,7 @@ reflections = { module = "org.reflections:reflections", version.ref = "reflectio
 netty-handler-proxy = { module = "io.netty:netty-handler-proxy", version.ref = "netty" }
 netty-codec-socks = { module = "io.netty:netty-codec-socks", version.ref = "netty" }
 waybackauthlib = { module = "de.florianmichael:WaybackAuthLib", version.ref = "waybackauthlib" }
+minecraft-auth = { module = "net.raphimc:MinecraftAuth", version.ref = "minecraftauth" }
 
 [plugins]
 fabric-loom = { id = "fabric-loom", version.ref = "loom" }

@@ -99,6 +99,7 @@ dependencies {
     jij(libs.netty.handler.proxy) { isTransitive = false }
     jij(libs.netty.codec.socks) { isTransitive = false }
     jij(libs.waybackauthlib)
+    jij(libs.minecraft.auth)
 }
 
 // Handle transitive dependencies for jar-in-jar
