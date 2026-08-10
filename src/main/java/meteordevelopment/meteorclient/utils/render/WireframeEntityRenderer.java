@@ -85,6 +85,8 @@ public class WireframeEntityRenderer {
             ModelFeatureRenderer.CrumblingOverlay crumblingOverlay
         ) {
             if (renderType.isOutline()) return;
+
+            model.setupAnim(state);
             model.renderToBuffer(poseStack, vertexConsumer, lightCoords, overlayCoords, tintedColor);
         }
 
