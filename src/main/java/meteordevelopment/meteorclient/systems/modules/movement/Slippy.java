@@ -8,6 +8,7 @@ package meteordevelopment.meteorclient.systems.modules.movement;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.utils.misc.ListMode;
 import net.minecraft.world.level.block.Block;
 
 import java.util.List;
@@ -49,8 +50,4 @@ public class Slippy extends Module {
         super(Categories.Movement, "slippy", "Changes the base friction level of blocks.");
     }
 
-    public enum ListMode {
-        Whitelist,
-        Blacklist
-    }
 }

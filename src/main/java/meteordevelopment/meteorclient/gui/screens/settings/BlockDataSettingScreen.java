@@ -21,7 +21,7 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
@@ -52,7 +52,7 @@ public class BlockDataSettingScreen<T extends ICopyable<T> & ISerializable<T> & 
             T data = blockData;
             if (data == null) data = setting.defaultData.get().copy();
 
-            mc.setScreen(data.createScreen(theme, block, setting));
+            mc.gui.setScreen(data.createScreen(theme, block, setting));
             invalidate = true;
         };
         return edit;

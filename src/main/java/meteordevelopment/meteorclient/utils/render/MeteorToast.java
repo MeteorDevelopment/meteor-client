@@ -5,7 +5,6 @@
 
 package meteordevelopment.meteorclient.utils.render;
 
-import meteordevelopment.meteorclient.utils.render.DisplayItemUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -20,8 +19,8 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
@@ -33,7 +32,7 @@ public class MeteorToast implements Toast {
     private static final SimpleSoundInstance DEFAULT_SOUND = SimpleSoundInstance.forUI(SoundEvents.NOTE_BLOCK_CHIME.value(), 1.2f, 1);
 
     // Toast fields
-    private final @NotNull Component title;
+    private final @NonNull Component title;
     private final @Nullable Component text;
     private final @Nullable ItemStack icon;
     private final @Nullable SimpleSoundInstance customSound;
@@ -53,13 +52,13 @@ public class MeteorToast implements Toast {
     }
 
     public static class Builder {
-        private final @NotNull Component title;
+        private final @NonNull Component title;
         private @Nullable Component text;
         private @Nullable ItemStack icon;
         private @Nullable SimpleSoundInstance customSound = DEFAULT_SOUND;
         private long duration = DEFAULT_DURATION;
 
-        public Builder(@NotNull String title) {
+        public Builder(@NonNull String title) {
             this.title = Component.literal(title).setStyle(Style.EMPTY.withColor(TextColor.fromRgb(TITLE_COLOR)));
         }
 
@@ -91,12 +90,12 @@ public class MeteorToast implements Toast {
     }
 
     @Override
-    public Visibility getWantedVisibility() {
+    public @NonNull Visibility getWantedVisibility() {
         return this.visibility;
     }
 
     @Override
-    public void update(ToastManager manager, long time) {
+    public void update(@NonNull ToastManager manager, long time) {
         if (start == -1) start = time;
 
         visibility = time - start >= duration ? Visibility.HIDE : Visibility.SHOW;
@@ -108,7 +107,7 @@ public class MeteorToast implements Toast {
     }
 
     @Override
-    public void extractRenderState(GuiGraphicsExtractor graphics, Font font, long fullyVisibleForMs) {
+    public void extractRenderState(GuiGraphicsExtractor graphics, @NonNull Font font, long fullyVisibleForMs) {
         graphics.blitSprite(RenderPipelines.GUI_TEXTURED, TEXTURE, 0, 0, width(), height());
 
         int textX = icon != null ? 28 : 12;

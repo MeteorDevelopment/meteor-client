@@ -9,6 +9,7 @@ import com.mojang.blaze3d.buffers.GpuBufferSlice;
 import com.mojang.blaze3d.buffers.Std140Builder;
 import com.mojang.blaze3d.buffers.Std140SizeCalculator;
 import net.minecraft.client.renderer.DynamicUniformStorage;
+import org.jspecify.annotations.NonNull;
 
 import java.nio.ByteBuffer;
 
@@ -33,7 +34,7 @@ public class OutlineUniforms {
     private record Data(int width, float fillOpacity, int shapeMode,
                         float glowMultiplier) implements DynamicUniformStorage.DynamicUniform {
         @Override
-        public void write(ByteBuffer buffer) {
+        public void write(@NonNull ByteBuffer buffer) {
             Std140Builder.intoBuffer(buffer)
                 .putInt(width)
                 .putFloat(fillOpacity)

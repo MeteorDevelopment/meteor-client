@@ -101,7 +101,8 @@ public class BetterTab extends Module {
             String nameString = name.getString();
 
             for (ChatFormatting format : ChatFormatting.values()) {
-                if (format.isColor()) nameString = nameString.replace(format.toString(), "");
+                if (TextColor.fromLegacyFormat(format) != null)
+                    nameString = nameString.replace(format.toString(), "");
             }
 
             name = Component.literal(nameString).setStyle(name.getStyle().withColor(TextColor.fromRgb(color.getPacked())));

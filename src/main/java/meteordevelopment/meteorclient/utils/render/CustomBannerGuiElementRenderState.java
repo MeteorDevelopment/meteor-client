@@ -10,7 +10,7 @@ import net.minecraft.client.model.object.banner.BannerFlagModel;
 import net.minecraft.client.renderer.state.gui.pip.PictureInPictureRenderState;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.block.entity.BannerPatternLayers;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public record CustomBannerGuiElementRenderState(
     BannerFlagModel flag,

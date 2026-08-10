@@ -23,7 +23,7 @@ public class YesNoPrompt extends Prompt<YesNoPrompt> {
     }
 
     public static YesNoPrompt create() {
-        return new YesNoPrompt(GuiThemes.get(), mc.screen);
+        return new YesNoPrompt(GuiThemes.get(), mc.gui.screen());
     }
 
     public static YesNoPrompt create(GuiTheme theme, Screen parent) {

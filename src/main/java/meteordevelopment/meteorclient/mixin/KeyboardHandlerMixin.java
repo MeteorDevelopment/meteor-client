@@ -43,7 +43,7 @@ public abstract class KeyboardHandlerMixin {
                 modifiers &= ~Input.getModifier(event.key());
             }
 
-            if (minecraft.screen instanceof WidgetScreen widgetScreen && action == GLFW.GLFW_REPEAT) {
+            if (minecraft.gui.screen() instanceof WidgetScreen widgetScreen && action == GLFW.GLFW_REPEAT) {
                 widgetScreen.keyRepeated(new KeyEvent(event.key(), event.scancode(), modifiers));
             }
 
@@ -57,7 +57,7 @@ public abstract class KeyboardHandlerMixin {
 
     @Inject(method = "charTyped", at = @At("HEAD"), cancellable = true)
     private void onChar(long handle, CharacterEvent event, CallbackInfo ci) {
-        if (Utils.canUpdate() && !minecraft.isPaused() && (minecraft.screen == null || minecraft.screen instanceof WidgetScreen)) {
+        if (Utils.canUpdate() && !minecraft.isPaused() && (minecraft.gui.screen() == null || minecraft.gui.screen() instanceof WidgetScreen)) {
             if (MeteorClient.EVENT_BUS.post(CharTypedEvent.get((char) event.codepoint())).isCancelled()) ci.cancel();
         }
     }

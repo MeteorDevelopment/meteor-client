@@ -15,6 +15,8 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public class FontFaceSetting extends Setting<FontFace> {
+    private static final List<String> SUGGESTIONS = List.of("JetBrainsMono-Regular", "Arial-Bold");
+
     public FontFaceSetting(String name, String description, FontFace defaultValue, Consumer<FontFace> onChanged, Consumer<Setting<FontFace>> onModuleActivated, IVisible visible) {
         super(name, description, defaultValue, onChanged, onModuleActivated, visible);
     }
@@ -38,8 +40,8 @@ public class FontFaceSetting extends Setting<FontFace> {
     }
 
     @Override
-    public List<String> getSuggestions() {
-        return List.of("JetBrainsMono-Regular", "Arial-Bold");
+    public Iterable<String> getSuggestions() {
+        return SUGGESTIONS;
     }
 
     @Override

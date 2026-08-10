@@ -15,7 +15,7 @@ import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
 import net.minecraft.nbt.CompoundTag;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -80,7 +80,7 @@ public class Macros extends System<Macros> implements Iterable<Macro> {
     }
 
     @Override
-    public @NotNull Iterator<Macro> iterator() {
+    public @NonNull Iterator<Macro> iterator() {
         return macros.iterator();
     }
 

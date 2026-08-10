@@ -18,8 +18,6 @@ accessible   class   net/minecraft/client/gui/screens/inventory/BeaconScreen$Bea
 # ResourceLoadStateTrackerAccessor, ReloadStateAccessor, Utils#isLoading
 accessible   class   net/minecraft/client/ResourceLoadStateTracker$ReloadState
 
-# CapabilityTrackerMixin
-accessible   class   com/mojang/blaze3d/opengl/GlStateManager$BooleanState
 # ExtendedRenderPipelineBuilder
 accessible   method  com/mojang/blaze3d/pipeline/RenderPipeline$Builder <init> ()V
 accessible   method  com/mojang/blaze3d/pipeline/RenderPipeline$Builder withSnippet (Lcom/mojang/blaze3d/pipeline/RenderPipeline$Snippet;)V

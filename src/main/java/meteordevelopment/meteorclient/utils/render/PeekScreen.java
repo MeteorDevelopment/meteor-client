@@ -19,6 +19,7 @@ import net.minecraft.util.ARGB;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.inventory.ShulkerBoxMenu;
 import net.minecraft.world.item.ItemStack;
+import org.jspecify.annotations.NonNull;
 import org.lwjgl.glfw.GLFW;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
@@ -33,7 +34,7 @@ public class PeekScreen extends ShulkerBoxScreen {
     }
 
     @Override
-    public boolean mouseClicked(MouseButtonEvent click, boolean doubled) {
+    public boolean mouseClicked(@NonNull MouseButtonEvent click, boolean doubled) {
         BetterTooltips tooltips = Modules.get().get(BetterTooltips.class);
 
         if (tooltips.shouldOpenContents(click) && hoveredSlot != null && !hoveredSlot.getItem().isEmpty() && mc.player.containerMenu.getCarried().isEmpty()) {
@@ -45,12 +46,12 @@ public class PeekScreen extends ShulkerBoxScreen {
     }
 
     @Override
-    public boolean mouseReleased(MouseButtonEvent click) {
+    public boolean mouseReleased(@NonNull MouseButtonEvent click) {
         return false;
     }
 
     @Override
-    public boolean keyPressed(KeyEvent input) {
+    public boolean keyPressed(@NonNull KeyEvent input) {
         BetterTooltips tooltips = Modules.get().get(BetterTooltips.class);
 
         if (tooltips.shouldOpenContents(input) && hoveredSlot != null && !hoveredSlot.getItem().isEmpty() && mc.player.containerMenu.getCarried().isEmpty()) {

@@ -40,7 +40,7 @@ public abstract class BeaconScreenMixin extends AbstractContainerScreen<BeaconMe
     private void changeButtons(CallbackInfo ci) {
         if (!Modules.get().get(BetterBeacons.class).isActive()) return;
         List<Holder<MobEffect>> effects = BeaconBlockEntity.BEACON_EFFECTS.stream().flatMap(Collection::stream).toList();
-        if (Minecraft.getInstance().screen instanceof BeaconScreen beaconScreen) {
+        if (Minecraft.getInstance().gui.screen() instanceof BeaconScreen beaconScreen) {
             addBeaconButton(beaconScreen.new BeaconConfirmButton(this.leftPos + 164, this.topPos + 107));
             addBeaconButton(beaconScreen.new BeaconCancelButton(this.leftPos + 190, this.topPos + 107));
 

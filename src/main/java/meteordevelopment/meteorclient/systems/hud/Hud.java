@@ -22,7 +22,7 @@ import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.*;
 
@@ -164,13 +164,13 @@ public class Hud extends System<Hud> implements Iterable<HudElement> {
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    public void add(@NotNull HudElementInfo.Preset preset, int x, int y, XAnchor xAnchor, YAnchor yAnchor) {
+    public void add(HudElementInfo.@NonNull Preset preset, int x, int y, XAnchor xAnchor, YAnchor yAnchor) {
         HudElement element = preset.info.create();
         preset.callback.accept(element);
         add(element, x, y, xAnchor, yAnchor);
     }
 
-    public void add(@NotNull HudElementInfo<?>.Preset preset, int x, int y) {
+    public void add(HudElementInfo<?>.@NonNull Preset preset, int x, int y) {
         add(preset, x, y, null, null);
     }
 
@@ -231,7 +231,8 @@ public class Hud extends System<Hud> implements Iterable<HudElement> {
         if (Utils.isLoading()) return;
 
         if (!(active || HudEditorScreen.isOpen()) || shouldHideHud()) return;
-        if ((mc.options.hideGui || mc.debugEntries.isOverlayVisible()) && !HudEditorScreen.isOpen()) return;
+        if ((mc.gameRenderer.gameRenderState().guiRenderState.isHudHidden || mc.debugEntries.isOverlayVisible()) && !HudEditorScreen.isOpen())
+            return;
 
         HudRenderer.INSTANCE.begin(event.graphics);
 
@@ -247,7 +248,7 @@ public class Hud extends System<Hud> implements Iterable<HudElement> {
     }
 
     private boolean shouldHideHud() {
-        return hideInMenus.get() && mc.screen != null && !(mc.screen instanceof WidgetScreen);
+        return hideInMenus.get() && mc.gui.screen() != null && !(mc.gui.screen() instanceof WidgetScreen);
     }
 
     @EventHandler
@@ -265,7 +266,7 @@ public class Hud extends System<Hud> implements Iterable<HudElement> {
         return textScale.get();
     }
 
-    @NotNull
+    @NonNull
     @Override
     public Iterator<HudElement> iterator() {
         return elements.iterator();

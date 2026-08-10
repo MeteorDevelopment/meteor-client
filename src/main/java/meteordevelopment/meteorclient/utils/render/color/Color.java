@@ -87,11 +87,12 @@ public class Color implements ICopyable<Color>, ISerializable<Color> {
     }
 
     public Color(ChatFormatting formatting) {
-        if (formatting.isColor()) {
-            this.r = toRGBAR(formatting.getColor());
-            this.g = toRGBAG(formatting.getColor());
-            this.b = toRGBAB(formatting.getColor());
-            this.a = toRGBAA(formatting.getColor());
+        TextColor textColor = TextColor.fromLegacyFormat(formatting);
+        if (textColor != null) {
+            this.r = toRGBAR(textColor.getValue());
+            this.g = toRGBAG(textColor.getValue());
+            this.b = toRGBAB(textColor.getValue());
+            this.a = toRGBAA(textColor.getValue());
         } else {
             this.r = 255;
             this.g = 255;
@@ -312,7 +313,11 @@ public class Color implements ICopyable<Color>, ISerializable<Color> {
     }
 
     public Vector4f getVec4f() {
-        return new Vector4f(r / 255.0f, g / 255.0f, b / 255.0f, a / 255.0f);
+        return getVec4f(new Vector4f());
+    }
+
+    public Vector4f getVec4f(Vector4f dest) {
+        return dest.set(r / 255.0f, g / 255.0f, b / 255.0f, a / 255.0f);
     }
 
     public int getPacked() {

@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.systems.modules.movement;
 
+import com.mojang.datafixers.util.Pair;
 import meteordevelopment.meteorclient.events.entity.player.CanWalkOnFluidEvent;
 import meteordevelopment.meteorclient.events.entity.player.PlayerMoveEvent;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
@@ -23,7 +24,6 @@ import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
-import net.minecraft.util.Tuple;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -255,8 +255,8 @@ public class Jesus extends Module {
         if (!ncpBypass.get()) return;
 
         // Check inWater, fallDistance and if over liquid
-        Tuple<Boolean, Boolean> overLiquid = isOverLiquid();
-        boolean shouldWork = (overLiquid.getA() && waterShouldBeSolid()) || (overLiquid.getB() && lavaShouldBeSolid());
+        Pair<Boolean, Boolean> overLiquid = isOverLiquid();
+        boolean shouldWork = (overLiquid.getFirst() && waterShouldBeSolid()) || (overLiquid.getSecond() && lavaShouldBeSolid());
 
         if (mc.player.isInWater() || mc.player.isInLava() || mc.player.fallDistance > 3f || !shouldWork) return;
 
@@ -270,9 +270,9 @@ public class Jesus extends Module {
     private void onMoveEvent(PlayerMoveEvent event) {
         if (!ncpBypass.get()) return;
 
-        Tuple<Boolean, Boolean> overLiquid = isOverLiquid();
-        boolean water = overLiquid.getA() && waterShouldBeSolid();
-        boolean lava = overLiquid.getB() && lavaShouldBeSolid();
+        Pair<Boolean, Boolean> overLiquid = isOverLiquid();
+        boolean water = overLiquid.getFirst() && waterShouldBeSolid();
+        boolean lava = overLiquid.getSecond() && lavaShouldBeSolid();
 
         if (!water && !lava) {
             swimmingTicks = 0;
@@ -329,7 +329,7 @@ public class Jesus extends Module {
         return !mc.player.hasEffect(MobEffects.FIRE_RESISTANCE) || (mc.player.getEffect(MobEffects.FIRE_RESISTANCE).getDuration() <= (15 * 20 * mc.player.getAttributeValue(Attributes.BURNING_TIME)));
     }
 
-    private Tuple<Boolean, Boolean> isOverLiquid() {
+    private Pair<Boolean, Boolean> isOverLiquid() {
         AABB box = mc.player.isPassenger() ? mc.player.getBoundingBox().minmax(mc.player.getVehicle().getBoundingBox()) : mc.player.getBoundingBox();
         BlockState[] states = mc.level.getBlockStatesIfLoaded(box.move(0.0, -0.01, 0.0)).toArray(BlockState[]::new);
 
@@ -346,7 +346,7 @@ public class Jesus extends Module {
             }
         }
 
-        return new Tuple<>(water && !foundSolid, lava && !foundSolid);
+        return Pair.of(water && !foundSolid, lava && !foundSolid);
     }
 
     public enum Mode {
