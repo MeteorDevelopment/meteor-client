@@ -5,6 +5,8 @@
 
 package meteordevelopment.meteorclient.utils.misc;
 
+import org.jspecify.annotations.NonNull;
+
 import java.util.AbstractList;
 import java.util.Arrays;
 import java.util.Objects;
@@ -88,7 +90,7 @@ public class UnorderedArrayList<T> extends AbstractList<T> {
     }
 
     @Override
-    public boolean removeIf(Predicate<? super T> filter) {
+    public boolean removeIf(@NonNull Predicate<? super T> filter) {
         int preSize = size;
         int j = 0;
 

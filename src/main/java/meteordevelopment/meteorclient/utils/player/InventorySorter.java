@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.utils.player;
 
+import com.mojang.datafixers.util.Pair;
 import meteordevelopment.meteorclient.mixininterface.ISlot;
 import meteordevelopment.meteorclient.utils.render.PeekScreen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -12,7 +13,6 @@ import net.minecraft.client.gui.screens.inventory.ContainerScreen;
 import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
 import net.minecraft.client.gui.screens.inventory.ShulkerBoxScreen;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.util.Tuple;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.Slot;
@@ -90,7 +90,7 @@ public class InventorySorter {
 
         // Stack previously found slots
         for (var entry : slotMap.map) {
-            List<MySlot> slotsToStack = entry.getB();
+            List<MySlot> slotsToStack = entry.getSecond();
             MySlot slotToStackTo = null;
 
             for (int i = 0; i < slotsToStack.size(); i++) {
@@ -209,17 +209,17 @@ public class InventorySorter {
     }
 
     private static class SlotMap {
-        private final List<Tuple<ItemStack, List<MySlot>>> map = new ArrayList<>();
+        private final List<Pair<ItemStack, List<MySlot>>> map = new ArrayList<>();
 
         public List<MySlot> get(ItemStack itemStack) {
-            for (Tuple<ItemStack, List<MySlot>> entry : map) {
-                if (ItemStack.isSameItemSameComponents(itemStack, entry.getA())) {
-                    return entry.getB();
+            for (Pair<ItemStack, List<MySlot>> entry : map) {
+                if (ItemStack.isSameItemSameComponents(itemStack, entry.getFirst())) {
+                    return entry.getSecond();
                 }
             }
 
             List<MySlot> list = new ArrayList<>();
-            map.add(new Tuple<>(itemStack, list));
+            map.add(Pair.of(itemStack, list));
             return list;
         }
     }

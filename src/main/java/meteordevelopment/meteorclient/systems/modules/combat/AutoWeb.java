@@ -192,7 +192,7 @@ public class AutoWeb extends Module {
     }
 
     private boolean isOutOfRange(BlockPos blockPos) {
-        Vec3 pos = blockPos.getCenter();
+        Vec3 pos = Vec3.atCenterOf(blockPos);
         if (!PlayerUtils.isWithin(pos, placeRange.get())) return true;
 
         ClipContext clipContext = new ClipContext(mc.player.getEyePosition(), pos, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, mc.player);

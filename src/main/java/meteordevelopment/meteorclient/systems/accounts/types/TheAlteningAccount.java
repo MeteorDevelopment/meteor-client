@@ -7,13 +7,13 @@ package meteordevelopment.meteorclient.systems.accounts.types;
 
 import com.mojang.authlib.Environment;
 import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
+import com.mojang.util.UndashedUuid;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.systems.accounts.Account;
 import meteordevelopment.meteorclient.systems.accounts.AccountType;
 import meteordevelopment.meteorclient.systems.accounts.TokenAccount;
 import meteordevelopment.meteorclient.utils.misc.NbtException;
 import meteordevelopment.meteorclient.utils.network.Http;
-import com.mojang.util.UndashedUuid;
 import net.minecraft.client.User;
 import net.minecraft.nbt.CompoundTag;
 

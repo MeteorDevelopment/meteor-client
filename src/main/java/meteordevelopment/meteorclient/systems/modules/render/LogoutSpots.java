@@ -20,6 +20,7 @@ import meteordevelopment.meteorclient.utils.render.NametagUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
@@ -188,7 +189,7 @@ public class LogoutSpots extends Module {
 
     @EventHandler
     private void onRender2D(Render2DEvent event) {
-        for (Entry player : players) player.render2D();
+        for (Entry player : players) player.render2D(event.graphics);
     }
 
     @Override
@@ -232,7 +233,7 @@ public class LogoutSpots extends Module {
                 event.renderer.sideHorizontal(x, y, z, x + xWidth, z, sideColor.get(), lineColor.get(), shapeMode.get());
         }
 
-        public void render2D() {
+        public void render2D(GuiGraphicsExtractor graphics) {
             if (!PlayerUtils.isWithinCamera(x, y, z, mc.options.renderDistance().get() * 16)) return;
 
             TextRenderer text = TextRenderer.get();
@@ -259,7 +260,7 @@ public class LogoutSpots extends Module {
             Renderer2D.COLOR.render();
 
             // Render name and health texts
-            text.beginBig();
+            text.beginBig(graphics);
             double hX = text.render(name, -i, 0, nameColor.get());
             text.render(healthText, hX, 0, healthColor);
             text.end();

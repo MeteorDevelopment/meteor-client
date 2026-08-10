@@ -5,11 +5,11 @@
 
 package meteordevelopment.meteorclient.utils.render.postprocess;
 
+import com.mojang.blaze3d.GpuFormat;
 import com.mojang.blaze3d.buffers.Std140Builder;
 import com.mojang.blaze3d.buffers.Std140SizeCalculator;
 import com.mojang.blaze3d.platform.TextureUtil;
 import com.mojang.blaze3d.textures.FilterMode;
-import com.mojang.blaze3d.textures.TextureFormat;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.game.ResourcePacksReloadedEvent;
 import meteordevelopment.meteorclient.renderer.MeshRenderer;
@@ -23,6 +23,7 @@ import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.renderer.DynamicUniformStorage;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.world.entity.Entity;
+import org.jspecify.annotations.NonNull;
 import org.lwjgl.stb.STBImage;
 import org.lwjgl.system.MemoryStack;
 
@@ -69,7 +70,7 @@ public class ChamsShader extends EntityShader {
                 STBImage.stbi_set_flip_vertically_on_load(true);
                 ByteBuffer image = STBImage.stbi_load_from_memory(data, width, height, comp, 4);
 
-                IMAGE_TEX = new Texture(width.get(0), height.get(0), TextureFormat.RGBA8, FilterMode.NEAREST, FilterMode.NEAREST);
+                IMAGE_TEX = new Texture(width.get(0), height.get(0), GpuFormat.RGBA8_UNORM, FilterMode.NEAREST, FilterMode.NEAREST);
                 IMAGE_TEX.upload(image);
 
                 STBImage.stbi_image_free(image);
@@ -124,7 +125,7 @@ public class ChamsShader extends EntityShader {
 
     private record UniformData(float r, float g, float b, float a) implements DynamicUniformStorage.DynamicUniform {
         @Override
-        public void write(ByteBuffer buffer) {
+        public void write(@NonNull ByteBuffer buffer) {
             Std140Builder.intoBuffer(buffer)
                 .putVec4(r, g, b, a);
         }

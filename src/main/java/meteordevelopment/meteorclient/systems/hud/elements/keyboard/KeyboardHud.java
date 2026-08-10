@@ -1017,8 +1017,8 @@ public class KeyboardHud extends HudElement {
 
             WButton edit = table.add(theme.button(GuiRenderer.EDIT)).expandCellX().widget();
             edit.action = () -> {
-                WidgetScreen screen = (WidgetScreen) mc.screen;
-                mc.setScreen(new CustomKeySettingScreen(theme, setting, key, screen));
+                WidgetScreen screen = (WidgetScreen) mc.gui.screen();
+                mc.gui.setScreen(new CustomKeySettingScreen(theme, setting, key, screen));
             };
 
             WMinus delete = table.add(theme.minus()).right().widget();

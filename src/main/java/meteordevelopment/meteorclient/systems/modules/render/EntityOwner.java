@@ -19,6 +19,7 @@ import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
 import meteordevelopment.meteorclient.utils.render.NametagUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityReference;
 import net.minecraft.world.entity.LivingEntity;
@@ -26,7 +27,6 @@ import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.throwableitemprojectile.ThrownEnderpearl;
 
-import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3d;
 
 import java.util.HashMap;
@@ -62,7 +62,7 @@ public class EntityOwner extends Module {
     @EventHandler
     private void onRender2D(Render2DEvent event) {
         for (Entity entity : mc.level.entitiesForRendering()) {
-            @Nullable EntityReference<LivingEntity> owner;
+            EntityReference<LivingEntity> owner;
 
             switch (entity) {
                 case TamableAnimal tameable -> owner = tameable.getOwnerReference();
@@ -77,17 +77,17 @@ public class EntityOwner extends Module {
                 pos.add(0, entity.getEyeHeight(entity.getPose()) + 0.75, 0);
 
                 if (NametagUtils.to2D(pos, scale.get())) {
-                    renderNametag(getOwnerName(owner));
+                    renderNametag(event.graphics, getOwnerName(owner));
                 }
             }
         }
     }
 
-    private void renderNametag(String name) {
+    private void renderNametag(GuiGraphicsExtractor graphics, String name) {
         TextRenderer text = TextRenderer.get();
 
         NametagUtils.begin(pos);
-        text.beginBig();
+        text.beginBig(graphics);
 
         double w = text.getWidth(name);
 
@@ -106,7 +106,7 @@ public class EntityOwner extends Module {
 
     private String getOwnerName(EntityReference<LivingEntity> owner) {
         // Check if the player is online
-        @Nullable LivingEntity ownerEntity = EntityReference.get(owner, mc.level, LivingEntity.class);
+        LivingEntity ownerEntity = EntityReference.get(owner, mc.level, LivingEntity.class);
         if (ownerEntity instanceof Player playerEntity) return playerEntity.getName().getString();
 
         UUID uuid = owner.getUUID();

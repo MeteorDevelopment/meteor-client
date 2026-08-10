@@ -56,7 +56,7 @@ public class TitleScreenCredits {
                     case Http.UNAUTHORIZED -> {
                         String message = "Invalid authentication token for repository '%s'".formatted(repo.getOwnerName());
                         MeteorToast toast = new MeteorToast.Builder("GitHub: Unauthorized").icon(Items.BARRIER).text(message).build();
-                        mc.getToastManager().addToast(toast);
+                        mc.gui.toastManager().addToast(toast);
                         MeteorClient.LOG.warn(message);
                         if (System.getenv("meteor.github.authorization") == null) {
                             MeteorClient.LOG.info("Consider setting an authorization " +
@@ -104,7 +104,7 @@ public class TitleScreenCredits {
         int y = 3;
         for (Credit credit : credits) {
             synchronized (credit.text) {
-                int x = mc.screen.width - 3 - mc.font.width(credit.text);
+                int x = mc.gui.screen().width - 3 - mc.font.width(credit.text);
 
                 graphics.text(mc.font, credit.text, x, y, -1);
             }
@@ -121,11 +121,11 @@ public class TitleScreenCredits {
                 width = mc.font.width(credit.text);
             }
 
-            int x = mc.screen.width - 3 - width;
+            int x = mc.gui.screen().width - 3 - width;
 
             if (mouseX >= x && mouseX <= x + width && mouseY >= y && mouseY <= y + mc.font.lineHeight + 2) {
                 if (credit.addon.getRepo() != null && credit.addon.getCommit() != null) {
-                    mc.setScreen(new CommitsScreen(GuiThemes.get(), credit.addon));
+                    mc.gui.setScreen(new CommitsScreen(GuiThemes.get(), credit.addon));
                     return true;
                 }
             }

@@ -82,7 +82,7 @@ public class FreeLook extends Module {
 
     @Override
     public void onDeactivate() {
-        if (mc.options.getCameraType() != prePers && togglePerspective.get()) mc.options.setCameraType(prePers);
+        if (prePers != null && mc.options.getCameraType() != prePers && togglePerspective.get()) mc.options.setCameraType(prePers);
     }
 
     public boolean playerMode() {

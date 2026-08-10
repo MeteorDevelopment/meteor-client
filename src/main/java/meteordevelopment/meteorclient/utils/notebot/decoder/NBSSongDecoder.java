@@ -10,7 +10,7 @@ import com.google.common.collect.MultimapBuilder;
 import meteordevelopment.meteorclient.utils.notebot.song.Note;
 import meteordevelopment.meteorclient.utils.notebot.song.Song;
 import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.io.*;
 
@@ -32,7 +32,7 @@ public class NBSSongDecoder extends SongDecoder {
      * @see Song
      */
     @Override
-    @NotNull
+    @NonNull
     public Song parse(File songFile) throws Exception {
         return parse(new FileInputStream(songFile));
     }
@@ -44,7 +44,7 @@ public class NBSSongDecoder extends SongDecoder {
      * @return Song object representing the given .nbs file
      * @see Song
      */
-    @NotNull
+    @NonNull
     private Song parse(InputStream inputStream) throws Exception {
         Multimap<Integer, Note> notesMap = MultimapBuilder.linkedHashKeys().arrayListValues().build();
 

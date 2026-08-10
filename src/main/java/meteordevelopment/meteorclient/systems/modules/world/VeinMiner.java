@@ -13,6 +13,7 @@ import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
+import meteordevelopment.meteorclient.utils.misc.ListMode;
 import meteordevelopment.meteorclient.utils.misc.Pool;
 import meteordevelopment.meteorclient.utils.player.Rotations;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
@@ -29,6 +30,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -130,7 +132,7 @@ public class VeinMiner extends Module {
 
     private final Pool<MyBlock> blockPool = new Pool<>(MyBlock::new);
     private final List<MyBlock> blocks = new ArrayList<>();
-    private final List<BlockPos> foundBlockPositions = new ArrayList<>();
+    private final Set<BlockPos> foundBlockPositions = new HashSet<>();
 
     private int tick = 0;
 
@@ -159,9 +161,7 @@ public class VeinMiner extends Module {
 
         if (state.getDestroySpeed(mc.level, event.blockPos) < 0)
             return;
-        if (mode.get() == ListMode.Whitelist && !selectedBlocks.get().contains(state.getBlock()))
-            return;
-        if (mode.get() == ListMode.Blacklist && selectedBlocks.get().contains(state.getBlock()))
+        if (!mode.get().allows(selectedBlocks.get().contains(state.getBlock())))
             return;
 
         foundBlockPositions.clear();
@@ -258,8 +258,7 @@ public class VeinMiner extends Module {
 
     private void mineNearbyBlocks(Item item, BlockPos pos, Direction dir, int depth) {
         if (depth <= 0) return;
-        if (foundBlockPositions.contains(pos)) return;
-        foundBlockPositions.add(pos);
+        if (!foundBlockPositions.add(pos)) return;
         if (Utils.distance(mc.player.getX() - 0.5, mc.player.getY() + mc.player.getEyeHeight(mc.player.getPose()), mc.player.getZ() - 0.5, pos.getX(), pos.getY(), pos.getZ()) > mc.player.blockInteractionRange())
             return;
         for (Vec3i neighbourOffset : blockNeighbours) {
@@ -278,8 +277,4 @@ public class VeinMiner extends Module {
         return mode.get().toString() + " (" + selectedBlocks.get().size() + ")";
     }
 
-    public enum ListMode {
-        Whitelist,
-        Blacklist
-    }
 }

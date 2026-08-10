@@ -57,7 +57,7 @@
     "optifabric": "*",
     "feather": "*",
     "origins": "*",
-    "sodium": "<0.8.7",
+    "sodium": "<0.9.1",
     "morechathistory": "*",
     "lithium": "<0.22.1"
   }

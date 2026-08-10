@@ -12,6 +12,7 @@ import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
+import meteordevelopment.meteorclient.utils.misc.ListMode;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
@@ -131,8 +132,7 @@ public class SpeedMine extends Module {
     }
 
     public boolean filter(Block block) {
-        if (blocksFilter.get() == ListMode.Blacklist && !blocks.get().contains(block)) return true;
-        return blocksFilter.get() == ListMode.Whitelist && blocks.get().contains(block);
+        return blocksFilter.get().allows(blocks.get().contains(block));
     }
 
     public boolean instamine() {
@@ -145,8 +145,4 @@ public class SpeedMine extends Module {
         Damage
     }
 
-    public enum ListMode {
-        Whitelist,
-        Blacklist
-    }
 }

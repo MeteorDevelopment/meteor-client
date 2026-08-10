@@ -38,10 +38,10 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.network.Filterable;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffectUtil;
+import net.minecraft.world.entity.Bucketable;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.animal.Bucketable;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.*;
 import net.minecraft.world.item.component.BundleContents;
@@ -511,15 +511,15 @@ public class BetterTooltips extends Module {
         if (!openContents() || itemStack.isEmpty()) return false;
 
         if (itemStack.getItem() instanceof BundleItem) {
-            if (mc.screen instanceof AbstractContainerScreen) mc.screen.onClose();
-            mc.setScreen(new ContainerInventoryScreen(itemStack));
+            if (mc.gui.screen() instanceof AbstractContainerScreen) mc.gui.screen().onClose();
+            mc.gui.setScreen(new ContainerInventoryScreen(itemStack));
             return true;
         } else if (Utils.hasItems(itemStack) || itemStack.getItem() == Items.ENDER_CHEST) {
             Utils.openContainer(itemStack, PEEK_SCREEN, false);
             return true;
         } else if (itemStack.getItem() == Items.WRITABLE_BOOK || itemStack.getItem() == Items.WRITTEN_BOOK) {
-            if (mc.screen instanceof AbstractContainerScreen) mc.screen.onClose();
-            mc.setScreen(new BookViewScreen(BookViewScreen.BookAccess.fromItem(itemStack)));
+            if (mc.gui.screen() instanceof AbstractContainerScreen) mc.gui.screen().onClose();
+            mc.gui.setScreen(new BookViewScreen(BookViewScreen.BookAccess.fromItem(itemStack)));
             return true;
         }
 

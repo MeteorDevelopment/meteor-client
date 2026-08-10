@@ -43,7 +43,7 @@ public class ClickTP extends Module {
                 return;
         }
 
-        Camera camera = mc.gameRenderer.getMainCamera();
+        Camera camera = mc.gameRenderer.mainCamera();
         Vec3 cameraPos = camera.position();
 
         // Calculate the direction the camera is looking based on its pitch and yaw, and extend this direction 210 units away from the camera position

@@ -5,6 +5,8 @@
 
 package meteordevelopment.meteorclient.systems.modules.combat;
 
+import it.unimi.dsi.fastutil.ints.IntArrayList;
+import it.unimi.dsi.fastutil.ints.IntList;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.mixin.BlockBehaviourAccessor;
 import meteordevelopment.meteorclient.settings.*;
@@ -29,9 +31,10 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 public class Quiver extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -100,7 +103,7 @@ public class Quiver extends Module {
         .build()
     );
 
-    private final List<Integer> arrowSlots = new ArrayList<>();
+    private final IntList arrowSlots = new IntArrayList();
     private FindItemResult bow;
     private boolean wasMainhand, wasHotbar;
     private int timer, prevSlot;
@@ -128,7 +131,7 @@ public class Quiver extends Module {
         } else wasMainhand = true;
 
         arrowSlots.clear();
-        List<MobEffect> usedEffects = new ArrayList<>();
+        Set<MobEffect> usedEffects = new HashSet<>();
 
         for (int i = mc.player.getInventory().getContainerSize(); i > 0; i--) {
             if (i == mc.player.getInventory().getSelectedSlot()) continue;
@@ -177,12 +180,11 @@ public class Quiver extends Module {
         boolean charging = mc.options.keyUse.isDown();
 
         if (!charging) {
-            InvUtils.move().from(arrowSlots.getFirst()).to(9);
+            InvUtils.move().from(arrowSlots.getInt(0)).to(9);
             mc.options.keyUse.setDown(true);
         } else {
             if (BowItem.getPowerForTime(mc.player.getTicksUsingItem()) >= 0.12) {
-                int targetSlot = arrowSlots.getFirst();
-                arrowSlots.removeFirst();
+                int targetSlot = arrowSlots.removeInt(0);
 
                 mc.getConnection().send(new ServerboundMovePlayerPacket.Rot(mc.player.getYRot(), -90, mc.player.onGround(), mc.player.horizontalCollision));
                 mc.options.keyUse.setDown(false);

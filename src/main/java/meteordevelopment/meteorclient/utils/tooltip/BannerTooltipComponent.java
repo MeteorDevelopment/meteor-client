@@ -18,6 +18,7 @@ import net.minecraft.world.item.BannerItem;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BannerPatternLayers;
+import org.jspecify.annotations.NonNull;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
@@ -49,17 +50,17 @@ public class BannerTooltipComponent implements MeteorTooltipData, ClientTooltipC
     }
 
     @Override
-    public int getHeight(Font textRenderer) {
+    public int getHeight(@NonNull Font textRenderer) {
         return 40 * 2;
     }
 
     @Override
-    public int getWidth(Font textRenderer) {
+    public int getWidth(@NonNull Font textRenderer) {
         return 20 * 2;
     }
 
     @Override
-    public void extractImage(Font textRenderer, int x, int y, int width, int height, GuiGraphicsExtractor graphics) {
+    public void extractImage(@NonNull Font textRenderer, int x, int y, int width, int height, @NonNull GuiGraphicsExtractor graphics) {
         var centerX = width / 2 - getWidth(null) / 2;
 
         GuiGraphicsExtractorAccessor contextAccessor = (GuiGraphicsExtractorAccessor) graphics;

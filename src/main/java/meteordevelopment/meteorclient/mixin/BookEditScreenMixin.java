@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.mixin;
 
+import it.unimi.dsi.fastutil.io.FastByteArrayInputStream;
 import it.unimi.dsi.fastutil.io.FastByteArrayOutputStream;
 import meteordevelopment.meteorclient.MeteorClient;
 import net.minecraft.client.gui.components.Button;
@@ -20,8 +21,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.io.ByteArrayInputStream;
-import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.Base64;
@@ -91,7 +90,7 @@ public abstract class BookEditScreenMixin extends Screen {
                 } catch (IllegalArgumentException _) {
                     return;
                 }
-                DataInputStream in = new DataInputStream(new ByteArrayInputStream(bytes));
+                var in = new FastByteArrayInputStream(bytes);
 
                 try {
                     CompoundTag tag = NbtIo.readCompressed(in, NbtAccounter.unlimitedHeap());

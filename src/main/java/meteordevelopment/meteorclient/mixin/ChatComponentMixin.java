@@ -75,8 +75,7 @@ public abstract class ChatComponentMixin implements IChatHud {
     @SuppressWarnings("DataFlowIssue")
     @ModifyExpressionValue(method = "addMessageToDisplayQueue", at = @At(value = "NEW", target = "(Lnet/minecraft/client/multiplayer/chat/GuiMessage;Lnet/minecraft/util/FormattedCharSequence;Z)Lnet/minecraft/client/multiplayer/chat/GuiMessage$Line;"))
     private GuiMessage.Line onAddMessage_modifyGuiMessageLine(GuiMessage.Line line, @Local(name = "i") int i) {
-        IChatListener handler = (IChatListener) minecraft.getChatListener();
-        if (handler == null) return line;
+        IChatListener handler = (IChatListener) minecraft.gui.chatListener();
 
         IGuiMessageVisible meteorLine = (IGuiMessageVisible) (Object) line;
 
@@ -88,8 +87,7 @@ public abstract class ChatComponentMixin implements IChatHud {
 
     @ModifyExpressionValue(method = "addMessage", at = @At(value = "NEW", target = "(ILnet/minecraft/network/chat/Component;Lnet/minecraft/network/chat/MessageSignature;Lnet/minecraft/client/multiplayer/chat/GuiMessageSource;Lnet/minecraft/client/multiplayer/chat/GuiMessageTag;)Lnet/minecraft/client/multiplayer/chat/GuiMessage;"))
     private GuiMessage onAddMessage_modifyGuiMessage(GuiMessage line) {
-        IChatListener handler = (IChatListener) minecraft.getChatListener();
-        if (handler == null) return line;
+        IChatListener handler = (IChatListener) minecraft.gui.chatListener();
 
         ((IGuiMessage) (Object) line).meteor$setSender(handler.meteor$getSender());
         return line;

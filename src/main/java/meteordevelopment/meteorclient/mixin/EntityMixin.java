@@ -175,7 +175,7 @@ public abstract class EntityMixin {
             freecam.changeLookDirection(xo * 0.15, yo * 0.15);
             ci.cancel();
         } else if (Modules.get().isActive(HighwayBuilder.class)) {
-            Camera camera = mc.gameRenderer.getMainCamera();
+            Camera camera = mc.gameRenderer.mainCamera();
             ((ICamera) camera).meteor$setRot(camera.yRot() + xo * 0.15, camera.xRot() + yo * 0.15);
             ci.cancel();
         } else if (freeLook.cameraMode()) {

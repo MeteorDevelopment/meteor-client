@@ -24,6 +24,7 @@ import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec2;
 import org.joml.Vector2f;
@@ -48,7 +49,7 @@ public class Tracers extends Module {
     private final Setting<Set<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
         .name("entities")
         .description("Select specific entities.")
-        .defaultValue(EntityType.PLAYER)
+        .defaultValue(EntityTypes.PLAYER)
         .build()
     );
 
@@ -245,7 +246,8 @@ public class Tracers extends Module {
 
     @EventHandler
     private void onRender(Render3DEvent event) {
-        if (mc.options.hideGui || style.get() == TracerStyle.Offscreen) return;
+        if (mc.gameRenderer.gameRenderState().guiRenderState.isHudHidden || style.get() == TracerStyle.Offscreen)
+            return;
         count = 0;
 
         for (Entity entity : mc.level.entitiesForRendering()) {
@@ -270,7 +272,8 @@ public class Tracers extends Module {
 
     @EventHandler
     public void onRender2D(Render2DEvent event) {
-        if (mc.options.hideGui || style.get() != TracerStyle.Offscreen) return;
+        if (mc.gameRenderer.gameRenderState().guiRenderState.isHudHidden || style.get() != TracerStyle.Offscreen)
+            return;
         count = 0;
 
         Renderer2D.COLOR.begin();

@@ -176,14 +176,14 @@ public class GUIMove extends Module {
     }
 
     public boolean skip() {
-        if (mc.screen == null ||
-            (mc.screen instanceof CreativeModeInventoryScreen && CreativeModeInventoryScreenAccessor.meteor$getSelectedTab() == CreativeModeTabs.searchTab())
-            || mc.screen instanceof ChatScreen
-            || mc.screen instanceof SignEditScreen
-            || mc.screen instanceof AnvilScreen
-            || mc.screen instanceof AbstractCommandBlockEditScreen
-            || mc.screen instanceof StructureBlockEditScreen) return true;
-        if (screens.get() == Screens.GUI && !(mc.screen instanceof WidgetScreen)) return true;
-        return screens.get() == Screens.Inventory && mc.screen instanceof WidgetScreen;
+        if (mc.gui.screen() == null ||
+            (mc.gui.screen() instanceof CreativeModeInventoryScreen && CreativeModeInventoryScreenAccessor.meteor$getSelectedTab() == CreativeModeTabs.searchTab())
+            || mc.gui.screen() instanceof ChatScreen
+            || mc.gui.screen() instanceof SignEditScreen
+            || mc.gui.screen() instanceof AnvilScreen
+            || mc.gui.screen() instanceof AbstractCommandBlockEditScreen
+            || mc.gui.screen() instanceof StructureBlockEditScreen) return true;
+        if (screens.get() == Screens.GUI && !(mc.gui.screen() instanceof WidgetScreen)) return true;
+        return screens.get() == Screens.Inventory && mc.gui.screen() instanceof WidgetScreen;
     }
 }
