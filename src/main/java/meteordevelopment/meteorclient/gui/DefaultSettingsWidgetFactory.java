@@ -28,7 +28,9 @@ import meteordevelopment.meteorclient.utils.render.DisplayItemUtils;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.client.resources.language.I18n;
 import org.apache.commons.lang3.Strings;
+import org.lwjgl.util.tinyfd.TinyFileDialogs;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -74,6 +76,7 @@ public class DefaultSettingsWidgetFactory extends SettingsWidgetFactory {
         factories.put(FontFaceSetting.class, (table, setting) -> fontW(table, (FontFaceSetting) setting));
         factories.put(Vector3dSetting.class, (table, setting) -> vector3dW(table, (Vector3dSetting) setting));
         factories.put(KeyboardHud.CustomKeyListSetting.class, (table, setting) -> customKeyListW(table, (KeyboardHud.CustomKeyListSetting) setting));
+        factories.put(FileSetting.class, (table, setting) -> fileW(table, (FileSetting) setting));
     }
 
     @Override
@@ -407,7 +410,7 @@ public class DefaultSettingsWidgetFactory extends SettingsWidgetFactory {
 
             t.add(theme.label(i + ":"));
 
-            t.add(theme.quad(color)).widget();
+            t.add(theme.quad(color));
 
             WButton edit = t.add(theme.button(GuiRenderer.EDIT)).widget();
             edit.action = () -> {
@@ -474,6 +477,31 @@ public class DefaultSettingsWidgetFactory extends SettingsWidgetFactory {
     private void customKeyListW(WTable table, KeyboardHud.CustomKeyListSetting setting) {
         WTable wtable = table.add(theme.table()).expandX().widget();
         KeyboardHud.fillTable(theme, wtable, setting);
+    }
+
+    private void fileW(WTable table, FileSetting setting) {
+        WHorizontalList list = table.add(theme.horizontalList()).expandX().widget();
+
+        WButton selectFile = list.add(theme.button("Select File")).widget();
+
+        WLabel fileName = list.add(theme.label((setting.get() != null && setting.get().exists()) ? setting.get().getName() : "No file selected.")).widget();
+
+        selectFile.action = () -> {
+            String path = TinyFileDialogs.tinyfd_openFileDialog(
+                "Select File",
+                null,
+                setting.filters,
+                null,
+                false
+            );
+
+            if (path != null) {
+                setting.set(new File(path));
+                fileName.set(setting.get().getName());
+            }
+        };
+
+        reset(table, setting, () -> fileName.set((setting.get() != null && setting.get().exists()) ? setting.get().getName() : "No file selected."));
     }
 
     // Other
