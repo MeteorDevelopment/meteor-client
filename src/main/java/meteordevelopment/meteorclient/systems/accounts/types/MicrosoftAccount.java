@@ -39,13 +39,13 @@ public class MicrosoftAccount extends Account<MicrosoftAccount> {
 
     private @Nullable String auth() {
         MicrosoftLogin.LoginData data = MicrosoftLogin.login(name);
-        if (data == null || data.newRefreshToken() == null) return null;
+        if (!data.isGood()) return null;
 
-        name = data.newRefreshToken();
-        cache.username = data.username();
-        cache.uuid = data.uuid();
+        name = data.newRefreshToken;
+        cache.username = data.username;
+        cache.uuid = data.uuid;
 
-        return data.mcToken();
+        return data.mcToken;
     }
 
     @Override
