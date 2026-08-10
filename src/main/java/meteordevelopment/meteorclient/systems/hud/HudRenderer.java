@@ -8,6 +8,7 @@ package meteordevelopment.meteorclient.systems.hud;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.common.cache.RemovalCause;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import meteordevelopment.meteorclient.MeteorClient;
@@ -28,8 +29,6 @@ import net.minecraft.world.item.ItemStack;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -44,16 +43,21 @@ public class HudRenderer {
 
     private final Hud hud = Hud.get();
     private final List<Runnable> postTasks = new ArrayList<>();
+    private final Color shadowColor = new Color(CustomTextRenderer.SHADOW_COLOR);
 
     private final Int2ObjectMap<FontHolder> fontsInUse = new Int2ObjectOpenHashMap<>();
     private final LoadingCache<Integer, FontHolder> fontCache = CacheBuilder.newBuilder()
         .maximumSize(4)
         .expireAfterAccess(Duration.ofMinutes(10))
         .removalListener(notification -> {
-            if (notification.wasEvicted())
+            if (notification.getCause() != RemovalCause.EXPLICIT)
                 ((FontHolder) notification.getValue()).destroy();
         })
         .build(CacheLoader.from(HudRenderer::loadFont));
+
+    private boolean frameActive;
+    private boolean customFontForFrame;
+    private boolean fontResetPending;
 
     public GuiGraphicsExtractor graphics;
     public double delta;
@@ -63,52 +67,69 @@ public class HudRenderer {
     }
 
     public void begin(GuiGraphicsExtractor graphics) {
+        if (frameActive) throw new IllegalStateException("HudRenderer.begin() called twice");
+
         Renderer2D.COLOR.begin();
 
         this.graphics = graphics;
         this.delta = Utils.frameTime;
+        this.customFontForFrame = hud.hasCustomFont();
 
         graphics.nextStratum();
 
-        if (!hud.hasCustomFont()) {
+        if (!customFontForFrame) {
             VanillaTextRenderer.INSTANCE.scaleIndividually = true;
             VanillaTextRenderer.INSTANCE.begin();
         }
+
+        frameActive = true;
     }
 
     public void end() {
-        Renderer2D.COLOR.render();
+        if (!frameActive) throw new IllegalStateException("HudRenderer.end() called without calling begin()");
 
-        if (hud.hasCustomFont()) {
-            // Render fonts that were visited this frame and move to cache which weren't visited
-            for (Iterator<FontHolder> it = fontsInUse.values().iterator(); it.hasNext(); ) {
-                FontHolder fontHolder = it.next();
+        try {
+            Renderer2D.COLOR.render();
 
-                if (fontHolder.visited) {
-                    MeshRenderer.begin()
-                        .attachments(mc.getMainRenderTarget())
-                        .pipeline(MeteorRenderPipelines.UI_TEXT)
-                        .mesh(fontHolder.getMesh())
-                        .sampler("u_Texture", fontHolder.font.texture.getTextureView(), fontHolder.font.texture.getSampler())
-                        .end();
-                } else {
-                    it.remove();
-                    fontCache.put(fontHolder.font.getHeight(), fontHolder);
+            if (customFontForFrame) {
+                // Render fonts that were visited this frame and move to cache which weren't visited
+                for (Iterator<FontHolder> it = fontsInUse.values().iterator(); it.hasNext(); ) {
+                    FontHolder fontHolder = it.next();
+
+                    if (fontHolder.visited) {
+                        fontHolder.font.uploadPendingGlyphs();
+
+                        MeshRenderer.begin()
+                            .attachments(mc.getMainRenderTarget())
+                            .pipeline(MeteorRenderPipelines.UI_TEXT)
+                            .mesh(fontHolder.getMesh())
+                            .sampler("u_Texture", fontHolder.font.texture.getTextureView(), fontHolder.font.texture.getSampler())
+                            .end();
+                    } else {
+                        it.remove();
+                        fontCache.put(fontHolder.font.getHeight(), fontHolder);
+                    }
+
+                    fontHolder.visited = false;
                 }
-
-                fontHolder.visited = false;
+            } else {
+                VanillaTextRenderer.INSTANCE.end();
+                VanillaTextRenderer.INSTANCE.scaleIndividually = false;
             }
-        } else {
-            VanillaTextRenderer.INSTANCE.end();
-            VanillaTextRenderer.INSTANCE.scaleIndividually = false;
+
+            for (Runnable task : postTasks) task.run();
+
+            graphics.nextStratum();
+        } finally {
+            postTasks.clear();
+            graphics = null;
+            frameActive = false;
+
+            if (fontResetPending) {
+                resetFonts();
+                fontResetPending = false;
+            }
         }
-
-        for (Runnable task : postTasks) task.run();
-        postTasks.clear();
-
-        graphics.nextStratum();
-
-        graphics = null;
     }
 
     public void line(double x1, double y1, double x2, double y2, Color color) {
@@ -136,7 +157,7 @@ public class HudRenderer {
     public double text(String text, double x, double y, Color color, boolean shadow, double scale) {
         if (scale == -1) scale = hud.getTextScale();
 
-        if (!hud.hasCustomFont()) {
+        if (!usesCustomFont()) {
             VanillaTextRenderer.INSTANCE.scale = scale * 2;
             return VanillaTextRenderer.INSTANCE.render(text, x, y, color, shadow);
         }
@@ -149,13 +170,10 @@ public class HudRenderer {
         double width;
 
         if (shadow) {
-            int preShadowA = CustomTextRenderer.SHADOW_COLOR.a;
-            CustomTextRenderer.SHADOW_COLOR.a = (int) (color.a / 255.0 * preShadowA);
+            shadowColor.a = (int) (color.a / 255.0 * CustomTextRenderer.SHADOW_COLOR.a);
 
-            width = font.render(mesh, text, x + 1, y + 1, CustomTextRenderer.SHADOW_COLOR, scale);
+            width = font.render(mesh, text, x + 1, y + 1, shadowColor, scale);
             font.render(mesh, text, x, y, color, scale);
-
-            CustomTextRenderer.SHADOW_COLOR.a = preShadowA;
         } else {
             width = font.render(mesh, text, x, y, color, scale);
         }
@@ -170,7 +188,7 @@ public class HudRenderer {
     public double textWidth(String text, boolean shadow, double scale) {
         if (text.isEmpty()) return 0;
 
-        if (hud.hasCustomFont()) {
+        if (usesCustomFont()) {
             double width = getFont(scale).getWidth(text, text.length());
             return (width + (shadow ? 1 : 0)) * (scale == -1 ? hud.getTextScale() : scale) + (shadow ? 1 : 0);
         }
@@ -192,7 +210,7 @@ public class HudRenderer {
     }
 
     public double textHeight(boolean shadow, double scale) {
-        if (hud.hasCustomFont()) {
+        if (usesCustomFont()) {
             double height = getFont(scale).getHeight() + 1;
             return (height + (shadow ? 1 : 0)) * (scale == -1 ? hud.getTextScale() : scale);
         }
@@ -289,8 +307,21 @@ public class HudRenderer {
         return getFontHolder(scale, false).font;
     }
 
+    private boolean usesCustomFont() {
+        return frameActive ? customFontForFrame : hud.hasCustomFont();
+    }
+
     @EventHandler
     private void onCustomFontChanged(CustomFontChangedEvent event) {
+        if (frameActive) {
+            fontResetPending = true;
+            return;
+        }
+
+        resetFonts();
+    }
+
+    private void resetFonts() {
         // Need to destroy both fonts in use and in cache because they were not evicted from the cache automatically
         for (FontHolder fontHolder : fontsInUse.values()) fontHolder.destroy();
         for (FontHolder fontHolder : fontCache.asMap().values()) fontHolder.destroy();
@@ -301,12 +332,7 @@ public class HudRenderer {
     }
 
     private static FontHolder loadFont(int height) {
-        try {
-            ByteBuffer buffer = Fonts.RENDERER.fontFace.readToDirectByteBuffer();
-            return new FontHolder(new Font(buffer, height));
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to load font: " + Fonts.RENDERER.fontFace, e);
-        }
+        return new FontHolder(Fonts.RENDERER.createFont(height));
     }
 
     private static class FontHolder {
@@ -326,7 +352,7 @@ public class HudRenderer {
         }
 
         public void destroy() {
-            font.texture.close();
+            font.close();
         }
     }
 }

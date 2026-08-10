@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.renderer.text;
 
+import meteordevelopment.meteorclient.renderer.Fonts;
 import meteordevelopment.meteorclient.renderer.MeshBuilder;
 import meteordevelopment.meteorclient.renderer.MeshRenderer;
 import meteordevelopment.meteorclient.renderer.MeteorRenderPipelines;
@@ -13,30 +14,38 @@ import net.minecraft.client.Minecraft;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.List;
 
 public class CustomTextRenderer implements TextRenderer {
     public static final Color SHADOW_COLOR = new Color(60, 60, 60, 180);
 
     private final MeshBuilder mesh = new MeshBuilder(MeteorRenderPipelines.UI_TEXT);
+    private final Color shadowColor = new Color(SHADOW_COLOR);
 
     public final FontFace fontFace;
 
+    private final List<ByteBuffer> fontBuffers;
     private final Font[] fonts;
     private Font font;
 
     private boolean building;
     private boolean scaleOnly;
+    private boolean destroyed;
     private double fontScale = 1;
     private double scale = 1;
 
     public CustomTextRenderer(FontFace fontFace) throws IOException {
         this.fontFace = fontFace;
+        this.fontBuffers = Fonts.readFontBuffers(fontFace);
 
-        ByteBuffer buffer = fontFace.readToDirectByteBuffer();
-
-        fonts = new Font[5];
-        for (int i = 0; i < fonts.length; i++) {
-            fonts[i] = new Font(buffer, (int) Math.round(27 * ((i * 0.5) + 1)));
+        this.fonts = new Font[5];
+        try {
+            for (int i = 0; i < fonts.length; i++) {
+                fonts[i] = createFont((int) Math.round(27 * ((i * 0.5) + 1)));
+            }
+        } catch (RuntimeException | Error e) {
+            closeFonts();
+            throw e;
         }
     }
 
@@ -47,6 +56,7 @@ public class CustomTextRenderer implements TextRenderer {
 
     @Override
     public void begin(double scale, boolean scaleOnly, boolean big) {
+        if (destroyed) throw new IllegalStateException("CustomTextRenderer has already been destroyed.");
         if (building) throw new RuntimeException("CustomTextRenderer.begin() called twice");
 
         if (!scaleOnly) mesh.begin();
@@ -94,13 +104,10 @@ public class CustomTextRenderer implements TextRenderer {
 
         double width;
         if (shadow) {
-            int preShadowA = SHADOW_COLOR.a;
-            SHADOW_COLOR.a = (int) (color.a / 255.0 * preShadowA);
+            shadowColor.a = (int) (color.a / 255.0 * SHADOW_COLOR.a);
 
-            width = font.render(mesh, text, x + fontScale * scale / 1.5, y + fontScale * scale / 1.5, SHADOW_COLOR, scale / 1.5);
+            width = font.render(mesh, text, x + fontScale * scale / 1.5, y + fontScale * scale / 1.5, shadowColor, scale / 1.5);
             font.render(mesh, text, x, y, color, scale / 1.5);
-
-            SHADOW_COLOR.a = preShadowA;
         } else {
             width = font.render(mesh, text, x, y, color, scale / 1.5);
         }
@@ -118,24 +125,40 @@ public class CustomTextRenderer implements TextRenderer {
     public void end() {
         if (!building) throw new RuntimeException("CustomTextRenderer.end() called without calling begin()");
 
-        if (!scaleOnly) {
-            mesh.end();
+        try {
+            if (!scaleOnly) {
+                mesh.end();
+                font.uploadPendingGlyphs();
 
-            MeshRenderer.begin()
-                .attachments(Minecraft.getInstance().getMainRenderTarget())
-                .pipeline(MeteorRenderPipelines.UI_TEXT)
-                .mesh(mesh)
-                .sampler("u_Texture", font.texture.getTextureView(), font.texture.getSampler())
-                .end();
+                MeshRenderer.begin()
+                    .attachments(Minecraft.getInstance().getMainRenderTarget())
+                    .pipeline(MeteorRenderPipelines.UI_TEXT)
+                    .mesh(mesh)
+                    .sampler("u_Texture", font.texture.getTextureView(), font.texture.getSampler())
+                    .end();
+            }
+        } finally {
+            building = false;
+            scaleOnly = false;
+            scale = 1;
         }
+    }
 
-        building = false;
-        scale = 1;
+    public Font createFont(int height) {
+        if (destroyed) throw new IllegalStateException("CustomTextRenderer has already been destroyed.");
+        return new Font(fontBuffers, height);
     }
 
     public void destroy() {
-        for (Font font : this.fonts) {
-            font.texture.close();
+        if (destroyed) return;
+
+        closeFonts();
+        destroyed = true;
+    }
+
+    private void closeFonts() {
+        for (Font font : fonts) {
+            if (font != null) font.close();
         }
     }
 }
