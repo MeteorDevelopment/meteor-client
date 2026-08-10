@@ -9,6 +9,8 @@ import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.game.GameLeftEvent;
 import meteordevelopment.meteorclient.systems.accounts.Accounts;
+import meteordevelopment.meteorclient.systems.baritoneflow.BaritoneFlows;
+import meteordevelopment.meteorclient.systems.baritoneflow.DisconnectLog;
 import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.systems.hud.Hud;
@@ -46,6 +48,8 @@ public class Systems {
         config.settings.registerColorSettings(null);
 
         add(new Macros());
+        add(new BaritoneFlows());
+        add(new DisconnectLog());
         add(new Friends());
         add(new Accounts());
         add(new Waypoints());

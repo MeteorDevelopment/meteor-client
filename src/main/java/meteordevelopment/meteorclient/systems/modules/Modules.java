@@ -20,6 +20,7 @@ import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.System;
 import meteordevelopment.meteorclient.systems.Systems;
 import meteordevelopment.meteorclient.systems.config.Config;
+import meteordevelopment.meteorclient.systems.modules.baritone.*;
 import meteordevelopment.meteorclient.systems.modules.combat.*;
 import meteordevelopment.meteorclient.systems.modules.misc.*;
 import meteordevelopment.meteorclient.systems.modules.misc.swarm.Swarm;
@@ -78,6 +79,7 @@ public class Modules extends System<Modules> {
         initRender();
         initWorld();
         initMisc();
+        initBaritone();
     }
 
     @Override
@@ -578,5 +580,16 @@ public class Modules extends System<Modules> {
         add(new SoundBlocker());
         add(new Spam());
         add(new Swarm());
+    }
+
+    private void initBaritone() {
+        add(new Goto());
+        add(new Mine());
+        add(new Follow());
+        add(new Pause());
+        add(new Resume());
+        add(new Stop());
+        add(new Command());
+        add(new FlowBuilder());
     }
 }
