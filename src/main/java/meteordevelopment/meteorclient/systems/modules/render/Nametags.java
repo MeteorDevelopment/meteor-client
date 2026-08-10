@@ -41,7 +41,10 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.item.PrimedTnt;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.minecart.MinecartTNT;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
@@ -63,9 +66,16 @@ public class Nametags extends Module {
     private final Setting<Set<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
         .name("entities")
         .description("Select entities to draw nametags on.")
-        .defaultValue(EntityType.PLAYER, EntityType.ITEM)
+        .defaultValue(EntityType.PLAYER)
+        .filter(type -> type != EntityType.ITEM)
         .build()
     );
+
+    private final Setting<List<Item>> items = sgGeneral.add(new ItemListSetting.Builder()
+        .name("items")
+        .description("Select items to draw nametags on.")
+        .defaultValue(getDefaultItems())
+        .build());
 
     private final Setting<Double> scale = sgGeneral.add(new DoubleSetting.Builder()
         .name("scale")
@@ -313,6 +323,14 @@ public class Nametags extends Module {
         super(Categories.Render, "nametags", "Displays customizable nametags above players, items and other entities.");
     }
 
+    private static List<Item> getDefaultItems() {
+        List<Item> items = new ArrayList<>();
+        for (Item item : BuiltInRegistries.ITEM) {
+            if (item != Items.AIR) items.add(item);
+        }
+        return items;
+    }
+
     private static String ticksToTime(int ticks) {
         if (ticks > 20 * 3600) {
             int h = ticks / 20 / 3600;
@@ -337,7 +355,11 @@ public class Nametags extends Module {
 
         for (Entity entity : mc.level.entitiesForRendering()) {
             EntityType<?> type = entity.getType();
-            if (!entities.get().contains(type)) continue;
+
+            if (entity instanceof ItemEntity itemEntity) {
+                if (!items.get().contains(itemEntity.getItem().getItem())) continue;
+            }
+            else if (!entities.get().contains(type)) continue;
 
             if (type == EntityType.PLAYER) {
                 if ((ignoreSelf.get() || (freecamNotActive && notThirdPerson)) && entity == mc.player) continue;
