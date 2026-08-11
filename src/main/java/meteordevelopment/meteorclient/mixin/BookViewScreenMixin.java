@@ -73,7 +73,7 @@ public abstract class BookViewScreenMixin extends Screen {
                     MeteorClient.LOG.error("Error writing the book to the output stream", e);
                 }
 
-                String encoded = Base64.getEncoder().encodeToString(bytes.array);
+                String encoded = Base64.getEncoder().encodeToString(bytes.toByteArray());
 
                 @SuppressWarnings("resource")
                 long available = MemoryStack.stackGet().getPointer();

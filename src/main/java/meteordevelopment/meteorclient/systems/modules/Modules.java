@@ -62,7 +62,7 @@ public class Modules extends System<Modules> {
     private final Map<Category, List<Module>> groups = new Reference2ReferenceOpenHashMap<>();
 
     private final Set<Module> active = new ReferenceOpenHashSet<>();
-    private Module moduleToBind;
+    private @Nullable Module moduleToBind;
     private boolean awaitingKeyRelease = false;
 
     public Modules() {
@@ -214,7 +214,7 @@ public class Modules extends System<Modules> {
 
     // Binding
 
-    public void setModuleToBind(Module moduleToBind) {
+    public void setModuleToBind(@Nullable Module moduleToBind) {
         this.moduleToBind = moduleToBind;
     }
 
