@@ -24,6 +24,7 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.waypoints.Waypoint;
 import meteordevelopment.meteorclient.systems.waypoints.Waypoints;
 import meteordevelopment.meteorclient.utils.Utils;
+import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.render.NametagUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
@@ -33,6 +34,7 @@ import net.minecraft.client.gui.screens.DeathScreen;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.server.permissions.Permissions;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3d;
 
@@ -145,7 +147,7 @@ public class WaypointsModule extends Module {
                 // Setup text rendering
                 int preTextA = TEXT.a;
                 TEXT.a *= a;
-                text.begin();
+                text.begin(event.graphics);
 
                 // Render name
                 text.render(waypoint.name.get(), -text.getWidth(waypoint.name.get()) / 2, -16 - text.getHeight(), TEXT, true);
@@ -242,7 +244,7 @@ public class WaypointsModule extends Module {
             };
 
             WButton edit = table.add(theme.button(GuiRenderer.EDIT)).widget();
-            edit.action = () -> mc.setScreen(new EditWaypointScreen(theme, waypoint, () -> initTable(theme, table)));
+            edit.action = () -> mc.gui.setScreen(new EditWaypointScreen(theme, waypoint, () -> initTable(theme, table)));
 
             // Goto
             if (validDim) {
@@ -252,6 +254,24 @@ public class WaypointsModule extends Module {
                         PathManagers.get().stop();
 
                     PathManagers.get().moveTo(waypoint.getPos());
+                };
+            }
+
+            boolean isOperator = mc.player.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER);
+            if (isOperator) {
+                WButton teleportB = table.add(theme.button("TP")).widget();
+                teleportB.action = () -> {
+                    BlockPos pos = waypoint.pos.get();
+
+                    String command = String.format(
+                        "/execute in %s run tp %d %d %d",
+                        waypoint.dimension.toString(),
+                        pos.getX(),
+                        pos.getY(),
+                        pos.getZ()
+                    );
+
+                    ChatUtils.sendPlayerMsg(command, false);
                 };
             }
 
@@ -268,7 +288,7 @@ public class WaypointsModule extends Module {
         table.row();
 
         WButton create = table.add(theme.button("Create")).expandX().widget();
-        create.action = () -> mc.setScreen(new EditWaypointScreen(theme, null, () -> initTable(theme, table)));
+        create.action = () -> mc.gui.setScreen(new EditWaypointScreen(theme, null, () -> initTable(theme, table)));
     }
 
     private static class EditWaypointScreen extends EditSystemScreen<Waypoint> {

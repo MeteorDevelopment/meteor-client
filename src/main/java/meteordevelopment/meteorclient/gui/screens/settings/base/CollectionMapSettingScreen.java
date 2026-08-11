@@ -14,7 +14,7 @@ import meteordevelopment.meteorclient.gui.widgets.input.WTextBox;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.utils.misc.IChangeable;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Comparator;
 import java.util.Map;
@@ -57,7 +57,7 @@ public abstract class CollectionMapSettingScreen<K, V> extends WindowScreen {
         Iterable<K> sorted = SortingHelper.sortWithPriority(registry, this::includeValue, this::getValueNames, filterText, prioritizeChanged);
 
         sorted.forEach(t -> {
-            @Nullable V data = map.get(t);
+            V data = map.get(t);
             boolean isChanged = data instanceof IChangeable changeable && changeable.isChanged();
 
             table.add(getValueWidget(t)).expandCellX();

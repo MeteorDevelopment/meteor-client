@@ -5,7 +5,7 @@
 
 package meteordevelopment.meteorclient.utils.misc;
 
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.io.DataOutput;
 import java.io.IOException;
@@ -34,7 +34,7 @@ public class ByteCountDataOutput implements DataOutput {
     }
 
     @Override
-    public void write(byte @NotNull [] b, int off, int len) throws IOException {
+    public void write(byte @NonNull [] b, int off, int len) throws IOException {
         count += len;
     }
 
@@ -89,7 +89,7 @@ public class ByteCountDataOutput implements DataOutput {
     }
 
     @Override
-    public void writeUTF(@NotNull String s) {
+    public void writeUTF(@NonNull String s) {
         count += 2 + getUTFLength(s);
     }
 

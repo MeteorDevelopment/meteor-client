@@ -88,13 +88,13 @@ public class Excavator extends Module {
     @Override
     public void onDeactivate() {
         baritone.getSelectionManager().removeSelection(baritone.getSelectionManager().getLastSelection());
-        if (baritone.getBuilderProcess().isActive()) baritone.getCommandManager().execute("stop");
+        if (baritone.getBuilderProcess().isActive()) baritone.getPathingBehavior().cancelEverything();
         status = Status.SEL_START;
     }
 
     @EventHandler
     private void onMouseClick(MouseClickEvent event) {
-        if (event.action != KeyAction.Press || !selectionBind.get().isPressed() || mc.screen != null) {
+        if (event.action != KeyAction.Press || !selectionBind.get().isPressed() || mc.gui.screen() != null) {
             return;
         }
         selectCorners();
@@ -102,7 +102,7 @@ public class Excavator extends Module {
 
     @EventHandler
     private void onKey(KeyInputEvent event) {
-        if (event.action != KeyAction.Press || !selectionBind.get().isPressed() || mc.screen != null) {
+        if (event.action != KeyAction.Press || !selectionBind.get().isPressed() || mc.gui.screen() != null) {
             return;
         }
         selectCorners();

@@ -318,8 +318,9 @@ public class AnchorAura extends Module {
             }
 
             float bestDamage = isPlacing ? (float) bestPlaceDamage : (float) bestBreakDamage;
-            float selfDamage = DamageUtils.anchorDamage(mc.player, blockPos.getCenter());
-            float targetDamage = DamageUtils.anchorDamage(target, blockPos.getCenter());
+            Vec3 center = Vec3.atCenterOf(blockPos);
+            float selfDamage = DamageUtils.anchorDamage(mc.player, center);
+            float targetDamage = DamageUtils.anchorDamage(target, center);
 
             // Is the anchor optimal?
             if (targetDamage >= minDamage.get() && targetDamage > bestDamage
@@ -377,7 +378,7 @@ public class AnchorAura extends Module {
         BlockState blockState = mc.level.getBlockState(bestBreakPos);
         if (blockState.getBlock() != Blocks.RESPAWN_ANCHOR) return;
 
-        Vec3 center = bestBreakPos.getCenter();
+        Vec3 center = Vec3.atCenterOf(bestBreakPos);
         int charges = blockState.getValue(BlockStateProperties.RESPAWN_ANCHOR_CHARGES);
 
         // Charge the anchor
@@ -407,7 +408,7 @@ public class AnchorAura extends Module {
     }
 
     private boolean isOutOfRange(BlockPos blockPos, double baseRange, double wallsRange) {
-        Vec3 pos = blockPos.getCenter();
+        Vec3 pos = Vec3.atCenterOf(blockPos);
         if (!PlayerUtils.isWithin(pos, baseRange)) return true;
 
         ClipContext clipContext = new ClipContext(mc.player.getEyePosition(), pos, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, mc.player);

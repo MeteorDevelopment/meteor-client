@@ -10,6 +10,7 @@ import com.mojang.blaze3d.buffers.Std140Builder;
 import com.mojang.blaze3d.buffers.Std140SizeCalculator;
 import net.minecraft.client.renderer.DynamicUniformStorage;
 import org.joml.Matrix4f;
+import org.jspecify.annotations.NonNull;
 
 import java.nio.ByteBuffer;
 
@@ -39,7 +40,7 @@ public class MeshUniforms {
         private Matrix4f modelView;
 
         @Override
-        public void write(ByteBuffer buffer) {
+        public void write(@NonNull ByteBuffer buffer) {
             Std140Builder.intoBuffer(buffer)
                 .putMat4f(proj)
                 .putMat4f(modelView);

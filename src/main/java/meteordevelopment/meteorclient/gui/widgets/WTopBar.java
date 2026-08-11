@@ -50,7 +50,7 @@ public abstract class WTopBar extends WHorizontalList {
 
         @Override
         protected void onPressed(int button) {
-            Screen screen = mc.screen;
+            Screen screen = mc.gui.screen();
 
             if (!(screen instanceof TabScreen tabScreen) || tabScreen.tab != tab) {
                 double mouseX = mc.mouseHandler.xpos();
@@ -64,7 +64,7 @@ public abstract class WTopBar extends WHorizontalList {
         @Override
         protected void onRender(GuiRenderer renderer, double mouseX, double mouseY, double delta) {
             double pad = pad();
-            Color color = getButtonColor(pressed || (mc.screen instanceof TabScreen tabScreen && tabScreen.tab == tab), mouseOver);
+            Color color = getButtonColor(pressed || (mc.gui.screen() instanceof TabScreen tabScreen && tabScreen.tab == tab), mouseOver);
 
             renderer.quad(x, y, width, height, color);
             renderer.text(tab.name, x + pad, y + pad, getNameColor(), false);

@@ -31,7 +31,7 @@ public class BoolSetting extends Setting<Boolean> {
     }
 
     @Override
-    public List<String> getSuggestions() {
+    public Iterable<String> getSuggestions() {
         return SUGGESTIONS;
     }
 

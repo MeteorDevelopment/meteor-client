@@ -11,11 +11,10 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
+import java.nio.channels.SeekableByteChannel;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.function.IntFunction;
-
-import static java.nio.file.Files.size;
 
 @NullMarked
 public final class ByteBufferUtils {
@@ -24,21 +23,24 @@ public final class ByteBufferUtils {
 
     public static ByteBuffer readFully(Path path, IntFunction<ByteBuffer> allocator) throws IOException {
         try (FileChannel channel = FileChannel.open(path, StandardOpenOption.READ)) {
-            long size = size(path);
+            long size = channel.size();
             if (size > Integer.MAX_VALUE) {
                 throw new IOException("File too large to read into ByteBuffer: " + path);
             }
-            ByteBuffer buffer = allocator.apply((int) size);
-            while (buffer.hasRemaining()) {
-                int bytesRead = channel.read(buffer);
-                if (bytesRead == -1) break; // EOF
-            }
-            buffer.flip();
-            return buffer;
+            return readFully(channel, (int) size, allocator);
         }
     }
 
     public static ByteBuffer readFully(ReadableByteChannel channel, IntFunction<ByteBuffer> allocator) throws IOException {
+        // special-case if content size is known
+        if (channel instanceof SeekableByteChannel seekableChannel) {
+            long size = seekableChannel.size();
+            if (size > Integer.MAX_VALUE) {
+                throw new IOException("Channel content too large to read into ByteBuffer");
+            }
+            return readFully(seekableChannel, (int) size, allocator);
+        }
+
         ByteBuffer buffer = requireCapacity(allocator.apply(8192), 8192);
 
         while (true) {
@@ -63,6 +65,16 @@ public final class ByteBufferUtils {
             }
         }
 
+        buffer.flip();
+        return buffer;
+    }
+
+    private static ByteBuffer readFully(SeekableByteChannel channel, int size, IntFunction<ByteBuffer> allocator) throws IOException {
+        ByteBuffer buffer = requireCapacity(allocator.apply(size), size);
+        while (buffer.hasRemaining()) {
+            int bytesRead = channel.read(buffer);
+            if (bytesRead == -1) break; // EOF
+        }
         buffer.flip();
         return buffer;
     }

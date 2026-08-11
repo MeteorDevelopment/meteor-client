@@ -15,7 +15,7 @@ import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.Settings;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.resources.Identifier;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -65,7 +65,7 @@ public class SettingValueArgumentType implements ArgumentType<String> {
         return suggest(builder, setting);
     }
 
-    public static CompletableFuture<Suggestions> suggest(SuggestionsBuilder builder, @NotNull Setting<?> setting) {
+    public static CompletableFuture<Suggestions> suggest(SuggestionsBuilder builder, @NonNull Setting<?> setting) {
         Iterable<Identifier> identifiers = setting.getIdentifierSuggestions();
         if (identifiers != null) {
             return SharedSuggestionProvider.suggestResource(identifiers, builder);

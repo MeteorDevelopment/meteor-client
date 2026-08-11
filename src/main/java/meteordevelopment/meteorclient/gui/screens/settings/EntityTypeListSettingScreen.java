@@ -22,7 +22,6 @@ import meteordevelopment.meteorclient.utils.misc.Names;
 import meteordevelopment.meteorclient.utils.render.DisplayItemUtils;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.util.Tuple;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -137,8 +136,9 @@ public class EntityTypeListSettingScreen extends WindowScreen {
         Cell<WSection> miscCell = add(misc).expandX();
         miscT = misc.add(theme.table()).expandX().widget();
 
+        @SuppressWarnings("deprecation") // Use of Item#builtInRegistryHolder
         var spawnEggItems = BuiltInRegistries.ITEM.stream()
-            .filter(item -> item.components().has(DataComponents.ENTITY_DATA))
+            .filter(item -> item.builtInRegistryHolder().areComponentsBound() && item.components().has(DataComponents.ENTITY_DATA))
             .toList();
 
         Consumer<EntityType<?>> entityTypeForEach = entityType -> {
@@ -172,15 +172,17 @@ public class EntityTypeListSettingScreen extends WindowScreen {
         if (filterText.isEmpty()) {
             BuiltInRegistries.ENTITY_TYPE.forEach(entityTypeForEach);
         } else {
-            List<Tuple<EntityType<?>, Integer>> entities = new ArrayList<>();
+            record DiffByType(EntityType<?> type, int diff) {}
+            List<DiffByType> entities = new ArrayList<>();
             BuiltInRegistries.ENTITY_TYPE.forEach(entity -> {
-                int words = Utils.searchInWords(Names.get(entity), filterText);
-                int diff = Utils.searchLevenshteinDefault(Names.get(entity), filterText, false);
+                String text = Names.get(entity);
+                int words = Utils.searchInWords(text, filterText);
+                int diff = Utils.searchLevenshteinDefault(text, filterText, false);
 
-                if (words > 0 || diff < Names.get(entity).length() / 2) entities.add(new Tuple<>(entity, -diff));
+                if (words > 0 || diff < text.length() / 2) entities.add(new DiffByType(entity, diff));
             });
-            entities.sort(Comparator.comparingInt(value -> -value.getB()));
-            for (Tuple<EntityType<?>, Integer> pair : entities) entityTypeForEach.accept(pair.getA());
+            entities.sort(Comparator.comparingInt(DiffByType::diff));
+            for (var pair : entities) entityTypeForEach.accept(pair.type);
         }
 
         if (animalsT.cells.isEmpty()) list.cells.remove(animalsCell);

@@ -15,7 +15,6 @@ import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.sounds.WeighedSoundEvents;
 import net.minecraft.core.Holder;
-import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -107,7 +106,6 @@ public class Names {
     }
 
     public static String get(ParticleType<?> type) {
-        if (!(type instanceof ParticleOptions)) return "";
         return particleTypesNames.computeIfAbsent(type, _ -> StringUtils.capitalize(BuiltInRegistries.PARTICLE_TYPE.getKey(type).getPath().replace("_", " ")));
     }
 

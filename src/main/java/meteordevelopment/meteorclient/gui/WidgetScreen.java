@@ -25,6 +25,7 @@ import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
+import org.jspecify.annotations.NonNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -67,7 +68,7 @@ public abstract class WidgetScreen extends Screen {
     public WidgetScreen(GuiTheme theme, String title) {
         super(Component.literal(title));
 
-        this.parent = mc.screen;
+        this.parent = mc.gui.screen();
         this.root = new WFullScreenRoot();
         this.theme = theme;
 
@@ -119,7 +120,7 @@ public abstract class WidgetScreen extends Screen {
     }
 
     @Override
-    public boolean mouseClicked(MouseButtonEvent click, boolean doubled) {
+    public boolean mouseClicked(@NonNull MouseButtonEvent click, boolean doubled) {
         if (locked) return false;
 
         double mouseX = click.x();
@@ -129,11 +130,18 @@ public abstract class WidgetScreen extends Screen {
         mouseX *= s;
         mouseY *= s;
 
+        // Unfocus all text boxes that are not under the mouse cursor
+        loopWidgets(root, widget -> {
+            if (widget instanceof WTextBox textBox && textBox.isFocused() && !textBox.mouseOver) {
+                textBox.setFocused(false);
+            }
+        });
+
         return root.mouseClicked(new MouseButtonEvent(mouseX, mouseY, click.buttonInfo()), doubled);
     }
 
     @Override
-    public boolean mouseReleased(MouseButtonEvent click) {
+    public boolean mouseReleased(@NonNull MouseButtonEvent click) {
         if (locked) return false;
 
         double mouseX = click.x();
@@ -173,7 +181,7 @@ public abstract class WidgetScreen extends Screen {
     }
 
     @Override
-    public boolean keyReleased(KeyEvent input) {
+    public boolean keyReleased(@NonNull KeyEvent input) {
         if (locked) return false;
 
         if ((input.modifiers() == GLFW_MOD_CONTROL || input.modifiers() == GLFW_MOD_SUPER) && input.key() == GLFW_KEY_9) {
@@ -190,7 +198,7 @@ public abstract class WidgetScreen extends Screen {
     }
 
     @Override
-    public boolean keyPressed(KeyEvent input) {
+    public boolean keyPressed(@NonNull KeyEvent input) {
         if (locked) return false;
 
         boolean shouldReturn = root.keyPressed(input) || super.keyPressed(input);
@@ -241,14 +249,14 @@ public abstract class WidgetScreen extends Screen {
     }
 
     @Override
-    public boolean charTyped(CharacterEvent input) {
+    public boolean charTyped(@NonNull CharacterEvent input) {
         if (locked) return false;
 
         return root.charTyped(input);
     }
 
     @Override
-    public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float deltaTicks) {
+    public void extractBackground(@NonNull GuiGraphicsExtractor graphics, int mouseX, int mouseY, float deltaTicks) {
         if (this.minecraft.level == null) {
             this.extractPanorama(graphics, deltaTicks);
         }
@@ -337,9 +345,17 @@ public abstract class WidgetScreen extends Screen {
             }
 
             if (onClose) {
+                double restoreX = mc.mouseHandler.xpos();
+                double restoreY = mc.mouseHandler.ypos();
+
                 taskAfterRender = () -> {
                     locked = true;
-                    mc.setScreen(parent);
+                    mc.gui.setScreen(parent);
+
+                    // Restore mouse position to where it was when the screen was closed
+                    if (parent != null) {
+                        glfwSetCursorPos(mc.getWindow().handle(), restoreX, restoreY);
+                    }
                 };
             }
         }

@@ -49,11 +49,11 @@ public class WBlockPosEdit extends WHorizontalList {
 
                 clicking = true;
                 MeteorClient.EVENT_BUS.subscribe(this);
-                previousScreen = mc.screen;
-                mc.setScreen(null);
+                previousScreen = mc.gui.screen();
+                mc.gui.setScreen(null);
             };
 
-            WButton here = add(theme.button("Set Here")).expandX().widget();
+            WButton here = add(theme.confirmedButton("Set Here", "Confirm")).expandX().widget();
             here.action = () -> {
                 lastValue = value;
                 set(new BlockPos(mc.player.blockPosition()));
@@ -71,7 +71,7 @@ public class WBlockPosEdit extends WHorizontalList {
             clicking = false;
             event.cancel();
             MeteorClient.EVENT_BUS.unsubscribe(this);
-            mc.setScreen(previousScreen);
+            mc.gui.setScreen(previousScreen);
         }
     }
 
@@ -89,7 +89,7 @@ public class WBlockPosEdit extends WHorizontalList {
             clicking = false;
             event.cancel();
             MeteorClient.EVENT_BUS.unsubscribe(this);
-            mc.setScreen(previousScreen);
+            mc.gui.setScreen(previousScreen);
         }
     }
 

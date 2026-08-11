@@ -10,7 +10,7 @@ import meteordevelopment.meteorclient.systems.accounts.Account;
 import meteordevelopment.meteorclient.systems.accounts.AccountType;
 import meteordevelopment.meteorclient.systems.accounts.MicrosoftLogin;
 import net.minecraft.client.User;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Optional;
 
@@ -39,13 +39,13 @@ public class MicrosoftAccount extends Account<MicrosoftAccount> {
 
     private @Nullable String auth() {
         MicrosoftLogin.LoginData data = MicrosoftLogin.login(name);
-        if (!data.isGood()) return null;
+        if (data == null || data.newRefreshToken() == null) return null;
 
-        name = data.newRefreshToken;
-        cache.username = data.username;
-        cache.uuid = data.uuid;
+        name = data.newRefreshToken();
+        cache.username = data.username();
+        cache.uuid = data.uuid();
 
-        return data.mcToken;
+        return data.mcToken();
     }
 
     @Override

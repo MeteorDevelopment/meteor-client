@@ -7,10 +7,10 @@
     "MeshVertexConsumerMixin",
     "AbstractBlockRenderContextMixin",
     "SodiumBlockRendererMixin",
+    "SodiumChunkBuilderMeshingTaskMixin",
     "SodiumDefaultFluidRendererMixin",
     "SodiumFluidRendererImplDefaultRenderContextMixin",
     "SodiumFluidRendererImplMixin",
-    "SodiumInnerPartitionBSPNodeMixin",
     "SodiumLightDataAccessMixin",
     "SodiumWorldRendererMixin"
   ],

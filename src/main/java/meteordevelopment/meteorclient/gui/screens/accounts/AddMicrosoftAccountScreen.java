@@ -40,7 +40,7 @@ public class AddMicrosoftAccountScreen extends AddAccountScreen {
 
         WButton cancel = l.add(theme.button("Cancel")).expandX().widget();
         cancel.action = () -> {
-            MicrosoftLogin.stopServer();
+            MicrosoftLogin.cancelLogin();
             onClose();
         };
     }

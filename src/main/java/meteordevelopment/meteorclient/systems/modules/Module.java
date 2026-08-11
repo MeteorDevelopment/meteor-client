@@ -22,7 +22,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.Objects;
 
@@ -200,7 +200,7 @@ public abstract class Module implements ISerializable<Module>, Comparable<Module
     }
 
     @Override
-    public int compareTo(@NotNull Module o) {
+    public int compareTo(@NonNull Module o) {
         return name.compareTo(o.name);
     }
 }

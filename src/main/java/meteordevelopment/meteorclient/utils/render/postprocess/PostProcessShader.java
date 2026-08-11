@@ -1,5 +1,6 @@
 package meteordevelopment.meteorclient.utils.render.postprocess;
 
+import com.mojang.blaze3d.GpuFormat;
 import com.mojang.blaze3d.buffers.Std140Builder;
 import com.mojang.blaze3d.buffers.Std140SizeCalculator;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
@@ -10,6 +11,8 @@ import com.mojang.blaze3d.textures.FilterMode;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.renderer.MeshRenderer;
 import net.minecraft.client.renderer.DynamicUniformStorage;
+import org.joml.Vector4f;
+import org.jspecify.annotations.NonNull;
 
 import java.nio.ByteBuffer;
 
@@ -22,7 +25,8 @@ public abstract class PostProcessShader {
 
     protected PostProcessShader(RenderPipeline pipeline) {
         this.pipeline = pipeline;
-        this.framebuffer = new TextureTarget(MeteorClient.NAME + " PostProcessShader " + this.getClass().getSimpleName(), mc.getWindow().getWidth(), mc.getWindow().getHeight(), true);
+        this.framebuffer = new TextureTarget(MeteorClient.NAME + " PostProcessShader " + this.getClass().getSimpleName(), mc.getWindow().getWidth(), mc.getWindow().getHeight(), true,
+            GpuFormat.RGBA8_UNORM);
     }
 
     protected abstract boolean shouldDraw();
@@ -37,7 +41,7 @@ public abstract class PostProcessShader {
 
     public void clearTexture() {
         if (this.shouldDraw()) {
-            RenderSystem.getDevice().createCommandEncoder().clearColorTexture(framebuffer.getColorTexture(), 0);
+            RenderSystem.getDevice().createCommandEncoder().clearColorTexture(framebuffer.getColorTexture(), new Vector4f(0));
         }
     }
 
@@ -53,7 +57,7 @@ public abstract class PostProcessShader {
         if (!shouldDraw()) return;
 
         var renderer = MeshRenderer.begin()
-            .attachments(mc.getMainRenderTarget())
+            .attachments(mc.gameRenderer.mainRenderTarget())
             .pipeline(pipeline)
             .fullscreen()
             .uniform("PostData", UNIFORM_STORAGE.writeUniform(new UniformData(
@@ -87,7 +91,7 @@ public abstract class PostProcessShader {
 
     private record UniformData(float sizeX, float sizeY, float time) implements DynamicUniformStorage.DynamicUniform {
         @Override
-        public void write(ByteBuffer buffer) {
+        public void write(@NonNull ByteBuffer buffer) {
             Std140Builder.intoBuffer(buffer)
                 .putVec2(sizeX, sizeY)
                 .putFloat(time);

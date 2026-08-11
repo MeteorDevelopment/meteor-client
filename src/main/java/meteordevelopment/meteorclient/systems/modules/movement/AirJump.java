@@ -40,7 +40,7 @@ public class AirJump extends Module {
 
     @EventHandler
     private void onKey(KeyInputEvent event) {
-        if (Modules.get().isActive(Freecam.class) || mc.screen != null || mc.player.onGround()) return;
+        if (Modules.get().isActive(Freecam.class) || mc.gui.screen() != null || mc.player.onGround()) return;
 
         if (event.action != KeyAction.Press) return;
 

@@ -16,7 +16,6 @@ import meteordevelopment.meteorclient.systems.modules.movement.elytrafly.ElytraF
 import meteordevelopment.meteorclient.systems.modules.movement.elytrafly.ElytraFly;
 import meteordevelopment.meteorclient.systems.modules.movement.elytrafly.modes.Bounce;
 import meteordevelopment.meteorclient.systems.modules.player.NoStatusEffects;
-import meteordevelopment.meteorclient.systems.modules.player.OffhandCrash;
 import meteordevelopment.meteorclient.systems.modules.render.HandView;
 import meteordevelopment.meteorclient.systems.modules.render.NoRender;
 import net.minecraft.core.Holder;
@@ -25,7 +24,6 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -56,15 +54,6 @@ public abstract class LivingEntityMixin extends Entity {
     private void spawnItemParticles(ItemStack itemStack, int count, CallbackInfo ci) {
         NoRender noRender = Modules.get().get(NoRender.class);
         if (noRender.noEatParticles() && itemStack.getComponents().has(DataComponents.FOOD)) ci.cancel();
-    }
-
-    @Inject(method = "onEquipItem", at = @At("HEAD"), cancellable = true)
-    private void onEquipStack(EquipmentSlot slot, ItemStack oldStack, ItemStack stack, CallbackInfo ci) {
-        if ((Object) this != mc.player) return;
-
-        if (Modules.get().get(OffhandCrash.class).isAntiCrash()) {
-            ci.cancel();
-        }
     }
 
     @ModifyVariable(method = "swing(Lnet/minecraft/world/InteractionHand;)V", at = @At("HEAD"), argsOnly = true, name = "hand")

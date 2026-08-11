@@ -231,13 +231,6 @@ public class NoRender extends Module {
         .build()
     );
 
-    private final Setting<Boolean> noBlockBreakParticles = sgWorld.add(new BoolSetting.Builder()
-        .name("block-break-particles")
-        .description("Disables rendering of block-break particles.")
-        .defaultValue(false)
-        .build()
-    );
-
     private final Setting<Boolean> noBlockBreakOverlay = sgWorld.add(new BoolSetting.Builder()
         .name("block-break-overlay")
         .description("Disables rendering of block-break overlay.")
@@ -263,7 +256,7 @@ public class NoRender extends Module {
         .name("cave-culling")
         .description("Disables Minecraft's cave culling algorithm.")
         .defaultValue(false)
-        .onChanged(_ -> mc.levelRenderer.allChanged())
+        .onChanged(_ -> mc.levelExtractor.allChanged())
         .build()
     );
 
@@ -312,7 +305,7 @@ public class NoRender extends Module {
         .name("texture-rotations")
         .description("Changes texture rotations and model offsets to use a constant value instead of the block position.")
         .defaultValue(false)
-        .onChanged(_ -> mc.levelRenderer.allChanged())
+        .onChanged(_ -> mc.levelExtractor.allChanged())
         .build()
     );
 
@@ -386,12 +379,16 @@ public class NoRender extends Module {
 
     @Override
     public void onActivate() {
-        if (noCaveCulling.get() || noTextureRotations.get()) mc.levelRenderer.allChanged();
+        if (noCaveCulling.get() || noTextureRotations.get()) {
+            mc.levelExtractor.allChanged();
+        }
     }
 
     @Override
     public void onDeactivate() {
-        if (noCaveCulling.get() || noTextureRotations.get()) mc.levelRenderer.allChanged();
+        if (noCaveCulling.get() || noTextureRotations.get()) {
+            mc.levelExtractor.allChanged();
+        }
     }
 
     // Overlay
@@ -512,8 +509,8 @@ public class NoRender extends Module {
         return isActive() && noSignText.get();
     }
 
-    public boolean noBlockBreakParticles() {
-        return isActive() && noBlockBreakParticles.get();
+    public boolean noParticle(ParticleType<?> type) {
+        return isActive() && particles.get().contains(type);
     }
 
     public boolean noBlockBreakOverlay() {

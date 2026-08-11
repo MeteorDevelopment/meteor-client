@@ -9,7 +9,6 @@ import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.mixin.DirectionAccessor;
-import meteordevelopment.meteorclient.mixin.LevelRendererAccessor;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
@@ -41,6 +40,7 @@ import net.minecraft.world.phys.AABB;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
+import java.util.SortedSet;
 
 public class Surround extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -372,8 +372,10 @@ public class Surround extends Module {
 
         // Check if the block is being mined
         boolean beingMined = false;
-        for (BlockDestructionProgress value : ((LevelRendererAccessor) mc.levelRenderer).meteor$getDestroyingBlocks().values()) {
-            if (value.getPos().equals(placePos)) {
+        for (SortedSet<BlockDestructionProgress> progresses : mc.level.destructionProgress().values()) {
+            if (progresses.isEmpty()) continue;
+
+            if (progresses.last().getPos().equals(placePos)) {
                 beingMined = true;
                 break;
             }

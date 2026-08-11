@@ -5,16 +5,16 @@
 
 package meteordevelopment.meteorclient.systems.modules.misc;
 
-import it.unimi.dsi.fastutil.objects.Reference2IntOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
-import meteordevelopment.meteorclient.utils.network.PacketUtils;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.PacketType;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
@@ -36,17 +36,17 @@ public class PacketLogger extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgOutput = settings.createGroup("Output");
 
-    private final Setting<Set<Class<? extends Packet<?>>>> s2cPackets = sgGeneral.add(new PacketListSetting.Builder()
+    private final Setting<Set<PacketType<? extends Packet<?>>>> s2cPackets = sgGeneral.add(new PacketListSetting.Builder()
         .name("S2C-packets")
         .description("Server-to-client packets to log.")
-        .filter(aClass -> PacketUtils.getS2CPackets().contains(aClass))
+        .clientbound()
         .build()
     );
 
-    private final Setting<Set<Class<? extends Packet<?>>>> c2sPackets = sgGeneral.add(new PacketListSetting.Builder()
+    private final Setting<Set<PacketType<? extends Packet<?>>>> c2sPackets = sgGeneral.add(new PacketListSetting.Builder()
         .name("C2S-packets")
         .description("Client-to-server packets to log.")
-        .filter(aClass -> PacketUtils.getC2SPackets().contains(aClass))
+        .serverbound()
         .build()
     );
 
@@ -128,7 +128,7 @@ public class PacketLogger extends Module {
     private static final int LINE_SEPARATOR_BYTES = System.lineSeparator().getBytes(StandardCharsets.UTF_8).length;
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm:ss.SSS");
     private static final DateTimeFormatter FILE_NAME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss");
-    private final Reference2IntOpenHashMap<Class<? extends Packet<?>>> packetCounts = new Reference2IntOpenHashMap<>();
+    private final Object2IntOpenHashMap<PacketType<? extends Packet<?>>> packetCounts = new Object2IntOpenHashMap<>();
     private @Nullable BufferedWriter fileWriter;
     private long lastFlushMs;
     private long currentFileSizeBytes;
@@ -173,17 +173,14 @@ public class PacketLogger extends Module {
     private void logPacket(String direction, Packet<?> packet) {
         if (!logToChat.get() && !logToFile.get()) return;
 
-        @SuppressWarnings("unchecked")
-        Class<? extends Packet<?>> packetClass = (Class<? extends Packet<?>>) packet.getClass();
-
         // Update count
-        packetCounts.addTo(packetClass, 1);
+        packetCounts.addTo(packet.type(), 1);
 
         // Build log message
         StringBuilder msg = new StringBuilder(128);
         if (showTimestamp.get()) msg.append("[").append(LocalDateTime.now().format(TIME_FORMATTER)).append("] ");
-        msg.append(direction).append(" ").append(PacketUtils.getName(packetClass));
-        if (showCount.get()) msg.append(" (#").append(packetCounts.getInt(packetClass)).append(")");
+        msg.append(direction).append(" ").append(packet.type());
+        if (showCount.get()) msg.append(" (#").append(packetCounts.getInt(packet.type())).append(")");
         if (showPacketData.get()) msg.append("\n  Data: ").append(packet);
 
         // Log to chat and/or file
@@ -199,9 +196,9 @@ public class PacketLogger extends Module {
         lines.add("--- SUMMARY ---");
         lines.add("Final packet counts (total " + totalPackets + "):");
 
-        packetCounts.reference2IntEntrySet().stream()
+        packetCounts.object2IntEntrySet().stream()
             .sorted((a, b) -> Integer.compare(b.getIntValue(), a.getIntValue()))
-            .forEach(e -> lines.add("  %s: %d".formatted(PacketUtils.getName(e.getKey()), e.getIntValue())));
+            .forEach(e -> lines.add("  %s: %d".formatted(e.getKey().toString(), e.getIntValue())));
 
         for (String line : lines) {
             if (logToChat.get()) info(line);
@@ -290,11 +287,11 @@ public class PacketLogger extends Module {
 
     @EventHandler(priority = EventPriority.HIGHEST + 1)
     private void onReceivePacket(PacketEvent.Receive event) {
-        if (s2cPackets.get().contains(event.packet.getClass())) logPacket("<- S2C", event.packet);
+        if (s2cPackets.get().contains(event.packet.type())) logPacket("<- S2C", event.packet);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST + 1)
     private void onSendPacket(PacketEvent.Send event) {
-        if (c2sPackets.get().contains(event.packet.getClass())) logPacket("-> C2S", event.packet);
+        if (c2sPackets.get().contains(event.packet.type())) logPacket("-> C2S", event.packet);
     }
 }

@@ -9,6 +9,8 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import meteordevelopment.meteorclient.renderer.MeshBuilder;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import net.minecraft.client.renderer.rendertype.RenderType;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.NullMarked;
 
 public class MeshBuilderVertexConsumerProvider implements IVertexConsumerProvider {
     private final MeshBuilderVertexConsumer vertexConsumer;
@@ -22,6 +24,7 @@ public class MeshBuilderVertexConsumerProvider implements IVertexConsumerProvide
         return new W(vertexConsumer); // new instance each call to fix duplicate delegates
     }
 
+    @NullMarked
     private record W(MeshBuilderVertexConsumer d) implements VertexConsumer {
         public VertexConsumer addVertex(float x, float y, float z) {
             d.addVertex(x, y, z);
@@ -98,7 +101,7 @@ public class MeshBuilderVertexConsumerProvider implements IVertexConsumerProvide
         }
 
         @Override
-        public VertexConsumer addVertex(float x, float y, float z) {
+        public @NonNull VertexConsumer addVertex(float x, float y, float z) {
             xs[i] = (double) offsetX + x;
             ys[i] = (double) offsetY + y;
             zs[i] = (double) offsetZ + z;
@@ -120,12 +123,12 @@ public class MeshBuilderVertexConsumerProvider implements IVertexConsumerProvide
         }
 
         @Override
-        public VertexConsumer setColor(int red, int green, int blue, int alpha) {
+        public @NonNull VertexConsumer setColor(int red, int green, int blue, int alpha) {
             return this;
         }
 
         @Override
-        public VertexConsumer setColor(int argb) {
+        public @NonNull VertexConsumer setColor(int argb) {
             return this;
         }
 
@@ -133,7 +136,7 @@ public class MeshBuilderVertexConsumerProvider implements IVertexConsumerProvide
          * Set texture coordinates
          */
         @Override
-        public VertexConsumer setUv(float u, float v) {
+        public @NonNull VertexConsumer setUv(float u, float v) {
             return this;
         }
 
@@ -141,7 +144,7 @@ public class MeshBuilderVertexConsumerProvider implements IVertexConsumerProvide
          * Set overlay coordinates
          */
         @Override
-        public VertexConsumer setUv1(int u, int v) {
+        public @NonNull VertexConsumer setUv1(int u, int v) {
             return this;
         }
 
@@ -149,17 +152,17 @@ public class MeshBuilderVertexConsumerProvider implements IVertexConsumerProvide
          * Set lightmap coordinates
          */
         @Override
-        public VertexConsumer setUv2(int u, int v) {
+        public @NonNull VertexConsumer setUv2(int u, int v) {
             return this;
         }
 
         @Override
-        public VertexConsumer setNormal(float x, float y, float z) {
-            return null;
+        public @NonNull VertexConsumer setNormal(float x, float y, float z) {
+            return this;
         }
 
         @Override
-        public VertexConsumer setLineWidth(float width) {
+        public @NonNull VertexConsumer setLineWidth(float width) {
             return this;
         }
 

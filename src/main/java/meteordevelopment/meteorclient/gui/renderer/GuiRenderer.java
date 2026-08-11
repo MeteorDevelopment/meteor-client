@@ -121,14 +121,14 @@ public class GuiRenderer {
         rTex.render("u_Texture", TEXTURE.getTextureView(), TEXTURE.getSampler());
 
         // Normal text
-        theme.textRenderer().begin(theme.scale(1));
+        theme.textRenderer().begin(graphics, theme.scale(1));
         for (TextOperation text : texts) {
             if (!text.title) text.run(textPool);
         }
         theme.textRenderer().end();
 
         // Title text
-        theme.textRenderer().begin(theme.scale(1.25));
+        theme.textRenderer().begin(graphics, theme.scale(1.25));
         for (TextOperation text : texts) {
             if (text.title) text.run(textPool);
         }

@@ -12,6 +12,7 @@ import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.world.entity.LivingEntity;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
+import org.jspecify.annotations.NonNull;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
@@ -29,17 +30,17 @@ public class EntityTooltipComponent implements MeteorTooltipData, ClientTooltipC
     }
 
     @Override
-    public int getHeight(Font textRenderer) {
+    public int getHeight(@NonNull Font textRenderer) {
         return 48;
     }
 
     @Override
-    public int getWidth(Font textRenderer) {
+    public int getWidth(@NonNull Font textRenderer) {
         return 64;
     }
 
     @Override
-    public void extractImage(Font textRenderer, int x, int y, int width, int height, GuiGraphicsExtractor graphics) {
+    public void extractImage(@NonNull Font textRenderer, int x, int y, int width, int height, GuiGraphicsExtractor graphics) {
         var state = (LivingEntityRenderState) mc.getEntityRenderDispatcher().getRenderer(entity).createRenderState(entity, 1);
 
         state.lightCoords = 15728880;
