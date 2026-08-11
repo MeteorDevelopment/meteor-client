@@ -10,14 +10,13 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.textures.FilterMode;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.renderer.MeshRenderer;
+import net.minecraft.client.gui.render.GuiRenderer;
 import net.minecraft.client.renderer.DynamicUniformStorage;
-import org.joml.Vector4f;
 import org.jspecify.annotations.NonNull;
 
 import java.nio.ByteBuffer;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
-import static org.lwjgl.glfw.GLFW.glfwGetTime;
 
 public abstract class PostProcessShader {
     protected final RenderPipeline pipeline;
@@ -41,7 +40,8 @@ public abstract class PostProcessShader {
 
     public void clearTexture() {
         if (this.shouldDraw()) {
-            RenderSystem.getDevice().createCommandEncoder().clearColorTexture(framebuffer.getColorTexture(), new Vector4f(0));
+            RenderSystem.getDevice().createCommandEncoder().clearColorTexture(framebuffer.getColorTexture(),
+                GuiRenderer.CLEAR_COLOR);
         }
     }
 
@@ -62,7 +62,7 @@ public abstract class PostProcessShader {
             .fullscreen()
             .uniform("PostData", UNIFORM_STORAGE.writeUniform(new UniformData(
                 (float) mc.getWindow().getWidth(), (float) mc.getWindow().getHeight(),
-                (float) glfwGetTime()
+                (float) (mc.getFrameTimeNs() / 1e9)
             )))
             .sampler("u_Texture", framebuffer.getColorTextureView(), RenderSystem.getSamplerCache().getClampToEdge(FilterMode.NEAREST));
 

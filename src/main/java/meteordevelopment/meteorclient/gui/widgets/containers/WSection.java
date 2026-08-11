@@ -11,7 +11,7 @@ import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.util.Mth;
 
-import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_LEFT;
+import static com.mojang.blaze3d.platform.InputConstants.MOUSE_BUTTON_LEFT;
 
 public abstract class WSection extends WVerticalList {
     public Runnable action;
@@ -124,7 +124,7 @@ public abstract class WSection extends WVerticalList {
 
         @Override
         public boolean onMouseClicked(MouseButtonEvent click, boolean doubled) {
-            if (mouseOver && click.button() == GLFW_MOUSE_BUTTON_LEFT && !doubled) {
+            if (mouseOver && click.button() == MOUSE_BUTTON_LEFT && !doubled) {
                 onClick();
                 return true;
             }

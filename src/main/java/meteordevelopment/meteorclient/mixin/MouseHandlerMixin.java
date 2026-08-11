@@ -22,7 +22,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import static org.lwjgl.glfw.GLFW.GLFW_RELEASE;
+import static com.mojang.blaze3d.platform.InputConstants.RELEASE;
 
 @Mixin(MouseHandler.class)
 public abstract class MouseHandlerMixin {
@@ -38,7 +38,7 @@ public abstract class MouseHandlerMixin {
 
     @Inject(method = "onButton", at = @At("HEAD"), cancellable = true)
     private void onMouseButton(long handle, MouseButtonInfo rawButtonInfo, int action, CallbackInfo ci) {
-        Input.setButtonState(rawButtonInfo.button(), action != GLFW_RELEASE);
+        Input.setButtonState(rawButtonInfo.button(), action != RELEASE);
 
         MouseButtonEvent click = new MouseButtonEvent(getScaledXPos(minecraft.getWindow()), getScaledYPos(minecraft.getWindow()), rawButtonInfo);
         if (MeteorClient.EVENT_BUS.post(MouseClickEvent.get(click, KeyAction.get(action))).isCancelled()) ci.cancel();

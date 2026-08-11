@@ -21,7 +21,7 @@ import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.util.Mth;
 import org.jspecify.annotations.NonNull;
-import org.lwjgl.glfw.GLFW;
+import com.mojang.blaze3d.platform.InputConstants;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -77,7 +77,7 @@ public class HudEditorScreen extends WidgetScreen implements Snapper.Container {
         mouseX *= s;
         mouseY *= s;
 
-        if (click.button() == GLFW.GLFW_MOUSE_BUTTON_LEFT) {
+        if (click.button() == InputConstants.MOUSE_BUTTON_LEFT) {
             pressed = true;
             selectionSnapBox = null;
 
@@ -126,7 +126,7 @@ public class HudEditorScreen extends WidgetScreen implements Snapper.Container {
         mouseX *= s;
         mouseY *= s;
 
-        if (click.button() == GLFW.GLFW_MOUSE_BUTTON_LEFT) pressed = false;
+        if (click.button() == InputConstants.MOUSE_BUTTON_LEFT) pressed = false;
 
         if (addedHoveredToSelectionWhenClickedElement != null) {
             selection.remove(addedHoveredToSelectionWhenClickedElement);
@@ -134,12 +134,12 @@ public class HudEditorScreen extends WidgetScreen implements Snapper.Container {
         }
 
         if (moved) {
-            if (click.button() == GLFW.GLFW_MOUSE_BUTTON_LEFT && !dragging) fillSelection((int) mouseX, (int) mouseY);
+            if (click.button() == InputConstants.MOUSE_BUTTON_LEFT && !dragging) fillSelection((int) mouseX, (int) mouseY);
         } else {
-            if (click.button() == GLFW.GLFW_MOUSE_BUTTON_LEFT) {
+            if (click.button() == InputConstants.MOUSE_BUTTON_LEFT) {
                 HudElement hovered = getHovered((int) mouseX, (int) mouseY);
                 if (hovered != null) hovered.toggle();
-            } else if (click.button() == GLFW.GLFW_MOUSE_BUTTON_RIGHT) {
+            } else if (click.button() == InputConstants.MOUSE_BUTTON_RIGHT) {
                 HudElement hovered = getHovered((int) mouseX, (int) mouseY);
 
                 if (hovered != null) mc.gui.setScreen(new HudElementScreen(theme, hovered));
@@ -147,7 +147,7 @@ public class HudEditorScreen extends WidgetScreen implements Snapper.Container {
             }
         }
 
-        if (click.button() == GLFW.GLFW_MOUSE_BUTTON_LEFT) {
+        if (click.button() == InputConstants.MOUSE_BUTTON_LEFT) {
             snapper.unsnap();
             moved = dragging = false;
         }
@@ -158,10 +158,10 @@ public class HudEditorScreen extends WidgetScreen implements Snapper.Container {
     @Override
     public boolean keyPressed(@NonNull KeyEvent input) {
         if (!pressed) {
-            if (input.key() == GLFW.GLFW_KEY_ENTER || input.key() == GLFW.GLFW_KEY_KP_ENTER) {
+            if (input.key() == InputConstants.KEY_RETURN || input.key() == InputConstants.KEY_NUMPADENTER) {
                 HudElement hovered = getHovered(lastMouseX, lastMouseY);
                 if (hovered != null) hovered.toggle();
-            } else if (input.key() == GLFW.GLFW_KEY_DELETE) {
+            } else if (input.key() == InputConstants.KEY_DELETE) {
                 HudElement hovered = getHovered(lastMouseX, lastMouseY);
 
                 if (hovered != null) hovered.remove();
@@ -170,14 +170,14 @@ public class HudEditorScreen extends WidgetScreen implements Snapper.Container {
                     selection.clear();
                 }
             } else if (!selection.isEmpty()) {
-                int pixels = (Input.isKeyPressed(GLFW.GLFW_KEY_LEFT_CONTROL) || Input.isKeyPressed(GLFW.GLFW_KEY_RIGHT_CONTROL)) ? 10 : 1;
+                int pixels = (Input.isKeyPressed(InputConstants.KEY_LCONTROL) || Input.isKeyPressed(InputConstants.KEY_RCONTROL)) ? 10 : 1;
                 int dx = 0, dy = 0;
 
                 switch (input.key()) {
-                    case GLFW.GLFW_KEY_UP -> dy = -pixels;
-                    case GLFW.GLFW_KEY_DOWN -> dy = pixels;
-                    case GLFW.GLFW_KEY_RIGHT -> dx = pixels;
-                    case GLFW.GLFW_KEY_LEFT -> dx = -pixels;
+                    case InputConstants.KEY_UP -> dy = -pixels;
+                    case InputConstants.KEY_DOWN -> dy = pixels;
+                    case InputConstants.KEY_RIGHT -> dx = pixels;
+                    case InputConstants.KEY_LEFT -> dx = -pixels;
                 }
 
                 // manually move selection to bypass snapping

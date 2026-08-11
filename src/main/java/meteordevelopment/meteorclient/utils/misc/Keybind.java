@@ -13,7 +13,7 @@ import net.minecraft.nbt.CompoundTag;
 
 import java.util.Objects;
 
-import static org.lwjgl.glfw.GLFW.*;
+import static com.mojang.blaze3d.platform.InputConstants.*;
 
 public class Keybind implements ISerializable<Keybind>, ICopyable<Keybind> {
     private boolean isKey;
@@ -25,7 +25,7 @@ public class Keybind implements ISerializable<Keybind>, ICopyable<Keybind> {
     }
 
     public static Keybind none() {
-        return new Keybind(true, GLFW_KEY_UNKNOWN, 0);
+        return new Keybind(true, UNKNOWN.getValue(), 0);
     }
 
     public static Keybind fromKey(int key) {
@@ -45,7 +45,7 @@ public class Keybind implements ISerializable<Keybind>, ICopyable<Keybind> {
     }
 
     public boolean isSet() {
-        return value != GLFW_KEY_UNKNOWN;
+        return value != UNKNOWN.getValue();
     }
 
     public boolean isKey() {
@@ -72,15 +72,15 @@ public class Keybind implements ISerializable<Keybind>, ICopyable<Keybind> {
     }
 
     public void reset() {
-        set(true, GLFW_KEY_UNKNOWN, 0);
+        set(true, UNKNOWN.getValue(), 0);
     }
 
     public boolean canBindTo(boolean isKey, int value, int modifiers) {
         if (isKey) {
             if (modifiers != 0 && isKeyMod(value)) return false;
-            return value != GLFW_KEY_UNKNOWN && value != GLFW_KEY_ESCAPE;
+            return value != UNKNOWN.getValue() && value != KEY_ESCAPE;
         }
-        return value != GLFW_MOUSE_BUTTON_LEFT && value != GLFW_MOUSE_BUTTON_RIGHT;
+        return value != MOUSE_BUTTON_LEFT && value != MOUSE_BUTTON_RIGHT;
     }
 
     public boolean matches(boolean isKey, int value, int modifiers) {
@@ -104,10 +104,10 @@ public class Keybind implements ISerializable<Keybind>, ICopyable<Keybind> {
     private boolean modifiersPressed() {
         if (!hasMods()) return true;
 
-        if (!isModPressed(GLFW_MOD_CONTROL, GLFW_KEY_LEFT_CONTROL, GLFW_KEY_RIGHT_CONTROL)) return false;
-        if (!isModPressed(GLFW_MOD_SUPER, GLFW_KEY_LEFT_SUPER, GLFW_KEY_RIGHT_SUPER)) return false;
-        if (!isModPressed(GLFW_MOD_ALT, GLFW_KEY_LEFT_ALT, GLFW_KEY_RIGHT_ALT)) return false;
-        if (!isModPressed(GLFW_MOD_SHIFT, GLFW_KEY_LEFT_SHIFT, GLFW_KEY_RIGHT_SHIFT)) return false;
+        if (!isModPressed(MOD_CONTROL, KEY_LCONTROL, KEY_RCONTROL)) return false;
+        if (!isModPressed(MOD_SUPER, KEY_LSUPER, KEY_RSUPER)) return false;
+        if (!isModPressed(MOD_ALT, KEY_LALT, KEY_RALT)) return false;
+        if (!isModPressed(MOD_SHIFT, KEY_LSHIFT, KEY_RSHIFT)) return false;
 
         return true;
     }
@@ -123,7 +123,7 @@ public class Keybind implements ISerializable<Keybind>, ICopyable<Keybind> {
     }
 
     private boolean isKeyMod(int key) {
-        return key >= GLFW_KEY_LEFT_SHIFT && key <= GLFW_KEY_RIGHT_SUPER;
+        return key >= KEY_LSHIFT && key <= KEY_RSUPER;
     }
 
     @Override
@@ -138,12 +138,12 @@ public class Keybind implements ISerializable<Keybind>, ICopyable<Keybind> {
         if (modifiers == 0) return Utils.getKeyName(value);
 
         StringBuilder label = new StringBuilder();
-        if ((modifiers & GLFW_MOD_CONTROL) != 0) label.append("Ctrl + ");
-        if ((modifiers & GLFW_MOD_SUPER) != 0) label.append("Cmd + ");
-        if ((modifiers & GLFW_MOD_ALT) != 0) label.append("Alt + ");
-        if ((modifiers & GLFW_MOD_SHIFT) != 0) label.append("Shift + ");
-        if ((modifiers & GLFW_MOD_CAPS_LOCK) != 0) label.append("Caps Lock + ");
-        if ((modifiers & GLFW_MOD_NUM_LOCK) != 0) label.append("Num Lock + ");
+        if ((modifiers & MOD_CONTROL) != 0) label.append("Ctrl + ");
+        if ((modifiers & MOD_SUPER) != 0) label.append("Cmd + ");
+        if ((modifiers & MOD_ALT) != 0) label.append("Alt + ");
+        if ((modifiers & MOD_SHIFT) != 0) label.append("Shift + ");
+        if ((modifiers & MOD_CAPS_LOCK) != 0) label.append("Caps Lock + ");
+        if ((modifiers & MOD_NUM_LOCK) != 0) label.append("Num Lock + ");
         label.append(Utils.getKeyName(value));
 
         return label.toString();

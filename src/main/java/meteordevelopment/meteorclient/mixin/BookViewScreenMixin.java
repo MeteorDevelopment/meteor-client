@@ -21,7 +21,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import org.lwjgl.glfw.GLFW;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
 import org.spongepowered.asm.mixin.Mixin;
@@ -83,7 +82,7 @@ public abstract class BookViewScreenMixin extends Screen {
                 if (size > available) {
                     ChatUtils.error("Could not copy to clipboard: Out of memory.");
                 } else {
-                    GLFW.glfwSetClipboardString(mc.getWindow().handle(), encoded);
+                    mc.keyboardHandler.setClipboard(encoded);
                 }
             })
                 .pos(4, 4)

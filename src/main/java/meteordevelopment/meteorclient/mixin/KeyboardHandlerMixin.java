@@ -17,7 +17,7 @@ import net.minecraft.client.KeyboardHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
-import org.lwjgl.glfw.GLFW;
+import com.mojang.blaze3d.platform.InputConstants;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -34,21 +34,21 @@ public abstract class KeyboardHandlerMixin {
     @Inject(method = "keyPress", at = @At("HEAD"), cancellable = true)
     public void onKey(long handle, int action, KeyEvent event, CallbackInfo ci) {
         int modifiers = event.modifiers();
-        if (event.key() != GLFW.GLFW_KEY_UNKNOWN) {
+        if (event.key() != InputConstants.UNKNOWN.getValue()) {
             // on Linux/X11 the modifier is not active when the key is pressed and still active when the key is released
             // https://github.com/glfw/glfw/issues/1630
-            if (action == GLFW.GLFW_PRESS) {
+            if (action == InputConstants.PRESS) {
                 modifiers |= Input.getModifier(event.key());
-            } else if (action == GLFW.GLFW_RELEASE) {
+            } else if (action == InputConstants.RELEASE) {
                 modifiers &= ~Input.getModifier(event.key());
             }
 
-            if (minecraft.gui.screen() instanceof WidgetScreen widgetScreen && action == GLFW.GLFW_REPEAT) {
+            if (minecraft.gui.screen() instanceof WidgetScreen widgetScreen && action == InputConstants.REPEAT) {
                 widgetScreen.keyRepeated(new KeyEvent(event.key(), event.scancode(), modifiers));
             }
 
             if (GuiKeyEvents.canUseKeys) {
-                Input.setKeyState(event.key(), action != GLFW.GLFW_RELEASE);
+                Input.setKeyState(event.key(), action != InputConstants.RELEASE);
                 if (MeteorClient.EVENT_BUS.post(KeyInputEvent.get(new KeyEvent(event.key(), event.scancode(), modifiers), KeyAction.get(action))).isCancelled())
                     ci.cancel();
             }
