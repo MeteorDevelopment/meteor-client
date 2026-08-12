@@ -16,17 +16,12 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class FakePlayerManager {
     private static final List<FakePlayerEntity> ENTITIES = new ArrayList<>();
-    private static int nextEntityId = -1;
 
     private FakePlayerManager() {
     }
 
     public static List<FakePlayerEntity> getFakePlayers() {
         return ENTITIES;
-    }
-
-    static int getNextEntityId() {
-        return nextEntityId--;
     }
 
     public static FakePlayerEntity get(String name) {

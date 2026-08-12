@@ -33,7 +33,6 @@ public class FakePlayerEntity extends RemotePlayer {
 
     public FakePlayerEntity(Player player, String name, float health, boolean copyInv) {
         super(mc.level, new GameProfile(UUID.randomUUID(), name));
-        ((EntityAccessor) this).meteor$setId(FakePlayerManager.getNextEntityId());
 
         copyPosition(player);
 
