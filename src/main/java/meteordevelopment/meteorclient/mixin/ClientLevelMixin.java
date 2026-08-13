@@ -78,6 +78,12 @@ public abstract class ClientLevelMixin extends Level {
 
     @Override
     public int getNextEntityId() {
-        return NEXT_ENTITY_ID.getAndDecrement();
+        int id;
+
+        do {
+            id = NEXT_ENTITY_ID.getAndDecrement();
+        } while (getEntity(id) != null);
+
+        return id;
     }
 }
