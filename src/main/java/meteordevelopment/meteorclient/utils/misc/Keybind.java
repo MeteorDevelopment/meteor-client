@@ -6,7 +6,6 @@
 package meteordevelopment.meteorclient.utils.misc;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.input.Input;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonInfo;
@@ -225,8 +224,8 @@ public class Keybind implements ISerializable<Keybind>, ICopyable<Keybind> {
     @Override
     public String toString() {
         if (!isSet()) return "None";
-        if (key.getType() == InputConstants.Type.MOUSE) return Utils.getButtonName(key.getValue());
-        if (modifiers.isEmpty()) return Utils.getKeyName(key.getValue());
+        if (key.getType() == InputConstants.Type.MOUSE) return key.getDisplayName().getString();
+        if (modifiers.isEmpty()) return key.getDisplayName().getString();
 
         StringBuilder label = new StringBuilder();
         if (modifiers.contains(Modifier.CONTROL)) label.append("Ctrl + ");
@@ -235,7 +234,7 @@ public class Keybind implements ISerializable<Keybind>, ICopyable<Keybind> {
         if (modifiers.contains(Modifier.SHIFT)) label.append("Shift + ");
         if (modifiers.contains(Modifier.CAPS_LOCK)) label.append("Caps Lock + ");
         if (modifiers.contains(Modifier.NUM_LOCK)) label.append("Num Lock + ");
-        label.append(Utils.getKeyName(key.getValue()));
+        label.append(key.getDisplayName().getString());
 
         return label.toString();
     }
