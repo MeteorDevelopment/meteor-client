@@ -73,10 +73,6 @@ public class Keybind implements ISerializable<Keybind>, ICopyable<Keybind> {
         return new Keybind(key, Set.of());
     }
 
-    /**
-     * @deprecated Use {@link #fromKey(InputConstants.Key)} instead.
-     */
-    @Deprecated
     public static Keybind fromKey(int key) {
         return fromKey(keyboard(key));
     }
@@ -89,18 +85,10 @@ public class Keybind implements ISerializable<Keybind>, ICopyable<Keybind> {
         return fromKeys(key, Arrays.asList(modifiers));
     }
 
-    /**
-     * @deprecated Use {@link #fromKeys(InputConstants.Key, Collection)} or {@link #fromKeys(InputConstants.Key, Modifier...)} instead.
-     */
-    @Deprecated
     public static Keybind fromKeys(int key, int modifiers) {
         return fromKeys(keyboard(key), Modifier.fromRawValue(modifiers));
     }
 
-    /**
-     * @deprecated Use {@link #fromKey(InputConstants.Key)} with {@link InputConstants.Type#MOUSE} instead.
-     */
-    @Deprecated
     public static Keybind fromButton(int button) {
         return fromKey(mouse(button));
     }
@@ -109,10 +97,6 @@ public class Keybind implements ISerializable<Keybind>, ICopyable<Keybind> {
         return !key.equals(InputConstants.UNKNOWN);
     }
 
-    /**
-     * @deprecated Use {@link #key} and {@link InputConstants.Key#getType()} instead.
-     */
-    @Deprecated
     public boolean isKey() {
         return key.getType() != InputConstants.Type.MOUSE;
     }
@@ -121,10 +105,6 @@ public class Keybind implements ISerializable<Keybind>, ICopyable<Keybind> {
         return !modifiers.isEmpty();
     }
 
-    /**
-     * @deprecated Use {@link #key} and {@link InputConstants.Key#getValue()} instead.
-     */
-    @Deprecated
     public int getValue() {
         return key.getValue();
     }
@@ -139,10 +119,6 @@ public class Keybind implements ISerializable<Keybind>, ICopyable<Keybind> {
         set(key, Arrays.asList(modifiers));
     }
 
-    /**
-     * @deprecated Use {@link #set(InputConstants.Key, Collection)} or {@link #set(InputConstants.Key, Modifier...)} instead.
-     */
-    @Deprecated
     public void set(boolean isKey, int value, int modifiers) {
         set(isKey ? keyboard(value) : mouse(value), isKey ? Modifier.fromRawValue(modifiers) : Set.of());
     }
@@ -167,10 +143,6 @@ public class Keybind implements ISerializable<Keybind>, ICopyable<Keybind> {
         return !key.equals(mouse(InputConstants.MOUSE_BUTTON_LEFT)) && !key.equals(mouse(InputConstants.MOUSE_BUTTON_RIGHT));
     }
 
-    /**
-     * @deprecated Use {@link #canBindTo(InputConstants.Key, Collection)} instead.
-     */
-    @Deprecated
     public boolean canBindTo(boolean isKey, int value, int modifiers) {
         return canBindTo(isKey ? keyboard(value) : mouse(value), isKey ? Modifier.fromRawValue(modifiers) : Set.of());
     }
@@ -180,10 +152,6 @@ public class Keybind implements ISerializable<Keybind>, ICopyable<Keybind> {
         return !hasMods() || this.modifiers.equals(modifiers);
     }
 
-    /**
-     * @deprecated Use {@link #matches(InputConstants.Key, Set)} instead.
-     */
-    @Deprecated
     public boolean matches(boolean isKey, int value, int modifiers) {
         return matches(isKey ? keyboard(value) : mouse(value), isKey ? Modifier.fromRawValue(modifiers) : Set.of());
     }
