@@ -6,7 +6,9 @@
 package meteordevelopment.meteorclient.settings;
 
 import net.minecraft.nbt.CompoundTag;
+import org.lwjgl.BufferUtils;
 import org.lwjgl.PointerBuffer;
+import org.lwjgl.system.MemoryUtil;
 
 import java.io.File;
 import java.util.function.Consumer;
@@ -58,6 +60,13 @@ public class FileSetting extends Setting<File> {
 
         public FileSetting.Builder filter(PointerBuffer filter) {
             this.filter = filter;
+            return this;
+        }
+
+        public FileSetting.Builder filter(String... filters) {
+            this.filter = BufferUtils.createPointerBuffer(filters.length);
+            for (String filter : filters) this.filter.put(MemoryUtil.memASCII(filter));
+            this.filter.flip();
             return this;
         }
 
