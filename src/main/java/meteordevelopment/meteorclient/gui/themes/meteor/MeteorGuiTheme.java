@@ -74,6 +74,13 @@ public class MeteorGuiTheme extends GuiTheme {
         .build()
     );
 
+    public final Setting<Boolean> modulesHelpText = sgGeneral.add(new BoolSetting.Builder()
+        .name("modules-help-text")
+        .description("Toggle help text in the modules screen.")
+        .defaultValue(true)
+        .build()
+    );
+
     public final Setting<Boolean> hideHUD = sgGeneral.add(new BoolSetting.Builder()
         .name("hide-HUD")
         .description("Hide HUD when in GUI.")
@@ -383,6 +390,11 @@ public class MeteorGuiTheme extends GuiTheme {
     @Override
     public boolean categoryIcons() {
         return categoryIcons.get();
+    }
+
+    @Override
+    public boolean modulesHelpText() {
+        return modulesHelpText.get();
     }
 
     @Override
