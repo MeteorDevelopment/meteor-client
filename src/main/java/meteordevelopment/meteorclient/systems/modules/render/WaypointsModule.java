@@ -137,7 +137,7 @@ public class WaypointsModule extends Module {
             }
 
             // Render
-            NametagUtils.begin(pos);
+            NametagUtils.begin(pos, event.graphics);
 
             // Render icon
             waypoint.renderIcon(-16, -16, a, 32);
@@ -161,7 +161,7 @@ public class WaypointsModule extends Module {
                 TEXT.a = preTextA;
             }
 
-            NametagUtils.end();
+            NametagUtils.end(event.graphics);
         }
 
         Waypoints.get().removeAll(toRemove);
