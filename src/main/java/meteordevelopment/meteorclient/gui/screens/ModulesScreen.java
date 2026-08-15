@@ -98,8 +98,7 @@ public class ModulesScreen extends TabScreen {
 
                 int count = 0;
                 for (Pair<Module, String> p : modules) {
-                    if (count >= Config.get().moduleSearchCount.get() || count >= modules.size())
-                        break;
+                    if (count >= Config.get().moduleSearchCount.get() || count >= modules.size()) break;
                     section.add(theme.module(p.getFirst(), p.getSecond())).expandX();
                     count++;
                 }
@@ -114,8 +113,7 @@ public class ModulesScreen extends TabScreen {
 
                 int count = 0;
                 for (Module module : settings) {
-                    if (count >= Config.get().moduleSearchCount.get() || count >= settings.size())
-                        break;
+                    if (count >= Config.get().moduleSearchCount.get() || count >= settings.size()) break;
                     section.add(theme.module(module)).expandX();
                     count++;
                 }
@@ -129,8 +127,7 @@ public class ModulesScreen extends TabScreen {
         searchWindow = w;
 
         if (theme.categoryIcons()) {
-            w.beforeHeaderInit = wContainer -> wContainer.add(theme.item(DisplayItemUtils.toStack(Items.COMPASS)))
-                    .pad(2);
+            w.beforeHeaderInit = wContainer -> wContainer.add(theme.item(DisplayItemUtils.toStack(Items.COMPASS))).pad(2);
         }
 
         c.add(w);
@@ -156,15 +153,12 @@ public class ModulesScreen extends TabScreen {
 
     @Override
     public boolean keyPressed(@NonNull KeyEvent value) {
-        if (locked)
-            return false;
+        if (locked) return false;
 
-        boolean cntrl = MacosUtil.IS_MACOS ? value.modifiers() == GLFW_MOD_SUPER
-                : value.modifiers() == GLFW_MOD_CONTROL;
+        boolean cntrl = MacosUtil.IS_MACOS ? value.modifiers() == GLFW_MOD_SUPER : value.modifiers() == GLFW_MOD_CONTROL;
 
         if (cntrl && value.key() == GLFW_KEY_F) {
-            if (searchWindow != null)
-                searchWindow.setExpanded(true);
+            if (searchWindow != null) searchWindow.setExpanded(true);
             if (searchTextBox != null) {
                 searchTextBox.setFocused(true);
                 searchTextBox.setCursorMax();
@@ -180,8 +174,7 @@ public class ModulesScreen extends TabScreen {
 
     protected Cell<WWindow> createFavorites(WContainer c) {
         boolean hasFavorites = Modules.get().getAll().stream().anyMatch(module -> module.favorite);
-        if (!hasFavorites)
-            return null;
+        if (!hasFavorites) return null;
 
         WWindow w = theme.window("Favorites");
         w.id = "favorites";
@@ -189,8 +182,7 @@ public class ModulesScreen extends TabScreen {
         w.spacing = 0;
 
         if (theme.categoryIcons()) {
-            w.beforeHeaderInit = wContainer -> wContainer.add(theme.item(DisplayItemUtils.toStack(Items.NETHER_STAR)))
-                    .pad(2);
+            w.beforeHeaderInit = wContainer -> wContainer.add(theme.item(DisplayItemUtils.toStack(Items.NETHER_STAR))).pad(2);
         }
 
         Cell<WWindow> cell = c.add(w);
@@ -265,8 +257,7 @@ public class ModulesScreen extends TabScreen {
         protected void refresh() {
             if (favorites == null) {
                 favorites = createFavorites(this);
-                if (favorites != null)
-                    windows.add(favorites.widget());
+                if (favorites != null) windows.add(favorites.widget());
             } else {
                 favorites.widget().clear();
 
@@ -297,13 +288,11 @@ public class ModulesScreen extends TabScreen {
 
                 if (x > windowWidth) {
                     x = windowWidth / 2.0 - cell.width / 2.0;
-                    if (x < 0)
-                        x = 0;
+                    if (x < 0) x = 0;
                 }
                 if (y > windowHeight) {
                     y = windowHeight / 2.0 - cell.height / 2.0;
-                    if (y < 0)
-                        y = 0;
+                    if (y < 0) y = 0;
                 }
 
                 cell.x = x;
