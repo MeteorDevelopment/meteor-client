@@ -16,6 +16,8 @@ import java.util.Objects;
 import static org.lwjgl.glfw.GLFW.*;
 
 public class Keybind implements ISerializable<Keybind>, ICopyable<Keybind> {
+    private static final int COMBINATION_MODS = GLFW_MOD_SHIFT | GLFW_MOD_CONTROL | GLFW_MOD_ALT | GLFW_MOD_SUPER;
+
     private boolean isKey;
     private int value;
     private int modifiers;
@@ -85,8 +87,8 @@ public class Keybind implements ISerializable<Keybind>, ICopyable<Keybind> {
 
     public boolean matches(boolean isKey, int value, int modifiers) {
         if (!this.isSet() || this.isKey != isKey) return false;
-        if (!hasMods()) return this.value == value;
-        return this.value == value && this.modifiers == modifiers;
+        if (!hasMods()) return this.value == value && (modifiers & COMBINATION_MODS) == 0;
+        return this.value == value && (this.modifiers & COMBINATION_MODS) == (modifiers & COMBINATION_MODS);
     }
 
     public boolean matches(KeyEvent input) {
