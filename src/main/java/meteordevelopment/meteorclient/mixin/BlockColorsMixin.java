@@ -25,7 +25,7 @@ public abstract class BlockColorsMixin {
         at = @At(
             value = "INVOKE",
             target = "Lnet/minecraft/client/color/block/BlockColors;register(Ljava/util/List;[Lnet/minecraft/world/level/block/Block;)V",
-            ordinal = 3
+            ordinal = 4
         ),
         index = 0
     )
@@ -38,7 +38,7 @@ public abstract class BlockColorsMixin {
         at = @At(
             value = "INVOKE",
             target = "Lnet/minecraft/client/color/block/BlockColors;register(Ljava/util/List;[Lnet/minecraft/world/level/block/Block;)V",
-            ordinal = 4
+            ordinal = 5
         ),
         index = 0
     )
