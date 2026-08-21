@@ -341,8 +341,8 @@ public class ColorSettingScreen extends WindowScreen {
 
         @Override
         protected void onRender(GuiRenderer renderer, double mouseX, double mouseY, double delta) {
-            if (height != width) {
-                fixedHeight = width;
+            if (height != Math.round(width)) {
+                fixedHeight = Math.round(width);
                 invalidate();
 
                 handleX = saturation * width;
