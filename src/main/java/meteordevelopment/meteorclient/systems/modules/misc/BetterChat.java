@@ -47,6 +47,15 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 public class BetterChat extends Module {
+	private final int FIRST_USABLE_ASCII = (int) ' '; // 32
+	private final int LAST_USABLE_ASCII = (int) '}'; // 125
+	private final int NUM_USABLE_ASCII = LAST_USABLE_ASCII - FIRST_USABLE_ASCII + 1;
+    private final int FIRST_LOWERCASE = (int) 'a';
+    private final int LAST_LOWERCASE = (int) 'z';
+    private final int FIRST_CAPITAL = (int) 'A';
+    private final int LAST_CAPITAL = (int) 'Z';
+    private final int NUM_LETTERS = 26;
+
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgFilter = settings.createGroup("Filter");
     private final SettingGroup sgLongerChat = settings.createGroup("Longer Chat");
@@ -100,6 +109,20 @@ public class BetterChat extends Module {
     private final Setting<Boolean> keepHistory = sgGeneral.add(new BoolSetting.Builder()
         .name("keep-history")
         .description("Prevents the chat history from being cleared when disconnecting.")
+        .defaultValue(true)
+        .build()
+    );
+
+    private final Setting<Boolean> encrypt = sgGeneral.add(new BoolSetting.Builder()
+        .name("encrypt")
+        .description("Applies an encryption routine to chat messages")
+        .defaultValue(false)
+        .build()
+    );
+
+    private final Setting<Boolean> decrypt = sgGeneral.add(new BoolSetting.Builder()
+        .name("decrypt")
+        .description("Applies a decryption routine to encrypted chat messages")
         .defaultValue(true)
         .build()
     );
@@ -257,6 +280,13 @@ public class BetterChat extends Module {
     private void onMessageReceive(ReceiveMessageEvent event) {
         Component message = event.getMessage();
 
+        if (decrypt.get()) {
+            Optional<String> decryptedMessage = applyDecryption(message.getString());
+            if (decryptedMessage.isPresent()) {
+                message = Component.empty().append(decryptedMessage.get());
+            }
+        }
+
         if (filterRegex.get()) {
             String messageString = message.getString();
             for (Pattern pattern : filterRegexList) {
@@ -303,6 +333,8 @@ public class BetterChat extends Module {
     @EventHandler
     private void onMessageSend(SendMessageEvent event) {
         String message = event.message;
+
+        if (encrypt.get()) message = applyEncryption(message);
 
         if (annoy.get()) message = applyAnnoy(message);
 
@@ -509,6 +541,103 @@ public class BetterChat extends Module {
         }
         message = sb.toString();
         return message;
+    }
+
+    // Encrypt
+
+    private String applyEncryption(String message) {
+        int msgLen = message.length();
+        int offset = Utils.random(0, 26); //cypherOffset.get();
+        StringBuilder modString = new StringBuilder(msgLen + 2);
+
+        // Encode offset into message with char for validation
+        modString.append('[');
+        modString.append((char) (FIRST_CAPITAL + offset));
+        modString.append(encryptChar('E', offset));
+
+        for (int i = 0; i < msgLen; ++i) {
+            char chr = message.charAt(i);
+            chr = encryptChar(chr, offset);
+            modString.append(chr);
+        }
+        modString.append(']');
+        return modString.toString();
+    }
+
+    private char encryptChar(char chr, int offset) {
+        int ascii = (int) chr;
+        if (Character.isUpperCase(chr)) {
+            ascii -= FIRST_CAPITAL;
+            ascii += offset;
+            ascii += NUM_LETTERS;
+            ascii %= NUM_LETTERS;
+            ascii += FIRST_CAPITAL;
+            chr = (char) ascii;
+        }
+        else if (Character.isLowerCase(chr)) {
+            ascii -= FIRST_LOWERCASE;
+            ascii += offset;
+            ascii += NUM_LETTERS;
+            ascii %= NUM_LETTERS;
+            ascii += FIRST_LOWERCASE;
+            chr = (char) ascii;
+        }
+        return chr;
+    }
+
+    // Decrypt
+
+    private Optional<String> applyDecryption(String message) {
+        int rawMsgLen = message.length();
+        int nameTagEnd = message.indexOf("> ") + 2;
+        int encStart = message.indexOf('[') + 1;
+        int encEnd = message.lastIndexOf(']') - 1;
+        int msgLen = encEnd - encStart;
+        StringBuilder modString = new StringBuilder();
+
+        // Exit early if there is definitely not an encrypted substring
+        if (msgLen < 2 || encStart == 0 || encEnd == -2 || nameTagEnd == 1) {
+            return Optional.empty();
+        }
+
+        int offset = (int)(message.charAt(encStart)) - FIRST_CAPITAL;
+        boolean isEncrypted = decryptChar(message.charAt(encStart+1), offset) == 'E';
+
+        if (isEncrypted) {
+            for (int i = 0; i < rawMsgLen; ++i) {
+                char chr = message.charAt(i);
+                if (i >= encStart+2 && i <= encEnd) {
+                    chr = decryptChar(chr, offset);
+                }
+                else if (i >= nameTagEnd) {
+                    continue;
+                }
+                modString.append(chr);
+            }
+            return Optional.of(modString.toString());
+        }
+        return Optional.empty();
+    }
+
+    private char decryptChar(char chr, int offset) {
+        int ascii = (int) chr;
+        if (Character.isUpperCase(chr)) {
+            ascii -= FIRST_CAPITAL;
+            ascii -= offset;
+            ascii += NUM_LETTERS;
+            ascii %= NUM_LETTERS;
+            ascii += FIRST_CAPITAL;
+            chr = (char) ascii;
+        }
+        else if (Character.isLowerCase(chr)) {
+            ascii -= FIRST_LOWERCASE;
+            ascii -= offset;
+            ascii += NUM_LETTERS;
+            ascii %= NUM_LETTERS;
+            ascii += FIRST_LOWERCASE;
+            chr = (char) ascii;
+        }
+        return chr;
     }
 
     // Fancy
