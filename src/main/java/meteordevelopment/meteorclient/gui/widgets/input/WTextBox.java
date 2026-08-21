@@ -25,7 +25,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
-import static org.lwjgl.glfw.GLFW.*;
+import static com.mojang.blaze3d.platform.InputConstants.*;
 
 public abstract class WTextBox extends WWidget {
     private static final Renderer DEFAULT_RENDERER = (renderer, x, y, text, color) -> renderer.text(text, x, y, color, false);
@@ -110,7 +110,7 @@ public abstract class WTextBox extends WWidget {
     @Override
     public boolean onMouseClicked(MouseButtonEvent click, boolean doubled) {
         if (mouseOver) {
-            if (click.button() == GLFW_MOUSE_BUTTON_RIGHT) {
+            if (click.button() == MOUSE_BUTTON_RIGHT) {
                 if (!text.isEmpty()) {
                     text = "";
                     cursor = 0;
@@ -119,7 +119,7 @@ public abstract class WTextBox extends WWidget {
 
                     runAction();
                 }
-            } else if (click.button() == GLFW_MOUSE_BUTTON_LEFT) {
+            } else if (click.button() == MOUSE_BUTTON_LEFT) {
                 selecting = true;
 
                 double overflowWidth = getOverflowWidthForRender();
@@ -240,32 +240,32 @@ public abstract class WTextBox extends WWidget {
     public boolean onKeyPressed(KeyEvent input) {
         if (!focused) return false;
 
-        boolean control = MacosUtil.IS_MACOS ? input.modifiers() == GLFW_MOD_SUPER : input.modifiers() == GLFW_MOD_CONTROL;
+        boolean control = MacosUtil.IS_MACOS ? input.modifiers() == MOD_SUPER : input.modifiers() == MOD_CONTROL;
 
-        if (control && input.key() == GLFW_KEY_C) {
+        if (control && input.key() == KEY_C) {
             if (cursor != selectionStart || cursor != selectionEnd) {
                 mc.keyboardHandler.setClipboard(text.substring(selectionStart, selectionEnd));
             }
             return true;
-        } else if (control && input.key() == GLFW_KEY_X) {
+        } else if (control && input.key() == KEY_X) {
             if (cursor != selectionStart || cursor != selectionEnd) {
                 mc.keyboardHandler.setClipboard(text.substring(selectionStart, selectionEnd));
                 clearSelection();
             }
 
             return true;
-        } else if (control && input.key() == GLFW_KEY_A) {
+        } else if (control && input.key() == KEY_A) {
             cursor = text.length();
             selectionStart = 0;
             selectionEnd = cursor;
-        } else if (input.modifiers() == ((MacosUtil.IS_MACOS ? GLFW_MOD_SUPER : GLFW_MOD_CONTROL) | GLFW_MOD_SHIFT) && input.key() == GLFW_KEY_A) {
+        } else if (input.modifiers() == ((MacosUtil.IS_MACOS ? MOD_SUPER : MOD_CONTROL) | MOD_SHIFT) && input.key() == KEY_A) {
             resetSelection();
-        } else if (input.key() == GLFW_KEY_ENTER || input.key() == GLFW_KEY_KP_ENTER) {
+        } else if (input.key() == KEY_RETURN || input.key() == KEY_NUMPADENTER) {
             setFocused(false);
 
             if (actionOnUnfocused != null) actionOnUnfocused.run();
             return true;
-        } else if (input.key() == GLFW_KEY_TAB && completionsW != null) {
+        } else if (input.key() == KEY_TAB && completionsW != null) {
             String completion = ((ICompletionItem) completionsW.cells.get(getSelectedCompletion()).widget()).getCompletion();
 
             StringBuilder sb = new StringBuilder(text.length() + completion.length() + 1);
@@ -299,12 +299,12 @@ public abstract class WTextBox extends WWidget {
     public boolean onKeyRepeated(KeyEvent input) {
         if (!focused) return false;
 
-        boolean control = MacosUtil.IS_MACOS ? input.modifiers() == GLFW_MOD_SUPER : input.modifiers() == GLFW_MOD_CONTROL;
-        boolean shift = input.modifiers() == GLFW_MOD_SHIFT;
-        boolean controlShift = input.modifiers() == ((SystemUtils.IS_OS_WINDOWS ? GLFW_MOD_ALT : MacosUtil.IS_MACOS ? GLFW_MOD_SUPER : GLFW_MOD_CONTROL) | GLFW_MOD_SHIFT);
-        boolean altShift = input.modifiers() == ((SystemUtils.IS_OS_WINDOWS ? GLFW_MOD_CONTROL : GLFW_MOD_ALT) | GLFW_MOD_SHIFT);
+        boolean control = MacosUtil.IS_MACOS ? input.modifiers() == MOD_SUPER : input.modifiers() == MOD_CONTROL;
+        boolean shift = input.modifiers() == MOD_SHIFT;
+        boolean controlShift = input.modifiers() == ((SystemUtils.IS_OS_WINDOWS ? MOD_ALT : MacosUtil.IS_MACOS ? MOD_SUPER : MOD_CONTROL) | MOD_SHIFT);
+        boolean altShift = input.modifiers() == ((SystemUtils.IS_OS_WINDOWS ? MOD_CONTROL : MOD_ALT) | MOD_SHIFT);
 
-        if (control && input.key() == GLFW_KEY_V) {
+        if (control && input.key() == KEY_V) {
             clearSelection();
 
             String preText = text;
@@ -328,13 +328,13 @@ public abstract class WTextBox extends WWidget {
 
             if (!text.equals(preText)) runAction();
             return true;
-        } else if (input.key() == GLFW_KEY_BACKSPACE) {
+        } else if (input.key() == KEY_BACKSPACE) {
             if (cursor > 0 && cursor == selectionStart && cursor == selectionEnd) {
                 String preText = text;
 
-                int count = (input.modifiers() == (SystemUtils.IS_OS_WINDOWS ? GLFW_MOD_ALT : MacosUtil.IS_MACOS ? GLFW_MOD_SUPER : GLFW_MOD_CONTROL))
+                int count = (input.modifiers() == (SystemUtils.IS_OS_WINDOWS ? MOD_ALT : MacosUtil.IS_MACOS ? MOD_SUPER : MOD_CONTROL))
                     ? cursor
-                    : (input.modifiers() == (SystemUtils.IS_OS_WINDOWS ? GLFW_MOD_CONTROL : GLFW_MOD_ALT))
+                    : (input.modifiers() == (SystemUtils.IS_OS_WINDOWS ? MOD_CONTROL : MOD_ALT))
                       ? countToNextSpace(true)
                       : 1;
 
@@ -348,14 +348,14 @@ public abstract class WTextBox extends WWidget {
             }
 
             return true;
-        } else if (input.key() == GLFW_KEY_DELETE) {
+        } else if (input.key() == KEY_DELETE) {
             if (cursor == selectionStart && cursor == selectionEnd) {
                 if (cursor < text.length()) {
                     String preText = text;
 
-                    int count = input.modifiers() == (SystemUtils.IS_OS_WINDOWS ? GLFW_MOD_ALT : MacosUtil.IS_MACOS ? GLFW_MOD_SUPER : GLFW_MOD_CONTROL)
+                    int count = input.modifiers() == (SystemUtils.IS_OS_WINDOWS ? MOD_ALT : MacosUtil.IS_MACOS ? MOD_SUPER : MOD_CONTROL)
                         ? text.length() - cursor
-                        : (input.modifiers() == (SystemUtils.IS_OS_WINDOWS ? GLFW_MOD_CONTROL : GLFW_MOD_ALT))
+                        : (input.modifiers() == (SystemUtils.IS_OS_WINDOWS ? MOD_CONTROL : MOD_ALT))
                           ? countToNextSpace(false)
                           : 1;
 
@@ -367,15 +367,15 @@ public abstract class WTextBox extends WWidget {
                 clearSelection();
             }
             return true;
-        } else if (input.key() == GLFW_KEY_LEFT) {
+        } else if (input.key() == KEY_LEFT) {
             if (cursor > 0) {
                 // sets the cursor to just after the next leftmost space
-                if (input.modifiers() == (SystemUtils.IS_OS_WINDOWS ? GLFW_MOD_CONTROL : GLFW_MOD_ALT)) {
+                if (input.modifiers() == (SystemUtils.IS_OS_WINDOWS ? MOD_CONTROL : MOD_ALT)) {
                     cursor -= countToNextSpace(true);
                     resetSelection();
                 }
                 // sets the cursor to the beginning of the text box
-                else if (input.modifiers() == (SystemUtils.IS_OS_WINDOWS ? GLFW_MOD_ALT : MacosUtil.IS_MACOS ? GLFW_MOD_SUPER : GLFW_MOD_CONTROL)) {
+                else if (input.modifiers() == (SystemUtils.IS_OS_WINDOWS ? MOD_ALT : MacosUtil.IS_MACOS ? MOD_SUPER : MOD_CONTROL)) {
                     cursor = 0;
                     resetSelection();
                 }
@@ -431,15 +431,15 @@ public abstract class WTextBox extends WWidget {
             }
 
             return true;
-        } else if (input.key() == GLFW_KEY_RIGHT) {
+        } else if (input.key() == KEY_RIGHT) {
             if (cursor < text.length()) {
                 // sets the cursor to just before the next rightmost space
-                if (input.modifiers() == (SystemUtils.IS_OS_WINDOWS ? GLFW_MOD_CONTROL : GLFW_MOD_ALT)) {
+                if (input.modifiers() == (SystemUtils.IS_OS_WINDOWS ? MOD_CONTROL : MOD_ALT)) {
                     cursor += countToNextSpace(false);
                     resetSelection();
                 }
                 // sets the cursor to the end of the text box
-                else if (input.modifiers() == (SystemUtils.IS_OS_WINDOWS ? GLFW_MOD_ALT : MacosUtil.IS_MACOS ? GLFW_MOD_SUPER : GLFW_MOD_CONTROL)) {
+                else if (input.modifiers() == (SystemUtils.IS_OS_WINDOWS ? MOD_ALT : MacosUtil.IS_MACOS ? MOD_SUPER : MOD_CONTROL)) {
                     cursor = text.length();
                     resetSelection();
                 }
@@ -494,7 +494,7 @@ public abstract class WTextBox extends WWidget {
             }
 
             return true;
-        } else if (input.key() == GLFW_KEY_DOWN && completionsW != null) {
+        } else if (input.key() == KEY_DOWN && completionsW != null) {
             int currentI = getSelectedCompletion();
 
             if (currentI == Math.min(5, completions.size() - 1)) {
@@ -508,7 +508,7 @@ public abstract class WTextBox extends WWidget {
             }
 
             return true;
-        } else if (input.key() == GLFW_KEY_UP && completionsW != null) {
+        } else if (input.key() == KEY_UP && completionsW != null) {
             int currentI = getSelectedCompletion();
 
             if (currentI == 0) {

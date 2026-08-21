@@ -13,7 +13,7 @@ import meteordevelopment.meteorclient.utils.misc.input.Input;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.CameraType;
 import net.minecraft.util.Mth;
-import org.lwjgl.glfw.GLFW;
+import com.mojang.blaze3d.platform.InputConstants;
 
 public class FreeLook extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -99,19 +99,19 @@ public class FreeLook extends Module {
             for (int i = 0; i < (arrowSpeed.get() * 2); i++) {
                 switch (mode.get()) {
                     case Player -> {
-                        if (Input.isKeyPressed(GLFW.GLFW_KEY_LEFT)) cameraYaw -= 0.5;
-                        if (Input.isKeyPressed(GLFW.GLFW_KEY_RIGHT)) cameraYaw += 0.5;
-                        if (Input.isKeyPressed(GLFW.GLFW_KEY_UP)) cameraPitch -= 0.5;
-                        if (Input.isKeyPressed(GLFW.GLFW_KEY_DOWN)) cameraPitch += 0.5;
+                        if (Input.isKeyPressed(InputConstants.KEY_LEFT)) cameraYaw -= 0.5;
+                        if (Input.isKeyPressed(InputConstants.KEY_RIGHT)) cameraYaw += 0.5;
+                        if (Input.isKeyPressed(InputConstants.KEY_UP)) cameraPitch -= 0.5;
+                        if (Input.isKeyPressed(InputConstants.KEY_DOWN)) cameraPitch += 0.5;
                     }
                     case Camera -> {
                         float yaw = mc.player.getYRot();
                         float pitch = mc.player.getXRot();
 
-                        if (Input.isKeyPressed(GLFW.GLFW_KEY_LEFT)) yaw -= 0.5;
-                        if (Input.isKeyPressed(GLFW.GLFW_KEY_RIGHT)) yaw += 0.5;
-                        if (Input.isKeyPressed(GLFW.GLFW_KEY_UP)) pitch -= 0.5;
-                        if (Input.isKeyPressed(GLFW.GLFW_KEY_DOWN)) pitch += 0.5;
+                        if (Input.isKeyPressed(InputConstants.KEY_LEFT)) yaw -= 0.5;
+                        if (Input.isKeyPressed(InputConstants.KEY_RIGHT)) yaw += 0.5;
+                        if (Input.isKeyPressed(InputConstants.KEY_UP)) pitch -= 0.5;
+                        if (Input.isKeyPressed(InputConstants.KEY_DOWN)) pitch += 0.5;
 
                         mc.player.setYRot(yaw);
                         mc.player.setXRot(pitch);

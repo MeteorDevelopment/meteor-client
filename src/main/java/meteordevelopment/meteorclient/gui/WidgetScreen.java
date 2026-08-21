@@ -36,7 +36,7 @@ import java.util.function.Consumer;
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 import static meteordevelopment.meteorclient.utils.Utils.getWindowHeight;
 import static meteordevelopment.meteorclient.utils.Utils.getWindowWidth;
-import static org.lwjgl.glfw.GLFW.*;
+import static com.mojang.blaze3d.platform.InputConstants.*;
 
 public abstract class WidgetScreen extends Screen {
     private static final GuiRenderer RENDERER = new GuiRenderer();
@@ -151,7 +151,7 @@ public abstract class WidgetScreen extends Screen {
         mouseX *= s;
         mouseY *= s;
 
-        if (debug && click.button() == GLFW_MOUSE_BUTTON_RIGHT)
+        if (debug && click.button() == MOUSE_BUTTON_RIGHT)
             DEBUG_RENDERER.mouseReleased(root, new MouseButtonEvent(mouseX, mouseY, click.buttonInfo()), 0);
 
         return root.mouseReleased(new MouseButtonEvent(mouseX, mouseY, click.buttonInfo()));
@@ -184,12 +184,12 @@ public abstract class WidgetScreen extends Screen {
     public boolean keyReleased(@NonNull KeyEvent input) {
         if (locked) return false;
 
-        if ((input.modifiers() == GLFW_MOD_CONTROL || input.modifiers() == GLFW_MOD_SUPER) && input.key() == GLFW_KEY_9) {
+        if ((input.modifiers() == MOD_CONTROL || input.modifiers() == MOD_SUPER) && input.key() == KEY_9) {
             debug = !debug;
             return true;
         }
 
-        if ((input.key() == GLFW_KEY_ENTER || input.key() == GLFW_KEY_KP_ENTER) && enterAction != null) {
+        if ((input.key() == KEY_RETURN || input.key() == KEY_NUMPADENTER) && enterAction != null) {
             enterAction.run();
             return true;
         }
@@ -205,7 +205,7 @@ public abstract class WidgetScreen extends Screen {
         if (shouldReturn) return true;
 
         // Select next text box if TAB was pressed
-        if (input.key() == GLFW_KEY_TAB) {
+        if (input.key() == KEY_TAB) {
             AtomicReference<WTextBox> firstTextBox = new AtomicReference<>(null);
             AtomicBoolean done = new AtomicBoolean(false);
             AtomicBoolean foundFocused = new AtomicBoolean(false);
@@ -236,10 +236,10 @@ public abstract class WidgetScreen extends Screen {
             return true;
         }
 
-        boolean control = MacosUtil.IS_MACOS ? input.modifiers() == GLFW_MOD_SUPER : input.modifiers() == GLFW_MOD_CONTROL;
+        boolean control = MacosUtil.IS_MACOS ? input.modifiers() == MOD_SUPER : input.modifiers() == MOD_CONTROL;
 
-        return (control && input.key() == GLFW_KEY_C && toClipboard())
-            || (control && input.key() == GLFW_KEY_V && fromClipboard());
+        return (control && input.key() == KEY_C && toClipboard())
+            || (control && input.key() == KEY_V && fromClipboard());
     }
 
     public void keyRepeated(KeyEvent input) {
@@ -354,7 +354,7 @@ public abstract class WidgetScreen extends Screen {
 
                     // Restore mouse position to where it was when the screen was closed
                     if (parent != null) {
-                        glfwSetCursorPos(mc.getWindow().handle(), restoreX, restoreY);
+                        grabOrReleaseMouse(mc.getWindow(), CURSOR_NORMAL, restoreX, restoreY);
                     }
                 };
             }

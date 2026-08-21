@@ -13,7 +13,7 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.misc.Keybind;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.CameraType;
-import org.lwjgl.glfw.GLFW;
+import com.mojang.blaze3d.platform.InputConstants;
 
 public class CameraTweaks extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -50,7 +50,7 @@ public class CameraTweaks extends Module {
         .name("bind")
         .description("Binds camera distance scrolling to a key.")
         .visible(scrollingEnabled::get)
-        .defaultValue(Keybind.fromKey(GLFW.GLFW_KEY_LEFT_ALT))
+        .defaultValue(Keybind.fromKey(InputConstants.KEY_LALT))
         .build()
     );
 
