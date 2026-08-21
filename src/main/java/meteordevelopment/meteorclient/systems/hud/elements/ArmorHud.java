@@ -5,7 +5,6 @@
 
 package meteordevelopment.meteorclient.systems.hud.elements;
 
-import meteordevelopment.meteorclient.renderer.text.TextRenderer;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.hud.Hud;
 import meteordevelopment.meteorclient.systems.hud.HudElement;
@@ -183,7 +182,7 @@ public class ArmorHud extends HudElement {
                         armorY = y + (getHeight() - renderer.textHeight());
                     }
 
-                    TextRenderer.get().render(message, armorX, armorY, durabilityColor.get(), durabilityShadow.get());
+                    renderer.text(message, armorX, armorY, durabilityColor.get(), durabilityShadow.get());
                 }
             }
         });
