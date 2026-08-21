@@ -67,7 +67,7 @@ public class HandView extends Module {
         .build()
     );
 
-    public final Setting<Integer> swingSpeed = sgGeneral.add(new IntSetting.Builder()
+    public final Setting<Double> swingSpeed = sgGeneral.add(new DoubleSetting.Builder()
         .name("swing-speed")
         .description("The swing speed of your hands.")
         .defaultValue(6)

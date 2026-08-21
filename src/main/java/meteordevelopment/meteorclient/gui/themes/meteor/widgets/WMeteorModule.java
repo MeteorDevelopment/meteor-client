@@ -13,9 +13,9 @@ import meteordevelopment.meteorclient.gui.widgets.pressable.WPressable;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import net.minecraft.util.Mth;
 
+import static com.mojang.blaze3d.platform.InputConstants.MOUSE_BUTTON_LEFT;
+import static com.mojang.blaze3d.platform.InputConstants.MOUSE_BUTTON_RIGHT;
 import static meteordevelopment.meteorclient.MeteorClient.mc;
-import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_LEFT;
-import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_RIGHT;
 
 public class WMeteorModule extends WPressable implements MeteorWidget {
     private final Module module;
@@ -58,8 +58,8 @@ public class WMeteorModule extends WPressable implements MeteorWidget {
 
     @Override
     protected void onPressed(int button) {
-        if (button == GLFW_MOUSE_BUTTON_LEFT) module.toggle();
-        else if (button == GLFW_MOUSE_BUTTON_RIGHT) mc.gui.setScreen(theme.moduleScreen(module));
+        if (button == MOUSE_BUTTON_LEFT) module.toggle();
+        else if (button == MOUSE_BUTTON_RIGHT) mc.gui.setScreen(theme.moduleScreen(module));
     }
 
     @Override

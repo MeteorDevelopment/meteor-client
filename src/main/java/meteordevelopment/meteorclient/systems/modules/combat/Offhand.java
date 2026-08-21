@@ -19,11 +19,10 @@ import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.item.AxeItem;
 import net.minecraft.world.item.Items;
 
+import static com.mojang.blaze3d.platform.InputConstants.MOUSE_BUTTON_RIGHT;
 import static meteordevelopment.orbit.EventPriority.HIGHEST;
-import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_RIGHT;
 
 public class Offhand extends Module {
     private final SettingGroup sgCombat = settings.createGroup("Combat");
@@ -191,7 +190,7 @@ public class Offhand extends Module {
         }
 
         // Always Gap
-        else if ((mc.player.getMainHandItem().is(ItemTags.SWORDS) || mc.player.getMainHandItem().getItem() instanceof AxeItem) && alwaysSwordGap.get())
+        else if ((mc.player.getMainHandItem().is(ItemTags.SWORDS) || mc.player.getMainHandItem().is(ItemTags.AXES)) && alwaysSwordGap.get())
             currentItem = Item.EGap;
 
             // Potion Click
@@ -206,7 +205,7 @@ public class Offhand extends Module {
         }
 
         // Always Pot
-        else if ((mc.player.getMainHandItem().is(ItemTags.SWORDS) || mc.player.getMainHandItem().getItem() instanceof AxeItem) && alwaysPot.get())
+        else if ((mc.player.getMainHandItem().is(ItemTags.SWORDS) || mc.player.getMainHandItem().is(ItemTags.AXES)) && alwaysPot.get())
             currentItem = Item.Potion;
 
 
@@ -242,7 +241,7 @@ public class Offhand extends Module {
     @EventHandler
     private void onMouseClick(MouseClickEvent event) {
         // Detects if the User is right-clicking
-        isClicking = mc.gui.screen() == null && !Modules.get().get(AutoTotem.class).isLocked() && !usableItem() && !mc.player.isUsingItem() && event.action == KeyAction.Press && event.button() == GLFW_MOUSE_BUTTON_RIGHT;
+        isClicking = mc.gui.screen() == null && !Modules.get().get(AutoTotem.class).isLocked() && !usableItem() && !mc.player.isUsingItem() && event.action == KeyAction.Press && event.button() == MOUSE_BUTTON_RIGHT;
     }
 
     private boolean usableItem() {

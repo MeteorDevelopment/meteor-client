@@ -5,10 +5,11 @@
 
 package meteordevelopment.meteorclient.utils.render.postprocess;
 
-import com.mojang.blaze3d.buffers.GpuBufferSlice;
 import com.mojang.blaze3d.buffers.Std140Builder;
 import com.mojang.blaze3d.buffers.Std140SizeCalculator;
-import net.minecraft.client.renderer.DynamicUniformStorage;
+import com.mojang.renderpearl.api.buffers.GpuBuffer;
+import com.mojang.renderpearl.api.buffers.GpuBufferSlice;
+import net.minecraft.client.renderer.DynamicGpuDataStorage;
 import org.jspecify.annotations.NonNull;
 
 import java.nio.ByteBuffer;
@@ -21,18 +22,18 @@ public class OutlineUniforms {
         .putFloat()
         .get();
 
-    private static final DynamicUniformStorage<Data> STORAGE = new DynamicUniformStorage<>("Meteor - Outline UBO", UNIFORM_SIZE, 16);
+    private static final DynamicGpuDataStorage<Data> STORAGE = new DynamicGpuDataStorage<>("Meteor - Outline UBO", UNIFORM_SIZE, GpuBuffer.USAGE_UNIFORM, 16);
 
     public static void flipFrame() {
         STORAGE.endFrame();
     }
 
     public static GpuBufferSlice write(int width, float fillOpacity, int shapeMode, float glowMultiplier) {
-        return STORAGE.writeUniform(new Data(width, fillOpacity, shapeMode, glowMultiplier));
+        return STORAGE.writeData(new Data(width, fillOpacity, shapeMode, glowMultiplier));
     }
 
     private record Data(int width, float fillOpacity, int shapeMode,
-                        float glowMultiplier) implements DynamicUniformStorage.DynamicUniform {
+                        float glowMultiplier) implements DynamicGpuDataStorage.DynamicGpuData {
         @Override
         public void write(@NonNull ByteBuffer buffer) {
             Std140Builder.intoBuffer(buffer)

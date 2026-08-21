@@ -28,7 +28,8 @@ import meteordevelopment.meteorclient.utils.render.DisplayItemUtils;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.client.resources.language.I18n;
 import org.apache.commons.lang3.Strings;
-import org.lwjgl.util.tinyfd.TinyFileDialogs;
+import org.lwjgl.sdl.SDLDialog;
+import org.lwjgl.system.MemoryUtil;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -486,22 +487,23 @@ public class DefaultSettingsWidgetFactory extends SettingsWidgetFactory {
 
         WLabel fileName = list.add(theme.label((setting.get() != null && setting.get().exists()) ? setting.get().getName() : "No file selected.")).widget();
 
-        selectFile.action = () -> {
-            String path = TinyFileDialogs.tinyfd_openFileDialog(
-                "Select File",
-                null,
-                setting.filters,
-                null,
-                false
-            );
+        selectFile.action = () -> SDLDialog.SDL_ShowOpenFileDialog((_, file, _) -> {
+            if (file == 0) return;
 
-            if (path != null) {
+            long filePointer = MemoryUtil.memGetAddress(file);
+            if (filePointer == 0) return;
+
+            String path = MemoryUtil.memUTF8(filePointer);
+            System.out.println(path);
+
+            if (!path.isEmpty()) {
                 setting.set(new File(path));
                 fileName.set(setting.get().getName());
             }
-        };
 
-        reset(table, setting, () -> fileName.set((setting.get() != null && setting.get().exists()) ? setting.get().getName() : "No file selected."));
+            reset(table, setting, () -> fileName.set((setting.get() != null && setting.get().exists()) ? setting.get().getName() : "No file selected."));
+        }, 0L, 0, setting.filters, "", false);
+
     }
 
     // Other

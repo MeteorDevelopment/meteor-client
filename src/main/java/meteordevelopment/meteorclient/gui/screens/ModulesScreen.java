@@ -5,7 +5,6 @@
 
 package meteordevelopment.meteorclient.gui.screens;
 
-import com.mojang.blaze3d.platform.MacosUtil;
 import com.mojang.datafixers.util.Pair;
 import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.tabs.TabScreen;
@@ -24,15 +23,16 @@ import meteordevelopment.meteorclient.utils.misc.NbtUtils;
 import meteordevelopment.meteorclient.utils.render.DisplayItemUtils;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.world.item.Items;
+import org.apache.commons.lang3.SystemUtils;
 import org.jspecify.annotations.NonNull;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import static com.mojang.blaze3d.platform.InputConstants.*;
 import static meteordevelopment.meteorclient.utils.Utils.getWindowHeight;
 import static meteordevelopment.meteorclient.utils.Utils.getWindowWidth;
-import static org.lwjgl.glfw.GLFW.*;
 
 public class ModulesScreen extends TabScreen {
     private WCategoryController controller;
@@ -155,9 +155,9 @@ public class ModulesScreen extends TabScreen {
     public boolean keyPressed(@NonNull KeyEvent value) {
         if (locked) return false;
 
-        boolean cntrl = MacosUtil.IS_MACOS ? value.modifiers() == GLFW_MOD_SUPER : value.modifiers() == GLFW_MOD_CONTROL;
+        boolean cntrl = SystemUtils.IS_OS_MAC ? value.modifiers() == MOD_SUPER : value.modifiers() == MOD_CONTROL;
 
-        if (cntrl && value.key() == GLFW_KEY_F) {
+        if (cntrl && value.key() == KEY_F) {
             if (searchWindow != null) searchWindow.setExpanded(true);
             if (searchTextBox != null) {
                 searchTextBox.setFocused(true);

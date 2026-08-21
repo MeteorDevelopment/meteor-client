@@ -5,7 +5,7 @@
 
 package meteordevelopment.meteorclient.gui;
 
-import com.mojang.blaze3d.platform.MacosUtil;
+import com.mojang.blaze3d.platform.cursor.CursorTypes;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.gui.renderer.GuiDebugRenderer;
 import meteordevelopment.meteorclient.gui.renderer.GuiRenderer;
@@ -16,7 +16,6 @@ import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.gui.widgets.containers.WContainer;
 import meteordevelopment.meteorclient.gui.widgets.input.WTextBox;
 import meteordevelopment.meteorclient.utils.Utils;
-import meteordevelopment.meteorclient.utils.misc.CursorStyle;
 import meteordevelopment.meteorclient.utils.misc.input.Input;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
@@ -25,7 +24,9 @@ import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
+import org.apache.commons.lang3.SystemUtils;
 import org.jspecify.annotations.NonNull;
+import org.lwjgl.sdl.SDLMouse;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,10 +34,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
+import static com.mojang.blaze3d.platform.InputConstants.*;
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 import static meteordevelopment.meteorclient.utils.Utils.getWindowHeight;
 import static meteordevelopment.meteorclient.utils.Utils.getWindowWidth;
-import static org.lwjgl.glfw.GLFW.*;
 
 public abstract class WidgetScreen extends Screen {
     private static final GuiRenderer RENDERER = new GuiRenderer();
@@ -151,7 +152,7 @@ public abstract class WidgetScreen extends Screen {
         mouseX *= s;
         mouseY *= s;
 
-        if (debug && click.button() == GLFW_MOUSE_BUTTON_RIGHT)
+        if (debug && click.button() == MOUSE_BUTTON_RIGHT)
             DEBUG_RENDERER.mouseReleased(root, new MouseButtonEvent(mouseX, mouseY, click.buttonInfo()), 0);
 
         return root.mouseReleased(new MouseButtonEvent(mouseX, mouseY, click.buttonInfo()));
@@ -184,12 +185,12 @@ public abstract class WidgetScreen extends Screen {
     public boolean keyReleased(@NonNull KeyEvent input) {
         if (locked) return false;
 
-        if ((input.modifiers() == GLFW_MOD_CONTROL || input.modifiers() == GLFW_MOD_SUPER) && input.key() == GLFW_KEY_9) {
+        if ((input.modifiers() == MOD_CONTROL || input.modifiers() == MOD_SUPER) && input.key() == KEY_9) {
             debug = !debug;
             return true;
         }
 
-        if ((input.key() == GLFW_KEY_ENTER || input.key() == GLFW_KEY_KP_ENTER) && enterAction != null) {
+        if ((input.key() == KEY_RETURN || input.key() == KEY_NUMPADENTER) && enterAction != null) {
             enterAction.run();
             return true;
         }
@@ -205,7 +206,7 @@ public abstract class WidgetScreen extends Screen {
         if (shouldReturn) return true;
 
         // Select next text box if TAB was pressed
-        if (input.key() == GLFW_KEY_TAB) {
+        if (input.key() == KEY_TAB) {
             AtomicReference<WTextBox> firstTextBox = new AtomicReference<>(null);
             AtomicBoolean done = new AtomicBoolean(false);
             AtomicBoolean foundFocused = new AtomicBoolean(false);
@@ -236,10 +237,10 @@ public abstract class WidgetScreen extends Screen {
             return true;
         }
 
-        boolean control = MacosUtil.IS_MACOS ? input.modifiers() == GLFW_MOD_SUPER : input.modifiers() == GLFW_MOD_CONTROL;
+        boolean control = SystemUtils.IS_OS_MAC ? input.modifiers() == MOD_SUPER : input.modifiers() == MOD_CONTROL;
 
-        return (control && input.key() == GLFW_KEY_C && toClipboard())
-            || (control && input.key() == GLFW_KEY_V && fromClipboard());
+        return (control && input.key() == KEY_C && toClipboard())
+            || (control && input.key() == KEY_V && fromClipboard());
     }
 
     public void keyRepeated(KeyEvent input) {
@@ -331,7 +332,7 @@ public abstract class WidgetScreen extends Screen {
             closed = true;
             onClosed();
 
-            Input.setCursorStyle(CursorStyle.Default);
+            Input.setCursorStyle(CursorTypes.ARROW);
 
             loopWidgets(root, widget -> {
                 if (widget instanceof WTextBox textBox && textBox.isFocused()) textBox.setFocused(false);
@@ -354,7 +355,7 @@ public abstract class WidgetScreen extends Screen {
 
                     // Restore mouse position to where it was when the screen was closed
                     if (parent != null) {
-                        glfwSetCursorPos(mc.getWindow().handle(), restoreX, restoreY);
+                        SDLMouse.SDL_WarpMouseInWindow(mc.getWindow().handle(), (float) restoreX, (float) restoreY);
                     }
                 };
             }

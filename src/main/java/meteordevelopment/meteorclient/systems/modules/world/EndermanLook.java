@@ -18,7 +18,7 @@ import meteordevelopment.orbit.EventHandler;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.monster.EnderMan;
+import net.minecraft.world.entity.monster.Enderman;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 
@@ -51,7 +51,7 @@ public class EndermanLook extends Module {
             return;
 
         for (Entity entity : mc.level.entitiesForRendering()) {
-            if (!(entity instanceof EnderMan enderman) || !enderman.isAlive() || !mc.player.hasLineOfSight(enderman))
+            if (!(entity instanceof Enderman enderman) || !enderman.isAlive() || !mc.player.hasLineOfSight(enderman))
                 continue;
 
             switch (lookMode.get()) {
@@ -69,9 +69,9 @@ public class EndermanLook extends Module {
     }
 
     /**
-     * @see EnderMan#isBeingStaredBy(Player)
+     * @see Enderman#isBeingStaredBy(Player)
      */
-    private boolean angleCheck(EnderMan entity) {
+    private boolean angleCheck(Enderman entity) {
         Vec3 vec3d = mc.player.getViewVector(1.0F).normalize();
         Vec3 vec3d2 = new Vec3(entity.getX() - mc.player.getX(), entity.getEyeY() - mc.player.getEyeY(), entity.getZ() - mc.player.getZ());
 

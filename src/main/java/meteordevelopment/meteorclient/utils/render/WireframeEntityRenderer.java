@@ -16,13 +16,13 @@ import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.SubmitNodeStorage;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
-import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
 import net.minecraft.client.renderer.rendertype.RenderType;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.renderer.texture.UvMapping;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
@@ -80,9 +80,8 @@ public class WireframeEntityRenderer {
             int lightCoords,
             int overlayCoords,
             int tintedColor,
-            TextureAtlasSprite sprite,
-            int outlineColor,
-            ModelFeatureRenderer.CrumblingOverlay crumblingOverlay
+            final @Nullable UvMapping uvMapping,
+            int outlineColor
         ) {
             if (renderType.isOutline()) return;
 
@@ -149,6 +148,11 @@ public class WireframeEntityRenderer {
 
         @Override
         public @NonNull VertexConsumer setUv2(int u, int v) {
+            return this;
+        }
+
+        @Override
+        public VertexConsumer setUv3(float u, float v) {
             return this;
         }
 

@@ -123,7 +123,7 @@ public class BundleTooltipComponent implements ClientTooltipComponent, MeteorToo
             int j = x + width / 2 - 12;
             ClientTooltipComponent tooltipComponent = ClientTooltipComponent.create(text.getVisualOrderText());
             graphics.tooltip(
-                font, List.of(tooltipComponent), j - i / 2, y - 37, DefaultTooltipPositioner.INSTANCE, itemStack.get(DataComponents.TOOLTIP_STYLE)
+                font, List.of(tooltipComponent), j - i / 2, y - 37, DefaultTooltipPositioner.INSTANCE, itemStack.get(DataComponents.TOOLTIP_STYLE), false
             );
         }
     }

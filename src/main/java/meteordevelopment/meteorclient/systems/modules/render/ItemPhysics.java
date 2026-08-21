@@ -60,7 +60,7 @@ public class ItemPhysics extends Module {
 
         for (int i = 0; i < ((ItemStackRenderStateAccessor) event.renderState.item).meteor$getActiveLayerCount(); i++) {
             ItemStackRenderState.LayerRenderState layer = ((ItemStackRenderStateAccessor) event.renderState.item).meteor$getLayers()[i];
-            ModelInfo info = getInfo(layer.prepareQuadList());
+            ModelInfo info = getInfo(layer.quads.all());
 
             matrices.pushPose();
             applyTransformation(matrices, ((LayerRenderStateAccessor) layer).meteor$getTransform());

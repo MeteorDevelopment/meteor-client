@@ -13,7 +13,6 @@ import net.minecraft.client.model.Model;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.EndCrystalRenderer;
 import net.minecraft.client.renderer.entity.state.EndCrystalRenderState;
-import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.resources.Identifier;
@@ -55,8 +54,8 @@ public abstract class EndCrystalRendererMixin {
 
     // Chams - Color
 
-    @WrapWithCondition(method = "submit(Lnet/minecraft/client/renderer/entity/state/EndCrystalRenderState;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;Lnet/minecraft/client/renderer/state/level/CameraRenderState;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/SubmitNodeCollector;submitModel(Lnet/minecraft/client/model/Model;Ljava/lang/Object;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/resources/Identifier;IIILnet/minecraft/client/renderer/feature/ModelFeatureRenderer$CrumblingOverlay;)V"))
-    private <S> boolean render$color(SubmitNodeCollector instance, Model<? super S> model, S state, PoseStack poseStack, Identifier identifier, int lightCoords, int overlayCoords, int outlineColor, ModelFeatureRenderer.CrumblingOverlay crumblingOverlay) {
+    @WrapWithCondition(method = "submit(Lnet/minecraft/client/renderer/entity/state/EndCrystalRenderState;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;Lnet/minecraft/client/renderer/state/level/CameraRenderState;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/SubmitNodeCollector;submitModel(Lnet/minecraft/client/model/Model;Ljava/lang/Object;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/resources/Identifier;III)V"))
+    private <S> boolean render$color(SubmitNodeCollector instance, Model<? super S> model, S state, PoseStack poseStack, Identifier identifier, int lightCoords, int overlayCoords, int outlineColor) {
         if (chams.isActive() && chams.crystals.get()) {
             var renderType = RenderTypes.entityTranslucent((chams.isActive() && chams.crystals.get() && !chams.crystalsTexture.get()) ? Chams.BLANK : END_CRYSTAL_LOCATION);
 
@@ -69,8 +68,7 @@ public abstract class EndCrystalRendererMixin {
                 overlayCoords,
                 chams.crystalsColor.get().getPacked(),
                 null,
-                outlineColor,
-                null
+                outlineColor
             );
 
             return false;

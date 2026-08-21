@@ -15,9 +15,9 @@ import net.minecraft.util.Mth;
 
 import java.util.function.Consumer;
 
+import static com.mojang.blaze3d.platform.InputConstants.MOUSE_BUTTON_RIGHT;
 import static meteordevelopment.meteorclient.utils.Utils.getWindowHeight;
 import static meteordevelopment.meteorclient.utils.Utils.getWindowWidth;
-import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_RIGHT;
 
 public abstract class WWindow extends WVerticalList {
     public double padding = 8;
@@ -191,7 +191,7 @@ public abstract class WWindow extends WVerticalList {
         @Override
         public boolean onMouseClicked(MouseButtonEvent click, boolean doubled) {
             if (mouseOver && !doubled) {
-                if (click.button() == GLFW_MOUSE_BUTTON_RIGHT) setExpanded(!expanded);
+                if (click.button() == MOUSE_BUTTON_RIGHT) setExpanded(!expanded);
                 else {
                     dragging = true;
                     dragged = false;

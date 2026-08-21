@@ -5,19 +5,18 @@
 
 package meteordevelopment.meteorclient.utils.misc.input;
 
+import com.mojang.blaze3d.platform.InputConstants;
+import com.mojang.blaze3d.platform.cursor.CursorType;
+import com.mojang.blaze3d.platform.cursor.CursorTypes;
 import meteordevelopment.meteorclient.gui.GuiKeyEvents;
 import meteordevelopment.meteorclient.mixin.KeyMappingAccessor;
-import meteordevelopment.meteorclient.utils.misc.CursorStyle;
 import net.minecraft.client.KeyMapping;
-import org.lwjgl.glfw.GLFW;
-
-import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class Input {
     private static final boolean[] keys = new boolean[512];
     private static final boolean[] buttons = new boolean[16];
 
-    private static CursorStyle lastCursorStyle = CursorStyle.Default;
+    private static CursorType lastCursorStyle = CursorTypes.ARROW;
 
     private Input() {
     }
@@ -45,7 +44,7 @@ public class Input {
     public static boolean isKeyPressed(int key) {
         if (!GuiKeyEvents.canUseKeys) return false;
 
-        if (key == GLFW.GLFW_KEY_UNKNOWN) return false;
+        if (key == InputConstants.UNKNOWN.getValue()) return false;
         return key < keys.length && keys[key];
     }
 
@@ -54,19 +53,19 @@ public class Input {
         return button < buttons.length && buttons[button];
     }
 
-    public static void setCursorStyle(CursorStyle style) {
+    public static void setCursorStyle(CursorType style) {
         if (lastCursorStyle != style) {
-            GLFW.glfwSetCursor(mc.getWindow().handle(), style.getGlfwCursor());
+            style.select();
             lastCursorStyle = style;
         }
     }
 
     public static int getModifier(int key) {
         return switch (key) {
-            case GLFW.GLFW_KEY_LEFT_SHIFT, GLFW.GLFW_KEY_RIGHT_SHIFT -> GLFW.GLFW_MOD_SHIFT;
-            case GLFW.GLFW_KEY_LEFT_CONTROL, GLFW.GLFW_KEY_RIGHT_CONTROL -> GLFW.GLFW_MOD_CONTROL;
-            case GLFW.GLFW_KEY_LEFT_ALT, GLFW.GLFW_KEY_RIGHT_ALT -> GLFW.GLFW_MOD_ALT;
-            case GLFW.GLFW_KEY_LEFT_SUPER, GLFW.GLFW_KEY_RIGHT_SUPER -> GLFW.GLFW_MOD_SUPER;
+            case InputConstants.KEY_LSHIFT, InputConstants.KEY_RSHIFT -> InputConstants.MOD_SHIFT;
+            case InputConstants.KEY_LCONTROL, InputConstants.KEY_RCONTROL -> InputConstants.MOD_CONTROL;
+            case InputConstants.KEY_LALT, InputConstants.KEY_RALT -> InputConstants.MOD_ALT;
+//            case InputConstants.KEY_LSUPER, InputConstants.KEY_RSUPER -> InputConstants.MOD_SUPER;
             default -> 0;
         };
     }

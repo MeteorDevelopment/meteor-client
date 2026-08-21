@@ -36,10 +36,11 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.DecoratedPotBlock;
-import org.lwjgl.glfw.GLFW;
 
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
+
+import static com.mojang.blaze3d.platform.InputConstants.MOUSE_BUTTON_MIDDLE;
 
 public class InventoryTweaks extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -98,7 +99,7 @@ public class InventoryTweaks extends Module {
         .name("sorting-key")
         .description("Key to trigger the sort.")
         .visible(sortingEnabled::get)
-        .defaultValue(Keybind.fromButton(GLFW.GLFW_MOUSE_BUTTON_MIDDLE))
+        .defaultValue(Keybind.fromButton(MOUSE_BUTTON_MIDDLE))
         .build()
     );
 

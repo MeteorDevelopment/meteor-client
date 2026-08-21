@@ -38,13 +38,13 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.util.Mth;
-import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 
+import static com.mojang.blaze3d.platform.InputConstants.*;
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class KeyboardHud extends HudElement {
@@ -260,7 +260,7 @@ public class KeyboardHud extends HudElement {
     @EventHandler(priority = EventPriority.HIGH)
     private void onKey(KeyInputEvent event) {
         for (Key key : keys) {
-            if (key.matches(event.input.key(), event.input.scancode(), true)) {
+            if (key.matches(event.input.key(), event.input.keycode(), true)) {
                 key.update(event.action);
             }
         }
@@ -277,15 +277,11 @@ public class KeyboardHud extends HudElement {
 
     public KeyboardHud() {
         super(INFO);
-        if (mc.options != null)
-            onPresetChanged(preset.get());
+        onPresetChanged(preset.get());
         MeteorClient.EVENT_BUS.subscribe(this);
     }
 
     private void onPresetChanged(Preset preset) {
-        if (mc.options == null)
-            return;
-
         keys.clear();
         double u = 35;  // base key unit size
         double g = spacing.get() * 2;  // gap between keys (spacing setting)
@@ -332,117 +328,117 @@ public class KeyboardHud extends HudElement {
         double row0 = l.uy(0), row1 = l.uy(1), row2 = l.uy(2), row3 = l.uy(3), row4 = l.uy(4), row5 = l.uy(5);
 
         // Row 0: ESC, F1-F12, Print/Scroll/Pause
-        keys.add(l.key(Keybind.fromKey(GLFW.GLFW_KEY_ESCAPE), 0, row0));
+        keys.add(l.key(Keybind.fromKey(KEY_ESCAPE), 0, row0));
         for (int i = 0; i < 4; i++)
-            keys.add(l.key(Keybind.fromKey(GLFW.GLFW_KEY_F1 + i), l.ux(2d + i), row0));
+            keys.add(l.key(Keybind.fromKey(KEY_F1 + i), l.ux(2d + i), row0));
         for (int i = 0; i < 4; i++)
-            keys.add(l.key(Keybind.fromKey(GLFW.GLFW_KEY_F5 + i), l.ux(6.5 + i), row0));
+            keys.add(l.key(Keybind.fromKey(KEY_F5 + i), l.ux(6.5 + i), row0));
         for (int i = 0; i < 4; i++)
-            keys.add(l.key(Keybind.fromKey(GLFW.GLFW_KEY_F9 + i), l.ux(11d + i), row0));
-        keys.add(l.key(Keybind.fromKey(GLFW.GLFW_KEY_PRINT_SCREEN), l.ux(15.5), row0));
-        keys.add(l.key(Keybind.fromKey(GLFW.GLFW_KEY_SCROLL_LOCK), l.ux(16.5), row0));
-        keys.add(l.key(Keybind.fromKey(GLFW.GLFW_KEY_PAUSE), l.ux(17.5), row0));
+            keys.add(l.key(Keybind.fromKey(KEY_F9 + i), l.ux(11d + i), row0));
+        keys.add(l.key(Keybind.fromKey(KEY_PRINTSCREEN), l.ux(15.5), row0));
+        keys.add(l.key(Keybind.fromKey(KEY_SCROLLLOCK), l.ux(16.5), row0));
+        keys.add(l.key(Keybind.fromKey(KEY_PAUSE), l.ux(17.5), row0));
 
         // Row 1: ` 1-0 - = BS, Ins/Home/PgUp
-        int[] row1Keys = {GLFW.GLFW_KEY_GRAVE_ACCENT, GLFW.GLFW_KEY_1, GLFW.GLFW_KEY_2, GLFW.GLFW_KEY_3, GLFW.GLFW_KEY_4, GLFW.GLFW_KEY_5, GLFW.GLFW_KEY_6, GLFW.GLFW_KEY_7, GLFW.GLFW_KEY_8, GLFW.GLFW_KEY_9, GLFW.GLFW_KEY_0, GLFW.GLFW_KEY_MINUS, GLFW.GLFW_KEY_EQUAL};
+        int[] row1Keys = {KEY_GRAVE, KEY_1, KEY_2, KEY_3, KEY_4, KEY_5, KEY_6, KEY_7, KEY_8, KEY_9, KEY_0, KEY_MINUS, KEY_EQUALS};
         for (int i = 0; i < row1Keys.length; i++)
             keys.add(l.key(Keybind.fromKey(row1Keys[i]), l.ux(i), row1));
-        keys.add(l.key(Keybind.fromKey(GLFW.GLFW_KEY_BACKSPACE), l.ux(13), row1, KeyDimensions.BACKSPACE));
-        keys.add(l.key(Keybind.fromKey(GLFW.GLFW_KEY_INSERT), l.ux(15.5), row1));
-        keys.add(l.key(Keybind.fromKey(GLFW.GLFW_KEY_HOME), l.ux(16.5), row1));
-        keys.add(l.key(Keybind.fromKey(GLFW.GLFW_KEY_PAGE_UP), l.ux(17.5), row1));
+        keys.add(l.key(Keybind.fromKey(KEY_BACKSPACE), l.ux(13), row1, KeyDimensions.BACKSPACE));
+        keys.add(l.key(Keybind.fromKey(KEY_INSERT), l.ux(15.5), row1));
+        keys.add(l.key(Keybind.fromKey(KEY_HOME), l.ux(16.5), row1));
+        keys.add(l.key(Keybind.fromKey(KEY_PAGEUP), l.ux(17.5), row1));
 
         // Row 2: Tab QWERTY..., Del/End/PgDn
-        keys.add(l.key(Keybind.fromKey(GLFW.GLFW_KEY_TAB), 0, row2, KeyDimensions.TAB));
-        int[] row2Keys = {GLFW.GLFW_KEY_Q, GLFW.GLFW_KEY_W, GLFW.GLFW_KEY_E, GLFW.GLFW_KEY_R, GLFW.GLFW_KEY_T, GLFW.GLFW_KEY_Y, GLFW.GLFW_KEY_U, GLFW.GLFW_KEY_I, GLFW.GLFW_KEY_O, GLFW.GLFW_KEY_P, GLFW.GLFW_KEY_LEFT_BRACKET, GLFW.GLFW_KEY_RIGHT_BRACKET};
+        keys.add(l.key(Keybind.fromKey(KEY_TAB), 0, row2, KeyDimensions.TAB));
+        int[] row2Keys = {KEY_Q, KEY_W, KEY_E, KEY_R, KEY_T, KEY_Y, KEY_U, KEY_I, KEY_O, KEY_P, KEY_LBRACKET, KEY_RBRACKET};
         double tabEnd = l.px(KeyDimensions.TAB) + l.keyGap;
         for (int i = 0; i < row2Keys.length; i++)
             keys.add(l.key(Keybind.fromKey(row2Keys[i]), tabEnd + l.ux(i), row2));
-        keys.add(l.key(Keybind.fromKey(GLFW.GLFW_KEY_BACKSLASH), tabEnd + l.ux(12), row2, KeyDimensions.TAB));
-        keys.add(l.key(Keybind.fromKey(GLFW.GLFW_KEY_DELETE), l.ux(15.5), row2));
-        keys.add(l.key(Keybind.fromKey(GLFW.GLFW_KEY_END), l.ux(16.5), row2));
-        keys.add(l.key(Keybind.fromKey(GLFW.GLFW_KEY_PAGE_DOWN), l.ux(17.5), row2));
+        keys.add(l.key(Keybind.fromKey(KEY_BACKSLASH), tabEnd + l.ux(12), row2, KeyDimensions.TAB));
+        keys.add(l.key(Keybind.fromKey(KEY_DELETE), l.ux(15.5), row2));
+        keys.add(l.key(Keybind.fromKey(KEY_END), l.ux(16.5), row2));
+        keys.add(l.key(Keybind.fromKey(KEY_PAGEDOWN), l.ux(17.5), row2));
 
         // Row 3: Caps ASDF..., Enter
-        keys.add(l.key(Keybind.fromKey(GLFW.GLFW_KEY_CAPS_LOCK), 0, row3, KeyDimensions.CAPS_LOCK));
-        int[] row3Keys = {GLFW.GLFW_KEY_A, GLFW.GLFW_KEY_S, GLFW.GLFW_KEY_D, GLFW.GLFW_KEY_F, GLFW.GLFW_KEY_G, GLFW.GLFW_KEY_H, GLFW.GLFW_KEY_J, GLFW.GLFW_KEY_K, GLFW.GLFW_KEY_L, GLFW.GLFW_KEY_SEMICOLON, GLFW.GLFW_KEY_APOSTROPHE};
+        keys.add(l.key(Keybind.fromKey(KEY_CAPSLOCK), 0, row3, KeyDimensions.CAPS_LOCK));
+        int[] row3Keys = {KEY_A, KEY_S, KEY_D, KEY_F, KEY_G, KEY_H, KEY_J, KEY_K, KEY_L, KEY_SEMICOLON, KEY_APOSTROPHE};
         double capsEnd = l.px(KeyDimensions.CAPS_LOCK) + l.keyGap;
         for (int i = 0; i < row3Keys.length; i++)
             keys.add(l.key(Keybind.fromKey(row3Keys[i]), capsEnd + l.ux(i), row3));
-        keys.add(l.key(Keybind.fromKey(GLFW.GLFW_KEY_ENTER), capsEnd + l.ux(11), row3, KeyDimensions.ENTER_ANSI));
+        keys.add(l.key(Keybind.fromKey(KEY_RETURN), capsEnd + l.ux(11), row3, KeyDimensions.ENTER_ANSI));
 
         // Row 4: LShift ZXCV..., RShift, Up
-        keys.add(l.key(Keybind.fromKey(GLFW.GLFW_KEY_LEFT_SHIFT), 0, row4, KeyDimensions.LEFT_SHIFT_ANSI));
-        int[] row4Keys = {GLFW.GLFW_KEY_Z, GLFW.GLFW_KEY_X, GLFW.GLFW_KEY_C, GLFW.GLFW_KEY_V, GLFW.GLFW_KEY_B, GLFW.GLFW_KEY_N, GLFW.GLFW_KEY_M, GLFW.GLFW_KEY_COMMA, GLFW.GLFW_KEY_PERIOD, GLFW.GLFW_KEY_SLASH};
+        keys.add(l.key(Keybind.fromKey(KEY_LSHIFT), 0, row4, KeyDimensions.LEFT_SHIFT_ANSI));
+        int[] row4Keys = {KEY_Z, KEY_X, KEY_C, KEY_V, KEY_B, KEY_N, KEY_M, KEY_COMMA, KEY_PERIOD, KEY_SLASH};
         double lShiftEnd = l.px(KeyDimensions.LEFT_SHIFT_ANSI) + l.keyGap;
         for (int i = 0; i < row4Keys.length; i++)
             keys.add(l.key(Keybind.fromKey(row4Keys[i]), lShiftEnd + l.ux(i), row4));
-        keys.add(l.key(Keybind.fromKey(GLFW.GLFW_KEY_RIGHT_SHIFT), lShiftEnd + l.ux(10), row4, KeyDimensions.RIGHT_SHIFT));
-        keys.add(l.key(Keybind.fromKey(GLFW.GLFW_KEY_UP), l.ux(16.5), row4));
+        keys.add(l.key(Keybind.fromKey(KEY_RSHIFT), lShiftEnd + l.ux(10), row4, KeyDimensions.RIGHT_SHIFT));
+        keys.add(l.key(Keybind.fromKey(KEY_UP), l.ux(16.5), row4));
 
         // Row 5: Ctrl/Win/Alt/Space/Alt/Win/Menu/Ctrl, Arrows
         double xPos = 0;
-        keys.add(l.key(Keybind.fromKey(GLFW.GLFW_KEY_LEFT_CONTROL), xPos, row5, KeyDimensions.CTRL));
+        keys.add(l.key(Keybind.fromKey(KEY_LCONTROL), xPos, row5, KeyDimensions.CTRL));
         xPos += l.px(KeyDimensions.CTRL) + l.keyGap;
-        keys.add(l.key(Keybind.fromKey(GLFW.GLFW_KEY_LEFT_SUPER), xPos, row5, KeyDimensions.GUI));
-        xPos += l.px(KeyDimensions.GUI) + l.keyGap;
-        keys.add(l.key(Keybind.fromKey(GLFW.GLFW_KEY_LEFT_ALT), xPos, row5, KeyDimensions.ALT));
+//        keys.add(l.key(Keybind.fromKey(KEY_LSUPER), xPos, row5, KeyDimensions.GUI));
+//        xPos += l.px(KeyDimensions.GUI) + l.keyGap;
+        keys.add(l.key(Keybind.fromKey(KEY_LALT), xPos, row5, KeyDimensions.ALT));
         xPos += l.px(KeyDimensions.ALT) + l.keyGap;
-        keys.add(l.key(Keybind.fromKey(GLFW.GLFW_KEY_SPACE), xPos, row5, KeyDimensions.SPACEBAR));
+        keys.add(l.key(Keybind.fromKey(KEY_SPACE), xPos, row5, KeyDimensions.SPACEBAR));
         xPos += l.px(KeyDimensions.SPACEBAR) + l.keyGap;
-        keys.add(l.key(Keybind.fromKey(GLFW.GLFW_KEY_RIGHT_ALT), xPos, row5, KeyDimensions.ALT));
+        keys.add(l.key(Keybind.fromKey(KEY_RALT), xPos, row5, KeyDimensions.ALT));
         xPos += l.px(KeyDimensions.ALT) + l.keyGap;
-        keys.add(l.key(Keybind.fromKey(GLFW.GLFW_KEY_RIGHT_SUPER), xPos, row5, KeyDimensions.GUI));
-        xPos += l.px(KeyDimensions.GUI) + l.keyGap;
-        keys.add(l.key(Keybind.fromKey(GLFW.GLFW_KEY_MENU), xPos, row5, KeyDimensions.MENU));
-        xPos += l.px(KeyDimensions.MENU) + l.keyGap;
-        keys.add(l.key(Keybind.fromKey(GLFW.GLFW_KEY_RIGHT_CONTROL), xPos, row5, KeyDimensions.CTRL));
-        keys.add(l.key(Keybind.fromKey(GLFW.GLFW_KEY_LEFT), l.ux(15.5), row5));
-        keys.add(l.key(Keybind.fromKey(GLFW.GLFW_KEY_DOWN), l.ux(16.5), row5));
-        keys.add(l.key(Keybind.fromKey(GLFW.GLFW_KEY_RIGHT), l.ux(17.5), row5));
+//        keys.add(l.key(Keybind.fromKey(KEY_RSUPER), xPos, row5, KeyDimensions.GUI));
+//        xPos += l.px(KeyDimensions.GUI) + l.keyGap;
+//        keys.add(l.key(Keybind.fromKey(KEY_MENU), xPos, row5, KeyDimensions.MENU));
+//        xPos += l.px(KeyDimensions.MENU) + l.keyGap;
+        keys.add(l.key(Keybind.fromKey(KEY_RCONTROL), xPos, row5, KeyDimensions.CTRL));
+        keys.add(l.key(Keybind.fromKey(KEY_LEFT), l.ux(15.5), row5));
+        keys.add(l.key(Keybind.fromKey(KEY_DOWN), l.ux(16.5), row5));
+        keys.add(l.key(Keybind.fromKey(KEY_RIGHT), l.ux(17.5), row5));
     }
 
     private void buildIsoLayout(LayoutContext l) {
         double row0 = l.uy(0), row1 = l.uy(1), row2 = l.uy(2), row3 = l.uy(3), row4 = l.uy(4), row5 = l.uy(5);
 
         // Row 0: ESC, F1-F12, Print/Scroll/Pause
-        keys.add(l.key(Keybind.fromKey(GLFW.GLFW_KEY_ESCAPE), 0, row0));
+        keys.add(l.key(Keybind.fromKey(KEY_ESCAPE), 0, row0));
         for (int i = 0; i < 4; i++)
-            keys.add(l.key(Keybind.fromKey(GLFW.GLFW_KEY_F1 + i), l.ux(2d + i), row0));
+            keys.add(l.key(Keybind.fromKey(KEY_F1 + i), l.ux(2d + i), row0));
         for (int i = 0; i < 4; i++)
-            keys.add(l.key(Keybind.fromKey(GLFW.GLFW_KEY_F5 + i), l.ux(6.5 + i), row0));
+            keys.add(l.key(Keybind.fromKey(KEY_F5 + i), l.ux(6.5 + i), row0));
         for (int i = 0; i < 4; i++)
-            keys.add(l.key(Keybind.fromKey(GLFW.GLFW_KEY_F9 + i), l.ux(11d + i), row0));
-        keys.add(l.key(Keybind.fromKey(GLFW.GLFW_KEY_PRINT_SCREEN), l.ux(15.5), row0));
-        keys.add(l.key(Keybind.fromKey(GLFW.GLFW_KEY_SCROLL_LOCK), l.ux(16.5), row0));
-        keys.add(l.key(Keybind.fromKey(GLFW.GLFW_KEY_PAUSE), l.ux(17.5), row0));
+            keys.add(l.key(Keybind.fromKey(KEY_F9 + i), l.ux(11d + i), row0));
+        keys.add(l.key(Keybind.fromKey(KEY_PRINTSCREEN), l.ux(15.5), row0));
+        keys.add(l.key(Keybind.fromKey(KEY_SCROLLLOCK), l.ux(16.5), row0));
+        keys.add(l.key(Keybind.fromKey(KEY_PAUSE), l.ux(17.5), row0));
 
         // Row 1: ` 1-0 - = BS, Ins/Home/PgUp
-        int[] row1Keys = {GLFW.GLFW_KEY_GRAVE_ACCENT, GLFW.GLFW_KEY_1, GLFW.GLFW_KEY_2, GLFW.GLFW_KEY_3, GLFW.GLFW_KEY_4, GLFW.GLFW_KEY_5, GLFW.GLFW_KEY_6, GLFW.GLFW_KEY_7, GLFW.GLFW_KEY_8, GLFW.GLFW_KEY_9, GLFW.GLFW_KEY_0, GLFW.GLFW_KEY_MINUS, GLFW.GLFW_KEY_EQUAL};
+        int[] row1Keys = {KEY_GRAVE, KEY_1, KEY_2, KEY_3, KEY_4, KEY_5, KEY_6, KEY_7, KEY_8, KEY_9, KEY_0, KEY_MINUS, KEY_EQUALS};
         for (int i = 0; i < row1Keys.length; i++)
             keys.add(l.key(Keybind.fromKey(row1Keys[i]), l.ux(i), row1));
-        keys.add(l.key(Keybind.fromKey(GLFW.GLFW_KEY_BACKSPACE), l.ux(13), row1, KeyDimensions.BACKSPACE));
-        keys.add(l.key(Keybind.fromKey(GLFW.GLFW_KEY_INSERT), l.ux(15.5), row1));
-        keys.add(l.key(Keybind.fromKey(GLFW.GLFW_KEY_HOME), l.ux(16.5), row1));
-        keys.add(l.key(Keybind.fromKey(GLFW.GLFW_KEY_PAGE_UP), l.ux(17.5), row1));
+        keys.add(l.key(Keybind.fromKey(KEY_BACKSPACE), l.ux(13), row1, KeyDimensions.BACKSPACE));
+        keys.add(l.key(Keybind.fromKey(KEY_INSERT), l.ux(15.5), row1));
+        keys.add(l.key(Keybind.fromKey(KEY_HOME), l.ux(16.5), row1));
+        keys.add(l.key(Keybind.fromKey(KEY_PAGEUP), l.ux(17.5), row1));
 
         // Row 2: Tab QWERTY... brackets
-        keys.add(l.key(Keybind.fromKey(GLFW.GLFW_KEY_TAB), 0, row2, KeyDimensions.TAB));
-        int[] row2Keys = {GLFW.GLFW_KEY_Q, GLFW.GLFW_KEY_W, GLFW.GLFW_KEY_E, GLFW.GLFW_KEY_R, GLFW.GLFW_KEY_T, GLFW.GLFW_KEY_Y, GLFW.GLFW_KEY_U, GLFW.GLFW_KEY_I, GLFW.GLFW_KEY_O, GLFW.GLFW_KEY_P, GLFW.GLFW_KEY_LEFT_BRACKET, GLFW.GLFW_KEY_RIGHT_BRACKET};
+        keys.add(l.key(Keybind.fromKey(KEY_TAB), 0, row2, KeyDimensions.TAB));
+        int[] row2Keys = {KEY_Q, KEY_W, KEY_E, KEY_R, KEY_T, KEY_Y, KEY_U, KEY_I, KEY_O, KEY_P, KEY_LBRACKET, KEY_RBRACKET};
         double tabEnd = l.px(KeyDimensions.TAB) + l.keyGap;
         for (int i = 0; i < row2Keys.length; i++)
             keys.add(l.key(Keybind.fromKey(row2Keys[i]), tabEnd + l.ux(i), row2));
-        keys.add(l.key(Keybind.fromKey(GLFW.GLFW_KEY_DELETE), l.ux(15.5), row2));
-        keys.add(l.key(Keybind.fromKey(GLFW.GLFW_KEY_END), l.ux(16.5), row2));
-        keys.add(l.key(Keybind.fromKey(GLFW.GLFW_KEY_PAGE_DOWN), l.ux(17.5), row2));
+        keys.add(l.key(Keybind.fromKey(KEY_DELETE), l.ux(15.5), row2));
+        keys.add(l.key(Keybind.fromKey(KEY_END), l.ux(16.5), row2));
+        keys.add(l.key(Keybind.fromKey(KEY_PAGEDOWN), l.ux(17.5), row2));
 
         // Row 3: Caps ASDF..., ISO # key
-        keys.add(l.key(Keybind.fromKey(GLFW.GLFW_KEY_CAPS_LOCK), 0, row3, KeyDimensions.CAPS_LOCK));
-        int[] row3Keys = {GLFW.GLFW_KEY_A, GLFW.GLFW_KEY_S, GLFW.GLFW_KEY_D, GLFW.GLFW_KEY_F, GLFW.GLFW_KEY_G, GLFW.GLFW_KEY_H, GLFW.GLFW_KEY_J, GLFW.GLFW_KEY_K, GLFW.GLFW_KEY_L, GLFW.GLFW_KEY_SEMICOLON, GLFW.GLFW_KEY_APOSTROPHE};
+        keys.add(l.key(Keybind.fromKey(KEY_CAPSLOCK), 0, row3, KeyDimensions.CAPS_LOCK));
+        int[] row3Keys = {KEY_A, KEY_S, KEY_D, KEY_F, KEY_G, KEY_H, KEY_J, KEY_K, KEY_L, KEY_SEMICOLON, KEY_APOSTROPHE};
         double capsEnd = l.px(KeyDimensions.CAPS_LOCK) + l.keyGap;
         for (int i = 0; i < row3Keys.length; i++)
             keys.add(l.key(Keybind.fromKey(row3Keys[i]), capsEnd + l.ux(i), row3));
-        keys.add(l.key(Keybind.fromKey(GLFW.GLFW_KEY_BACKSLASH), capsEnd + l.ux(11), row3));
+        keys.add(l.key(Keybind.fromKey(KEY_BACKSLASH), capsEnd + l.ux(11), row3));
 
         // ISO Enter
         double topBarStartX = tabEnd + l.ux(12);
@@ -450,41 +446,41 @@ public class KeyboardHud extends HudElement {
         double enterStemWidth = l.px(KeyDimensions.ENTER_ISO_WIDTH);
         double enterStemHeight = l.px(KeyDimensions.ENTER_ISO_HEIGHT);
         double enterStemX = mainBlockRightEdge - enterStemWidth;
-        keys.add(new IsoEnterKey(Keybind.fromKey(GLFW.GLFW_KEY_ENTER), enterStemX, row2, enterStemWidth, enterStemHeight, topBarStartX));
+        keys.add(new IsoEnterKey(Keybind.fromKey(KEY_RETURN), enterStemX, row2, enterStemWidth, enterStemHeight, topBarStartX));
 
         // Row 4: LShift, ISO \| key, ZXCV..., RShift, Up
-        keys.add(l.key(Keybind.fromKey(GLFW.GLFW_KEY_LEFT_SHIFT), 0, row4, KeyDimensions.LEFT_SHIFT_ISO));
+        keys.add(l.key(Keybind.fromKey(KEY_LSHIFT), 0, row4, KeyDimensions.LEFT_SHIFT_ISO));
         double lShiftEnd = l.px(KeyDimensions.LEFT_SHIFT_ISO) + l.keyGap;
-        keys.add(l.key(Keybind.fromKey(GLFW.GLFW_KEY_WORLD_2), lShiftEnd, row4));
+//        keys.add(l.key(Keybind.fromKey(KEY_WORLD_2), lShiftEnd, row4));
 
-        int[] row4Keys = {GLFW.GLFW_KEY_Z, GLFW.GLFW_KEY_X, GLFW.GLFW_KEY_C, GLFW.GLFW_KEY_V, GLFW.GLFW_KEY_B, GLFW.GLFW_KEY_N, GLFW.GLFW_KEY_M, GLFW.GLFW_KEY_COMMA, GLFW.GLFW_KEY_PERIOD, GLFW.GLFW_KEY_SLASH};
+        int[] row4Keys = {KEY_Z, KEY_X, KEY_C, KEY_V, KEY_B, KEY_N, KEY_M, KEY_COMMA, KEY_PERIOD, KEY_SLASH};
         for (int i = 0; i < row4Keys.length; i++)
             keys.add(l.key(Keybind.fromKey(row4Keys[i]), lShiftEnd + l.ux(1d + i), row4));
 
         double rShiftX = lShiftEnd + l.ux(11);
-        keys.add(l.key(Keybind.fromKey(GLFW.GLFW_KEY_RIGHT_SHIFT), rShiftX, row4, KeyDimensions.RIGHT_SHIFT));
-        keys.add(l.key(Keybind.fromKey(GLFW.GLFW_KEY_UP), l.ux(16.5), row4));
+        keys.add(l.key(Keybind.fromKey(KEY_RSHIFT), rShiftX, row4, KeyDimensions.RIGHT_SHIFT));
+        keys.add(l.key(Keybind.fromKey(KEY_UP), l.ux(16.5), row4));
 
         // Row 5: Ctrl/Win/Alt/Space/AltGr/Win/Menu/Ctrl, Arrows
         double xPos = 0;
-        keys.add(l.key(Keybind.fromKey(GLFW.GLFW_KEY_LEFT_CONTROL), xPos, row5, KeyDimensions.CTRL));
+        keys.add(l.key(Keybind.fromKey(KEY_LCONTROL), xPos, row5, KeyDimensions.CTRL));
         xPos += l.px(KeyDimensions.CTRL) + l.keyGap;
-        keys.add(l.key(Keybind.fromKey(GLFW.GLFW_KEY_LEFT_SUPER), xPos, row5, KeyDimensions.GUI));
-        xPos += l.px(KeyDimensions.GUI) + l.keyGap;
-        keys.add(l.key(Keybind.fromKey(GLFW.GLFW_KEY_LEFT_ALT), xPos, row5, KeyDimensions.ALT));
+//        keys.add(l.key(Keybind.fromKey(KEY_LSUPER), xPos, row5, KeyDimensions.GUI));
+//        xPos += l.px(KeyDimensions.GUI) + l.keyGap;
+        keys.add(l.key(Keybind.fromKey(KEY_LALT), xPos, row5, KeyDimensions.ALT));
         xPos += l.px(KeyDimensions.ALT) + l.keyGap;
-        keys.add(l.key(Keybind.fromKey(GLFW.GLFW_KEY_SPACE), xPos, row5, KeyDimensions.SPACEBAR));
+        keys.add(l.key(Keybind.fromKey(KEY_SPACE), xPos, row5, KeyDimensions.SPACEBAR));
         xPos += l.px(KeyDimensions.SPACEBAR) + l.keyGap;
-        keys.add(l.keyNamed(Keybind.fromKey(GLFW.GLFW_KEY_RIGHT_ALT), "AltGr", xPos, row5, KeyDimensions.ALT));
+        keys.add(l.keyNamed(Keybind.fromKey(KEY_RALT), "AltGr", xPos, row5, KeyDimensions.ALT));
         xPos += l.px(KeyDimensions.ALT) + l.keyGap;
-        keys.add(l.key(Keybind.fromKey(GLFW.GLFW_KEY_RIGHT_SUPER), xPos, row5, KeyDimensions.GUI));
-        xPos += l.px(KeyDimensions.GUI) + l.keyGap;
-        keys.add(l.key(Keybind.fromKey(GLFW.GLFW_KEY_MENU), xPos, row5, KeyDimensions.MENU));
-        xPos += l.px(KeyDimensions.MENU) + l.keyGap;
-        keys.add(l.key(Keybind.fromKey(GLFW.GLFW_KEY_RIGHT_CONTROL), xPos, row5, KeyDimensions.CTRL));
-        keys.add(l.key(Keybind.fromKey(GLFW.GLFW_KEY_LEFT), l.ux(15.5), row5));
-        keys.add(l.key(Keybind.fromKey(GLFW.GLFW_KEY_DOWN), l.ux(16.5), row5));
-        keys.add(l.key(Keybind.fromKey(GLFW.GLFW_KEY_RIGHT), l.ux(17.5), row5));
+//        keys.add(l.key(Keybind.fromKey(KEY_RSUPER), xPos, row5, KeyDimensions.GUI));
+//        xPos += l.px(KeyDimensions.GUI) + l.keyGap;
+//        keys.add(l.key(Keybind.fromKey(KEY_MEN), xPos, row5, KeyDimensions.MENU));
+//        xPos += l.px(KeyDimensions.MENU) + l.keyGap;
+        keys.add(l.key(Keybind.fromKey(KEY_RCONTROL), xPos, row5, KeyDimensions.CTRL));
+        keys.add(l.key(Keybind.fromKey(KEY_LEFT), l.ux(15.5), row5));
+        keys.add(l.key(Keybind.fromKey(KEY_DOWN), l.ux(16.5), row5));
+        keys.add(l.key(Keybind.fromKey(KEY_RIGHT), l.ux(17.5), row5));
     }
 
     private void calculateSize() {
@@ -546,9 +542,7 @@ public class KeyboardHud extends HudElement {
     @Override
     public void render(HudRenderer renderer) {
         if (keys.isEmpty()) {
-            if (mc.options != null) {
-                onPresetChanged(preset.get());
-            }
+            onPresetChanged(preset.get());
             return;
         }
 
@@ -667,7 +661,7 @@ public class KeyboardHud extends HudElement {
         private float delta;
 
         public Key() {
-            this.keybind = Keybind.fromKey(GLFW.GLFW_KEY_SPACE);
+            this.keybind = Keybind.fromKey(KEY_SPACE);
             this.width = 60;
             this.height = 40;
         }
@@ -712,14 +706,14 @@ public class KeyboardHud extends HudElement {
             return "?";
         }
 
-        public boolean matches(int input, int scancode, boolean key) {
+        public boolean matches(int input, int keycode, boolean key) {
             if (keybind != null) {
                 return keybind.isKey() == key && keybind.getValue() == input;
             } else {
                 InputConstants.Key inputKey = ((KeyMappingAccessor) binding).meteor$getKey();
                 boolean isKey = inputKey.getType() != InputConstants.Type.MOUSE;
-                return isKey == key && inputKey.getType() == InputConstants.Type.SCANCODE
-                    ? scancode == inputKey.getValue()
+                return isKey == key && inputKey.getType() == InputConstants.Type.KEYBOARD
+                    ? keycode == inputKey.getValue()
                     : input == inputKey.getValue();
             }
         }
@@ -736,17 +730,16 @@ public class KeyboardHud extends HudElement {
         }
 
         public boolean isNativelyPressed() {
-            long window = mc.getWindow().handle();
             if (keybind != null) {
                 if (!keybind.isSet()) return false;
                 return keybind.isKey()
-                    ? GLFW.glfwGetKey(window, keybind.getValue()) != GLFW.GLFW_RELEASE
-                    : GLFW.glfwGetMouseButton(window, keybind.getValue()) != GLFW.GLFW_RELEASE;
+                    ? Type.KEYBOARD.getOrCreate(keybind.getValue()).getValue() != RELEASE
+                    : Type.MOUSE.getOrCreate(keybind.getValue()).getValue() != RELEASE;
             } else {
                 int key = ((KeyMappingAccessor) binding).meteor$getKey().getValue();
                 return key >= 0 && key < 8
-                    ? GLFW.glfwGetMouseButton(window, key) != GLFW.GLFW_RELEASE
-                    : GLFW.glfwGetKey(window, key) != GLFW.GLFW_RELEASE;
+                    ? Type.MOUSE.getOrCreate(key).getValue() != RELEASE
+                    : Type.KEYBOARD.getOrCreate(key).getValue() != RELEASE;
             }
         }
 
@@ -915,7 +908,7 @@ public class KeyboardHud extends HudElement {
             sgGeneral.add(new KeybindSetting.Builder()
                 .name("custom-key")
                 .description("The key to display.")
-                .defaultValue(Keybind.fromKey(GLFW.GLFW_KEY_SPACE))
+                .defaultValue(Keybind.fromKey(KEY_SPACE))
                 .onChanged(k -> {
                     this.key.keybind = k;
                     this.screen.reload();

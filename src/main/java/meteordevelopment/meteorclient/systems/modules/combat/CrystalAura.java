@@ -874,8 +874,8 @@ public class CrystalAura extends Module {
         InteractionHand hand = InvUtils.findInHotbar(Items.END_CRYSTAL).getHand();
         if (hand == null) hand = InteractionHand.MAIN_HAND;
 
-        if (swingMode.get().client()) mc.player.swing(hand);
-        if (swingMode.get().packet()) mc.getConnection().send(new ServerboundSwingPacket(hand));
+        if (swingMode.get().client()) mc.player.swing(hand, mc.player.getItemInHand(hand).getAttackAnimation(), false);
+        if (swingMode.get().packet()) mc.getConnection().send(new ServerboundPunchPacket());
 
         attacks++;
     }
@@ -1037,8 +1037,8 @@ public class CrystalAura extends Module {
             // Place crystal
             mc.gameMode.startPrediction(mc.level, sequence -> new ServerboundUseItemOnPacket(hand, result, sequence));
 
-            if (swingMode.get().client()) mc.player.swing(hand);
-            if (swingMode.get().packet()) mc.getConnection().send(new ServerboundSwingPacket(hand));
+            if (swingMode.get().client()) mc.player.swing(hand, mc.player.getItemInHand(hand).getAttackAnimation(), false);
+            if (swingMode.get().packet()) mc.getConnection().send(new ServerboundPunchPacket());
 
             placing = true;
             placingTimer = 4;

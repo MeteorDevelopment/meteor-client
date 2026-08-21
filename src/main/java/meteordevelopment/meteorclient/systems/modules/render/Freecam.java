@@ -43,7 +43,8 @@ import net.minecraft.world.phys.*;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import org.joml.Vector3d;
 import org.jspecify.annotations.Nullable;
-import org.lwjgl.glfw.GLFW;
+
+import static com.mojang.blaze3d.platform.InputConstants.KEY_F3;
 
 public class Freecam extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -305,7 +306,7 @@ public class Freecam extends Module {
 
     @EventHandler(priority = EventPriority.HIGH)
     public void onKey(KeyInputEvent event) {
-        if (Input.isKeyPressed(GLFW.GLFW_KEY_F3)) return;
+        if (Input.isKeyPressed(KEY_F3)) return;
         if (checkGuiMove()) return;
 
         if (onInput(event.key(), event.action)) event.cancel();

@@ -5,14 +5,14 @@
 
 package meteordevelopment.meteorclient.systems.modules.render;
 
-import com.mojang.blaze3d.GpuFormat;
-import com.mojang.blaze3d.buffers.GpuBufferSlice;
 import com.mojang.blaze3d.buffers.Std140Builder;
 import com.mojang.blaze3d.buffers.Std140SizeCalculator;
-import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.textures.FilterMode;
-import com.mojang.blaze3d.textures.GpuTextureView;
+import com.mojang.renderpearl.api.GpuFormat;
+import com.mojang.renderpearl.api.buffers.GpuBufferSlice;
+import com.mojang.renderpearl.api.pipeline.RenderPipeline;
+import com.mojang.renderpearl.api.textures.FilterMode;
+import com.mojang.renderpearl.api.textures.GpuTextureView;
 import it.unimi.dsi.fastutil.ints.IntFloatImmutablePair;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.game.ResolutionChangedEvent;
@@ -31,7 +31,7 @@ import meteordevelopment.orbit.listeners.ConsumerListener;
 import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.client.renderer.DynamicUniformStorage;
+import net.minecraft.client.renderer.DynamicGpuDataStorage;
 import org.jspecify.annotations.NonNull;
 
 import java.nio.ByteBuffer;
@@ -217,7 +217,7 @@ public class Blur extends Module {
             .attachments(mc.gameRenderer.mainRenderTarget())
             .pipeline(MeteorRenderPipelines.BLUR_PASSTHROUGH)
             .fullscreen()
-            .sampler("u_Texture", fbos[0], RenderSystem.getSamplerCache().getClampToEdge(FilterMode.LINEAR)) // todo ???
+            .sampler("u_Texture", fbos[0], RenderSystem.getSamplerCache().getClampToEdge(FilterMode.LINEAR))
             .end();
     }
 
@@ -268,7 +268,7 @@ public class Blur extends Module {
     private static final FixedUniformStorage<BlurUniformData> UNIFORM_STORAGE = new FixedUniformStorage<>("Meteor - Blur UBO", UNIFORM_SIZE, 6);
 
     private record BlurUniformData(float halfTexelSizeX, float halfTexelSizeY,
-                                   float offset) implements DynamicUniformStorage.DynamicUniform {
+                                   float offset) implements DynamicGpuDataStorage.DynamicGpuData {
         @Override
         public void write(@NonNull ByteBuffer buffer) {
             Std140Builder.intoBuffer(buffer)

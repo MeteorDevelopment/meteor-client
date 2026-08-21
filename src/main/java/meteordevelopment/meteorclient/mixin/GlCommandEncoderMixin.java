@@ -5,21 +5,16 @@
 
 package meteordevelopment.meteorclient.mixin;
 
-import com.mojang.blaze3d.opengl.GlCommandEncoder;
-import com.mojang.blaze3d.opengl.GlDevice;
-import com.mojang.blaze3d.pipeline.RenderPipeline;
-import com.mojang.blaze3d.systems.RenderPassBackend;
+import com.mojang.renderpearl.backend.api.RenderPassBackend;
+import com.mojang.renderpearl.backend.opengl.GlCommandEncoder;
+import com.mojang.renderpearl.backend.opengl.GlDevice;
 import meteordevelopment.meteorclient.mixininterface.IGpuDevice;
-import meteordevelopment.meteorclient.mixininterface.IRenderPipeline;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-
-import static org.lwjgl.opengl.GL11C.*;
 
 @Mixin(GlCommandEncoder.class)
 public abstract class GlCommandEncoderMixin {
@@ -28,18 +23,19 @@ public abstract class GlCommandEncoderMixin {
     private GlDevice device;
 
     @SuppressWarnings("deprecation")
-    @Inject(method = "createRenderPass(Lcom/mojang/blaze3d/systems/RenderPassDescriptor;)Lcom/mojang/blaze3d/systems/RenderPassBackend;", at = @At("RETURN"))
+    @Inject(method = "createRenderPass", at = @At("RETURN"))
     private void createRenderPass$iGpuDevice(CallbackInfoReturnable<RenderPassBackend> cir) {
         ((IGpuDevice) device).meteor$onCreateRenderPass(cir.getReturnValue());
     }
 
-    @Inject(method = "applyPipelineState", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/opengl/GlStateManager;_polygonMode(II)V"))
-    private void setPipelineAndApplyState$lineSmooth(RenderPipeline pipeline, CallbackInfo ci) {
-        if (((IRenderPipeline) pipeline).meteor$getLineSmooth()) {
-            glEnable(GL_LINE_SMOOTH);
-            glLineWidth(1);
-        } else {
-            glDisable(GL_LINE_SMOOTH);
-        }
-    }
+    // todo ?
+//    @Inject(method = "applyPipelineState", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/opengl/GlStateManager;_polygonMode(II)V"))
+//    private void setPipelineAndApplyState$lineSmooth(RenderPipeline pipeline, CallbackInfo ci) {
+//        if (((IRenderPipeline) pipeline).meteor$getLineSmooth()) {
+//            glEnable(GL_LINE_SMOOTH);
+//            glLineWidth(1);
+//        } else {
+//            glDisable(GL_LINE_SMOOTH);
+//        }
+//    }
 }

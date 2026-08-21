@@ -31,7 +31,7 @@ import meteordevelopment.orbit.EventPriority;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
-import net.minecraft.network.protocol.game.ServerboundSwingPacket;
+import net.minecraft.network.protocol.game.ServerboundPunchPacket;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.block.Block;
@@ -509,8 +509,8 @@ public class Nuker extends Module {
             // Packet mine mode
             mc.gameMode.startPrediction(mc.level, sequence -> new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK, blockPos, BlockUtils.getDirection(blockPos), sequence));
 
-            if (swing.get()) mc.player.swing(InteractionHand.MAIN_HAND);
-            else mc.getConnection().send(new ServerboundSwingPacket(InteractionHand.MAIN_HAND));
+            if (swing.get()) mc.player.swing(InteractionHand.MAIN_HAND, mc.player.getMainHandItem().getAttackAnimation(), false);
+            else mc.getConnection().send(new ServerboundPunchPacket());
 
             mc.gameMode.startPrediction(mc.level, sequence -> new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.STOP_DESTROY_BLOCK, blockPos, BlockUtils.getDirection(blockPos), sequence));
         } else {
@@ -523,7 +523,7 @@ public class Nuker extends Module {
         Vec3 pos = Vec3.atCenterOf(blockPos);
         ClipContext clipContext = new ClipContext(mc.player.getEyePosition(), pos, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, mc.player);
         BlockHitResult result = mc.level.clip(clipContext);
-        if (result == null || !result.getBlockPos().equals(blockPos))
+        if (!result.getBlockPos().equals(blockPos))
             return !PlayerUtils.isWithin(pos, wallsRange.get());
 
         return false;

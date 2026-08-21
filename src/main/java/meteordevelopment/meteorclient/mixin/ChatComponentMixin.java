@@ -94,7 +94,7 @@ public abstract class ChatComponentMixin implements IChatHud {
     }
 
     @Inject(at = @At("HEAD"), method = "addMessage", cancellable = true)
-    private void onAddMessage(Component message, MessageSignature signature, GuiMessageSource source, GuiMessageTag indicator, CallbackInfo ci, @Local(argsOnly = true, name = "contents") LocalRef<Component> contents, @Local(argsOnly = true, name = "tag") LocalRef<GuiMessageTag> tag) {
+    private void onAddMessage(Component message, MessageSignature signature, GuiMessageSource source, GuiMessageTag indicator, CallbackInfo ci, @Local(argsOnly = true) LocalRef<Component> contents, @Local(argsOnly = true) LocalRef<GuiMessageTag> tag) {
         ReceiveMessageEvent event = MeteorClient.EVENT_BUS.post(ReceiveMessageEvent.get(message, indicator, nextId));
 
         if (event.isCancelled()) ci.cancel();

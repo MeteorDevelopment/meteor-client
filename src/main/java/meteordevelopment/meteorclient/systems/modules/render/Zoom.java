@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.systems.modules.render;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.meteor.KeyInputEvent;
 import meteordevelopment.meteorclient.events.meteor.MouseScrollEvent;
@@ -19,7 +20,6 @@ import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.util.Mth;
-import org.lwjgl.glfw.GLFW;
 
 public class Zoom extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -109,7 +109,7 @@ public class Zoom extends Module {
 
     @EventHandler
     public void onKeyPressed(KeyInputEvent event) {
-        if (event.key() != GLFW.GLFW_KEY_F1) return;
+        if (event.key() != InputConstants.KEY_F1) return;
         hudManualToggled = true;
     }
 

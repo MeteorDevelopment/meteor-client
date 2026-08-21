@@ -37,7 +37,7 @@ public abstract class DynamicRegistryListSettingScreen<T> extends CollectionList
 
         Optional.ofNullable(Minecraft.getInstance().getConnection())
             .map(networkHandler -> (HolderLookup.Provider) networkHandler.registryAccess())
-            .orElseGet(VanillaRegistries::createLookup)
+            .orElseGet(VanillaRegistries::createWorldLookup)
             .lookup(registryKey)
             .ifPresent(registry -> registry.listElementIds().forEach(set::add));
 

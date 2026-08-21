@@ -5,7 +5,6 @@
 
 package meteordevelopment.meteorclient.gui.themes.meteor;
 
-import com.mojang.blaze3d.platform.MacosUtil;
 import meteordevelopment.meteorclient.gui.DefaultSettingsWidgetFactory;
 import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.WidgetScreen;
@@ -31,6 +30,7 @@ import meteordevelopment.meteorclient.systems.accounts.Account;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
+import org.apache.commons.lang3.SystemUtils;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
@@ -380,7 +380,7 @@ public class MeteorGuiTheme extends GuiTheme {
     public double scale(double value) {
         double scaled = value * scale.get();
 
-        if (MacosUtil.IS_MACOS) {
+        if (SystemUtils.IS_OS_MAC) {
             scaled /= (double) mc.getWindow().getWidth() / mc.getWindow().getWidth();
         }
 
