@@ -81,7 +81,7 @@ public abstract class AvatarRendererMixin
     @WrapWithCondition(method = "renderHand", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/SubmitNodeCollector;submitModelPart(Lnet/minecraft/client/model/geom/ModelPart;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/rendertype/RenderType;IILnet/minecraft/client/renderer/texture/UvMapping;)V"))
     private boolean renderArm$color(SubmitNodeCollector instance, ModelPart modelPart, PoseStack poseStack, RenderType renderType, int light, int uv, UvMapping uvMapping) {
         if (chams.isActive() && chams.hand.get()) {
-            instance.submitModelPart(modelPart, poseStack, renderType, light, OverlayTexture.NO_OVERLAY, uvMapping);
+            instance.submitModelPart(modelPart, poseStack, renderType, light, OverlayTexture.NO_OVERLAY, uvMapping, chams.handColor.get().getPacked(), 0);
             return false;
         }
 
