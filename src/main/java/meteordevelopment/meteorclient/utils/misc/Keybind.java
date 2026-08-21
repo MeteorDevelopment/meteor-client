@@ -149,7 +149,8 @@ public class Keybind implements ISerializable<Keybind>, ICopyable<Keybind> {
 
     public boolean matches(InputConstants.Key key, Set<Modifier> modifiers) {
         if (!isSet() || !this.key.equals(key)) return false;
-        return !hasMods() || this.modifiers.equals(modifiers);
+        if (!hasMods()) return modifiers.stream().noneMatch(m -> m == Modifier.SHIFT || m == Modifier.CONTROL || m == Modifier.ALT || m == Modifier.SUPER);
+        return this.modifiers.equals(modifiers);
     }
 
     public boolean matches(boolean isKey, int value, int modifiers) {
