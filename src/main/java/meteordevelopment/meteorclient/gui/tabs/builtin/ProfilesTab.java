@@ -185,7 +185,10 @@ public class ProfilesTab extends Tab {
                 if (!f.toPath().startsWith(profileFolder.toPath())) continue;
 
                 valid = true;
-                NbtIo.writeUnnamedTagWithFallback(entry.getValue(), new DataOutputStream(new FileOutputStream(f)));
+
+                try (DataOutputStream output = new DataOutputStream(new FileOutputStream(f))) {
+                    NbtIo.writeUnnamedTagWithFallback(entry.getValue(), output);
+                }
             }
 
             if (!valid) {
