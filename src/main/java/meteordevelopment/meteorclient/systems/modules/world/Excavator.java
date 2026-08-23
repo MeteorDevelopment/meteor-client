@@ -20,7 +20,7 @@ import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.world.phys.BlockHitResult;
-import org.lwjgl.glfw.GLFW;
+import com.mojang.blaze3d.platform.InputConstants;
 
 public class Excavator extends Module {
     private final IBaritone baritone = BaritoneAPI.getProvider().getPrimaryBaritone();
@@ -31,7 +31,7 @@ public class Excavator extends Module {
     private final Setting<Keybind> selectionBind = sgGeneral.add(new KeybindSetting.Builder()
         .name("selection-bind")
         .description("Bind to draw selection.")
-        .defaultValue(Keybind.fromButton(GLFW.GLFW_MOUSE_BUTTON_RIGHT))
+        .defaultValue(Keybind.fromButton(InputConstants.MOUSE_BUTTON_RIGHT))
         .build()
     );
 
@@ -88,13 +88,13 @@ public class Excavator extends Module {
     @Override
     public void onDeactivate() {
         baritone.getSelectionManager().removeSelection(baritone.getSelectionManager().getLastSelection());
-        if (baritone.getBuilderProcess().isActive()) baritone.getCommandManager().execute("stop");
+        if (baritone.getBuilderProcess().isActive()) baritone.getPathingBehavior().cancelEverything();
         status = Status.SEL_START;
     }
 
     @EventHandler
     private void onMouseClick(MouseClickEvent event) {
-        if (event.action != KeyAction.Press || !selectionBind.get().isPressed() || mc.screen != null) {
+        if (event.action != KeyAction.Press || !selectionBind.get().isPressed() || mc.gui.screen() != null) {
             return;
         }
         selectCorners();
@@ -102,7 +102,7 @@ public class Excavator extends Module {
 
     @EventHandler
     private void onKey(KeyInputEvent event) {
-        if (event.action != KeyAction.Press || !selectionBind.get().isPressed() || mc.screen != null) {
+        if (event.action != KeyAction.Press || !selectionBind.get().isPressed() || mc.gui.screen() != null) {
             return;
         }
         selectCorners();

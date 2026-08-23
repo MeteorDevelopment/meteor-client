@@ -55,7 +55,7 @@ public class MeteorGuiTheme extends GuiTheme {
         .sliderRange(0.75, 4)
         .onSliderRelease()
         .onChanged(_ -> {
-            if (mc.screen instanceof WidgetScreen widgetScreen) widgetScreen.invalidate();
+            if (mc.gui.screen() instanceof WidgetScreen widgetScreen) widgetScreen.invalidate();
         })
         .build()
     );
@@ -74,12 +74,21 @@ public class MeteorGuiTheme extends GuiTheme {
         .build()
     );
 
+    public final Setting<Boolean> modulesHelpText = sgGeneral.add(new BoolSetting.Builder()
+        .name("modules-help-text")
+        .description("Toggle help text in the modules screen.")
+        .defaultValue(true)
+        .build()
+    );
+
     public final Setting<Boolean> hideHUD = sgGeneral.add(new BoolSetting.Builder()
         .name("hide-HUD")
         .description("Hide HUD when in GUI.")
         .defaultValue(false)
         .onChanged(v -> {
-            if (mc.screen instanceof WidgetScreen) mc.options.hideGui = v;
+            if (mc.gui.screen() instanceof WidgetScreen) {
+                mc.gameRenderer.gameRenderState().guiRenderState.isHudHidden = v;
+            }
         })
         .build()
     );
@@ -381,6 +390,11 @@ public class MeteorGuiTheme extends GuiTheme {
     @Override
     public boolean categoryIcons() {
         return categoryIcons.get();
+    }
+
+    @Override
+    public boolean modulesHelpText() {
+        return modulesHelpText.get();
     }
 
     @Override

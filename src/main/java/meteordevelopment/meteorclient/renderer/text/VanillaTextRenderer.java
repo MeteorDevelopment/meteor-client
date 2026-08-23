@@ -5,30 +5,19 @@
 
 package meteordevelopment.meteorclient.renderer.text;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.ByteBufferBuilder;
-import com.mojang.blaze3d.vertex.PoseStack;
 import meteordevelopment.meteorclient.utils.render.color.Color;
-import net.minecraft.client.gui.Font.DisplayMode;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.util.LightCoordsUtil;
-import org.joml.Matrix4f;
-import org.joml.Matrix4fStack;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import org.joml.Matrix3x2fStack;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class VanillaTextRenderer implements TextRenderer {
     public static final VanillaTextRenderer INSTANCE = new VanillaTextRenderer();
 
-    private final ByteBufferBuilder buffer = new ByteBufferBuilder(2048);
-    private final MultiBufferSource.BufferSource immediate = MultiBufferSource.immediate(buffer);
-
-    private final PoseStack matrices = new PoseStack();
-    private final Matrix4f emptyMatrix = new Matrix4f();
-
     public double scale = 2;
     public boolean scaleIndividually;
 
+    private GuiGraphicsExtractor graphics;
     private boolean building;
     private double alpha = 1;
 
@@ -55,17 +44,17 @@ public class VanillaTextRenderer implements TextRenderer {
     }
 
     @Override
-    public void begin(double scale, boolean scaleOnly, boolean big) {
+    public void begin(GuiGraphicsExtractor graphics, double scale, boolean scaleOnly, boolean big) {
         if (building) throw new RuntimeException("VanillaTextRenderer.begin() called twice");
 
+        this.graphics = graphics;
         this.scale = scale * 2;
         this.building = true;
     }
 
     @Override
     public double render(String text, double x, double y, Color color, boolean shadow) {
-        boolean wasBuilding = building;
-        if (!wasBuilding) begin();
+        if (!building) throw new RuntimeException("VanillaTextRenderer.render() called without calling begin()");
 
         x += 0.5 * scale;
         y += 0.5 * scale;
@@ -73,21 +62,18 @@ public class VanillaTextRenderer implements TextRenderer {
         int preA = color.a;
         color.a = (int) (((double) color.a / 255 * alpha) * 255);
 
-        Matrix4f matrix = emptyMatrix;
-        if (scaleIndividually) {
-            matrices.pushPose();
-            matrices.scale((float) scale, (float) scale, 1);
-            matrix = matrices.last().pose();
-        }
+        Matrix3x2fStack matrices = graphics.pose();
+        matrices.pushMatrix();
 
-        mc.font.drawInBatch(text, (float) (x / scale), (float) (y / scale), color.getPacked(), shadow, matrix, immediate, DisplayMode.NORMAL, 0, LightCoordsUtil.FULL_BRIGHT);
+        matrices.scale((float) scale, (float) scale);
+
+        graphics.text(mc.font, text, (int) (x / scale), (int) (y / scale), color.getPacked());
         double x2 = (x / scale) + mc.font.width(text);
 
-        if (scaleIndividually) matrices.popPose();
+        matrices.popMatrix();
 
         color.a = preA;
 
-        if (!wasBuilding) end();
         return (x2 - 1) * scale;
     }
 
@@ -100,15 +86,7 @@ public class VanillaTextRenderer implements TextRenderer {
     public void end() {
         if (!building) throw new RuntimeException("VanillaTextRenderer.end() called without calling begin()");
 
-        Matrix4fStack matrixStack = RenderSystem.getModelViewStack();
-
-        matrixStack.pushMatrix();
-        if (!scaleIndividually) matrixStack.scale((float) scale, (float) scale, 1);
-
-        immediate.endBatch();
-
-        matrixStack.popMatrix();
-
+        this.graphics = null;
         this.scale = 2;
         this.building = false;
     }

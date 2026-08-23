@@ -16,10 +16,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.render.GuiRenderer;
 import net.minecraft.client.gui.render.pip.PictureInPictureRenderer;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.feature.FeatureRenderDispatcher;
-import net.minecraft.client.renderer.fog.FogRenderer;
 import net.minecraft.client.renderer.state.gui.GuiRenderState;
 import net.minecraft.util.profiling.Profiler;
 import org.spongepowered.asm.mixin.Mixin;
@@ -39,15 +36,13 @@ public abstract class GuiRendererMixin {
     private MeteorMcGuiRenderer guiRenderer;
 
     @Inject(method = "<init>", at = @At("RETURN"))
-    private void init$meteor(GuiRenderState renderState, MultiBufferSource.BufferSource bufferSource, SubmitNodeCollector submitNodeCollector, FeatureRenderDispatcher featureRenderDispatcher, List<PictureInPictureRenderer<?>> pictureInPictureRenderers, CallbackInfo ci) {
+    private void init$meteor(GuiRenderState renderState, FeatureRenderDispatcher featureRenderDispatcher, List<PictureInPictureRenderer<?>> pictureInPictureRenderers, CallbackInfo ci) {
         if ((GuiRenderer) (Object) this instanceof MeteorMcGuiRenderer) return;
 
         this.renderState = new GuiRenderState();
 
         guiRenderer = new MeteorMcGuiRenderer(
             this.renderState,
-            bufferSource,
-            submitNodeCollector,
             featureRenderDispatcher,
             pictureInPictureRenderers
         );
@@ -58,7 +53,7 @@ public abstract class GuiRendererMixin {
         if ((GuiRenderer) (Object) this instanceof MeteorMcGuiRenderer) return;
         var mc = Minecraft.getInstance();
 
-        if (mc.screen == null || mc.screen instanceof WidgetScreen) return;
+        if (mc.gui.screen() == null || mc.gui.screen() instanceof WidgetScreen) return;
         meteor$render2D(mc);
     }
 
@@ -67,9 +62,9 @@ public abstract class GuiRendererMixin {
         if ((GuiRenderer) (Object) this instanceof MeteorMcGuiRenderer) return;
         var mc = Minecraft.getInstance();
 
-        RenderSystem.getDevice().createCommandEncoder().clearDepthTexture(mc.getMainRenderTarget().getDepthTexture(), 1.0);
+        RenderSystem.getDevice().createCommandEncoder().clearDepthTexture(mc.gameRenderer.mainRenderTarget().getDepthTexture(), 1.0);
 
-        if (mc.screen == null || mc.screen instanceof WidgetScreen) {
+        if (mc.gui.screen() == null || mc.gui.screen() instanceof WidgetScreen) {
             meteor$render2D(mc);
         }
 
@@ -80,8 +75,6 @@ public abstract class GuiRendererMixin {
     private void meteor$render2D(Minecraft mc) {
         var mouseX = (int) mc.mouseHandler.getScaledXPos(mc.getWindow());
         var mouseY = (int) mc.mouseHandler.getScaledYPos(mc.getWindow());
-        var fogRenderer = ((GameRendererAccessor) mc.gameRenderer).meteor$fogRenderer();
-
         if (Utils.canUpdate() || HudEditorScreen.isOpen()) {
             Profiler.get().push(MeteorClient.MOD_ID + "_render_2d");
             Utils.unscaledProjection();
@@ -90,18 +83,18 @@ public abstract class GuiRendererMixin {
             var tickDelta = mc.getDeltaTracker().getGameTimeDeltaPartialTick(true);
 
             MeteorClient.EVENT_BUS.post(Render2DEvent.get(graphics, graphics.guiWidth(), graphics.guiHeight(), tickDelta));
-            guiRenderer.render(fogRenderer.getBuffer(FogRenderer.FogMode.NONE));
+            guiRenderer.render();
 
             Utils.scaledProjection();
             Profiler.get().pop();
         }
 
-        if (mc.screen instanceof WidgetScreen widgetScreen) {
+        if (mc.gui.screen() instanceof WidgetScreen widgetScreen) {
             var graphics = new GuiGraphicsExtractor(mc, renderState, mouseX, mouseY);
             var guiDelta = mc.getDeltaTracker().getGameTimeDeltaTicks();
 
             widgetScreen.renderCustom(graphics, mouseX, mouseY, guiDelta);
-            guiRenderer.render(fogRenderer.getBuffer(FogRenderer.FogMode.NONE));
+            guiRenderer.render();
         }
     }
 }

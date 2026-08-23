@@ -7,7 +7,7 @@ package meteordevelopment.meteorclient.addons;
 
 import meteordevelopment.meteorclient.utils.network.Http;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public record GithubRepo(String owner, String name, String branch, @Nullable String accessToken) {
     public GithubRepo(String owner, String name, @Nullable String accessToken) {

@@ -14,6 +14,7 @@ import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
+import org.jspecify.annotations.NonNull;
 
 public class ContainerTooltipComponent implements ClientTooltipComponent, MeteorTooltipData {
     private static final Identifier TEXTURE_CONTAINER_BACKGROUND = MeteorClient.identifier("textures/container.png");
@@ -32,17 +33,17 @@ public class ContainerTooltipComponent implements ClientTooltipComponent, Meteor
     }
 
     @Override
-    public int getHeight(Font textRenderer) {
+    public int getHeight(@NonNull Font textRenderer) {
         return 67;
     }
 
     @Override
-    public int getWidth(Font textRenderer) {
+    public int getWidth(@NonNull Font textRenderer) {
         return 176;
     }
 
     @Override
-    public void extractImage(Font font, int x, int y, int width, int height, GuiGraphicsExtractor graphics) {
+    public void extractImage(@NonNull Font font, int x, int y, int width, int height, GuiGraphicsExtractor graphics) {
         // Background
         graphics.blit(RenderPipelines.GUI_TEXTURED, TEXTURE_CONTAINER_BACKGROUND, x, y, 0, 0, 176, 67, 176, 67, color.getPacked());
 

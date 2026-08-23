@@ -332,7 +332,7 @@ public class BetterChat extends Module {
         MutableComponent returnText = null;
         int messageIndex = -1;
 
-        List<GuiMessage> messages = ((ChatComponentAccessor) mc.gui.getChat()).meteor$getAllMessages();
+        List<GuiMessage> messages = ((ChatComponentAccessor) mc.gui.hud.getChat()).meteor$getAllMessages();
         if (messages.isEmpty()) return null;
 
         for (int i = 0; i < Math.min(antiSpamDepth.get(), messages.size()); i++) {
@@ -363,7 +363,7 @@ public class BetterChat extends Module {
         }
 
         if (returnText != null) {
-            List<GuiMessage.Line> visible = ((ChatComponentAccessor) mc.gui.getChat()).meteor$getTrimmedMessages();
+            List<GuiMessage.Line> visible = ((ChatComponentAccessor) mc.gui.hud.getChat()).meteor$getTrimmedMessages();
 
             int start = -1;
             for (int i = 0; i < messageIndex; i++) {

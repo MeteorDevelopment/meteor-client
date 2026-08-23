@@ -5,6 +5,8 @@
 
 package meteordevelopment.meteorclient.systems.modules.misc;
 
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import meteordevelopment.meteorclient.events.entity.EntityAddedEvent;
@@ -34,6 +36,7 @@ import net.minecraft.util.ArrayListDeque;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityEvent;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.throwableitemprojectile.ThrownEnderpearl;
 import net.minecraft.world.phys.Vec3;
@@ -115,7 +118,7 @@ public class Notifier extends Module {
     private final Setting<Set<EntityType<?>>> entities = sgVisualRange.add(new EntityTypeListSetting.Builder()
         .name("entities")
         .description("Which entities to notify about.")
-        .defaultValue(EntityType.PLAYER)
+        .defaultValue(EntityTypes.PLAYER)
         .build()
     );
 
@@ -192,7 +195,7 @@ public class Notifier extends Module {
     private boolean loginPacket = true;
     private final Object2IntMap<UUID> totemPopMap = new Object2IntOpenHashMap<>();
     private final Object2IntMap<UUID> chatIdMap = new Object2IntOpenHashMap<>();
-    private final Map<Integer, Vec3> pearlStartPosMap = new HashMap<>();
+    private final Int2ObjectMap<Vec3> pearlStartPosMap = new Int2ObjectOpenHashMap<>();
     private final ArrayListDeque<MutableComponent> messageQueue = new ArrayListDeque<>();
 
     private final Random random = new Random();
@@ -249,15 +252,15 @@ public class Notifier extends Module {
         if (pearl.get()) {
             Entity e = event.entity;
             int i = e.getId();
-            if (pearlStartPosMap.containsKey(i)) {
+            Vec3 thrownPos = pearlStartPosMap.remove(i);
+            if (thrownPos != null) {
                 ThrownEnderpearl pearl = (ThrownEnderpearl) e;
                 if (pearl.getOwner() != null && pearl.getOwner() instanceof Player p) {
-                    double d = pearlStartPosMap.get(i).distanceTo(e.position());
+                    double d = thrownPos.distanceTo(e.position());
                     if ((!Friends.get().isFriend(p) || !pearlIgnoreFriends.get()) && (!p.equals(mc.player) || !pearlIgnoreOwn.get())) {
                         info("(highlight)%s's(default) pearl landed at %d, %d, %d (highlight)(%.1fm away, travelled %.1fm)(default).", pearl.getOwner().getName().getString(), pearl.blockPosition().getX(), pearl.blockPosition().getY(), pearl.blockPosition().getZ(), pearl.distanceTo(mc.player), d);
                     }
                 }
-                pearlStartPosMap.remove(i);
             }
         }
     }

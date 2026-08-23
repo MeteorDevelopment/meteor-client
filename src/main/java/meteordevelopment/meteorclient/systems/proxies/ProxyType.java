@@ -5,7 +5,7 @@
 
 package meteordevelopment.meteorclient.systems.proxies;
 
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public enum ProxyType {
     Socks4,

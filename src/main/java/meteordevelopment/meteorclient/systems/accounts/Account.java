@@ -6,6 +6,7 @@
 package meteordevelopment.meteorclient.systems.accounts;
 
 import com.mojang.authlib.minecraft.UserApiService;
+import com.mojang.authlib.yggdrasil.FriendsService;
 import com.mojang.authlib.yggdrasil.ServicesKeyType;
 import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
 import meteordevelopment.meteorclient.mixin.FileCacheAccessor;
@@ -15,6 +16,7 @@ import meteordevelopment.meteorclient.utils.misc.ISerializable;
 import meteordevelopment.meteorclient.utils.misc.NbtException;
 import net.minecraft.client.User;
 import net.minecraft.client.gui.screens.social.PlayerSocialManager;
+import net.minecraft.client.gui.screens.social.RemoteFriendListUpdateHandler;
 import net.minecraft.client.multiplayer.ProfileKeyPairManager;
 import net.minecraft.client.multiplayer.chat.report.ReportEnvironment;
 import net.minecraft.client.multiplayer.chat.report.ReportingContext;
@@ -71,8 +73,10 @@ public abstract class Account<T extends Account<?>> implements ISerializable<T> 
         YggdrasilAuthenticationService yggdrasilAuthenticationService = new YggdrasilAuthenticationService(mc.getProxy());
 
         UserApiService apiService = yggdrasilAuthenticationService.createUserApiService(session.getAccessToken());
+        FriendsService friendsService = yggdrasilAuthenticationService.createFriendsService(session.getAccessToken());
+        RemoteFriendListUpdateHandler remoteFriendListUpdateHandler = new RemoteFriendListUpdateHandler(friendsService, mc);
         mca.meteor$setUserApiService(apiService);
-        mca.meteor$setPlayerSocialManager(new PlayerSocialManager(mc, apiService));
+        mca.meteor$setPlayerSocialManager(new PlayerSocialManager(mc, apiService, friendsService, remoteFriendListUpdateHandler));
         mca.meteor$setProfileKeyPairManager(ProfileKeyPairManager.create(apiService, session, mc.gameDirectory.toPath()));
         mca.meteor$setReportingContext(ReportingContext.create(ReportEnvironment.local(), apiService));
         mca.meteor$setProfileFuture(CompletableFuture.supplyAsync(() -> mc.services().sessionService().fetchProfile(mc.getUser().getProfileId(), true), Util.ioPool()));

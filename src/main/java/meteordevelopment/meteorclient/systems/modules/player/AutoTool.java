@@ -15,6 +15,7 @@ import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.Xray;
 import meteordevelopment.meteorclient.systems.modules.world.InfinityMiner;
 import meteordevelopment.meteorclient.utils.Utils;
+import meteordevelopment.meteorclient.utils.misc.ListMode;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
@@ -162,8 +163,8 @@ public class AutoTool extends Module {
         for (int i = 0; i < 9; i++) {
             ItemStack itemStack = mc.player.getInventory().getItem(i);
 
-            if (listMode.get() == ListMode.Whitelist && !whitelist.get().contains(itemStack.getItem())) continue;
-            if (listMode.get() == ListMode.Blacklist && blacklist.get().contains(itemStack.getItem())) continue;
+            boolean itemInList = (listMode.get() == ListMode.Whitelist ? whitelist.get() : blacklist.get()).contains(itemStack.getItem());
+            if (!listMode.get().allows(itemInList)) continue;
 
             double score = getScore(itemStack, blockState, silkTouchForEnderChest.get(), fortuneForOresCrops.get(), prefer.get(), itemStack2 -> !shouldStopUsing(itemStack2));
             if (score < 0) continue;
@@ -250,8 +251,4 @@ public class AutoTool extends Module {
         SilkTouch
     }
 
-    public enum ListMode {
-        Whitelist,
-        Blacklist
-    }
 }

@@ -19,6 +19,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
@@ -77,11 +78,11 @@ public class Flamethrower extends Module {
         .name("entities")
         .description("Entities to cook.")
         .defaultValue(
-            EntityType.PIG,
-            EntityType.COW,
-            EntityType.SHEEP,
-            EntityType.CHICKEN,
-            EntityType.RABBIT
+            EntityTypes.PIG,
+            EntityTypes.COW,
+            EntityTypes.SHEEP,
+            EntityTypes.CHICKEN,
+            EntityTypes.RABBIT
         )
         .build()
     );

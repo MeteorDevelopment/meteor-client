@@ -25,7 +25,7 @@ import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import org.apache.commons.lang3.Strings;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -156,7 +156,7 @@ public class Waypoints extends System<Waypoints> implements Iterable<Waypoint> {
     }
 
     @Override
-    public @NotNull Iterator<Waypoint> iterator() {
+    public @NonNull Iterator<Waypoint> iterator() {
         return new WaypointIterator();
     }
 

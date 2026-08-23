@@ -21,7 +21,7 @@ public class OkPrompt extends Prompt<OkPrompt> {
     }
 
     public static OkPrompt create() {
-        return new OkPrompt(GuiThemes.get(), mc.screen);
+        return new OkPrompt(GuiThemes.get(), mc.gui.screen());
     }
 
     public static OkPrompt create(GuiTheme theme, Screen parent) {

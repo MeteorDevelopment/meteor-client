@@ -18,6 +18,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.BundleContents;
 import org.apache.commons.lang3.math.Fraction;
+import org.jspecify.annotations.NonNull;
 
 import java.util.List;
 
@@ -56,12 +57,12 @@ public class BundleTooltipComponent implements ClientTooltipComponent, MeteorToo
     }
 
     @Override
-    public int getHeight(Font textRenderer) {
+    public int getHeight(@NonNull Font textRenderer) {
         return height;
     }
 
     @Override
-    public int getWidth(Font textRenderer) {
+    public int getWidth(@NonNull Font textRenderer) {
         return width;
     }
 
@@ -71,7 +72,7 @@ public class BundleTooltipComponent implements ClientTooltipComponent, MeteorToo
     }
 
     @Override
-    public void extractImage(Font font, int x, int y, int width, int height, GuiGraphicsExtractor graphics) {
+    public void extractImage(@NonNull Font font, int x, int y, int width, int height, @NonNull GuiGraphicsExtractor graphics) {
         int row = 0;
         int col = 0;
 

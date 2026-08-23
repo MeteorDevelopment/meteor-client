@@ -48,7 +48,7 @@ public abstract class WAccount extends WHorizontalList {
         // Info
         if (account instanceof TokenAccount) {
             WButton info = add(theme.button("Info")).widget();
-            info.action = () -> mc.setScreen(new AccountInfoScreen(theme, account));
+            info.action = () -> mc.gui.setScreen(new AccountInfoScreen(theme, account));
         }
 
         // Login

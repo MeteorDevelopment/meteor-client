@@ -25,6 +25,7 @@ import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
+import org.jspecify.annotations.NonNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,7 +36,7 @@ import java.util.function.Consumer;
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 import static meteordevelopment.meteorclient.utils.Utils.getWindowHeight;
 import static meteordevelopment.meteorclient.utils.Utils.getWindowWidth;
-import static org.lwjgl.glfw.GLFW.*;
+import static com.mojang.blaze3d.platform.InputConstants.*;
 
 public abstract class WidgetScreen extends Screen {
     private static final GuiRenderer RENDERER = new GuiRenderer();
@@ -67,7 +68,7 @@ public abstract class WidgetScreen extends Screen {
     public WidgetScreen(GuiTheme theme, String title) {
         super(Component.literal(title));
 
-        this.parent = mc.screen;
+        this.parent = mc.gui.screen();
         this.root = new WFullScreenRoot();
         this.theme = theme;
 
@@ -119,7 +120,7 @@ public abstract class WidgetScreen extends Screen {
     }
 
     @Override
-    public boolean mouseClicked(MouseButtonEvent click, boolean doubled) {
+    public boolean mouseClicked(@NonNull MouseButtonEvent click, boolean doubled) {
         if (locked) return false;
 
         double mouseX = click.x();
@@ -140,7 +141,7 @@ public abstract class WidgetScreen extends Screen {
     }
 
     @Override
-    public boolean mouseReleased(MouseButtonEvent click) {
+    public boolean mouseReleased(@NonNull MouseButtonEvent click) {
         if (locked) return false;
 
         double mouseX = click.x();
@@ -150,7 +151,7 @@ public abstract class WidgetScreen extends Screen {
         mouseX *= s;
         mouseY *= s;
 
-        if (debug && click.button() == GLFW_MOUSE_BUTTON_RIGHT)
+        if (debug && click.button() == MOUSE_BUTTON_RIGHT)
             DEBUG_RENDERER.mouseReleased(root, new MouseButtonEvent(mouseX, mouseY, click.buttonInfo()), 0);
 
         return root.mouseReleased(new MouseButtonEvent(mouseX, mouseY, click.buttonInfo()));
@@ -180,15 +181,15 @@ public abstract class WidgetScreen extends Screen {
     }
 
     @Override
-    public boolean keyReleased(KeyEvent input) {
+    public boolean keyReleased(@NonNull KeyEvent input) {
         if (locked) return false;
 
-        if ((input.modifiers() == GLFW_MOD_CONTROL || input.modifiers() == GLFW_MOD_SUPER) && input.key() == GLFW_KEY_9) {
+        if ((input.modifiers() == MOD_CONTROL || input.modifiers() == MOD_SUPER) && input.key() == KEY_9) {
             debug = !debug;
             return true;
         }
 
-        if ((input.key() == GLFW_KEY_ENTER || input.key() == GLFW_KEY_KP_ENTER) && enterAction != null) {
+        if ((input.key() == KEY_RETURN || input.key() == KEY_NUMPADENTER) && enterAction != null) {
             enterAction.run();
             return true;
         }
@@ -197,14 +198,14 @@ public abstract class WidgetScreen extends Screen {
     }
 
     @Override
-    public boolean keyPressed(KeyEvent input) {
+    public boolean keyPressed(@NonNull KeyEvent input) {
         if (locked) return false;
 
         boolean shouldReturn = root.keyPressed(input) || super.keyPressed(input);
         if (shouldReturn) return true;
 
         // Select next text box if TAB was pressed
-        if (input.key() == GLFW_KEY_TAB) {
+        if (input.key() == KEY_TAB) {
             AtomicReference<WTextBox> firstTextBox = new AtomicReference<>(null);
             AtomicBoolean done = new AtomicBoolean(false);
             AtomicBoolean foundFocused = new AtomicBoolean(false);
@@ -235,10 +236,10 @@ public abstract class WidgetScreen extends Screen {
             return true;
         }
 
-        boolean control = MacosUtil.IS_MACOS ? input.modifiers() == GLFW_MOD_SUPER : input.modifiers() == GLFW_MOD_CONTROL;
+        boolean control = MacosUtil.IS_MACOS ? input.modifiers() == MOD_SUPER : input.modifiers() == MOD_CONTROL;
 
-        return (control && input.key() == GLFW_KEY_C && toClipboard())
-            || (control && input.key() == GLFW_KEY_V && fromClipboard());
+        return (control && input.key() == KEY_C && toClipboard())
+            || (control && input.key() == KEY_V && fromClipboard());
     }
 
     public void keyRepeated(KeyEvent input) {
@@ -248,14 +249,14 @@ public abstract class WidgetScreen extends Screen {
     }
 
     @Override
-    public boolean charTyped(CharacterEvent input) {
+    public boolean charTyped(@NonNull CharacterEvent input) {
         if (locked) return false;
 
         return root.charTyped(input);
     }
 
     @Override
-    public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float deltaTicks) {
+    public void extractBackground(@NonNull GuiGraphicsExtractor graphics, int mouseX, int mouseY, float deltaTicks) {
         if (this.minecraft.level == null) {
             this.extractPanorama(graphics, deltaTicks);
         }
@@ -349,11 +350,11 @@ public abstract class WidgetScreen extends Screen {
 
                 taskAfterRender = () -> {
                     locked = true;
-                    mc.setScreen(parent);
+                    mc.gui.setScreen(parent);
 
                     // Restore mouse position to where it was when the screen was closed
                     if (parent != null) {
-                        glfwSetCursorPos(mc.getWindow().handle(), restoreX, restoreY);
+                        grabOrReleaseMouse(mc.getWindow(), CURSOR_NORMAL, restoreX, restoreY);
                     }
                 };
             }

@@ -38,10 +38,10 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.network.Filterable;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffectUtil;
+import net.minecraft.world.entity.Bucketable;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.animal.Bucketable;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.*;
 import net.minecraft.world.item.component.BundleContents;
@@ -59,8 +59,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT_ALT;
-import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_MIDDLE;
+import static com.mojang.blaze3d.platform.InputConstants.KEY_LALT;
+import static com.mojang.blaze3d.platform.InputConstants.MOUSE_BUTTON_MIDDLE;
 
 public class BetterTooltips extends Module {
     public static final Color ECHEST_COLOR = new Color(0, 50, 50);
@@ -82,7 +82,7 @@ public class BetterTooltips extends Module {
     private final Setting<Keybind> keybind = sgGeneral.add(new KeybindSetting.Builder()
         .name("keybind")
         .description("The bind for keybind mode.")
-        .defaultValue(Keybind.fromKey(GLFW_KEY_LEFT_ALT))
+        .defaultValue(Keybind.fromKey(KEY_LALT))
         .visible(() -> displayWhen.get() == DisplayWhen.Keybind)
         .onChanged(_ -> updateTooltips = true)
         .build()
@@ -98,7 +98,7 @@ public class BetterTooltips extends Module {
     private final Setting<Keybind> openContentsKey = sgGeneral.add(new KeybindSetting.Builder()
         .name("keybind")
         .description("Key to open contents (containers, books, etc.) when pressed on items.")
-        .defaultValue(Keybind.fromButton(GLFW_MOUSE_BUTTON_MIDDLE))
+        .defaultValue(Keybind.fromButton(MOUSE_BUTTON_MIDDLE))
         .visible(openContents::get)
         .build()
     );
@@ -511,15 +511,15 @@ public class BetterTooltips extends Module {
         if (!openContents() || itemStack.isEmpty()) return false;
 
         if (itemStack.getItem() instanceof BundleItem) {
-            if (mc.screen instanceof AbstractContainerScreen) mc.screen.onClose();
-            mc.setScreen(new ContainerInventoryScreen(itemStack));
+            if (mc.gui.screen() instanceof AbstractContainerScreen) mc.gui.screen().onClose();
+            mc.gui.setScreen(new ContainerInventoryScreen(itemStack));
             return true;
         } else if (Utils.hasItems(itemStack) || itemStack.getItem() == Items.ENDER_CHEST) {
             Utils.openContainer(itemStack, PEEK_SCREEN, false);
             return true;
         } else if (itemStack.getItem() == Items.WRITABLE_BOOK || itemStack.getItem() == Items.WRITTEN_BOOK) {
-            if (mc.screen instanceof AbstractContainerScreen) mc.screen.onClose();
-            mc.setScreen(new BookViewScreen(BookViewScreen.BookAccess.fromItem(itemStack)));
+            if (mc.gui.screen() instanceof AbstractContainerScreen) mc.gui.screen().onClose();
+            mc.gui.setScreen(new BookViewScreen(BookViewScreen.BookAccess.fromItem(itemStack)));
             return true;
         }
 

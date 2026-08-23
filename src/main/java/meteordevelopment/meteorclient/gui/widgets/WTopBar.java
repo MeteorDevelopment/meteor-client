@@ -15,7 +15,7 @@ import meteordevelopment.meteorclient.utils.render.color.Color;
 import net.minecraft.client.gui.screens.Screen;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
-import static org.lwjgl.glfw.GLFW.glfwSetCursorPos;
+import static com.mojang.blaze3d.platform.InputConstants.*;
 
 public abstract class WTopBar extends WHorizontalList {
     protected abstract Color getButtonColor(boolean pressed, boolean hovered);
@@ -50,21 +50,21 @@ public abstract class WTopBar extends WHorizontalList {
 
         @Override
         protected void onPressed(int button) {
-            Screen screen = mc.screen;
+            Screen screen = mc.gui.screen();
 
             if (!(screen instanceof TabScreen tabScreen) || tabScreen.tab != tab) {
                 double mouseX = mc.mouseHandler.xpos();
                 double mouseY = mc.mouseHandler.ypos();
 
                 tab.openScreen(theme);
-                glfwSetCursorPos(mc.getWindow().handle(), mouseX, mouseY);
+                grabOrReleaseMouse(mc.getWindow(), CURSOR_NORMAL, mouseX, mouseY);
             }
         }
 
         @Override
         protected void onRender(GuiRenderer renderer, double mouseX, double mouseY, double delta) {
             double pad = pad();
-            Color color = getButtonColor(pressed || (mc.screen instanceof TabScreen tabScreen && tabScreen.tab == tab), mouseOver);
+            Color color = getButtonColor(pressed || (mc.gui.screen() instanceof TabScreen tabScreen && tabScreen.tab == tab), mouseOver);
 
             renderer.quad(x, y, width, height, color);
             renderer.text(tab.name, x + pad, y + pad, getNameColor(), false);

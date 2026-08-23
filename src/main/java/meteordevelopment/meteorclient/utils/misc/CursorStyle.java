@@ -5,26 +5,21 @@
 
 package meteordevelopment.meteorclient.utils.misc;
 
-import org.lwjgl.glfw.GLFW;
+import com.mojang.blaze3d.platform.cursor.CursorType;
+import com.mojang.blaze3d.platform.cursor.CursorTypes;
 
 public enum CursorStyle {
-    Default,
-    Click,
-    Type;
+    Default(CursorType.DEFAULT),
+    Click(CursorTypes.POINTING_HAND),
+    Type(CursorTypes.IBEAM);
 
-    private boolean created;
-    private long cursor;
+    private final CursorType cursor;
 
-    public long getGlfwCursor() {
-        if (!created) {
-            switch (this) {
-                case Click -> cursor = GLFW.glfwCreateStandardCursor(GLFW.GLFW_HAND_CURSOR);
-                case Type -> cursor = GLFW.glfwCreateStandardCursor(GLFW.GLFW_IBEAM_CURSOR);
-            }
+    CursorStyle(CursorType cursor) {
+        this.cursor = cursor;
+    }
 
-            created = true;
-        }
-
+    public CursorType getCursor() {
         return cursor;
     }
 }

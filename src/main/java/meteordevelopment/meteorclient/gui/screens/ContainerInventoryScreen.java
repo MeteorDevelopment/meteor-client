@@ -20,7 +20,8 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.BundleItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.BundleContents;
-import org.lwjgl.glfw.GLFW;
+import org.jspecify.annotations.NonNull;
+import com.mojang.blaze3d.platform.InputConstants;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -73,7 +74,7 @@ public class ContainerInventoryScreen extends Screen {
     }
 
     @Override
-    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
+    public void extractRenderState(@NonNull GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
         super.extractRenderState(graphics, mouseX, mouseY, delta);
 
         baseX = x + 8;
@@ -142,7 +143,7 @@ public class ContainerInventoryScreen extends Screen {
     }
 
     @Override
-    public boolean keyPressed(KeyEvent input) {
+    public boolean keyPressed(@NonNull KeyEvent input) {
         BetterTooltips tooltips = Modules.get().get(BetterTooltips.class);
 
         ItemStack stack = getSelectedItem((int) mc.mouseHandler.getScaledXPos(mc.getWindow()), (int) mc.mouseHandler.getScaledYPos(mc.getWindow()));
@@ -150,7 +151,7 @@ public class ContainerInventoryScreen extends Screen {
             return tooltips.openContent(stack);
         }
 
-        if (input.key() == GLFW.GLFW_KEY_ESCAPE || mc.options.keyInventory.matches(input)) {
+        if (input.key() == InputConstants.KEY_ESCAPE || mc.options.keyInventory.matches(input)) {
             onClose();
             return true;
         }

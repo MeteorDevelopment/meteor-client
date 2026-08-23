@@ -3,9 +3,12 @@ plugins {
     id("maven-publish")
 }
 
+val archivesBaseName = providers.gradleProperty("archives_base_name").get()
+val mavenGroup = providers.gradleProperty("maven_group").get()
+
 base {
-    archivesName = properties["archives_base_name"] as String
-    group = properties["maven_group"] as String
+    archivesName = archivesBaseName
+    group = mavenGroup
 
     val suffix = providers.gradleProperty("build_number").getOrElse("local")
     version = "${libs.versions.minecraft.get()}-$suffix"
@@ -19,10 +22,6 @@ repositories {
     maven {
         name = "meteor-maven-snapshots"
         url = uri("https://maven.meteordev.org/snapshots")
-    }
-    maven {
-        name = "Terraformers"
-        url = uri("https://maven.terraformersmc.com")
     }
     maven {
         name = "ViaVersion"
@@ -43,8 +42,11 @@ repositories {
     }
 }
 
-val modInclude: Configuration by configurations.creating
-val jij: Configuration by configurations.creating
+val modInclude = configurations.create("modInclude")
+val jij = configurations.create("jij")
+val launcher = sourceSets.create("launcher") {
+    java.srcDir("src/launcher/java")
+}
 
 configurations {
     // include mods
@@ -92,14 +94,7 @@ dependencies {
     jij(libs.netty.handler.proxy) { isTransitive = false }
     jij(libs.netty.codec.socks) { isTransitive = false }
     jij(libs.waybackauthlib)
-}
-
-sourceSets {
-    val launcher by creating {
-        java {
-            srcDir("src/launcher/java")
-        }
-    }
+    jij(libs.minecraft.auth)
 }
 
 java {
@@ -140,12 +135,28 @@ loom {
 }
 
 fun toMinecraftCompat(version: String): String {
-    val match = Regex("""^(\d{2})\.([1-9]\d*)(?:\.([1-9]\d*))?$""")
-        .matchEntire(version)
-        ?: error("Invalid Minecraft version format: $version. Expected YY.D or YY.D.H")
+    // Stable release
+    val stable = Regex("""^(\d{2})\.([1-9]\d*)(?:\.(\d+))?$""")
 
-    val (year, drop, _) = match.destructured
-    return "~$year.$drop"
+    stable.matchEntire(version)?.let {
+        val (year, drop, _) = it.destructured
+        return "~$year.$drop"
+    }
+
+    // Prerelease
+    val pre = Regex("""^(\d{2})\.([1-9]\d*)-pre[-.](\d+)$""")
+    pre.matchEntire(version)?.let {
+        return version.replace("-pre-", "-pre.")
+    }
+
+    // Release Candidate
+    val rc = Regex("""^(\d{2})\.([1-9]\d*)-rc[-.](\d+)$""")
+    rc.matchEntire(version)?.let {
+        return version.replace("-rc-", "-rc.")
+    }
+
+    // fallback
+    return version
 }
 
 tasks {
@@ -176,14 +187,14 @@ tasks {
     }
 
     jar {
-        inputs.property("archivesName", project.base.archivesName.get())
+        inputs.property("archivesName", archivesBaseName)
 
         from("LICENSE") {
-            rename { "${it}_${inputs.properties["archivesName"]}" }
+            rename { "${it}_$archivesBaseName" }
         }
 
         // Include launcher classes
-        from(sourceSets["launcher"].output)
+        from(launcher.output)
 
         manifest {
             attributes["Main-Class"] = "meteordevelopment.meteorclient.Main"

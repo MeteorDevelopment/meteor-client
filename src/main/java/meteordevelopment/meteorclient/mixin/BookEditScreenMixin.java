@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.mixin;
 
+import it.unimi.dsi.fastutil.io.FastByteArrayInputStream;
 import it.unimi.dsi.fastutil.io.FastByteArrayOutputStream;
 import meteordevelopment.meteorclient.MeteorClient;
 import net.minecraft.client.gui.components.Button;
@@ -12,7 +13,6 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.BookEditScreen;
 import net.minecraft.nbt.*;
 import net.minecraft.network.chat.Component;
-import org.lwjgl.glfw.GLFW;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -20,8 +20,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.io.ByteArrayInputStream;
-import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.Base64;
@@ -70,9 +68,9 @@ public abstract class BookEditScreenMixin extends Screen {
                 }
 
                 try {
-                    GLFW.glfwSetClipboardString(mc.getWindow().handle(), Base64.getEncoder().encodeToString(bytes.array));
+                    mc.keyboardHandler.setClipboard(Base64.getEncoder().encodeToString(bytes.toByteArray()));
                 } catch (OutOfMemoryError exception) {
-                    GLFW.glfwSetClipboardString(mc.getWindow().handle(), exception.toString());
+                    mc.keyboardHandler.setClipboard(exception.toString());
                 }
             })
                 .pos(4, 4)
@@ -82,8 +80,8 @@ public abstract class BookEditScreenMixin extends Screen {
 
         addRenderableWidget(
             new Button.Builder(Component.literal("Paste"), _ -> {
-                String clipboard = GLFW.glfwGetClipboardString(mc.getWindow().handle());
-                if (clipboard == null) return;
+                String clipboard = mc.keyboardHandler.getClipboard();
+                if (clipboard.isEmpty()) return;
 
                 byte[] bytes;
                 try {
@@ -91,7 +89,7 @@ public abstract class BookEditScreenMixin extends Screen {
                 } catch (IllegalArgumentException _) {
                     return;
                 }
-                DataInputStream in = new DataInputStream(new ByteArrayInputStream(bytes));
+                var in = new FastByteArrayInputStream(bytes);
 
                 try {
                     CompoundTag tag = NbtIo.readCompressed(in, NbtAccounter.unlimitedHeap());

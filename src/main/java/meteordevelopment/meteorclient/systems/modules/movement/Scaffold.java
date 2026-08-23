@@ -11,6 +11,7 @@ import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.utils.misc.ListMode;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
@@ -298,8 +299,7 @@ public class Scaffold extends Module {
 
         Block block = ((BlockItem) itemStack.getItem()).getBlock();
 
-        if (blocksFilter.get() == ListMode.Blacklist && blocks.get().contains(block)) return false;
-        else if (blocksFilter.get() == ListMode.Whitelist && !blocks.get().contains(block)) return false;
+        if (!blocksFilter.get().allows(blocks.get().contains(block))) return false;
 
         if (!Block.isShapeFullBlock(block.defaultBlockState().getCollisionShape(mc.level, pos))) return false;
         return !(block instanceof FallingBlock) || !FallingBlock.isFree(mc.level.getBlockState(pos));
@@ -320,8 +320,4 @@ public class Scaffold extends Module {
         return false;
     }
 
-    public enum ListMode {
-        Whitelist,
-        Blacklist
-    }
 }

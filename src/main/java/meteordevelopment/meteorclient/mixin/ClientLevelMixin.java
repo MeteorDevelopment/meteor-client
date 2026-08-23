@@ -13,21 +13,37 @@ import meteordevelopment.meteorclient.systems.modules.render.NoRender;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Holder;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import org.jetbrains.annotations.Nullable;
+import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraft.world.level.storage.WritableLevelData;
+import org.jspecify.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArgs;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 @Mixin(ClientLevel.class)
-public abstract class ClientLevelMixin {
+public abstract class ClientLevelMixin extends Level {
+    @Unique
+    private static final AtomicInteger NEXT_ENTITY_ID = new AtomicInteger(-1);
+
+    protected ClientLevelMixin(WritableLevelData levelData, ResourceKey<Level> dimension, RegistryAccess registryAccess, Holder<DimensionType> dimensionTypeRegistration, boolean isClientSide, boolean isDebug, long biomeZoomSeed, int maxChainedNeighborUpdates) {
+        super(levelData, dimension, registryAccess, dimensionTypeRegistration, isClientSide, isDebug, biomeZoomSeed, maxChainedNeighborUpdates);
+    }
+
     @Shadow
     @Nullable
     public abstract Entity getEntity(int id);
@@ -60,5 +76,14 @@ public abstract class ClientLevelMixin {
         }
     }
 
+    @Override
+    public int getNextEntityId() {
+        int id;
 
+        do {
+            id = NEXT_ENTITY_ID.getAndDecrement();
+        } while (getEntity(id) != null);
+
+        return id;
+    }
 }

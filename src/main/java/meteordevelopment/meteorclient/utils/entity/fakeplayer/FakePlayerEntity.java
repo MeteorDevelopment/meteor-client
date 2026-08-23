@@ -7,10 +7,11 @@ package meteordevelopment.meteorclient.utils.entity.fakeplayer;
 
 import com.mojang.authlib.GameProfile;
 import meteordevelopment.meteorclient.mixin.AbstractClientPlayerAccessor;
+import meteordevelopment.meteorclient.mixin.EntityAccessor;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.client.player.RemotePlayer;
 import net.minecraft.world.entity.player.Player;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.UUID;
 
@@ -53,6 +54,11 @@ public class FakePlayerEntity extends RemotePlayer {
         }
 
         if (copyInv) getInventory().replaceWith(player.getInventory());
+    }
+
+    @Override
+    public int getId() {
+        return ((EntityAccessor) this).meteor$getId();
     }
 
     public void spawn() {

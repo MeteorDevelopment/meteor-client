@@ -22,6 +22,7 @@ import net.minecraft.network.protocol.common.ClientboundResourcePackPushPacket;
 import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
 import net.minecraft.network.protocol.common.ServerboundResourcePackPacket;
 import net.minecraft.network.protocol.common.custom.BrandPayload;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
 import org.apache.commons.lang3.Strings;
 
@@ -84,8 +85,8 @@ public class ServerSpoof extends Module {
     private void onPacketSend(PacketEvent.Send event) {
         if (!isActive()) return;
 
-        if (event.packet instanceof ServerboundCustomPayloadPacket customPayloadPacket) {
-            Identifier id = customPayloadPacket.payload().type().id();
+        if (event.packet instanceof ServerboundCustomPayloadPacket(CustomPacketPayload payload)) {
+            Identifier id = payload.type().id();
 
             if (blockChannels.get()) {
                 for (String channel : channels.get()) {

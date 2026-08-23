@@ -16,6 +16,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.MapItem;
 import net.minecraft.world.level.saveddata.maps.MapId;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
+import org.jspecify.annotations.NonNull;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
@@ -29,13 +30,13 @@ public class MapTooltipComponent implements ClientTooltipComponent, MeteorToolti
     }
 
     @Override
-    public int getHeight(Font textRenderer) {
+    public int getHeight(@NonNull Font textRenderer) {
         double scale = Modules.get().get(BetterTooltips.class).mapsScale.get();
         return (int) ((128 + 16) * scale) + 2;
     }
 
     @Override
-    public int getWidth(Font textRenderer) {
+    public int getWidth(@NonNull Font textRenderer) {
         double scale = Modules.get().get(BetterTooltips.class).mapsScale.get();
         return (int) ((128 + 16) * scale);
     }
@@ -46,7 +47,7 @@ public class MapTooltipComponent implements ClientTooltipComponent, MeteorToolti
     }
 
     @Override
-    public void extractImage(Font font, int x, int y, int width, int height, GuiGraphicsExtractor graphics) {
+    public void extractImage(@NonNull Font font, int x, int y, int width, int height, GuiGraphicsExtractor graphics) {
         var scale = Modules.get().get(BetterTooltips.class).mapsScale.get().floatValue();
 
         // Background

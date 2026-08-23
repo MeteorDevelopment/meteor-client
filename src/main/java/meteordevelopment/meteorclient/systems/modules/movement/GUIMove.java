@@ -24,7 +24,7 @@ import net.minecraft.client.gui.screens.inventory.*;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.CreativeModeTabs;
 
-import static org.lwjgl.glfw.GLFW.*;
+import static com.mojang.blaze3d.platform.InputConstants.*;
 
 public class GUIMove extends Module {
     public enum Screens {
@@ -147,10 +147,10 @@ public class GUIMove extends Module {
                 float yaw = mc.player.getYRot();
                 float pitch = mc.player.getXRot();
 
-                if (Input.isKeyPressed(GLFW_KEY_LEFT)) yaw -= rotationDelta;
-                if (Input.isKeyPressed(GLFW_KEY_RIGHT)) yaw += rotationDelta;
-                if (Input.isKeyPressed(GLFW_KEY_UP)) pitch -= rotationDelta;
-                if (Input.isKeyPressed(GLFW_KEY_DOWN)) pitch += rotationDelta;
+                if (Input.isKeyPressed(KEY_LEFT)) yaw -= rotationDelta;
+                if (Input.isKeyPressed(KEY_RIGHT)) yaw += rotationDelta;
+                if (Input.isKeyPressed(KEY_UP)) pitch -= rotationDelta;
+                if (Input.isKeyPressed(KEY_DOWN)) pitch += rotationDelta;
 
                 pitch = Mth.clamp(pitch, -90, 90);
 
@@ -159,10 +159,10 @@ public class GUIMove extends Module {
             } else {
                 double dy = 0, dx = 0;
 
-                if (Input.isKeyPressed(GLFW_KEY_LEFT)) dy = -rotationDelta;
-                if (Input.isKeyPressed(GLFW_KEY_RIGHT)) dy = rotationDelta;
-                if (Input.isKeyPressed(GLFW_KEY_UP)) dx = -rotationDelta;
-                if (Input.isKeyPressed(GLFW_KEY_DOWN)) dx = rotationDelta;
+                if (Input.isKeyPressed(KEY_LEFT)) dy = -rotationDelta;
+                if (Input.isKeyPressed(KEY_RIGHT)) dy = rotationDelta;
+                if (Input.isKeyPressed(KEY_UP)) dx = -rotationDelta;
+                if (Input.isKeyPressed(KEY_DOWN)) dx = rotationDelta;
 
                 freecam.changeLookDirection(dy, dx);
             }
@@ -176,14 +176,14 @@ public class GUIMove extends Module {
     }
 
     public boolean skip() {
-        if (mc.screen == null ||
-            (mc.screen instanceof CreativeModeInventoryScreen && CreativeModeInventoryScreenAccessor.meteor$getSelectedTab() == CreativeModeTabs.searchTab())
-            || mc.screen instanceof ChatScreen
-            || mc.screen instanceof SignEditScreen
-            || mc.screen instanceof AnvilScreen
-            || mc.screen instanceof AbstractCommandBlockEditScreen
-            || mc.screen instanceof StructureBlockEditScreen) return true;
-        if (screens.get() == Screens.GUI && !(mc.screen instanceof WidgetScreen)) return true;
-        return screens.get() == Screens.Inventory && mc.screen instanceof WidgetScreen;
+        if (mc.gui.screen() == null ||
+            (mc.gui.screen() instanceof CreativeModeInventoryScreen && CreativeModeInventoryScreenAccessor.meteor$getSelectedTab() == CreativeModeTabs.searchTab())
+            || mc.gui.screen() instanceof ChatScreen
+            || mc.gui.screen() instanceof SignEditScreen
+            || mc.gui.screen() instanceof AnvilScreen
+            || mc.gui.screen() instanceof AbstractCommandBlockEditScreen
+            || mc.gui.screen() instanceof StructureBlockEditScreen) return true;
+        if (screens.get() == Screens.GUI && !(mc.gui.screen() instanceof WidgetScreen)) return true;
+        return screens.get() == Screens.Inventory && mc.gui.screen() instanceof WidgetScreen;
     }
 }

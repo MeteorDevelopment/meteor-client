@@ -31,8 +31,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BedItem;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BedBlock;
-import net.minecraft.world.level.block.entity.BedBlockEntity;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 
@@ -281,10 +279,12 @@ public class BedAura extends Module {
     }
 
     private BlockPos findBreak() {
-        for (BlockEntity blockEntity : Utils.blockEntities()) {
-            if (!(blockEntity instanceof BedBlockEntity)) continue;
+        BlockPos targetPos = target.blockPosition();
+        int range = (int) Math.ceil(targetRange.get());
 
-            BlockPos bedPos = blockEntity.getBlockPos();
+        for (BlockPos bedPos : BlockPos.betweenClosed(targetPos.offset(-range, -range, -range), targetPos.offset(range, range, range))) {
+            if (!(mc.level.getBlockState(bedPos).getBlock() instanceof BedBlock)) continue;
+
             Vec3 bedVec = Utils.vec3(bedPos);
 
             if (PlayerUtils.isWithinReach(bedVec)

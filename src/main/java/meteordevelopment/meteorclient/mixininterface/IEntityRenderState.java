@@ -8,7 +8,7 @@ package meteordevelopment.meteorclient.mixininterface;
 import meteordevelopment.meteorclient.mixin.EntityRenderDispatcherMixin;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
 import net.minecraft.world.entity.Entity;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public interface IEntityRenderState {
     /**
@@ -22,7 +22,7 @@ public interface IEntityRenderState {
      * @return The entity that the render state refers to
      * @see EntityRenderDispatcherMixin#getAndUpdateRenderState$setEntity(EntityRenderState, Entity, float)
      */
-    @Nullable(value = "EntityCulling mod can prevent the code that sets the entity from running")
+    @Nullable // "EntityCulling mod can prevent the code that sets the entity from running"
     Entity meteor$getEntity();
 
     void meteor$setEntity(Entity entity);

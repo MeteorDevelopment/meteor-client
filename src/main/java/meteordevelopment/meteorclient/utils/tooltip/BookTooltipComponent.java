@@ -13,6 +13,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.FormattedCharSequence;
 import org.joml.Matrix3x2fStack;
+import org.jspecify.annotations.NonNull;
 
 public class BookTooltipComponent implements ClientTooltipComponent, MeteorTooltipData {
     private static final Identifier TEXTURE_BOOK_BACKGROUND = Identifier.parse("textures/gui/book.png");
@@ -29,12 +30,12 @@ public class BookTooltipComponent implements ClientTooltipComponent, MeteorToolt
     }
 
     @Override
-    public int getHeight(Font textRenderer) {
+    public int getHeight(@NonNull Font textRenderer) {
         return 134;
     }
 
     @Override
-    public int getWidth(Font textRenderer) {
+    public int getWidth(@NonNull Font textRenderer) {
         return 112;
     }
 

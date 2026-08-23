@@ -5,7 +5,8 @@
 
 package meteordevelopment.meteorclient.utils.network;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import javax.net.ssl.SSLSession;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -54,9 +55,8 @@ public record FailedHttpResponse<T>(HttpRequest request, Exception exception) im
         return this.request.uri();
     }
 
-    @Nullable
     @Override
-    public HttpClient.Version version() {
+    public HttpClient.@Nullable Version version() {
         return this.request.version().orElse(null);
     }
 }

@@ -11,7 +11,7 @@ import meteordevelopment.meteorclient.utils.Utils;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.util.Mth;
 
-import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_LEFT;
+import static com.mojang.blaze3d.platform.InputConstants.MOUSE_BUTTON_LEFT;
 
 public abstract class WView extends WVerticalList {
     public double maxHeight = Double.MAX_VALUE;
@@ -74,7 +74,7 @@ public abstract class WView extends WVerticalList {
 
     @Override
     public boolean onMouseClicked(MouseButtonEvent click, boolean doubled) {
-        if (handleMouseOver && click.button() == GLFW_MOUSE_BUTTON_LEFT && !doubled) {
+        if (handleMouseOver && click.button() == MOUSE_BUTTON_LEFT && !doubled) {
             setFocused(true);
             return true;
         }

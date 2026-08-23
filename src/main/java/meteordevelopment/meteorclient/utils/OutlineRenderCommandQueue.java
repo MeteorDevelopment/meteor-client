@@ -13,21 +13,23 @@ import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.SubmitNodeCollection;
 import net.minecraft.client.renderer.SubmitNodeStorage;
 import net.minecraft.client.renderer.block.MovingBlockRenderState;
-import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
 import net.minecraft.client.renderer.block.dispatch.BlockStateModelPart;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
 import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
+import net.minecraft.client.renderer.state.level.QuadParticleRenderState;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.geometry.BakedQuad;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.Nullable;
 import org.joml.Quaternionf;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.List;
@@ -41,21 +43,18 @@ public class OutlineRenderCommandQueue extends SubmitNodeStorage {
     }
 
     @Override
-    public SubmitNodeCollection order(int i) {
-        return submitsPerOrder.computeIfAbsent(i, _ -> new OutlineBatchingRenderCommandQueue(this));
+    public @NonNull SubmitNodeCollection order(int i) {
+        return submitsPerOrder.computeIfAbsent(i, _ -> new OutlineBatchingRenderCommandQueue());
     }
 
+    @NullMarked
     private class OutlineBatchingRenderCommandQueue extends SubmitNodeCollection {
-        public OutlineBatchingRenderCommandQueue(SubmitNodeStorage orderedQueueImpl) {
-            super(orderedQueueImpl);
-        }
-
         @Override
         public void submitShadow(PoseStack poseStack, float shadowRadius, List<EntityRenderState.ShadowPiece> shadowPieces) {
         }
 
         @Override
-        public void submitNameTag(PoseStack poseStack, @Nullable Vec3 vec3, int i, Component component, boolean bl, int j, double d, CameraRenderState cameraRenderState) {
+        public void submitNameTag(PoseStack poseStack, @Nullable Vec3 nameTagAttachment, int offset, Component name, boolean seeThrough, int lightCoords, CameraRenderState cameraRenderState) {
         }
 
         @Override
@@ -63,7 +62,7 @@ public class OutlineRenderCommandQueue extends SubmitNodeStorage {
         }
 
         @Override
-        public void submitFlame(PoseStack poseStack, EntityRenderState entityRenderState, Quaternionf quaternionf) {
+        public void submitFlame(PoseStack poseStack, EntityRenderState entityRenderState, Quaternionf rotation) {
         }
 
         @Override
@@ -71,27 +70,27 @@ public class OutlineRenderCommandQueue extends SubmitNodeStorage {
         }
 
         @Override
-        public <S> void submitModel(Model<? super S> model, S state, PoseStack matrices, RenderType renderLayer, int light, int overlay, int tintedColor, @Nullable TextureAtlasSprite sprite, int outlineColor, @Nullable ModelFeatureRenderer.CrumblingOverlay crumblingOverlay) {
-            super.submitModel(model, state, matrices, renderLayer, light, overlay, color, sprite, 0, crumblingOverlay);
+        public <S> void submitModel(Model<? super S> model, S state, PoseStack poseStack, RenderType renderType, int lightCoords, int overlayCoords, int tintedColor, @Nullable TextureAtlasSprite sprite, int outlineColor, ModelFeatureRenderer.@Nullable CrumblingOverlay crumblingOverlay) {
+            super.submitModel(model, state, poseStack, renderType, lightCoords, overlayCoords, color, sprite, color, crumblingOverlay);
         }
 
         @Override
-        public void submitModelPart(ModelPart part, PoseStack matrices, RenderType renderLayer, int light, int overlay, @Nullable TextureAtlasSprite sprite, boolean sheeted, boolean hasGlint, int tintedColor, @Nullable ModelFeatureRenderer.CrumblingOverlay crumblingOverlay, int i) {
-            super.submitModelPart(part, matrices, renderLayer, light, overlay, sprite, sheeted, hasGlint, color, crumblingOverlay, i);
+        public void submitModelPart(ModelPart part, PoseStack poseStack, RenderType renderType, int lightCoords, int overlayCoords, @Nullable TextureAtlasSprite sprite, int tintedColor, ModelFeatureRenderer.@Nullable CrumblingOverlay crumblingOverlay, int outlineColor) {
+            super.submitModelPart(part, poseStack, renderType, lightCoords, overlayCoords, sprite, color, crumblingOverlay, color);
         }
 
         @Override
-        public void submitMovingBlock(PoseStack matrices, MovingBlockRenderState state) {
+        public void submitMovingBlock(PoseStack poseStack, MovingBlockRenderState state, int outlineColor) {
         }
 
         @Override
         public void submitBlockModel(PoseStack poseStack, RenderType renderType, List<BlockStateModelPart> modelParts, int[] tintLayers, int lightCoords, int overlayCoords, int outlineColor) {
             Arrays.fill(tintLayers, color);
-            super.submitBlockModel(poseStack, renderType, modelParts, tintLayers, lightCoords, overlayCoords, outlineColor);
+            super.submitBlockModel(poseStack, renderType, modelParts, tintLayers, lightCoords, overlayCoords, color);
         }
 
         @Override
-        public void submitBreakingBlockModel(PoseStack poseStack, BlockStateModel model, long seed, int progress) {
+        public void submitBreakingBlockModel(PoseStack poseStack, List<BlockStateModelPart> modelParts, int progress) {
         }
 
         @Override
@@ -100,7 +99,7 @@ public class OutlineRenderCommandQueue extends SubmitNodeStorage {
                 tints = new int[]{color, color, color, color};
             }
 
-            super.submitItem(poseStack, displayContext, lightCoords, overlayCoords, outlineColor, tintLayers, quads, foilType);
+            super.submitItem(poseStack, displayContext, lightCoords, overlayCoords, color, tints, quads, foilType);
         }
 
         @Override
@@ -108,7 +107,7 @@ public class OutlineRenderCommandQueue extends SubmitNodeStorage {
         }
 
         @Override
-        public void submitParticleGroup(ParticleGroupRenderer particleGroupRenderer) {
+        public void submitQuadParticleGroup(QuadParticleRenderState quadParticleRenderState) {
         }
     }
 }

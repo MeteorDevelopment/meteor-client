@@ -11,7 +11,7 @@ import meteordevelopment.meteorclient.systems.Systems;
 import meteordevelopment.meteorclient.utils.misc.NbtUtils;
 import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
 import net.minecraft.nbt.CompoundTag;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.*;
 import java.util.concurrent.*;
@@ -204,7 +204,7 @@ public class Proxies extends System<Proxies> implements Iterable<Proxy> {
         return proxies.size();
     }
 
-    @NotNull
+    @NonNull
     @Override
     public Iterator<Proxy> iterator() {
         return proxies.iterator();
