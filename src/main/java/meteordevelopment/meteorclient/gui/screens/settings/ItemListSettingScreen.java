@@ -21,7 +21,7 @@ import meteordevelopment.meteorclient.utils.render.DisplayItemUtils;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.tags.ItemTags;
-import net.minecraft.util.Tuple;
+import com.mojang.datafixers.util.Pair;
 import net.minecraft.world.item.*;
 
 import java.util.ArrayList;
@@ -216,15 +216,15 @@ public class ItemListSettingScreen extends WindowScreen {
         if (filterText.isEmpty()) {
             BuiltInRegistries.ITEM.forEach(itemForEach);
         } else {
-            List<Tuple<Item, Integer>> items = new ArrayList<>();
+            List<Pair<Item, Integer>> items = new ArrayList<>();
             BuiltInRegistries.ITEM.forEach(item -> {
                 int words = Utils.searchInWords(Names.get(item), filterText);
                 int diff = Utils.searchLevenshteinDefault(Names.get(item), filterText, false);
 
-                if (words > 0 || diff < Names.get(item).length() / 2) items.add(new Tuple<>(item, -diff));
+                if (words > 0 || diff < Names.get(item).length() / 2) items.add(Pair.of(item, -diff));
             });
-            items.sort(Comparator.comparingInt(value -> -value.getB()));
-            for (Tuple<Item, Integer> pair : items) itemForEach.accept(pair.getA());
+            items.sort(Comparator.comparingInt(value -> -value.getSecond()));
+            for (Pair<Item, Integer> pair : items) itemForEach.accept(pair.getFirst());
         }
 
         if (blocksT.cells.isEmpty()) list.cells.remove(blocksCell);
