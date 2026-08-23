@@ -149,8 +149,10 @@ public class Keybind implements ISerializable<Keybind>, ICopyable<Keybind> {
 
     public boolean matches(InputConstants.Key key, Set<Modifier> modifiers) {
         if (!isSet() || !this.key.equals(key)) return false;
-        if (!hasMods()) return modifiers.stream().noneMatch(m -> m == Modifier.SHIFT || m == Modifier.CONTROL || m == Modifier.ALT || m == Modifier.SUPER);
-        return this.modifiers.equals(modifiers);
+        // Modifiers held for other reasons (sneaking, sprinting, or the bound key being a modifier
+        // itself, which sets its own bit on press) must not stop a bind without modifiers from
+        // matching. Binds that do have modifiers take precedence, see Modules#onAction.
+        return !hasMods() || this.modifiers.equals(modifiers);
     }
 
     public boolean matches(boolean isKey, int value, int modifiers) {
