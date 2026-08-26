@@ -5,7 +5,6 @@
 
 package meteordevelopment.meteorclient.gui.screens;
 
-import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.WindowScreen;
 import meteordevelopment.meteorclient.gui.widgets.containers.WTable;
@@ -57,8 +56,8 @@ public class NotebotSongsScreen extends WindowScreen {
 
     private void initSongsTable() {
         AtomicBoolean noSongsFound = new AtomicBoolean(true);
-        try {
-            Files.list(MeteorClient.FOLDER.toPath().resolve("notebot")).forEach(path -> {
+        try (var stream = Files.list(Notebot.PATH.toPath())) {
+            stream.forEach(path -> {
                 if (SongDecoders.hasDecoder(path)) {
                     String name = path.getFileName().toString();
 
