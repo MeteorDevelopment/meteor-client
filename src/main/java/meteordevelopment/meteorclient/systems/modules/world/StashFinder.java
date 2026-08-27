@@ -502,7 +502,7 @@ public class StashFinder extends Module {
     }
 
     public static class Chunk {
-        public ChunkPos chunkPos;
+        public final ChunkPos chunkPos;
         public int chests, barrels, shulkers, enderChests, furnaces, dispensersDroppers, hoppers;
 
         public Chunk(ChunkPos chunkPos) {
