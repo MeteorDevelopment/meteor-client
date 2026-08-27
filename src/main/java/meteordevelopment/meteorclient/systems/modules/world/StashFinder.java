@@ -257,7 +257,7 @@ public class StashFinder extends Module {
 
             if (renderTracer.get()) {
                 double y = mc.player != null ? mc.player.getEyeY() : 0.0;
-                tracerPositions.put(chunk.chunkPos, new Vec3(chunk.x, y, chunk.z));
+                tracerPositions.put(chunk.chunkPos, new Vec3(chunk.chunkPos.getMiddleBlockX(), y, chunk.chunkPos.getMiddleBlockZ()));
             }
 
             saveJson();
@@ -317,14 +317,14 @@ public class StashFinder extends Module {
 
     private void fillTable(GuiTheme theme, WTable table) {
         for (Chunk chunk : chunks) {
-            table.add(theme.label("Pos: " + chunk.x + ", " + chunk.z)).padRight(10);
+            table.add(theme.label("Pos: " + chunk.chunkPos.getMiddleBlockX() + ", " + chunk.chunkPos.getMiddleBlockZ())).padRight(10);
             table.add(theme.label("Total: " + chunk.getTotal())).padRight(10);
 
             WCheckbox visible = table.add(theme.checkbox(tracerPositions.containsKey(chunk.chunkPos))).widget();
             visible.action = () -> {
                 if (visible.checked) {
                     double y = mc.player != null ? mc.player.getEyeY() : 0.0;
-                    tracerPositions.put(chunk.chunkPos, new Vec3(chunk.x, y, chunk.z));
+                    tracerPositions.put(chunk.chunkPos, new Vec3(chunk.chunkPos.getMiddleBlockX(), y, chunk.chunkPos.getMiddleBlockZ()));
                 } else tracerPositions.remove(chunk.chunkPos);
             };
 
@@ -332,7 +332,7 @@ public class StashFinder extends Module {
             open.action = () -> mc.gui.setScreen(new ChunkScreen(theme, chunk));
 
             WButton gotoBtn = table.add(theme.button("Goto")).widget();
-            gotoBtn.action = () -> PathManagers.get().moveTo(new BlockPos(chunk.x, 0, chunk.z), true);
+            gotoBtn.action = () -> PathManagers.get().moveTo(new BlockPos(chunk.chunkPos.getMiddleBlockX(), 0, chunk.chunkPos.getMiddleBlockZ()), true);
 
             WMinus delete = table.add(theme.minus()).widget();
             delete.action = () -> {
@@ -359,7 +359,6 @@ public class StashFinder extends Module {
             try (BufferedReader reader = Files.newBufferedReader(jsonFile)) {
                 chunks = GSON.fromJson(reader, new TypeToken<List<Chunk>>() {
                 }.getType());
-                for (Chunk chunk : chunks) chunk.calculatePos();
                 loaded = true;
             } catch (Exception _) {
                 if (chunks == null) chunks = new ArrayList<>();
@@ -437,12 +436,12 @@ public class StashFinder extends Module {
     }
 
     private void sendChatNotification(Chunk chunk) {
-        MutableComponent coords = Component.literal(chunk.x + ", " + chunk.z)
+        MutableComponent coords = Component.literal(chunk.chunkPos.getMiddleBlockX() + ", " + chunk.chunkPos.getMiddleBlockZ())
             .setStyle(Style.EMPTY
                 .withColor(ChatFormatting.WHITE)
                 .applyFormat(ChatFormatting.UNDERLINE)
                 .withHoverEvent(new HoverEvent.ShowText(Component.literal("Path to stash")))
-                .withClickEvent(new RunnableClickEvent(() -> PathManagers.get().moveTo(new BlockPos(chunk.x, 0, chunk.z), true))));
+                .withClickEvent(new RunnableClickEvent(() -> PathManagers.get().moveTo(new BlockPos(chunk.chunkPos.getMiddleBlockX(), 0, chunk.chunkPos.getMiddleBlockZ()), true))));
 
         MutableComponent message = Component.literal("Found stash at ")
             .withStyle(ChatFormatting.GRAY)
@@ -504,18 +503,10 @@ public class StashFinder extends Module {
 
     public static class Chunk {
         public ChunkPos chunkPos;
-        public transient int x, z;
         public int chests, barrels, shulkers, enderChests, furnaces, dispensersDroppers, hoppers;
 
         public Chunk(ChunkPos chunkPos) {
             this.chunkPos = chunkPos;
-
-            calculatePos();
-        }
-
-        public void calculatePos() {
-            x = chunkPos.x() * 16 + 8;
-            z = chunkPos.z() * 16 + 8;
         }
 
         public int getTotal() {
@@ -553,7 +544,7 @@ public class StashFinder extends Module {
         private final Chunk chunk;
 
         public ChunkScreen(GuiTheme theme, Chunk chunk) {
-            super(theme, "Chunk at " + chunk.x + ", " + chunk.z);
+            super(theme, "Chunk at " + chunk.chunkPos.getMiddleBlockX() + ", " + chunk.chunkPos.getMiddleBlockZ());
 
             this.chunk = chunk;
         }
