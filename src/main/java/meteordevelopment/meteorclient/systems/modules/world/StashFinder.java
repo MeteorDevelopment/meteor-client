@@ -525,7 +525,7 @@ public class StashFinder extends Module {
 
         public boolean countsEqual(Chunk c) {
             if (c == null) return false;
-            return chests != c.chests || barrels != c.barrels || shulkers != c.shulkers || enderChests != c.enderChests || furnaces != c.furnaces || dispensersDroppers != c.dispensersDroppers || hoppers != c.hoppers;
+            return chests == c.chests && barrels == c.barrels && shulkers == c.shulkers && enderChests == c.enderChests && furnaces == c.furnaces && dispensersDroppers == c.dispensersDroppers && hoppers == c.hoppers;
         }
 
         @Override
