@@ -180,11 +180,14 @@ public class StashFinder extends Module {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
     private record CsvField(String name, ToIntFunction<Chunk> getter, ObjIntConsumer<Chunk> setter) {
+        public CsvField(String name, ToIntFunction<Chunk> getter) {
+            this(name, getter, null);
+        }
     }
 
     private static final List<CsvField> CSV_FIELDS = List.of(
-        new CsvField("x", c -> c.x, (c, v) -> c.x = v),
-        new CsvField("z", c -> c.z, (c, v) -> c.z = v),
+        new CsvField("x", c -> c.chunkPos.x()),
+        new CsvField("z", c -> c.chunkPos.z()),
         new CsvField("chests", c -> c.chests, (c, v) -> c.chests = v),
         new CsvField("barrels", c -> c.barrels, (c, v) -> c.barrels = v),
         new CsvField("shulkers", c -> c.shulkers, (c, v) -> c.shulkers = v),
@@ -376,11 +379,9 @@ public class StashFinder extends Module {
                         throw new IllegalStateException("Invalid CSV row length: expected " + CSV_FIELDS.size() + ", got " + values.length);
                     }
 
-                    int x = Integer.parseInt(values[0]);
-                    int z = Integer.parseInt(values[1]);
-                    Chunk chunk = new Chunk(new ChunkPos(Math.floorDiv(x - 8, 16), Math.floorDiv(z - 8, 16)));
+                    Chunk chunk = new Chunk(new ChunkPos(Integer.parseInt(values[0]), Integer.parseInt(values[1])));
 
-                    for (int i = 0; i < CSV_FIELDS.size(); i++) {
+                    for (int i = 2; i < CSV_FIELDS.size(); i++) {
                         CSV_FIELDS.get(i).setter().accept(chunk, Integer.parseInt(values[i]));
                     }
 
