@@ -46,8 +46,15 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.*;
 import net.minecraft.world.phys.Vec3;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
+import java.util.function.ObjIntConsumer;
+import java.util.function.ToIntFunction;
+import java.util.stream.Collectors;
 
 public class StashFinder extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -171,6 +178,22 @@ public class StashFinder extends Module {
     );
 
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
+
+    private record CsvField(String name, ToIntFunction<Chunk> getter, ObjIntConsumer<Chunk> setter) {
+    }
+
+    private static final List<CsvField> CSV_FIELDS = List.of(
+        new CsvField("x", c -> c.x, (c, v) -> c.x = v),
+        new CsvField("z", c -> c.z, (c, v) -> c.z = v),
+        new CsvField("chests", c -> c.chests, (c, v) -> c.chests = v),
+        new CsvField("barrels", c -> c.barrels, (c, v) -> c.barrels = v),
+        new CsvField("shulkers", c -> c.shulkers, (c, v) -> c.shulkers = v),
+        new CsvField("enderChests", c -> c.enderChests, (c, v) -> c.enderChests = v),
+        new CsvField("furnaces", c -> c.furnaces, (c, v) -> c.furnaces = v),
+        new CsvField("dispensersDroppers", c -> c.dispensersDroppers, (c, v) -> c.dispensersDroppers = v),
+        new CsvField("hoppers", c -> c.hoppers, (c, v) -> c.hoppers = v)
+    );
+
     private final Map<ChunkPos, Vec3> tracerPositions = new HashMap<>();
     public List<Chunk> chunks = new ArrayList<>();
 
@@ -217,6 +240,7 @@ public class StashFinder extends Module {
                 case DispenserBlockEntity _ -> chunk.dispensersDroppers++;
                 case HopperBlockEntity _ -> chunk.hoppers++;
                 default -> {
+                    // Do not track other block entities
                 }
             }
         }
@@ -327,16 +351,12 @@ public class StashFinder extends Module {
         boolean loaded = false;
 
         // Try to load json
-        File file = getJsonFile();
-        if (file.exists()) {
-            try {
-                FileReader reader = new FileReader(file);
+        Path jsonFile = getJsonFile();
+        if (Files.exists(jsonFile)) {
+            try (BufferedReader reader = Files.newBufferedReader(jsonFile)) {
                 chunks = GSON.fromJson(reader, new TypeToken<List<Chunk>>() {
                 }.getType());
-                reader.close();
-
                 for (Chunk chunk : chunks) chunk.calculatePos();
-
                 loaded = true;
             } catch (Exception _) {
                 if (chunks == null) chunks = new ArrayList<>();
@@ -344,28 +364,28 @@ public class StashFinder extends Module {
         }
 
         // Try to load csv
-        file = getCsvFile();
-        if (!loaded && file.exists()) {
-            try {
-                BufferedReader reader = new BufferedReader(new FileReader(file));
-                reader.readLine();
+        Path csvFile = getCsvFile();
+        if (!loaded && Files.exists(csvFile)) {
+            try (BufferedReader reader = Files.newBufferedReader(csvFile)) {
+                reader.readLine(); // Skip header
 
                 String line;
                 while ((line = reader.readLine()) != null) {
-                    String[] values = line.split(" ");
-                    Chunk chunk = new Chunk(new ChunkPos(Integer.parseInt(values[0]), Integer.parseInt(values[1])));
+                    String[] values = line.split(",");
+                    if (values.length != CSV_FIELDS.size()) {
+                        throw new IllegalStateException("Invalid CSV row length: expected " + CSV_FIELDS.size() + ", got " + values.length);
+                    }
 
-                    chunk.chests = Integer.parseInt(values[2]);
-                    chunk.shulkers = Integer.parseInt(values[3]);
-                    chunk.enderChests = Integer.parseInt(values[4]);
-                    chunk.furnaces = Integer.parseInt(values[5]);
-                    chunk.dispensersDroppers = Integer.parseInt(values[6]);
-                    chunk.hoppers = Integer.parseInt(values[7]);
+                    int x = Integer.parseInt(values[0]);
+                    int z = Integer.parseInt(values[1]);
+                    Chunk chunk = new Chunk(new ChunkPos(Math.floorDiv(x - 8, 16), Math.floorDiv(z - 8, 16)));
+
+                    for (int i = 0; i < CSV_FIELDS.size(); i++) {
+                        CSV_FIELDS.get(i).setter().accept(chunk, Integer.parseInt(values[i]));
+                    }
 
                     chunks.add(chunk);
                 }
-
-                reader.close();
             } catch (Exception _) {
                 if (chunks == null) chunks = new ArrayList<>();
             }
@@ -374,14 +394,17 @@ public class StashFinder extends Module {
 
     private void saveCsv() {
         try {
-            File file = getCsvFile();
-            file.getParentFile().mkdirs();
-            Writer writer = new FileWriter(file);
-
-            writer.write("X,Z,Chests,Barrels,Shulkers,EnderChests,Furnaces,DispensersDroppers,Hoppers\n");
-            for (Chunk chunk : chunks) chunk.write(writer);
-
-            writer.close();
+            Path csvFile = getCsvFile();
+            Files.createDirectories(csvFile.getParent());
+            try (BufferedWriter writer = Files.newBufferedWriter(csvFile)) {
+                String header = CSV_FIELDS.stream()
+                    .map(CsvField::name)
+                    .collect(Collectors.joining(","));
+                writer.write(header + "\n");
+                for (Chunk chunk : chunks) {
+                    chunk.write(writer);
+                }
+            }
         } catch (IOException e) {
             MeteorClient.LOG.error("Error while writing the stash list to csv", e);
         }
@@ -389,22 +412,22 @@ public class StashFinder extends Module {
 
     private void saveJson() {
         try {
-            File file = getJsonFile();
-            file.getParentFile().mkdirs();
-            Writer writer = new FileWriter(file);
-            GSON.toJson(chunks, writer);
-            writer.close();
+            Path jsonFile = getJsonFile();
+            Files.createDirectories(jsonFile.getParent());
+            try (BufferedWriter writer = Files.newBufferedWriter(jsonFile)) {
+                GSON.toJson(chunks, writer);
+            }
         } catch (IOException e) {
             MeteorClient.LOG.error("Error while writing the stash list to json", e);
         }
     }
 
-    private File getJsonFile() {
-        return new File(new File(new File(MeteorClient.FOLDER, "stashes"), Utils.getFileWorldName()), "stashes.json");
+    private Path getJsonFile() {
+        return Path.of(MeteorClient.FOLDER.getPath(), "stashes", Utils.getFileWorldName(), "stashes.json");
     }
 
-    private File getCsvFile() {
-        return new File(new File(new File(MeteorClient.FOLDER, "stashes"), Utils.getFileWorldName()), "stashes.csv");
+    private Path getCsvFile() {
+        return Path.of(MeteorClient.FOLDER.getPath(), "stashes", Utils.getFileWorldName(), "stashes.csv");
     }
 
     @Override
@@ -479,8 +502,6 @@ public class StashFinder extends Module {
     }
 
     public static class Chunk {
-        private static final StringBuilder sb = new StringBuilder();
-
         public ChunkPos chunkPos;
         public transient int x, z;
         public int chests, barrels, shulkers, enderChests, furnaces, dispensersDroppers, hoppers;
@@ -500,11 +521,12 @@ public class StashFinder extends Module {
             return chests + barrels + shulkers + enderChests + furnaces + dispensersDroppers + hoppers;
         }
 
-        public void write(Writer writer) throws IOException {
-            sb.setLength(0);
-            sb.append(x).append(',').append(z).append(',');
-            sb.append(chests).append(',').append(barrels).append(',').append(shulkers).append(',').append(enderChests).append(',').append(furnaces).append(',').append(dispensersDroppers).append(',').append(hoppers).append('\n');
-            writer.write(sb.toString());
+        public void write(BufferedWriter writer) throws IOException {
+            String line = CSV_FIELDS.stream()
+                .map(field -> String.valueOf(field.getter().applyAsInt(this)))
+                .collect(Collectors.joining(","));
+            writer.write(line);
+            writer.newLine();
         }
 
         public boolean countsEqual(Chunk c) {
