@@ -45,6 +45,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.*;
 import net.minecraft.world.phys.Vec3;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -373,7 +374,7 @@ public class StashFinder extends Module {
 
                 String line;
                 while ((line = reader.readLine()) != null) {
-                    String[] values = line.split(",");
+                    String[] values = StringUtils.split(line, ',');
                     if (values.length != CSV_FIELDS.size()) {
                         throw new IllegalStateException("Invalid CSV row length: expected " + CSV_FIELDS.size() + ", got " + values.length);
                     }
@@ -400,7 +401,8 @@ public class StashFinder extends Module {
                 String header = CSV_FIELDS.stream()
                     .map(CsvField::name)
                     .collect(Collectors.joining(","));
-                writer.write(header + "\n");
+                writer.write(header);
+                writer.newLine();
                 for (Chunk chunk : chunks) {
                     chunk.write(writer);
                 }
