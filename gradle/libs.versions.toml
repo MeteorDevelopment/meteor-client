@@ -8,6 +8,8 @@ fabric-api = "0.154.2+26.2"
 # Plugins
 # Loom (https://github.com/FabricMC/fabric-loom)
 loom = "1.17-SNAPSHOT"
+# Error Prone Plugin (https://github.com/tbroyer/gradle-errorprone-plugin)
+errorprone-plugin = "5.1.1"
 
 # Mods
 # Baritone (https://github.com/MeteorDevelopment/baritone)
@@ -37,6 +39,12 @@ waybackauthlib = "1.1.0"
 # MinecraftAuth (https://github.com/RaphiMC/MinecraftAuth)
 minecraftauth = "5.0.2"
 
+# Libraries
+# Error Prone (https://github.com/google/error-prone)
+errorprone = "2.50.0"
+# NullAway (https://github.com/uber/NullAway)
+nullaway = "0.14.0"
+
 [libraries]
 # Fabric base
 minecraft = { module = "com.mojang:minecraft", version.ref = "minecraft" }
@@ -60,6 +68,9 @@ netty-handler-proxy = { module = "io.netty:netty-handler-proxy", version.ref = "
 netty-codec-socks = { module = "io.netty:netty-codec-socks", version.ref = "netty" }
 waybackauthlib = { module = "de.florianreuth:waybackauthlib", version.ref = "waybackauthlib" }
 minecraft-auth = { module = "net.raphimc:MinecraftAuth", version.ref = "minecraftauth" }
+errorprone-core = { module = "com.google.errorprone:error_prone_core", version.ref = "errorprone" }
+nullaway = { module = "com.uber.nullaway:nullaway", version.ref = "nullaway" }
 
 [plugins]
 fabric-loom = { id = "net.fabricmc.fabric-loom", version.ref = "loom" }
+errorprone = { id = "net.ltgt.errorprone", version.ref = "errorprone-plugin" }
