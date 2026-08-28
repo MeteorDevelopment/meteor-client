@@ -64,6 +64,13 @@ public class BetterTab extends Module {
         .build()
     );
 
+    public final Setting<Boolean> onlyFriends = sgGeneral.add(new BoolSetting.Builder()
+        .name("show-only-friends")
+        .description("Only show friends and yourself in the tablist, nobody else.")
+        .defaultValue(false)
+        .build()
+    );
+
     public final Setting<Boolean> accurateLatency = sgGeneral.add(new BoolSetting.Builder()
         .name("accurate-latency")
         .description("Shows latency as a number in the tablist.")

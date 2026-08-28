@@ -7,6 +7,7 @@ package meteordevelopment.meteorclient.mixin;
 
 import com.llamalad7.mixinextras.sugar.Local;
 import com.llamalad7.mixinextras.sugar.ref.LocalIntRef;
+import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.BetterTab;
 import net.minecraft.client.Minecraft;
@@ -34,6 +35,20 @@ public abstract class PlayerTabOverlayMixin {
         BetterTab module = Modules.get().get(BetterTab.class);
 
         return module.isActive() ? module.tabSize.get() : count;
+    }
+
+    @Inject(method = "getPlayerInfos", at = @At("RETURN"), cancellable = true)
+    private void friendsOnly(CallbackInfoReturnable<List<PlayerInfo>> cir) {
+        BetterTab betterTab = Modules.get().get(BetterTab.class);
+
+        if (betterTab.isActive() && betterTab.onlyFriends.get()) {
+            List<PlayerInfo> players = cir.getReturnValue();
+            cir.setReturnValue(players.stream()
+                .filter(
+                    info -> info.getProfile().id().equals(Minecraft.getInstance().player.getUUID()) || Friends.get().isFriend(info)
+                ).toList()
+            );
+        }
     }
 
     @Inject(method = "getNameForDisplay", at = @At("HEAD"), cancellable = true)
