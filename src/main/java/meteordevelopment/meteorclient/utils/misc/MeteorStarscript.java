@@ -104,6 +104,7 @@ public class MeteorStarscript {
                 .set("process", MeteorStarscript::baritoneProcess)
                 .set("process_name", MeteorStarscript::baritoneProcessName)
                 .set("eta", MeteorStarscript::baritoneETA)
+                .set("prefix", MeteorStarscript::baritonePrefix)
             );
         }
 
@@ -455,6 +456,10 @@ public class MeteorStarscript {
         if (mc.player == null) return Value.number(0);
         Optional<Double> ticksTillGoal = BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().estimatedTicksToGoal();
         return ticksTillGoal.map(aDouble -> Value.number(aDouble / 20)).orElseGet(() -> Value.number(0));
+    }
+
+    private static Value baritonePrefix() {
+        return Value.string(BaritoneAPI.getSettings().prefix.value);
     }
 
     private static Value oppositeX(boolean camera) {
