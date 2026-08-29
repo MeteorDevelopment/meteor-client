@@ -7,6 +7,7 @@ package meteordevelopment.meteorclient.mixin;
 
 import com.llamalad7.mixinextras.sugar.Local;
 import com.llamalad7.mixinextras.sugar.ref.LocalIntRef;
+import java.util.Comparator;
 import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.BetterTab;
@@ -41,13 +42,22 @@ public abstract class PlayerTabOverlayMixin {
     private void friendsOnly(CallbackInfoReturnable<List<PlayerInfo>> cir) {
         BetterTab betterTab = Modules.get().get(BetterTab.class);
 
-        if (betterTab.isActive() && betterTab.onlyFriends.get()) {
+        if (betterTab.isActive()) {
             List<PlayerInfo> players = cir.getReturnValue();
-            cir.setReturnValue(players.stream()
-                .filter(
-                    info -> info.getProfile().id().equals(Minecraft.getInstance().player.getUUID()) || Friends.get().isFriend(info)
-                ).toList()
-            );
+
+            if (betterTab.onlyFriends.get()) {
+                players = players.stream()
+                    .filter(info -> info.getProfile().id().equals(Minecraft.getInstance().player.getUUID()) || Friends.get().isFriend(info))
+                    .toList();
+            }
+
+            if (betterTab.friendsFirst.get()) {
+                players = players.stream()
+                    .sorted(Comparator.comparing(info -> !(info.getProfile().id().equals(Minecraft.getInstance().player.getUUID()) || Friends.get().isFriend(info))))
+                    .toList();
+            }
+
+            cir.setReturnValue(players);
         }
     }
 
