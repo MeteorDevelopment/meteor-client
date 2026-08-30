@@ -12,6 +12,7 @@ import com.mojang.blaze3d.buffers.Std140SizeCalculator;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.textures.FilterMode;
+import com.mojang.blaze3d.textures.GpuTexture;
 import com.mojang.blaze3d.textures.GpuTextureView;
 import it.unimi.dsi.fastutil.ints.IntFloatImmutablePair;
 import meteordevelopment.meteorclient.MeteorClient;
@@ -133,7 +134,10 @@ public class Blur extends Module {
             // Resize all fbos
             for (int i = 0; i < fbos.length; i++) {
                 if (fbos[i] != null) {
+                    // Closing the view only drops a reference, the texture itself has to be closed too
+                    GpuTexture texture = fbos[i].texture();
                     fbos[i].close();
+                    texture.close();
                 }
 
                 fbos[i] = createFbo(i);
