@@ -59,14 +59,12 @@ public class Fonts {
     }
 
     public static void load(FontFace fontFace) {
-        if (RENDERER != null) {
-            if (RENDERER.fontFace.equals(fontFace)) return;
-            else RENDERER.destroy();
-        }
+        if (RENDERER != null && RENDERER.fontFace.equals(fontFace)) return;
+
+        CustomTextRenderer renderer;
 
         try {
-            RENDERER = new CustomTextRenderer(fontFace);
-            MeteorClient.EVENT_BUS.post(CustomFontChangedEvent.get());
+            renderer = new CustomTextRenderer(fontFace);
         } catch (Exception e) {
             if (fontFace.equals(DEFAULT_FONT)) {
                 throw new RuntimeException("Failed to load default font: " + fontFace, e);
@@ -74,7 +72,13 @@ public class Fonts {
 
             MeteorClient.LOG.error("Failed to load font: {}", fontFace, e);
             load(Fonts.DEFAULT_FONT);
+            return;
         }
+
+        if (RENDERER != null) RENDERER.destroy();
+        RENDERER = renderer;
+
+        MeteorClient.EVENT_BUS.post(CustomFontChangedEvent.get());
 
         if (mc.gui.screen() instanceof WidgetScreen widgetScreen && Config.get().customFont.get()) {
             widgetScreen.invalidate();
