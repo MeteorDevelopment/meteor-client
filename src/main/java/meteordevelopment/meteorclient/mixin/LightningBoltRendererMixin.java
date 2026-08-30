@@ -29,8 +29,8 @@ public abstract class LightningBoltRendererMixin {
             Color color = ambience.lightningColor.get();
 
             buffer.addVertex(pose, xo0 + (px1 ? rr2 : -rr2), (float) (h * 16), zo0 + (pz1 ? rr2 : -rr2)).setColor(color.r / 255f, color.g / 255f, color.b / 255f, 0.3F);
-            buffer.addVertex(pose, h + (px1 ? rr1 : -rr1), (float) ((h + 1) * 16), zo1 + (pz1 ? rr1 : -rr1)).setColor(color.r / 255f, color.g / 255f, color.b / 255f, 0.3F);
-            buffer.addVertex(pose, h + (px2 ? rr1 : -rr1), (float) ((h + 1) * 16), zo1 + (pz2 ? rr1 : -rr1)).setColor(color.r / 255f, color.g / 255f, color.b / 255f, 0.3F);
+            buffer.addVertex(pose, xo1 + (px1 ? rr1 : -rr1), (float) ((h + 1) * 16), zo1 + (pz1 ? rr1 : -rr1)).setColor(color.r / 255f, color.g / 255f, color.b / 255f, 0.3F);
+            buffer.addVertex(pose, xo1 + (px2 ? rr1 : -rr1), (float) ((h + 1) * 16), zo1 + (pz2 ? rr1 : -rr1)).setColor(color.r / 255f, color.g / 255f, color.b / 255f, 0.3F);
             buffer.addVertex(pose, xo0 + (px2 ? rr2 : -rr2), (float) (h * 16), zo0 + (pz2 ? rr2 : -rr2)).setColor(color.r / 255f, color.g / 255f, color.b / 255f, 0.3F);
 
             ci.cancel();
