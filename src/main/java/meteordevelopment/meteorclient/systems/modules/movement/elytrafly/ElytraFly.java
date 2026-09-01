@@ -22,11 +22,15 @@ import meteordevelopment.meteorclient.systems.modules.movement.elytrafly.modes.V
 import meteordevelopment.meteorclient.systems.modules.player.ChestSwap;
 import meteordevelopment.meteorclient.systems.modules.player.Rotation;
 import meteordevelopment.meteorclient.systems.modules.render.Freecam;
+import meteordevelopment.meteorclient.utils.player.FindItemResult;
+import meteordevelopment.meteorclient.utils.player.InvUtils;
+import meteordevelopment.meteorclient.utils.player.Rotations;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket;
 import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
 import net.minecraft.network.protocol.game.ServerboundPlayerCommandPacket;
+import net.minecraft.network.protocol.game.ServerboundSetCarriedItemPacket;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.Items;
@@ -41,6 +45,7 @@ public class ElytraFly extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgInventory = settings.createGroup("Inventory");
     private final SettingGroup sgAutopilot = settings.createGroup("Autopilot");
+    private final SettingGroup sgSpoof = settings.createGroup("Server Spoof");
 
     // General
 
@@ -339,9 +344,9 @@ public class ElytraFly extends Module {
 
     public final Setting<Boolean> useFireworks = sgAutopilot.add(new BoolSetting.Builder()
         .name("use-fireworks")
-        .description("Uses firework rockets every second of your choice.")
+        .description("Fires a firework rocket every few seconds while gliding.")
         .defaultValue(false)
-        .visible(() -> autoPilot.get() && flightMode.get() != ElytraFlightModes.Pitch40 && flightMode.get() != ElytraFlightModes.Bounce)
+        .visible(() -> flightMode.get() != ElytraFlightModes.Pitch40 && flightMode.get() != ElytraFlightModes.Bounce)
         .build()
     );
 
@@ -365,7 +370,42 @@ public class ElytraFly extends Module {
         .build()
     );
 
+    // Server Spoof
+
+    public final Setting<Boolean> spoofLook = sgSpoof.add(new BoolSetting.Builder()
+        .name("look-at-velocity")
+        .description("Tells the server you're facing the direction you're actually flying. Your camera is untouched, so you can look anywhere while the server sees a clean flight path. In Pitch40 only the heading is rewritten, since that mode flies by its pitch.")
+        .defaultValue(false)
+        .visible(() -> flightMode.get() != ElytraFlightModes.Bounce)
+        .build()
+    );
+
+    public final Setting<Boolean> spoofLookPitch = sgSpoof.add(new BoolSetting.Builder()
+        .name("include-pitch")
+        .description("Also match the climb/dive angle. Turn off to only line the yaw up and keep sending your real pitch.")
+        .defaultValue(true)
+        .visible(() -> spoofLook.get() && flightMode.get() != ElytraFlightModes.Pitch40 && flightMode.get() != ElytraFlightModes.Bounce)
+        .build()
+    );
+
+    public final Setting<Boolean> spoofFirework = sgSpoof.add(new BoolSetting.Builder()
+        .name("hold-firework")
+        .description("Makes the server see a firework rocket in your main hand for the whole flight, without changing the item you really hold. Actually firing one stays opt-in via use-fireworks.")
+        .defaultValue(false)
+        .build()
+    );
+
+    /** Rotations from anything with a real target should win over a constant background heading. */
+    private static final int LOOK_PRIORITY = -20;
+
+    /** Below this the velocity vector is mostly noise and would point somewhere useless. */
+    private static final double MIN_SPEED = 0.1;
+
     private ElytraFlightMode currentMode = new Vanilla();
+
+    /** Hotbar slot the server currently believes is selected, or -1 when we aren't spoofing one. */
+    private int spoofedSlot = -1;
+    private boolean sendingSpoof;
 
     public ElytraFly() {
         super(Categories.Movement, "elytra-fly", "Gives you more control over your elytra.");
@@ -382,6 +422,8 @@ public class ElytraFly extends Module {
 
     @Override
     public void onDeactivate() {
+        stopFireworkSpoof();
+
         if (autoPilot.get()) mc.options.keyUp.setDown(false);
 
         if (chestSwap.get() == ChestSwapMode.Always && mc.player.getItemBySlot(EquipmentSlot.CHEST).getItem() == Items.ELYTRA) {
@@ -496,11 +538,76 @@ public class ElytraFly extends Module {
     @EventHandler
     private void onPreTick(TickEvent.Pre event) {
         currentMode.onPreTick();
+
+        // Queued here so Rotations can fold it into this tick's movement packet.
+        applyLookSpoof();
+        applyFireworkSpoof();
     }
 
     @EventHandler
     private void onPacketSend(PacketEvent.Send event) {
+        if (!sendingSpoof && event.packet instanceof ServerboundSetCarriedItemPacket) spoofedSlot = -1;
+
         currentMode.onPacketSend(event);
+    }
+
+    /**
+     * Reports the heading we're actually travelling on rather than where the camera points. Only the
+     * outgoing packet is affected - {@link Rotations} restores the client rotation straight after.
+     */
+    private void applyLookSpoof() {
+        if (!spoofLook.get() || !mc.player.isFallFlying()) return;
+        if (flightMode.get() == ElytraFlightModes.Bounce) return;
+
+        Vec3 velocity = mc.player.getDeltaMovement();
+        double horizontal = Math.sqrt(velocity.x * velocity.x + velocity.z * velocity.z);
+        if (horizontal < MIN_SPEED) return;
+
+        float rawYaw = (float) Math.toDegrees(Math.atan2(-velocity.x, velocity.z));
+        float yaw = mc.player.getYRot() + Mth.wrapDegrees(rawYaw - mc.player.getYRot());
+
+        boolean pitchIsTheTechnique = flightMode.get() == ElytraFlightModes.Pitch40;
+
+        double pitch = spoofLookPitch.get() && !pitchIsTheTechnique
+            ? -Math.toDegrees(Math.atan2(velocity.y, horizontal))
+            : mc.player.getXRot();
+
+        Rotations.rotate(yaw, pitch, LOOK_PRIORITY);
+    }
+
+    /**
+     * Points the server at a hotbar firework while leaving the item we really hold alone. Gliding
+     * only: off the elytra this would hand our block places and attacks to the wrong item.
+     */
+    private void applyFireworkSpoof() {
+        if (!spoofFirework.get() || !mc.player.isFallFlying()) {
+            stopFireworkSpoof();
+            return;
+        }
+
+        FindItemResult firework = InvUtils.findInHotbar(Items.FIREWORK_ROCKET);
+        if (!firework.isHotbar() || firework.slot() == mc.player.getInventory().getSelectedSlot()) {
+            stopFireworkSpoof();
+            return;
+        }
+
+        if (spoofedSlot == firework.slot()) return;
+
+        sendSlot(firework.slot());
+        spoofedSlot = firework.slot();
+    }
+
+    private void stopFireworkSpoof() {
+        if (spoofedSlot == -1) return;
+        spoofedSlot = -1;
+
+        if (mc.player != null && mc.player.connection != null) sendSlot(mc.player.getInventory().getSelectedSlot());
+    }
+
+    private void sendSlot(int slot) {
+        sendingSpoof = true;
+        mc.player.connection.send(new ServerboundSetCarriedItemPacket(slot));
+        sendingSpoof = false;
     }
 
     @EventHandler
