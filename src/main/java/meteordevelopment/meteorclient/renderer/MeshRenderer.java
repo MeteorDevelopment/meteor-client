@@ -165,10 +165,9 @@ public class MeshRenderer {
 
             CommandEncoder encoder = RenderSystem.getDevice().createCommandEncoder();
 
-            GpuBufferSlice vertexBuffer = mesh != null ? mesh.getVertexBuffer().slice() : Objects.requireNonNull(this.vertexBuffer);
-            GpuBufferSlice indexBuffer = mesh != null ? mesh.getIndexBuffer().slice() : Objects.requireNonNull(this.indexBuffer);
+            GpuBufferSlice vertexBuffer = mesh != null ? mesh.uploadVertexBuffer(encoder) : Objects.requireNonNull(this.vertexBuffer);
+            GpuBufferSlice indexBuffer = mesh != null ? mesh.uploadIndexBuffer(encoder) : Objects.requireNonNull(this.indexBuffer);
 
-            int vertexOffset = getVertexOffset(vertexBuffer);
             int firstIndex = getFirstIndex(indexBuffer);
 
             GpuBufferSlice meshData = MeshUniforms.write(RenderUtils.projection, RenderSystem.getModelViewStack());
@@ -190,16 +189,11 @@ public class MeshRenderer {
 
                 pass.setVertexBuffer(0, vertexBuffer);
                 pass.setIndexBuffer(indexBuffer.buffer(), indexType);
-                pass.drawIndexed(indexCount, 1, 0, 0, 0);
+                pass.drawIndexed(indexCount, 1, firstIndex, 0, 0);
             }
 
             if (Utils.rendering3D || matrix != null) {
                 RenderSystem.getModelViewStack().popMatrix();
-            }
-
-            if (mesh != null) {
-                vertexBuffer.buffer().close();
-                indexBuffer.buffer().close();
             }
         }
 
@@ -216,16 +210,6 @@ public class MeshRenderer {
         samplers.clear();
 
         taken = false;
-    }
-
-    private int getVertexOffset(GpuBufferSlice vertexBuffer) {
-        var size = pipeline.getVertexFormatBinding(0).getVertexSize();
-
-        if (vertexBuffer.offset() % size != 0) {
-            throw new IllegalArgumentException("Vertex buffer offset must be aligned to " + size + " bytes.");
-        }
-
-        return Math.toIntExact(vertexBuffer.offset() / size);
     }
 
     private int getFirstIndex(GpuBufferSlice indexBuffer) {
