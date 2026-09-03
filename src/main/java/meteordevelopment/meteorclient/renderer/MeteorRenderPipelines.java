@@ -7,10 +7,10 @@ package meteordevelopment.meteorclient.renderer;
 
 import com.mojang.blaze3d.pipeline.PipelineCache;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.renderpearl.api.device.GpuDevice;
 import com.mojang.renderpearl.api.pipeline.*;
 import meteordevelopment.meteorclient.MeteorClient;
-import meteordevelopment.meteorclient.mixin.PipelineCacheAccessor;
 import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ShaderManager;
@@ -43,7 +43,7 @@ public abstract class MeteorRenderPipelines {
 
     public static final RenderPipeline WORLD_COLORED = add(new ExtendedRenderPipelineBuilder(MESH_UNIFORMS)
         .withLocation(MeteorClient.identifier("pipeline/world_colored"))
-        .withVertexBinding(0, MeteorVertexFormats.POS2_COLOR).withPrimitiveTopology(PrimitiveTopology.TRIANGLES)
+        .withVertexBinding(0, DefaultVertexFormat.POSITION_COLOR).withPrimitiveTopology(PrimitiveTopology.TRIANGLES)
         .withVertexShader(MeteorClient.identifier("shaders/pos_color.vsh"))
         .withFragmentShader(MeteorClient.identifier("shaders/pos_color.fsh"))
         .withDepthStencilState(new DepthStencilState(CompareOp.ALWAYS_PASS, false))
@@ -55,7 +55,7 @@ public abstract class MeteorRenderPipelines {
     public static final RenderPipeline WORLD_COLORED_LINES = add(new ExtendedRenderPipelineBuilder(MESH_UNIFORMS)
         .withLineSmooth()
         .withLocation(MeteorClient.identifier("pipeline/world_colored_lines"))
-        .withVertexBinding(0, MeteorVertexFormats.POS2_COLOR).withPrimitiveTopology(PrimitiveTopology.DEBUG_LINES)
+        .withVertexBinding(0, DefaultVertexFormat.POSITION_COLOR).withPrimitiveTopology(PrimitiveTopology.DEBUG_LINES)
         .withVertexShader(MeteorClient.identifier("shaders/pos_color.vsh"))
         .withFragmentShader(MeteorClient.identifier("shaders/pos_color.fsh"))
         .withDepthStencilState(new DepthStencilState(CompareOp.ALWAYS_PASS, false))
@@ -66,7 +66,7 @@ public abstract class MeteorRenderPipelines {
 
     public static final RenderPipeline WORLD_COLORED_DEPTH = add(new ExtendedRenderPipelineBuilder(MESH_UNIFORMS)
         .withLocation(MeteorClient.identifier("pipeline/world_colored_depth"))
-        .withVertexBinding(0, MeteorVertexFormats.POS2_COLOR).withPrimitiveTopology(PrimitiveTopology.TRIANGLES)
+        .withVertexBinding(0, DefaultVertexFormat.POSITION_COLOR).withPrimitiveTopology(PrimitiveTopology.TRIANGLES)
         .withVertexShader(MeteorClient.identifier("shaders/pos_color.vsh"))
         .withFragmentShader(MeteorClient.identifier("shaders/pos_color.fsh"))
         .withDepthStencilState(new DepthStencilState(DepthStencilState.DEFAULT.depthTest(), false))
@@ -78,7 +78,7 @@ public abstract class MeteorRenderPipelines {
     public static final RenderPipeline WORLD_COLORED_LINES_DEPTH = add(new ExtendedRenderPipelineBuilder(MESH_UNIFORMS)
         .withLineSmooth()
         .withLocation(MeteorClient.identifier("pipeline/world_colored_lines_depth"))
-        .withVertexBinding(0, MeteorVertexFormats.POS2_COLOR).withPrimitiveTopology(PrimitiveTopology.DEBUG_LINES)
+        .withVertexBinding(0, DefaultVertexFormat.POSITION_COLOR).withPrimitiveTopology(PrimitiveTopology.DEBUG_LINES)
         .withVertexShader(MeteorClient.identifier("shaders/pos_color.vsh"))
         .withFragmentShader(MeteorClient.identifier("shaders/pos_color.fsh"))
         .withDepthStencilState(new DepthStencilState(DepthStencilState.DEFAULT.depthTest(), false))
@@ -94,6 +94,7 @@ public abstract class MeteorRenderPipelines {
         .withVertexBinding(0, MeteorVertexFormats.POS2_COLOR).withPrimitiveTopology(PrimitiveTopology.TRIANGLES)
         .withVertexShader(MeteorClient.identifier("shaders/pos_color.vsh"))
         .withFragmentShader(MeteorClient.identifier("shaders/pos_color.fsh"))
+        .withShaderDefine("UI")
         .withDepthStencilState(new DepthStencilState(CompareOp.ALWAYS_PASS, false))
         .withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT))
         .withCull(true)
@@ -105,6 +106,7 @@ public abstract class MeteorRenderPipelines {
         .withVertexBinding(0, MeteorVertexFormats.POS2_COLOR).withPrimitiveTopology(PrimitiveTopology.DEBUG_LINES)
         .withVertexShader(MeteorClient.identifier("shaders/pos_color.vsh"))
         .withFragmentShader(MeteorClient.identifier("shaders/pos_color.fsh"))
+        .withShaderDefine("UI")
         .withDepthStencilState(new DepthStencilState(CompareOp.ALWAYS_PASS, false))
         .withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT))
         .withCull(true)
@@ -224,8 +226,6 @@ public abstract class MeteorRenderPipelines {
     }
 
     public static void precompile(PipelineCache cache) {
-        PipelineCacheAccessor pipelineAccessor = (PipelineCacheAccessor) cache;
-
         GpuDevice device = RenderSystem.getDevice();
         ResourceManager resources = Minecraft.getInstance().getResourceManager();
         final Map<Identifier, ShaderSource.CachedIncludeSource> includes = ShaderManager.listAllIncludes(resources);
@@ -255,9 +255,8 @@ public abstract class MeteorRenderPipelines {
         for (RenderPipeline pipeline : PIPELINES) {
             CompletableFuture<CompiledRenderPipeline.Pending> pendingPipeline = device.compilePipeline(pipeline, shaderSource, MeteorExecutor.executor);
 
-            try (CompiledRenderPipeline newPipeline = pendingPipeline.join().finishCompile()) {
-                pipelineAccessor.getCache().put(pipeline, newPipeline);
-            }
+            CompiledRenderPipeline compiled = pendingPipeline.join().finishCompile();
+            cache.insert(pipeline, compiled);
         }
     }
 

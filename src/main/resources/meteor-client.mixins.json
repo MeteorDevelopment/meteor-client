@@ -162,7 +162,6 @@
     "OptionsMixin",
     "PacketBundlingMixin",
     "ParticleEngineMixin",
-    "PipelineCacheAccessor",
     "PlayerAccessor",
     "PlayerInfoMixin",
     "PlayerMixin",
