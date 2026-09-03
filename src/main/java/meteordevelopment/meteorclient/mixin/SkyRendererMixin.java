@@ -30,7 +30,7 @@ public abstract class SkyRendererMixin {
         if (!ambience.isActive()) return;
 
         if (ambience.endSky.get()) state.skybox = DimensionType.Skybox.END;
-        if (ambience.customSkyColor.get()) state.skyColor = ambience.skyColor().getPacked();
+        if (ambience.customSkyColor.get()) state.skyColor = ambience.skyColor().getVec3f();
     }
 
     @WrapOperation(method = "renderEndSky", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/DynamicGpuData;writeTransform(Lorg/joml/Matrix4f;)Lcom/mojang/renderpearl/api/buffers/GpuBufferSlice;"))

@@ -11,7 +11,6 @@ import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.authlib.GameProfile;
 import meteordevelopment.meteorclient.MeteorClient;
-import meteordevelopment.meteorclient.events.entity.DropItemsEvent;
 import meteordevelopment.meteorclient.events.entity.player.PlayerTickMovementEvent;
 import meteordevelopment.meteorclient.events.entity.player.SendMovementPacketsEvent;
 import meteordevelopment.meteorclient.systems.modules.Modules;
@@ -48,12 +47,6 @@ public abstract class LocalPlayerMixin extends AbstractClientPlayer {
 
     public LocalPlayerMixin(ClientLevel world, GameProfile profile) {
         super(world, profile);
-    }
-
-    @Inject(method = "drop", at = @At("HEAD"), cancellable = true)
-    private void onDrop(boolean all, CallbackInfo ci) {
-        if (MeteorClient.EVENT_BUS.post(DropItemsEvent.get(getMainHandItem())).isCancelled())
-            ci.cancel();
     }
 
     @ModifyExpressionValue(method = "handlePortalTransitionEffect", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Gui;screen()Lnet/minecraft/client/gui/screens/Screen;", ordinal = 0))

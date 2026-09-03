@@ -23,6 +23,7 @@ import net.minecraft.client.resources.model.cuboid.ItemTransform;
 import net.minecraft.client.resources.model.geometry.BakedQuad;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.item.ItemEntity;
+import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
 
@@ -42,6 +43,8 @@ public class ItemPhysics extends Module {
 
     private final RandomSource random = RandomSource.createThreadLocalInstance();
     private boolean skipTransformation;
+
+    private final Matrix4f matrix4f = new Matrix4f();
 
     public ItemPhysics() {
         super(Categories.Render, "item-physics", "Applies physics to items on the ground.");
@@ -68,7 +71,7 @@ public class ItemPhysics extends Module {
             offsetInWater(matrices, event.itemEntity);
 
             if (info.flat) {
-                matrices.mulPose(Axis.XP.rotationDegrees(90));
+                matrices.mulPose(Axis.XP.rotateDegrees(matrix4f, 90));
                 matrices.translate(0, 0, info.offsetZ);
             }
 
@@ -87,7 +90,7 @@ public class ItemPhysics extends Module {
                 float degrees = (random.nextFloat() * 2 - 1) * 90;
 
                 matrices.translate(x, y, z);
-                matrices.mulPose(axis.rotationDegrees(degrees));
+                matrices.mulPose(axis.rotateDegrees(matrix4f, degrees));
                 matrices.translate(-x, -y, -z);
             }
 

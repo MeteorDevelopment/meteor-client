@@ -10,6 +10,7 @@ import com.mojang.blaze3d.buffers.Std140SizeCalculator;
 import com.mojang.renderpearl.api.buffers.GpuBuffer;
 import com.mojang.renderpearl.api.buffers.GpuBufferSlice;
 import net.minecraft.client.renderer.DynamicGpuDataStorage;
+import net.minecraft.client.renderer.DynamicGpuDataStorageMapped;
 import org.jspecify.annotations.NonNull;
 
 import java.nio.ByteBuffer;
@@ -22,7 +23,7 @@ public class OutlineUniforms {
         .putFloat()
         .get();
 
-    private static final DynamicGpuDataStorage<Data> STORAGE = new DynamicGpuDataStorage<>("Meteor - Outline UBO", UNIFORM_SIZE, GpuBuffer.USAGE_UNIFORM, 16);
+    private static final DynamicGpuDataStorage<Data> STORAGE = new DynamicGpuDataStorageMapped<>("Meteor - Outline UBO", UNIFORM_SIZE, GpuBuffer.USAGE_UNIFORM, 16);
 
     public static void flipFrame() {
         STORAGE.endFrame();

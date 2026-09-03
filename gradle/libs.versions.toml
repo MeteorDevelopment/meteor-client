@@ -1,9 +1,9 @@
 [versions]
 # Fabric (https://fabricmc.net/develop)
 jdk = "25"
-minecraft = "26.3-snapshot-9"
+minecraft = "26.3-pre-1"
 fabric-loader = "0.19.3"
-fabric-api = "0.158.0+26.3"
+fabric-api = "0.159.1+26.3"
 
 # Plugins
 # Loom (https://github.com/FabricMC/fabric-loom)

@@ -16,7 +16,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(ShaderManager.class)
 public abstract class ShaderManagerMixin {
-    @Inject(method = "apply(Lnet/minecraft/client/renderer/ShaderManager$Configs;Lnet/minecraft/server/packs/resources/ResourceManager;Lnet/minecraft/util/profiling/ProfilerFiller;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/ShaderManager$CompilationCache;close()V"))
+    @Inject(method = "apply", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/ShaderManager$PostChainCache;close()V"))
     private void meteor$reloadPipelines(CallbackInfo ci, @Local PipelineCache pipelineCache) {
         MeteorRenderPipelines.precompile(pipelineCache);
     }

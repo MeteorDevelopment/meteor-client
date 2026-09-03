@@ -13,6 +13,7 @@ import com.mojang.renderpearl.api.textures.FilterMode;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.renderer.MeshRenderer;
 import net.minecraft.client.renderer.DynamicGpuDataStorage;
+import net.minecraft.client.renderer.DynamicGpuDataStorageMapped;
 import org.joml.Vector4f;
 import org.jspecify.annotations.NonNull;
 
@@ -85,7 +86,7 @@ public abstract class PostProcessShader {
         .get();
 
     // todo what should usage be? not just here but everywhere else also
-    private static final DynamicGpuDataStorage<UniformData> UNIFORM_STORAGE = new DynamicGpuDataStorage<>("Meteor - Post UBO", UNIFORM_SIZE, GpuBuffer.USAGE_UNIFORM, 16);
+    private static final DynamicGpuDataStorage<UniformData> UNIFORM_STORAGE = new DynamicGpuDataStorageMapped<>("Meteor - Post UBO", UNIFORM_SIZE, GpuBuffer.USAGE_UNIFORM, 16);
 
     public static void flipFrame() {
         UNIFORM_STORAGE.endFrame();

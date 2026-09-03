@@ -22,6 +22,7 @@ import meteordevelopment.meteorclient.utils.PostInit;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.renderer.DynamicGpuDataStorage;
+import net.minecraft.client.renderer.DynamicGpuDataStorageMapped;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.world.entity.Entity;
 import org.jspecify.annotations.NonNull;
@@ -118,7 +119,7 @@ public class ChamsShader extends EntityShader {
         .putVec4()
         .get();
 
-    private static final DynamicGpuDataStorage<UniformData> UNIFORM_STORAGE = new DynamicGpuDataStorage<>("Meteor - Image UBO", UNIFORM_SIZE, GpuBuffer.USAGE_UNIFORM, 16);
+    private static final DynamicGpuDataStorage<UniformData> UNIFORM_STORAGE = new DynamicGpuDataStorageMapped<>("Meteor - Image UBO", UNIFORM_SIZE, GpuBuffer.USAGE_UNIFORM, 16);
 
     public static void flipFrame() {
         UNIFORM_STORAGE.endFrame();
