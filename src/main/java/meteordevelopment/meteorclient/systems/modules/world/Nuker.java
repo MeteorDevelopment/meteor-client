@@ -351,10 +351,9 @@ public class Nuker extends Module {
         double rangeSq = Math.pow(range.get(), 2);
         BlockPos playerBlockPos = mc.player.blockPosition();
 
-        if (shape.get() == Shape.UniformCube) range.set((double) Math.round(range.get()));
-
         double pX_ = pX;
         double pZ_ = pZ;
+        // Uniform cube works on whole blocks, so round the range locally instead of writing it back to the setting
         int r = (int) Math.round(range.get());
 
         if (shape.get() == Shape.UniformCube) {
@@ -410,7 +409,7 @@ public class Nuker extends Module {
                         return;
                 }
                 case UniformCube -> {
-                    if (chebyshevDist(playerBlockPos.getX(), playerBlockPos.getY(), playerBlockPos.getZ(), blockPos.getX(), blockPos.getY(), blockPos.getZ()) >= range.get())
+                    if (chebyshevDist(playerBlockPos.getX(), playerBlockPos.getY(), playerBlockPos.getZ(), blockPos.getX(), blockPos.getY(), blockPos.getZ()) >= r)
                         return;
                 }
                 case Cube -> {
