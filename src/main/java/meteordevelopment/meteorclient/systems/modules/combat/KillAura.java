@@ -437,7 +437,7 @@ public class KillAura extends Module {
             }
             // Passive mobs with baby variants (animals, villagers)
             if (entity instanceof AgeableMob && (!(entity instanceof Frog || entity instanceof Parrot))) {
-                passiveMobAgeFilter.get().test(livingEntity);
+                return passiveMobAgeFilter.get().test(livingEntity);
             }
         }
         return true;
