@@ -60,6 +60,7 @@ public class Names {
         statusEffectNames.clear();
         itemNames.clear();
         blockNames.clear();
+        enchantmentKeyNames.clear();
         enchantmentEntryNames.clear();
         entityTypeNames.clear();
         particleTypesNames.clear();
