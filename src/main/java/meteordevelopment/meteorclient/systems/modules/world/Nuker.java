@@ -351,11 +351,13 @@ public class Nuker extends Module {
         double rangeSq = Math.pow(range.get(), 2);
         BlockPos playerBlockPos = mc.player.blockPosition();
 
-        if (shape.get() == Shape.UniformCube) range.set((double) Math.round(range.get()));
-
         double pX_ = pX;
         double pZ_ = pZ;
+        // Uniform cube works on whole blocks, so round the range locally instead of writing it back to the setting
         int r = (int) Math.round(range.get());
+
+        // How far the block iterator has to reach to cover the shape
+        int horizontalRange, verticalRange;
 
         if (shape.get() == Shape.UniformCube) {
             pX_ += 1; // weird position stuff
@@ -363,6 +365,10 @@ public class Nuker extends Module {
             pos2.set(pX_ + r - 1, pY + r, pZ + r); // up
             maxh = 0;
             maxv = 0;
+
+            // The chebyshev check below uses the rounded radius, so anything past it would only be thrown away
+            horizontalRange = r + 1;
+            verticalRange = r;
         } else {
             // Only change me if you want to mess with 3D rotations:
             // I messed with it
@@ -394,6 +400,9 @@ public class Nuker extends Module {
             // get largest horizontal
             maxh = 1 + Math.max(Math.max(Math.max(range_back.get(), range_right.get()), range_forward.get()), range_left.get());
             maxv = 1 + Math.max(range_up.get(), range_down.get());
+
+            horizontalRange = (int) Math.ceil(range.get() + 1);
+            verticalRange = (int) Math.ceil(range.get());
         }
 
         // Flatten
@@ -402,7 +411,7 @@ public class Nuker extends Module {
         AABB box = new AABB(Vec3.atCenterOf(pos1), Vec3.atCenterOf(pos2));
 
         // Find blocks to break
-        BlockIterator.register(Math.max((int) Math.ceil(range.get() + 1), maxh), Math.max((int) Math.ceil(range.get()), maxv), (blockPos, blockState) -> {
+        BlockIterator.register(Math.max(horizontalRange, maxh), Math.max(verticalRange, maxv), (blockPos, blockState) -> {
             Vec3 center = Vec3.atCenterOf(blockPos);
             switch (shape.get()) {
                 case Sphere -> {
@@ -410,7 +419,7 @@ public class Nuker extends Module {
                         return;
                 }
                 case UniformCube -> {
-                    if (chebyshevDist(playerBlockPos.getX(), playerBlockPos.getY(), playerBlockPos.getZ(), blockPos.getX(), blockPos.getY(), blockPos.getZ()) >= range.get())
+                    if (chebyshevDist(playerBlockPos.getX(), playerBlockPos.getY(), playerBlockPos.getZ(), blockPos.getX(), blockPos.getY(), blockPos.getZ()) >= r)
                         return;
                 }
                 case Cube -> {
