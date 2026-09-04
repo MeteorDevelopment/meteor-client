@@ -238,6 +238,10 @@ public class GuiRenderer {
         quad(widget.x, widget.y, widget.width, widget.height, color);
     }
 
+    public void fill(WWidget widget, Color color) {
+        graphics.fill((int) widget.x, (int) widget.y, (int) (widget.x + widget.width), (int) (widget.y + widget.height), color.getPacked());
+    }
+
     public void quad(double x, double y, double width, double height, GuiTexture texture, Color color) {
         rTex.texQuad(x, y, width, height, texture.get(width, height), color);
     }
