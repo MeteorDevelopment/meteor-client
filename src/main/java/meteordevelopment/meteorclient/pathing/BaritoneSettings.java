@@ -145,12 +145,12 @@ public class BaritoneSettings implements IPathManager.ISettings {
                             .build();
                     }
                 } else if (value instanceof Long) {
-                    sgInt.add(new IntSetting.Builder()
+                    sgInt.add(new LongSetting.Builder()
                         .name(setting.getName())
                         .description(getDescription(setting.getName()))
-                        .defaultValue(((Long) setting.defaultValue).intValue())
-                        .onChanged(integer -> setting.value = integer.longValue())
-                        .onModuleActivated(integerSetting -> integerSetting.set(((Long) setting.value).intValue()))
+                        .defaultValue((Long) setting.defaultValue)
+                        .onChanged(longValue -> setting.value = longValue)
+                        .onModuleActivated(longSetting -> longSetting.set((Long) setting.value))
                         .build()
                     );
                 } else if (value instanceof String) {

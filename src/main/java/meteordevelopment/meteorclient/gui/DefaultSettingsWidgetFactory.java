@@ -47,6 +47,7 @@ public class DefaultSettingsWidgetFactory extends SettingsWidgetFactory {
 
         factories.put(BoolSetting.class, (table, setting) -> boolW(table, (BoolSetting) setting));
         factories.put(IntSetting.class, (table, setting) -> intW(table, (IntSetting) setting));
+        factories.put(LongSetting.class, (table, setting) -> longW(table, (LongSetting) setting));
         factories.put(DoubleSetting.class, (table, setting) -> doubleW(table, (DoubleSetting) setting));
         factories.put(StringSetting.class, (table, setting) -> stringW(table, (StringSetting) setting));
         factories.put(EnumSetting.class, (table, setting) -> enumW(table, (EnumSetting<? extends Enum<?>>) setting));
@@ -176,6 +177,15 @@ public class DefaultSettingsWidgetFactory extends SettingsWidgetFactory {
         };
 
         reset(table, setting, () -> edit.set(setting.get()));
+    }
+
+    private void longW(WTable table, LongSetting setting) {
+        WTextBox textBox = table.add(theme.textBox(setting.get().toString(), (text, c) -> Character.isDigit(c) || c == '-' && !text.contains("-"))).expandX().widget();
+        textBox.actionOnUnfocused = () -> {
+            if (!setting.parse(textBox.get())) textBox.set(setting.get().toString());
+        };
+
+        reset(table, setting, () -> textBox.set(setting.get().toString()));
     }
 
     private void doubleW(WTable table, DoubleSetting setting) {
