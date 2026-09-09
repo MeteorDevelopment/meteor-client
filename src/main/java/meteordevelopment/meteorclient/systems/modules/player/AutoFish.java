@@ -22,7 +22,10 @@ import net.minecraft.world.entity.projectile.FishingHook;
 import net.minecraft.world.item.FishingRodItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantments;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
+@NullMarked
 public class AutoFish extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
@@ -215,7 +218,7 @@ public class AutoFish extends Module {
     ///
     /// Candidates only replace the current best when they have a strictly higher score,
     /// preserving the ordering above for equal scores.
-    private RodCandidate findBestRodCandidate() {
+    private @Nullable RodCandidate findBestRodCandidate() {
         int selectedSlot = mc.player.getInventory().getSelectedSlot();
         RodCandidate best = null;
 
