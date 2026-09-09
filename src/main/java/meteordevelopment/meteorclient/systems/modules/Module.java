@@ -152,6 +152,10 @@ public abstract class Module implements ISerializable<Module>, Comparable<Module
         return null;
     }
 
+    public Color getInfoStringColor() {
+        return null;
+    }
+
     @Override
     public CompoundTag toTag() {
         if (!serialize) return null;
