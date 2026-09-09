@@ -47,17 +47,72 @@ public class Renderer3D {
 
     // Lines
 
-    public void line(double x1, double y1, double z1, double x2, double y2, double z2, Color color1, Color color2) {
-        lines.ensureLineCapacity();
+    public void line(double x1, double y1, double z1, double x2, double y2, double z2, Color color) {
+        line(x1, y1, z1, x2, y2, z2, color, color);
+    }
 
+    public void line(double x1, double y1, double z1, double x2, double y2, double z2, Color color1, Color color2) {
+        double[] p = reprojectBehindCamera(x1, y1, z1, x2, y2, z2);
+
+        lines.ensureLineCapacity();
         lines.line(
-            lines.vec3(x1, y1, z1).color(color1).next(),
-            lines.vec3(x2, y2, z2).color(color2).next()
+            lines.vec3(p[0], p[1], p[2]).color(color1).next(),
+            lines.vec3(p[3], p[4], p[5]).color(color2).next()
         );
     }
 
-    public void line(double x1, double y1, double z1, double x2, double y2, double z2, Color color) {
-        line(x1, y1, z1, x2, y2, z2, color, color);
+    private double[] reprojectBehindCamera(double x1, double y1, double z1, double x2, double y2, double z2) {
+        var camera = MinecraftClient.getInstance().gameRenderer.getCamera();
+        var cameraPos = camera.getCameraPos();
+        double camX = cameraPos.x;
+        double camY = cameraPos.y;
+        double camZ = cameraPos.z;
+
+        double yawRad = Math.toRadians(camera.getYaw());
+        double pitchRad = Math.toRadians(camera.getPitch());
+        double fwdX = -Math.sin(yawRad) * Math.cos(pitchRad);
+        double fwdY = -Math.sin(pitchRad);
+        double fwdZ =  Math.cos(yawRad) * Math.cos(pitchRad);
+
+        double[] result = { x1, y1, z1, x2, y2, z2 };
+
+        for (int i = 0; i < 2; i++) {
+            double px = result[i * 3]     - camX;
+            double py = result[i * 3 + 1] - camY;
+            double pz = result[i * 3 + 2] - camZ;
+            double dot = px * fwdX + py * fwdY + pz * fwdZ;
+
+            if (dot >= 0.05) continue;
+
+            double latX = px - fwdX * dot;
+            double latY = py - fwdY * dot;
+            double latZ = pz - fwdZ * dot;
+            double latLen = Math.sqrt(latX * latX + latY * latY + latZ * latZ);
+
+            if (latLen < 1e-6) {
+                if (Math.abs(fwdY) < 0.9) {
+                    latX = fwdZ;
+                    latY = 0;
+                    latZ = -fwdX;
+                } else {
+                    latX = 1;
+                    latY = 0;
+                    latZ = 0;
+                }
+                latLen = Math.sqrt(latX * latX + latY * latY + latZ * latZ);
+            }
+
+            latX /= latLen;
+            latY /= latLen;
+            latZ /= latLen;
+
+            double pushDist = 1000.0;
+            result[i * 3]     = camX + fwdX * 0.1 + latX * pushDist;
+            result[i * 3 + 1] = camY + fwdY * 0.1 + latY * pushDist;
+            result[i * 3 + 2] = camZ + fwdZ * 0.1 + latZ * pushDist;
+        }
+
+        return result;
     }
 
     @SuppressWarnings("Duplicates")
