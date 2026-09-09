@@ -118,20 +118,11 @@ public class AutoFish extends Module {
     private void handleIdle() {
         if (state != State.IDLE) state = State.IDLE;
 
-        InteractionHand fishingHand = getRodHand();
-
-        if (fishingHand == null) {
-            int bestRodSlot = findBestRod();
-
-            if (autoSwitch.get() && bestRodSlot != -1 && mc.player.getInventory().getSelectedSlot() != bestRodSlot) {
-                InvUtils.swap(bestRodSlot, false);
-            }
-
-            fishingHand = getRodHand();
-        }
-
-        if (fishingHand == null) return;
+        RodCandidate candidate = findBestRodCandidate();
+        if (candidate == null) return;
+        if (!prepareRod(candidate)) return;
         if (!autoCast.get()) return;
+
         if (castDelayLeft > 0) {
             castDelayLeft -= TickRate.INSTANCE.getTickRate() / 20.0;
             return;
@@ -150,7 +141,6 @@ public class AutoFish extends Module {
                 }
 
                 if (mc.player.fishing.currentState != FishingHook.FishHookState.BOBBING) return;
-
                 if (((FishingHookAccessor) mc.player.fishing).meteor$hasCaughtFish()) {
                     catchDelayLeft = randomizeDelay(catchDelay.get(), catchDelayVariance.get());
                     state = State.WAITING_TO_REEL;
@@ -181,19 +171,23 @@ public class AutoFish extends Module {
     }
 
     private boolean useRod() {
-        InteractionHand fishingHand = getRodHand();
-        if (fishingHand == null) return false;
+        RodCandidate candidate = findBestRodCandidate();
+        if (candidate == null) return false;
+        if (!prepareRod(candidate)) return false;
 
-        mc.gameMode.useItem(mc.player, fishingHand);
+        mc.gameMode.useItem(mc.player, candidate.hand());
         castDelayLeft = randomizeDelay(castDelay.get(), castDelayVariance.get());
         return true;
     }
 
-    private InteractionHand getRodHand() {
-        if (isUsableRod(mc.player.getOffhandItem())) return InteractionHand.OFF_HAND;
-        if (isUsableRod(mc.player.getMainHandItem())) return InteractionHand.MAIN_HAND;
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
+    private boolean prepareRod(RodCandidate candidate) {
+        if (candidate.hand() == InteractionHand.OFF_HAND) return true;
+        if (candidate.hotbarSlot() == mc.player.getInventory().getSelectedSlot()) return true;
+        if (!autoSwitch.get()) return false;
 
-        return null;
+        InvUtils.swap(candidate.hotbarSlot(), false);
+        return candidate.hotbarSlot() == mc.player.getInventory().getSelectedSlot();
     }
 
     private boolean isUsableRod(ItemStack stack) {
@@ -201,31 +195,61 @@ public class AutoFish extends Module {
         return !antiBreak.get() || stack.getDamageValue() != stack.getMaxDamage() - 1;
     }
 
-    private int findBestRod() {
-        int bestSlot = -1;
-        int bestScore = -1;
+    private int scoreRod(ItemStack stack) {
+        int score = 0;
+
+        score += Utils.getEnchantmentLevel(stack, Enchantments.LUCK_OF_THE_SEA);
+        score += Utils.getEnchantmentLevel(stack, Enchantments.LURE);
+        score += Utils.getEnchantmentLevel(stack, Enchantments.MENDING);
+        score += Utils.getEnchantmentLevel(stack, Enchantments.UNBREAKING);
+
+        return score;
+    }
+
+    /// Finds the best rod candidate in the player's inventory and offhand.
+    ///
+    /// Tie-break order:
+    /// 1. Selected hotbar slot
+    /// 2. Remaining hotbar slots in stable 0..8 order
+    /// 3. Offhand
+    ///
+    /// Candidates only replace the current best when they have a strictly higher score,
+    /// preserving the ordering above for equal scores.
+    private RodCandidate findBestRodCandidate() {
+        int selectedSlot = mc.player.getInventory().getSelectedSlot();
+        RodCandidate best = null;
+
+        ItemStack mainHandStack = mc.player.getMainHandItem();
+        if (isUsableRod(mainHandStack)) {
+            best = new RodCandidate(InteractionHand.MAIN_HAND, selectedSlot, scoreRod(mainHandStack));
+        }
 
         for (int i = 0; i < 9; i++) {
+            if (i == selectedSlot) continue;
+
             ItemStack stack = mc.player.getInventory().getItem(i);
             if (!isUsableRod(stack)) continue;
 
-            int score = 0;
+            int score = scoreRod(stack);
 
-            score += Utils.getEnchantmentLevel(stack, Enchantments.LUCK_OF_THE_SEA);
-            score += Utils.getEnchantmentLevel(stack, Enchantments.LURE);
-            score += Utils.getEnchantmentLevel(stack, Enchantments.MENDING);
-            score += Utils.getEnchantmentLevel(stack, Enchantments.UNBREAKING);
-
-            if (score > bestScore) {
-                bestScore = score;
-                bestSlot = i;
+            if (best == null || score > best.score()) {
+                best = new RodCandidate(InteractionHand.MAIN_HAND, i, score);
             }
-
-            // Found a maxed out rod
-            if (score == 10) break;
         }
 
-        return bestSlot;
+        ItemStack offhandStack = mc.player.getOffhandItem();
+        if (isUsableRod(offhandStack)) {
+            int score = scoreRod(offhandStack);
+
+            if (best == null || score > best.score()) {
+                best = new RodCandidate(InteractionHand.OFF_HAND, -1, score);
+            }
+        }
+
+        return best;
+    }
+
+    private record RodCandidate(InteractionHand hand, int hotbarSlot, int score) {
     }
 
     private double randomizeDelay(int delay, int variance) {
