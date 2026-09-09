@@ -17,6 +17,7 @@ import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.world.TickRate;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.projectile.FishingHook;
 import net.minecraft.world.item.FishingRodItem;
 import net.minecraft.world.item.ItemStack;
@@ -89,6 +90,7 @@ public class AutoFish extends Module {
     private double castDelayLeft = 0.0;
     private double catchDelayLeft = 0.0;
     private boolean wasHooked = false;
+    private InteractionHand fishingHand = null;
 
     @Override
     public void onActivate() {
@@ -96,20 +98,44 @@ public class AutoFish extends Module {
         catchDelayLeft = 0.0;
 
         wasHooked = false;
+        fishingHand = null;
     }
 
     @EventHandler
     private void onTick(TickEvent.Pre event) {
-        int bestRodSlot = findBestRod();
-
-        if (autoSwitch.get() && bestRodSlot != -1 && mc.player.getInventory().getSelectedSlot() != bestRodSlot) {
-            InvUtils.swap(bestRodSlot, false);
+        if (mc.player.fishing != null) {
+            if (fishingHand == null) fishingHand = getRodHand();
+            if (fishingHand != null) tryCatch();
+            return;
         }
 
-        if (!(mc.player.getMainHandItem().getItem() instanceof FishingRodItem)) return;
+        if (isUsableRod(mc.player.getOffhandItem())) {
+            fishingHand = InteractionHand.OFF_HAND;
+        } else {
+            int bestRodSlot = findBestRod();
+
+            if (autoSwitch.get() && bestRodSlot != -1 && mc.player.getInventory().getSelectedSlot() != bestRodSlot) {
+                InvUtils.swap(bestRodSlot, false);
+            }
+
+            fishingHand = isUsableRod(mc.player.getMainHandItem()) ? InteractionHand.MAIN_HAND : null;
+        }
+
+        if (fishingHand == null) return;
 
         tryCast();
-        tryCatch();
+    }
+
+    private InteractionHand getRodHand() {
+        if (isUsableRod(mc.player.getOffhandItem())) return InteractionHand.OFF_HAND;
+        if (isUsableRod(mc.player.getMainHandItem())) return InteractionHand.MAIN_HAND;
+        return null;
+    }
+
+    private boolean isUsableRod(ItemStack stack) {
+        if (!(stack.getItem() instanceof FishingRodItem)) return false;
+        if (antiBreak.get() && stack.getDamageValue() == stack.getMaxDamage() - 1) return false;
+        return true;
     }
 
     private void tryCast() {
@@ -122,11 +148,13 @@ public class AutoFish extends Module {
             return;
         }
 
+        if (fishingHand == null) return;
         useRod();
     }
 
     private void tryCatch() {
         if (mc.player.fishing == null) return;
+        if (fishingHand == null) return;
         if (mc.player.fishing.getHookedIn() != null) {
             useRod();
             return;
@@ -152,7 +180,7 @@ public class AutoFish extends Module {
     }
 
     private void useRod() {
-        Utils.rightClick();
+        mc.gameMode.useItem(mc.player, fishingHand);
         wasHooked = false;
         castDelayLeft = randomizeDelay(castDelay.get(), castDelayVariance.get());
     }
