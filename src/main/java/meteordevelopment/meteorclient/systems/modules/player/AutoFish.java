@@ -83,30 +83,47 @@ public class AutoFish extends Module {
         .build()
     );
 
+    private enum State {
+        IDLE,
+        WAITING_FOR_BITE,
+        WAITING_TO_REEL
+    }
+
+    private State state = State.IDLE;
+    private InteractionHand fishingHand = null;
+
+    private double castDelayLeft = 0.0;
+    private double catchDelayLeft = 0.0;
+
     public AutoFish() {
         super(Categories.Player, "auto-fish", "Automatically fishes for you.");
     }
 
-    private double castDelayLeft = 0.0;
-    private double catchDelayLeft = 0.0;
-    private boolean wasHooked = false;
-    private InteractionHand fishingHand = null;
-
     @Override
     public void onActivate() {
+        state = State.IDLE;
+        fishingHand = null;
+
         castDelayLeft = 0.0;
         catchDelayLeft = 0.0;
+    }
 
-        wasHooked = false;
+    @Override
+    public void onDeactivate() {
+        state = State.IDLE;
         fishingHand = null;
     }
 
     @EventHandler
     private void onTick(TickEvent.Pre event) {
-        if (mc.player.fishing != null) {
-            if (fishingHand == null) fishingHand = getRodHand();
-            if (fishingHand != null) tryCatch();
-            return;
+        if (mc.player.fishing != null) handleFishing();
+        else handleIdle();
+    }
+
+    private void handleIdle() {
+        if (state != State.IDLE) {
+            state = State.IDLE;
+            fishingHand = null;
         }
 
         if (isUsableRod(mc.player.getOffhandItem())) {
@@ -118,71 +135,73 @@ public class AutoFish extends Module {
                 InvUtils.swap(bestRodSlot, false);
             }
 
-            fishingHand = isUsableRod(mc.player.getMainHandItem()) ? InteractionHand.MAIN_HAND : null;
+            if (isUsableRod(mc.player.getMainHandItem())) {
+                fishingHand = InteractionHand.MAIN_HAND;
+            }
         }
 
         if (fishingHand == null) return;
-
-        tryCast();
-    }
-
-    private InteractionHand getRodHand() {
-        if (isUsableRod(mc.player.getOffhandItem())) return InteractionHand.OFF_HAND;
-        if (isUsableRod(mc.player.getMainHandItem())) return InteractionHand.MAIN_HAND;
-        return null;
-    }
-
-    private boolean isUsableRod(ItemStack stack) {
-        if (!(stack.getItem() instanceof FishingRodItem)) return false;
-        if (antiBreak.get() && stack.getDamageValue() == stack.getMaxDamage() - 1) return false;
-        return true;
-    }
-
-    private void tryCast() {
-        if (mc.player.fishing != null) return;
-
         if (!autoCast.get()) return;
-
         if (castDelayLeft > 0) {
             castDelayLeft -= TickRate.INSTANCE.getTickRate() / 20.0;
             return;
         }
 
-        if (fishingHand == null) return;
-        useRod();
+        cast();
     }
 
-    private void tryCatch() {
-        if (mc.player.fishing == null) return;
+    private void handleFishing() {
         if (fishingHand == null) return;
-        if (mc.player.fishing.getHookedIn() != null) {
-            useRod();
-            return;
-        }
 
-        if (mc.player.fishing.currentState != FishingHook.FishHookState.BOBBING) return;
+        switch (state) {
+            case IDLE -> state = State.WAITING_FOR_BITE;
+            case WAITING_FOR_BITE -> {
+                if (mc.player.fishing.getHookedIn() != null) {
+                    reel();
+                    return;
+                }
 
-        if (!wasHooked) {
-            if (((FishingHookAccessor) mc.player.fishing).meteor$hasCaughtFish()) {
-                catchDelayLeft = randomizeDelay(catchDelay.get(), catchDelayVariance.get());
-                wasHooked = true;
+                if (mc.player.fishing.currentState != FishingHook.FishHookState.BOBBING) return;
+
+                if (((FishingHookAccessor) mc.player.fishing).meteor$hasCaughtFish()) {
+                    catchDelayLeft = randomizeDelay(catchDelay.get(), catchDelayVariance.get());
+                    state = State.WAITING_TO_REEL;
+                }
             }
+            case WAITING_TO_REEL -> {
+                if (mc.player.fishing.getHookedIn() != null) {
+                    reel();
+                    return;
+                }
 
-            return;
+                if (catchDelayLeft > 0) {
+                    catchDelayLeft -= TickRate.INSTANCE.getTickRate() / 20.0;
+                    return;
+                }
+
+                reel();
+            }
         }
+    }
 
-        if (catchDelayLeft > 0) {
-            catchDelayLeft -= TickRate.INSTANCE.getTickRate() / 20.0;
-            return;
-        }
-
+    private void cast() {
         useRod();
+        state = State.WAITING_FOR_BITE;
+    }
+
+    private void reel() {
+        useRod();
+        state = State.IDLE;
     }
 
     private void useRod() {
         mc.gameMode.useItem(mc.player, fishingHand);
-        wasHooked = false;
         castDelayLeft = randomizeDelay(castDelay.get(), castDelayVariance.get());
+    }
+
+    private boolean isUsableRod(ItemStack stack) {
+        if (!(stack.getItem() instanceof FishingRodItem)) return false;
+        return !antiBreak.get() || stack.getDamageValue() != stack.getMaxDamage() - 1;
     }
 
     private int findBestRod() {
@@ -191,8 +210,7 @@ public class AutoFish extends Module {
 
         for (int i = 0; i < 9; i++) {
             ItemStack stack = mc.player.getInventory().getItem(i);
-            if (!(stack.getItem() instanceof FishingRodItem)) continue;
-            if (antiBreak.get() && stack.getDamageValue() == stack.getMaxDamage() - 1) continue;
+            if (!isUsableRod(stack)) continue;
 
             int score = 0;
 
