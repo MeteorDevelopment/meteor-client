@@ -90,8 +90,6 @@ public class AutoFish extends Module {
     }
 
     private State state = State.IDLE;
-    private InteractionHand fishingHand = null;
-
     private double castDelayLeft = 0.0;
     private double catchDelayLeft = 0.0;
 
@@ -102,8 +100,6 @@ public class AutoFish extends Module {
     @Override
     public void onActivate() {
         state = State.IDLE;
-        fishingHand = null;
-
         castDelayLeft = 0.0;
         catchDelayLeft = 0.0;
     }
@@ -111,7 +107,6 @@ public class AutoFish extends Module {
     @Override
     public void onDeactivate() {
         state = State.IDLE;
-        fishingHand = null;
     }
 
     @EventHandler
@@ -121,23 +116,18 @@ public class AutoFish extends Module {
     }
 
     private void handleIdle() {
-        if (state != State.IDLE) {
-            state = State.IDLE;
-            fishingHand = null;
-        }
+        if (state != State.IDLE) state = State.IDLE;
 
-        if (isUsableRod(mc.player.getOffhandItem())) {
-            fishingHand = InteractionHand.OFF_HAND;
-        } else {
+        InteractionHand fishingHand = getRodHand();
+
+        if (fishingHand == null) {
             int bestRodSlot = findBestRod();
 
             if (autoSwitch.get() && bestRodSlot != -1 && mc.player.getInventory().getSelectedSlot() != bestRodSlot) {
                 InvUtils.swap(bestRodSlot, false);
             }
 
-            if (isUsableRod(mc.player.getMainHandItem())) {
-                fishingHand = InteractionHand.MAIN_HAND;
-            }
+            fishingHand = getRodHand();
         }
 
         if (fishingHand == null) return;
@@ -151,8 +141,6 @@ public class AutoFish extends Module {
     }
 
     private void handleFishing() {
-        if (fishingHand == null) return;
-
         switch (state) {
             case IDLE -> state = State.WAITING_FOR_BITE;
             case WAITING_FOR_BITE -> {
@@ -185,18 +173,27 @@ public class AutoFish extends Module {
     }
 
     private void cast() {
-        useRod();
-        state = State.WAITING_FOR_BITE;
+        if (useRod()) state = State.WAITING_FOR_BITE;
     }
 
     private void reel() {
-        useRod();
-        state = State.IDLE;
+        if (useRod()) state = State.IDLE;
     }
 
-    private void useRod() {
+    private boolean useRod() {
+        InteractionHand fishingHand = getRodHand();
+        if (fishingHand == null) return false;
+
         mc.gameMode.useItem(mc.player, fishingHand);
         castDelayLeft = randomizeDelay(castDelay.get(), castDelayVariance.get());
+        return true;
+    }
+
+    private InteractionHand getRodHand() {
+        if (isUsableRod(mc.player.getOffhandItem())) return InteractionHand.OFF_HAND;
+        if (isUsableRod(mc.player.getMainHandItem())) return InteractionHand.MAIN_HAND;
+
+        return null;
     }
 
     private boolean isUsableRod(ItemStack stack) {
