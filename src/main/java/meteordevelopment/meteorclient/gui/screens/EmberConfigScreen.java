@@ -48,6 +48,8 @@ public class EmberConfigScreen extends WidgetScreen {
     private float fade = 0f;
     private String status = "";
     private long statusUntil = 0;
+    private String pendingDelete;
+    private long pendingDeleteUntil;
 
     private final Map<Object, Float> hoverAnims = new HashMap<>();
     private final EmberAnim.Clock clock = new EmberAnim.Clock();
@@ -176,18 +178,19 @@ public class EmberConfigScreen extends WidgetScreen {
                         (int) Mth.lerp(ra * 0.25f, ROW_BG.b, accent().b), 235));
 
                 // Load button
-                double lbX = px + PW - 44 - 110, lbY = rowY + 5;
+                double lbX = px + PW - 44 - 130, lbY = rowY + 5;
                 boolean lbHover = mx >= lbX && mx < lbX + 62 && my >= lbY && my < lbY + ROW_H - 14;
                 float la = anim("load_" + p.name.get(), lbHover ? 1f : 0f, dt);
                 r.roundedRect(lbX, lbY, 62, ROW_H - 14, 6,
                     new Color(accent().r, accent().g, accent().b, (int) (150 + 90 * la)));
 
-                // Delete button
-                double dbX = px + PW - 44 - 40, dbY = rowY + 5;
-                boolean dbHover = mx >= dbX && mx < dbX + 34 && my >= dbY && my < dbY + ROW_H - 14;
-                float da = anim("del_" + p.name.get(), dbHover ? 1f : 0f, dt);
-                r.roundedRect(dbX, dbY, 34, ROW_H - 14, 6,
-                    new Color(DANGER.r, DANGER.g, DANGER.b, (int) (90 + 110 * da)));
+                // Delete button - the first click turns it into "Sure?"
+                boolean armed = isArmed(p);
+                double dbX = px + PW - 44 - 60, dbY = rowY + 5;
+                boolean dbHover = mx >= dbX && mx < dbX + 54 && my >= dbY && my < dbY + ROW_H - 14;
+                float da = anim("del_" + p.name.get(), dbHover || armed ? 1f : 0f, dt);
+                r.roundedRect(dbX, dbY, 54, ROW_H - 14, 6,
+                    new Color(DANGER.r, DANGER.g, DANGER.b, armed ? 255 : (int) (90 + 110 * da)));
             }
             rowY += ROW_H;
         }
@@ -227,14 +230,15 @@ public class EmberConfigScreen extends WidgetScreen {
                 theme.textRenderer().render(p.name.get(), px + 32,
                     rowY + (ROW_H - 4 - theme.textHeight()) / 2, TEXT_WHITE, false);
 
-                double lbX = px + PW - 44 - 110;
+                double lbX = px + PW - 44 - 130;
                 double ltw = theme.textWidth("Load");
                 theme.textRenderer().render("Load", lbX + (62 - ltw) / 2,
                     rowY + (ROW_H - 4 - theme.textHeight()) / 2, ON_ACCENT, false);
 
-                double dbX = px + PW - 44 - 40;
-                double dtw = theme.textWidth("Del");
-                theme.textRenderer().render("Del", dbX + (34 - dtw) / 2,
+                double dbX = px + PW - 44 - 60;
+                String delLabel = isArmed(p) ? "Sure?" : "Del";
+                double dtw = theme.textWidth(delLabel);
+                theme.textRenderer().render(delLabel, dbX + (54 - dtw) / 2,
                     rowY + (ROW_H - 4 - theme.textHeight()) / 2, TEXT_WHITE, false);
             }
             rowY += ROW_H;
@@ -252,6 +256,10 @@ public class EmberConfigScreen extends WidgetScreen {
     public boolean mouseClicked(MouseButtonEvent click, boolean doubled) {
         double s = mc.getWindow().getGuiScale();
         double cx = click.x() * s, cy = click.y() * s;
+
+        // Any click disarms a pending delete; only a second click on the same "Sure?" deletes.
+        String armed = System.currentTimeMillis() < pendingDeleteUntil ? pendingDelete : null;
+        pendingDelete = null;
 
         double hh = 40;
 
@@ -281,17 +289,23 @@ public class EmberConfigScreen extends WidgetScreen {
 
         for (Profile p : profiles()) {
             if (cy >= rowY && cy < rowY + ROW_H && cy >= listY && cy < listY + listH) {
-                double lbX = px + PW - 44 - 110;
+                double lbX = px + PW - 44 - 130;
                 if (cx >= lbX && cx < lbX + 62) {
                     p.load();
                     setStatus("Loaded " + p.name.get());
                     return true;
                 }
 
-                double dbX = px + PW - 44 - 40;
-                if (cx >= dbX && cx < dbX + 34) {
-                    Profiles.get().remove(p);
-                    setStatus("Deleted " + p.name.get());
+                double dbX = px + PW - 44 - 60;
+                if (cx >= dbX && cx < dbX + 54) {
+                    if (p.name.get().equals(armed)) {
+                        Profiles.get().remove(p);
+                        setStatus("Deleted " + p.name.get());
+                    } else {
+                        pendingDelete = p.name.get();
+                        pendingDeleteUntil = System.currentTimeMillis() + 3000;
+                        setStatus("Click Sure? to delete " + p.name.get());
+                    }
                     return true;
                 }
 
@@ -326,6 +340,10 @@ public class EmberConfigScreen extends WidgetScreen {
         }
 
         setStatus("Saved " + n);
+    }
+
+    private boolean isArmed(Profile p) {
+        return p.name.get().equals(pendingDelete) && System.currentTimeMillis() < pendingDeleteUntil;
     }
 
     private void setStatus(String s) {

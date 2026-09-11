@@ -7,6 +7,8 @@ import meteordevelopment.meteorclient.gui.tabs.Tabs;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.hud.Hud;
 import meteordevelopment.meteorclient.systems.hud.HudElement;
+import meteordevelopment.meteorclient.systems.hud.XAnchor;
+import meteordevelopment.meteorclient.systems.hud.YAnchor;
 import meteordevelopment.meteorclient.systems.hud.screens.HudElementScreen;
 import meteordevelopment.meteorclient.systems.modules.Category;
 import meteordevelopment.meteorclient.systems.modules.Module;
@@ -121,7 +123,7 @@ public class EmberClickGui extends TabScreen {
             cp.isClient = true;
             cp.icon = new ItemStack(Items.ENDER_EYE);
             List<ClientEntry> entries = new ArrayList<>();
-            String[] wanted = {"ember-top-bar", "spotify"};
+            String[] wanted = {"ember-top-bar", "spotify", "ember-module-list", "ember-notifications"};
             for (String wName : wanted) {
                 HudElement found = null;
                 for (HudElement el : Hud.get()) {
@@ -130,8 +132,17 @@ public class EmberClickGui extends TabScreen {
                 if (found == null) {
                     var info = Hud.get().infos.get(wName);
                     if (info != null) {
-                        int yPos = wName.equals("spotify") ? 30 : 4;
-                        Hud.get().add(info, 4, yPos);
+                        switch (wName) {
+                            case "ember-module-list" -> {
+                                // Meteor's plain list sits in the same corner; the Ember one replaces it.
+                                for (HudElement el : Hud.get()) {
+                                    if (el.info.name.equals("active-modules") && el.isActive()) el.toggle();
+                                }
+                                Hud.get().add(info, -4, 4, XAnchor.Right, YAnchor.Top);
+                            }
+                            case "ember-notifications" -> Hud.get().add(info, -4, -40, XAnchor.Right, YAnchor.Bottom);
+                            default -> Hud.get().add(info, 4, wName.equals("spotify") ? 30 : 4);
+                        }
                         for (HudElement el : Hud.get()) {
                             if (el.info.name.equals(wName)) { found = el; break; }
                         }

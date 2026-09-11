@@ -4,12 +4,14 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
+import meteordevelopment.meteorclient.events.game.GameJoinedEvent;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.events.world.BlockUpdateEvent;
 import meteordevelopment.meteorclient.events.world.ChunkDataEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.settings.*;
+import meteordevelopment.meteorclient.systems.hud.elements.EmberNotificationsHud;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
@@ -41,7 +43,10 @@ import java.util.concurrent.Executors;
  * and cobbled deepslate or storage blocks don't generate deep underground.
  */
 public class SusChunkFinder extends Module {
+    private static final String FIND_TYPE = "sus-chunk";
+
     private final SettingGroup sgSignals = settings.createGroup("Signals");
+    private final SettingGroup sgStorage = settings.createGroup("Saving");
     private final SettingGroup sgRender = settings.createGroup("Render");
 
     // Signals
@@ -144,6 +149,22 @@ public class SusChunkFinder extends Module {
         .build()
     );
 
+    // Saving
+
+    private final Setting<Boolean> saveFinds = sgStorage.add(new BoolSetting.Builder()
+        .name("save-finds")
+        .description("Remember flagged chunks for this server, so they still show after relogging.")
+        .defaultValue(true)
+        .build()
+    );
+
+    private final Setting<Boolean> autoWaypoint = sgStorage.add(new BoolSetting.Builder()
+        .name("auto-waypoint")
+        .description("Add a waypoint for every newly flagged chunk.")
+        .defaultValue(false)
+        .build()
+    );
+
     // Render
 
     private final Setting<ShapeMode> shapeMode = sgRender.add(new EnumSetting.Builder<ShapeMode>()
@@ -191,6 +212,8 @@ public class SusChunkFinder extends Module {
     );
 
     private final Long2ObjectMap<String> flagged = new Long2ObjectOpenHashMap<>();
+    /** Chunks flagged in earlier sessions; drawn even when not loaded. */
+    private final LongSet saved = new LongOpenHashSet();
     private final LongSet announced = new LongOpenHashSet();
     private final LongSet pendingRescan = new LongOpenHashSet();
 
@@ -202,6 +225,7 @@ public class SusChunkFinder extends Module {
 
     private final BlockPos.MutableBlockPos abovePos = new BlockPos.MutableBlockPos();
     private DimensionType lastDimension;
+    private FindsStorage.Context context = new FindsStorage.Context("", "");
     private int rescanTimer;
 
     public SusChunkFinder() {
@@ -214,6 +238,14 @@ public class SusChunkFinder extends Module {
         if (mc.level == null) return;
 
         lastDimension = mc.level.dimensionType();
+        context = FindsStorage.context();
+
+        synchronized (flagged) {
+            for (FindsStorage.Find find : FindsStorage.get(context, FIND_TYPE)) {
+                saved.add(ChunkPos.pack(find.x >> 4, find.z >> 4));
+            }
+        }
+
         for (ChunkAccess chunk : Utils.chunks()) {
             if (chunk instanceof LevelChunk levelChunk) queueScan(levelChunk);
         }
@@ -227,9 +259,15 @@ public class SusChunkFinder extends Module {
     private void clear() {
         synchronized (flagged) {
             flagged.clear();
+            saved.clear();
             announced.clear();
             pendingRescan.clear();
         }
+    }
+
+    @EventHandler
+    private void onGameJoined(GameJoinedEvent event) {
+        onActivate();
     }
 
     @EventHandler
@@ -274,12 +312,15 @@ public class SusChunkFinder extends Module {
     }
 
     private void queueScan(LevelChunk chunk) {
+        FindsStorage.Context ctx = context;
+
         worker.submit(() -> {
             if (!isActive()) return;
 
             String reason = scan(chunk);
             long key = chunk.getPos().pack();
 
+            boolean isNewFind;
             synchronized (flagged) {
                 if (reason == null) {
                     flagged.remove(key);
@@ -287,12 +328,24 @@ public class SusChunkFinder extends Module {
                 }
 
                 flagged.put(key, reason);
-                if (chatNotify.get() && announced.add(key)) {
-                    int blockX = chunk.getPos().getMinBlockX() + 8;
-                    int blockZ = chunk.getPos().getMinBlockZ() + 8;
-                    mc.execute(() -> info("Sus chunk at (highlight)%d, %d(default): %s", blockX, blockZ, reason));
-                }
+                // Chunks remembered from earlier sessions were already announced back then.
+                isNewFind = !saved.contains(key) && announced.add(key);
+                if (isNewFind && saveFinds.get()) saved.add(key);
             }
+
+            if (!isNewFind) return;
+
+            int blockX = chunk.getPos().getMinBlockX() + 8;
+            int blockZ = chunk.getPos().getMinBlockZ() + 8;
+            BlockPos center = new BlockPos(blockX, 64, blockZ);
+
+            if (saveFinds.get()) FindsStorage.add(ctx, FIND_TYPE, center, reason);
+
+            mc.execute(() -> {
+                if (autoWaypoint.get()) FindsStorage.waypoint("Sus chunk", center);
+                if (chatNotify.get()) info("Sus chunk at (highlight)%d, %d(default): %s", blockX, blockZ, reason);
+                EmberNotificationsHud.push("Sus chunk found", blockX + ", " + blockZ, EmberNotificationsHud.GOOD);
+            });
         });
     }
 
@@ -416,18 +469,25 @@ public class SusChunkFinder extends Module {
         double y = followPlayerY.get() ? Math.floor(mc.player.getY()) : renderY.get();
 
         synchronized (flagged) {
-            for (long key : flagged.keySet()) {
-                double x = (double) ChunkPos.getX(key) * 16;
-                double z = (double) ChunkPos.getZ(key) * 16;
-                event.renderer.box(x, y, z, x + 16, y, z + 16, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            for (long key : flagged.keySet()) drawChunk(event, key, y);
+            for (long key : saved) {
+                if (!flagged.containsKey(key)) drawChunk(event, key, y);
             }
         }
+    }
+
+    private void drawChunk(Render3DEvent event, long key, double y) {
+        double x = (double) ChunkPos.getX(key) * 16;
+        double z = (double) ChunkPos.getZ(key) * 16;
+        event.renderer.box(x, y, z, x + 16, y, z + 16, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
     }
 
     @Override
     public String getInfoString() {
         synchronized (flagged) {
-            return flagged.isEmpty() ? null : String.valueOf(flagged.size());
+            LongSet all = new LongOpenHashSet(flagged.keySet());
+            all.addAll(saved);
+            return all.isEmpty() ? null : String.valueOf(all.size());
         }
     }
 }

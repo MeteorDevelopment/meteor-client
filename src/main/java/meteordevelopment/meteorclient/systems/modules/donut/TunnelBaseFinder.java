@@ -2,11 +2,15 @@ package meteordevelopment.meteorclient.systems.modules.donut;
 
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
+import it.unimi.dsi.fastutil.longs.LongSet;
+import meteordevelopment.meteorclient.events.game.GameJoinedEvent;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.events.world.ChunkDataEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.settings.*;
+import meteordevelopment.meteorclient.systems.hud.elements.EmberNotificationsHud;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
@@ -19,25 +23,36 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.dimension.DimensionType;
 
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
  * Finds 1-wide, 2-tall straight tunnels underground: the shape of a player mining
  * through stone. Natural caves are almost never that narrow and that straight.
+ * Pieces that end on a chunk border are joined with the neighbouring chunk, so long
+ * tunnels are found even though each chunk only sees 16 blocks of them.
  */
 public class TunnelBaseFinder extends Module {
+    private static final String FIND_TYPE = "tunnel";
+
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
+    private final SettingGroup sgStorage = settings.createGroup("Saving");
     private final SettingGroup sgRender = settings.createGroup("Render");
 
     private final Setting<Integer> minLength = sgGeneral.add(new IntSetting.Builder()
         .name("min-length")
-        .description("Minimum straight tunnel length inside one chunk.")
-        .defaultValue(12)
+        .description("Minimum straight tunnel length, joined across chunk borders.")
+        .defaultValue(20)
         .min(5)
-        .max(16)
-        .sliderRange(5, 16)
+        .max(128)
+        .sliderRange(5, 64)
+        .onChanged(value -> rescan())
         .build()
     );
 
@@ -51,8 +66,22 @@ public class TunnelBaseFinder extends Module {
 
     private final Setting<Boolean> chatNotify = sgGeneral.add(new BoolSetting.Builder()
         .name("chat-notify")
-        .description("Announce chunks with tunnels in chat.")
+        .description("Announce new tunnels in chat.")
         .defaultValue(true)
+        .build()
+    );
+
+    private final Setting<Boolean> saveFinds = sgStorage.add(new BoolSetting.Builder()
+        .name("save-finds")
+        .description("Remember tunnels for this server, so they still show after relogging.")
+        .defaultValue(true)
+        .build()
+    );
+
+    private final Setting<Boolean> autoWaypoint = sgStorage.add(new BoolSetting.Builder()
+        .name("auto-waypoint")
+        .description("Add a waypoint at the start of every new tunnel.")
+        .defaultValue(false)
         .build()
     );
 
@@ -77,8 +106,25 @@ public class TunnelBaseFinder extends Module {
         .build()
     );
 
-    /** Per chunk: tunnel boxes as {minX, minY, minZ, maxX, maxY, maxZ}. */
-    private final Long2ObjectMap<List<double[]>> tunnels = new Long2ObjectOpenHashMap<>();
+    /** A row of blocks a tunnel can run along: fixed is Z for tunnels along X, and X for tunnels along Z. */
+    private record Line(boolean alongX, int fixed, int y) {}
+
+    /** Tunnel cells found inside one chunk, start inclusive and end exclusive along the line. */
+    private record Run(Line line, int start, int end) {}
+
+    private record Segment(Line line, int start, int end) {
+        boolean overlaps(int otherStart, int otherEnd) {
+            return start < otherEnd && otherStart < end;
+        }
+    }
+
+    private final Object lock = new Object();
+    private final Long2ObjectMap<List<Run>> runsByChunk = new Long2ObjectOpenHashMap<>();
+    private final Map<Line, LongSet> chunksByLine = new HashMap<>();
+    private final Map<Line, List<Segment>> tunnels = new HashMap<>();
+    /** Ranges already announced per line, so a tunnel that grows as chunks load is only announced once. */
+    private final Map<Line, List<int[]>> announced = new HashMap<>();
+    private final List<Segment> saved = new ArrayList<>();
 
     private final ExecutorService worker = Executors.newSingleThreadExecutor(r -> {
         Thread thread = new Thread(r, "Ember-TunnelBaseFinder");
@@ -86,6 +132,9 @@ public class TunnelBaseFinder extends Module {
         return thread;
     });
 
+    /** Bumped on every reset so scans queued before it are thrown away. */
+    private volatile int generation;
+    private FindsStorage.Context context = new FindsStorage.Context("", "");
     private DimensionType lastDimension;
 
     public TunnelBaseFinder() {
@@ -94,12 +143,23 @@ public class TunnelBaseFinder extends Module {
 
     @Override
     public void onActivate() {
-        synchronized (tunnels) {
-            tunnels.clear();
-        }
+        generation++;
+        clear();
         if (mc.level == null) return;
 
         lastDimension = mc.level.dimensionType();
+        context = FindsStorage.context();
+
+        synchronized (lock) {
+            for (FindsStorage.Find find : FindsStorage.get(context, FIND_TYPE)) {
+                Segment segment = parse(find);
+                if (segment == null) continue;
+
+                saved.add(segment);
+                announced.computeIfAbsent(segment.line(), k -> new ArrayList<>()).add(new int[]{segment.start(), segment.end()});
+            }
+        }
+
         for (ChunkAccess chunk : Utils.chunks()) {
             if (chunk instanceof LevelChunk levelChunk) queueScan(levelChunk);
         }
@@ -107,9 +167,27 @@ public class TunnelBaseFinder extends Module {
 
     @Override
     public void onDeactivate() {
-        synchronized (tunnels) {
+        generation++;
+        clear();
+    }
+
+    private void rescan() {
+        if (isActive()) onActivate();
+    }
+
+    private void clear() {
+        synchronized (lock) {
+            runsByChunk.clear();
+            chunksByLine.clear();
             tunnels.clear();
+            announced.clear();
+            saved.clear();
         }
+    }
+
+    @EventHandler
+    private void onGameJoined(GameJoinedEvent event) {
+        onActivate();
     }
 
     @EventHandler
@@ -123,36 +201,164 @@ public class TunnelBaseFinder extends Module {
     }
 
     private void queueScan(LevelChunk chunk) {
+        // Settings and the world name are read here on the render thread, not on the worker.
+        int gen = generation;
+        int needed = minLength.get();
+        int top = maxY.get();
+        FindsStorage.Context ctx = context;
+
         worker.submit(() -> {
-            if (!isActive()) return;
+            if (!isActive() || gen != generation) return;
 
-            List<double[]> found = scan(chunk);
-            long key = chunk.getPos().pack();
+            List<Run> runs = scan(chunk, needed, top);
+            List<Segment> fresh;
 
-            synchronized (tunnels) {
-                if (found.isEmpty()) {
-                    tunnels.remove(key);
-                    return;
-                }
-
-                boolean isNew = tunnels.put(key, found) == null;
-                if (isNew && chatNotify.get()) {
-                    double[] first = found.getFirst();
-                    int bx = (int) first[0], by = (int) first[1], bz = (int) first[2];
-                    mc.execute(() -> info("Tunnel found near %d, %d, %d", bx, by, bz));
-                }
+            synchronized (lock) {
+                if (gen != generation) return;
+                fresh = update(chunk.getPos().pack(), runs, needed);
             }
+
+            for (Segment segment : fresh) announce(ctx, segment);
         });
     }
 
-    private List<double[]> scan(LevelChunk chunk) {
-        List<double[]> found = new ArrayList<>();
+    /** Replaces one chunk's runs and re-joins every line they touch. Returns tunnels not announced before. */
+    private List<Segment> update(long chunkKey, List<Run> runs, int needed) {
+        Set<Line> touched = new HashSet<>();
+
+        List<Run> old = runs.isEmpty() ? runsByChunk.remove(chunkKey) : runsByChunk.put(chunkKey, runs);
+        if (old != null) {
+            for (Run run : old) {
+                touched.add(run.line());
+
+                LongSet chunks = chunksByLine.get(run.line());
+                if (chunks != null) {
+                    chunks.remove(chunkKey);
+                    if (chunks.isEmpty()) chunksByLine.remove(run.line());
+                }
+            }
+        }
+
+        for (Run run : runs) {
+            touched.add(run.line());
+            chunksByLine.computeIfAbsent(run.line(), k -> new LongOpenHashSet()).add(chunkKey);
+        }
+
+        List<Segment> fresh = new ArrayList<>();
+
+        for (Line line : touched) {
+            List<Segment> joined = join(line, needed);
+            if (joined.isEmpty()) {
+                tunnels.remove(line);
+                continue;
+            }
+            tunnels.put(line, joined);
+
+            List<int[]> known = announced.computeIfAbsent(line, k -> new ArrayList<>());
+            for (Segment segment : joined) {
+                boolean seen = false;
+
+                for (int[] range : known) {
+                    if (segment.overlaps(range[0], range[1])) {
+                        range[0] = Math.min(range[0], segment.start());
+                        range[1] = Math.max(range[1], segment.end());
+                        seen = true;
+                        break;
+                    }
+                }
+
+                if (!seen) {
+                    known.add(new int[]{segment.start(), segment.end()});
+                    fresh.add(segment);
+                }
+            }
+        }
+
+        return fresh;
+    }
+
+    /** Glues together touching runs from every chunk on the line and keeps the long ones. */
+    private List<Segment> join(Line line, int needed) {
+        List<Run> runs = new ArrayList<>();
+
+        LongSet chunks = chunksByLine.get(line);
+        if (chunks != null) {
+            for (long key : chunks) {
+                List<Run> list = runsByChunk.get(key);
+                if (list == null) continue;
+
+                for (Run run : list) {
+                    if (run.line().equals(line)) runs.add(run);
+                }
+            }
+        }
+
+        runs.sort(Comparator.comparingInt(Run::start));
+
+        List<Segment> joined = new ArrayList<>();
+        int start = 0, end = Integer.MIN_VALUE;
+
+        for (Run run : runs) {
+            if (run.start() <= end) {
+                end = Math.max(end, run.end());
+                continue;
+            }
+
+            if (end - start >= needed) joined.add(new Segment(line, start, end));
+            start = run.start();
+            end = run.end();
+        }
+        if (end - start >= needed) joined.add(new Segment(line, start, end));
+
+        return joined;
+    }
+
+    private void announce(FindsStorage.Context ctx, Segment segment) {
+        Line line = segment.line();
+        int length = segment.end() - segment.start();
+        String axis = line.alongX() ? "X" : "Z";
+        BlockPos pos = line.alongX()
+            ? new BlockPos(segment.start(), line.y(), line.fixed())
+            : new BlockPos(line.fixed(), line.y(), segment.start());
+
+        if (saveFinds.get()) FindsStorage.add(ctx, FIND_TYPE, pos, axis + ":" + length);
+
+        mc.execute(() -> {
+            if (!isActive()) return;
+
+            if (autoWaypoint.get()) FindsStorage.waypoint("Tunnel", pos);
+            if (chatNotify.get()) {
+                info("Tunnel found: %d blocks along %s at %d, %d, %d", length, axis, pos.getX(), pos.getY(), pos.getZ());
+            }
+            EmberNotificationsHud.push("Tunnel found", length + " blocks at " + pos.getX() + ", " + pos.getZ(), EmberNotificationsHud.GOOD);
+        });
+    }
+
+    /** Saved tunnels store their axis and length in the note, as "X:24". */
+    private static Segment parse(FindsStorage.Find find) {
+        String note = find.note;
+        if (note == null || note.length() < 3 || note.charAt(1) != ':') return null;
+
+        int length;
+        try {
+            length = Integer.parseInt(note.substring(2));
+        } catch (NumberFormatException e) {
+            return null;
+        }
+        if (length <= 0) return null;
+
+        boolean alongX = note.charAt(0) == 'X';
+        int start = alongX ? find.x : find.z;
+        return new Segment(new Line(alongX, alongX ? find.z : find.x, find.y), start, start + length);
+    }
+
+    private List<Run> scan(LevelChunk chunk, int needed, int maxHeight) {
+        List<Run> runs = new ArrayList<>();
 
         int baseX = chunk.getPos().getMinBlockX();
         int baseZ = chunk.getPos().getMinBlockZ();
         int bottom = chunk.getMinY() + 1;
-        int top = Math.min(maxY.get(), chunk.getMinY() + chunk.getHeight() - 3);
-        int needed = minLength.get();
+        int top = Math.min(maxHeight, chunk.getMinY() + chunk.getHeight() - 3);
 
         BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
 
@@ -161,15 +367,16 @@ public class TunnelBaseFinder extends Module {
             for (int lz = 1; lz < 15; lz++) {
                 int run = 0;
                 for (int lx = 0; lx <= 16; lx++) {
-                    boolean cell = lx < 16 && isTunnelCell(chunk, pos, baseX + lx, y, baseZ + lz, true);
-                    if (cell) {
+                    if (lx < 16 && isTunnelCell(chunk, pos, baseX + lx, y, baseZ + lz, true)) {
                         run++;
-                    } else {
-                        if (run >= needed) {
-                            found.add(new double[]{baseX + lx - run, y, baseZ + lz, baseX + lx, y + 2, baseZ + lz + 1});
-                        }
-                        run = 0;
+                        continue;
                     }
+
+                    // Short pieces are only worth keeping if they can continue into the next chunk.
+                    if (run > 0 && (run >= needed || lx - run == 0 || lx == 16)) {
+                        runs.add(new Run(new Line(true, baseZ + lz, y), baseX + lx - run, baseX + lx));
+                    }
+                    run = 0;
                 }
             }
 
@@ -177,20 +384,20 @@ public class TunnelBaseFinder extends Module {
             for (int lx = 1; lx < 15; lx++) {
                 int run = 0;
                 for (int lz = 0; lz <= 16; lz++) {
-                    boolean cell = lz < 16 && isTunnelCell(chunk, pos, baseX + lx, y, baseZ + lz, false);
-                    if (cell) {
+                    if (lz < 16 && isTunnelCell(chunk, pos, baseX + lx, y, baseZ + lz, false)) {
                         run++;
-                    } else {
-                        if (run >= needed) {
-                            found.add(new double[]{baseX + lx, y, baseZ + lz - run, baseX + lx + 1, y + 2, baseZ + lz});
-                        }
-                        run = 0;
+                        continue;
                     }
+
+                    if (run > 0 && (run >= needed || lz - run == 0 || lz == 16)) {
+                        runs.add(new Run(new Line(false, baseX + lx, y), baseZ + lz - run, baseZ + lz));
+                    }
+                    run = 0;
                 }
             }
         }
 
-        return found;
+        return runs;
     }
 
     /** A 1x2 air gap with solid floor, ceiling and walls on both sides. */
@@ -216,19 +423,47 @@ public class TunnelBaseFinder extends Module {
 
     @EventHandler
     private void onRender(Render3DEvent event) {
-        synchronized (tunnels) {
-            for (List<double[]> boxes : tunnels.values()) {
-                for (double[] b : boxes) {
-                    event.renderer.box(b[0], b[1], b[2], b[3], b[4], b[5], sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                }
+        synchronized (lock) {
+            for (List<Segment> segments : tunnels.values()) {
+                for (Segment segment : segments) draw(event, segment);
             }
+            for (Segment segment : saved) {
+                if (!coveredByLive(segment)) draw(event, segment);
+            }
+        }
+    }
+
+    private boolean coveredByLive(Segment segment) {
+        List<Segment> live = tunnels.get(segment.line());
+        if (live == null) return false;
+
+        for (Segment other : live) {
+            if (other.overlaps(segment.start(), segment.end())) return true;
+        }
+        return false;
+    }
+
+    private void draw(Render3DEvent event, Segment segment) {
+        Line line = segment.line();
+
+        if (line.alongX()) {
+            event.renderer.box(segment.start(), line.y(), line.fixed(), segment.end(), line.y() + 2, line.fixed() + 1,
+                sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+        } else {
+            event.renderer.box(line.fixed(), line.y(), segment.start(), line.fixed() + 1, line.y() + 2, segment.end(),
+                sideColor.get(), lineColor.get(), shapeMode.get(), 0);
         }
     }
 
     @Override
     public String getInfoString() {
-        synchronized (tunnels) {
-            return tunnels.isEmpty() ? null : String.valueOf(tunnels.size());
+        synchronized (lock) {
+            int count = 0;
+            for (List<Segment> segments : tunnels.values()) count += segments.size();
+            for (Segment segment : saved) {
+                if (!coveredByLive(segment)) count++;
+            }
+            return count == 0 ? null : String.valueOf(count);
         }
     }
 }

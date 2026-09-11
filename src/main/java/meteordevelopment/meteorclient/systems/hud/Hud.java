@@ -120,6 +120,8 @@ public class Hud extends System<Hud> implements Iterable<HudElement> {
         register(MeteorTextHud.INFO);
         register(EmberTopBarHud.INFO);
         register(SpotifyHud.INFO);
+        register(EmberModuleListHud.INFO);
+        register(EmberNotificationsHud.INFO);
         register(ItemHud.INFO);
         register(InventoryHud.INFO);
         register(CompassHud.INFO);

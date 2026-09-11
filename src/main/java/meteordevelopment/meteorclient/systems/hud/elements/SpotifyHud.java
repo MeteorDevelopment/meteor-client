@@ -2,15 +2,19 @@ package meteordevelopment.meteorclient.systems.hud.elements;
 
 import meteordevelopment.meteorclient.settings.BoolSetting;
 import meteordevelopment.meteorclient.settings.DoubleSetting;
+import meteordevelopment.meteorclient.settings.KeybindSetting;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.hud.Hud;
 import meteordevelopment.meteorclient.systems.hud.HudElement;
 import meteordevelopment.meteorclient.systems.hud.HudElementInfo;
 import meteordevelopment.meteorclient.systems.hud.HudRenderer;
+import meteordevelopment.meteorclient.utils.misc.Keybind;
 import meteordevelopment.meteorclient.utils.misc.MediaInfo;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.EmberPalette;
+
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class SpotifyHud extends HudElement {
     public static final HudElementInfo<SpotifyHud> INFO = new HudElementInfo<>(Hud.GROUP, "spotify", "Shows the song currently playing on your PC.", SpotifyHud::new);
@@ -19,6 +23,7 @@ public class SpotifyHud extends HudElement {
     private static final Color ART_TINT = new Color(255, 255, 255, 255);
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
+    private final SettingGroup sgControls = settings.createGroup("Controls");
 
     private final Setting<Double> scale = sgGeneral.add(new DoubleSetting.Builder()
         .name("scale")
@@ -68,8 +73,38 @@ public class SpotifyHud extends HudElement {
         .build()
     );
 
+    private final Setting<Keybind> playPauseKey = sgControls.add(new KeybindSetting.Builder()
+        .name("play-pause-key")
+        .description("Play or pause whatever is playing.")
+        .defaultValue(Keybind.none())
+        .action(() -> control("toggle"))
+        .build()
+    );
+
+    private final Setting<Keybind> nextKey = sgControls.add(new KeybindSetting.Builder()
+        .name("next-key")
+        .description("Skip to the next track.")
+        .defaultValue(Keybind.none())
+        .action(() -> control("next"))
+        .build()
+    );
+
+    private final Setting<Keybind> previousKey = sgControls.add(new KeybindSetting.Builder()
+        .name("previous-key")
+        .description("Go back to the previous track.")
+        .defaultValue(Keybind.none())
+        .action(() -> control("prev"))
+        .build()
+    );
+
     public SpotifyHud() {
         super(INFO);
+    }
+
+    /** Keybind settings on HUD elements fire even when the widget is off, and while typing in chat. */
+    private void control(String command) {
+        if (!isActive() || mc.gui.screen() != null) return;
+        MediaInfo.sendCommand(command);
     }
 
     @Override

@@ -6,7 +6,10 @@ import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.resources.Identifier;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -20,20 +23,20 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 /**
  * Reports whatever is playing on the machine (Spotify, a browser tab, VLC, ...) by
- * reading the Windows system media session.
+ * reading the Windows system media session, and can play/pause or skip it.
  *
  * The session API is WinRT, which PowerShell cannot use here: the thumbnail stream
  * comes back as an unprojected __ComObject with no usable members. So a small C#
  * helper is compiled once with the csc.exe that ships with .NET Framework and then
- * run as a long-lived process that streams one record per second.
+ * run as a long-lived process that streams records out and takes commands in.
  */
 public class MediaInfo {
     public static final Identifier ART_ID = MeteorClient.identifier("media_art");
 
-    private static final Pattern SEP = Pattern.compile("\u0001");
+    private static final Pattern SEP = Pattern.compile("");
 
     /** Bump when SOURCE changes so a stale compiled helper is replaced. */
-    private static final String VERSION = "v1";
+    private static final String VERSION = "v2";
 
     private static volatile String title = "";
     private static volatile String artist = "";
@@ -52,7 +55,8 @@ public class MediaInfo {
     private static DynamicTexture artTexture = null;
 
     private static Thread worker = null;
-    private static Process process = null;
+    private static volatile Process process = null;
+    private static volatile BufferedWriter commands = null;
     private static Path artPath = null;
     private static boolean unsupported = false;
 
@@ -86,6 +90,21 @@ public class MediaInfo {
             Process p = process;
             if (p != null) p.destroyForcibly();
         }));
+    }
+
+    /** Sends "toggle", "next" or "prev" to whichever app owns the media session. */
+    public static void sendCommand(String command) {
+        BufferedWriter writer = commands;
+        if (writer == null) return;
+
+        try {
+            synchronized (writer) {
+                writer.write(command);
+                writer.newLine();
+                writer.flush();
+            }
+        } catch (IOException ignored) {
+        }
     }
 
     /** Must be called from the render thread. Uploads newly fetched art. */
@@ -135,6 +154,7 @@ public class MediaInfo {
 
         Process proc = pb.start();
         process = proc;
+        commands = new BufferedWriter(new OutputStreamWriter(proc.getOutputStream(), StandardCharsets.UTF_8));
 
         try (BufferedReader reader = new BufferedReader(
             new InputStreamReader(proc.getInputStream(), StandardCharsets.UTF_8))) {
@@ -144,6 +164,7 @@ public class MediaInfo {
                 handleLine(line);
             }
         } finally {
+            commands = null;
             proc.destroyForcibly();
             process = null;
         }
@@ -295,12 +316,32 @@ public class MediaInfo {
                     return 1;
                 }
 
+                // Commands arrive one per line on stdin: toggle, next, prev.
+                var input = new Thread(() => {
+                    string line;
+                    while ((line = Console.In.ReadLine()) != null) {
+                        try {
+                            var session = mgr.GetCurrentSession();
+                            if (session == null) continue;
+
+                            switch (line.Trim()) {
+                                case "toggle": Wait(session.TryTogglePlayPauseAsync()); break;
+                                case "next": Wait(session.TrySkipNextAsync()); break;
+                                case "prev": Wait(session.TrySkipPreviousAsync()); break;
+                            }
+                        } catch (Exception) {
+                        }
+                    }
+                });
+                input.IsBackground = true;
+                input.Start();
+
                 while (true) {
                     try {
                         Emit(mgr, artPath);
                     } catch (Exception) {
                     }
-                    Thread.Sleep(1000);
+                    Thread.Sleep(500);
                 }
             }
 

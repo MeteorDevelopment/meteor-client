@@ -604,6 +604,7 @@ public class Modules extends System<Modules> {
         add(new meteordevelopment.meteorclient.systems.modules.donut.VillagerESP());
         add(new meteordevelopment.meteorclient.systems.modules.donut.ChunkFinder());
         add(new meteordevelopment.meteorclient.systems.modules.donut.SusChunkFinder());
+        add(new meteordevelopment.meteorclient.systems.modules.donut.StaffDetector());
         add(new meteordevelopment.meteorclient.systems.modules.donut.AdvancedStashFinder());
         add(new meteordevelopment.meteorclient.systems.modules.donut.InvisESP());
 
