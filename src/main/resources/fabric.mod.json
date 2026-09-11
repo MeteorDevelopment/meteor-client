@@ -1,19 +1,13 @@
 {
   "schemaVersion": 1,
-  "name": "Meteor Client",
+  "name": "Ember Client",
   "id": "meteor-client",
   "version": "${version}",
-  "description": "Based utility mod.",
+  "description": "Modern utility mod.",
   "authors": [
-    "MineGame159",
-    "squidoodly",
-    "seasnail"
+    "catboy"
   ],
   "contact": {
-    "homepage": "https://meteorclient.com",
-    "issues": "https://github.com/MeteorDevelopment/meteor-client/issues",
-    "sources": "https://github.com/MeteorDevelopment/meteor-client",
-    "discord": "https://meteorclient.com/discord"
   },
   "license": "GPL-3.0",
   "icon": "assets/meteor-client/icon.png",
@@ -37,7 +31,7 @@
   "accessWidener": "meteor-client.classtweaker",
   "custom": {
     "meteor-client:build_number": "${build_number}",
-    "meteor-client:color": "145,61,226",
+    "meteor-client:color": "255,100,30",
     "meteor-client:commit": "${commit}",
     "modmenu": {
       "links": {

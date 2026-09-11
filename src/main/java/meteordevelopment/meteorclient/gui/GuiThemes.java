@@ -46,7 +46,7 @@ public class GuiThemes {
             }
         }
 
-        if (theme == null) select("Meteor");
+        if (theme == null) select("Ember");
     }
 
     public static void add(GuiTheme theme) {

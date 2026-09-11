@@ -11,6 +11,7 @@ import meteordevelopment.meteorclient.gui.themes.meteor.MeteorWidget;
 import meteordevelopment.meteorclient.gui.utils.AlignmentX;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WPressable;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.utils.render.color.Color;
 import net.minecraft.util.Mth;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
@@ -67,20 +68,41 @@ public class WMeteorModule extends WPressable implements MeteorWidget {
         MeteorGuiTheme theme = theme();
         double pad = pad();
 
-        animationProgress1 += delta * 4 * ((module.isActive() || mouseOver) ? 1 : -1);
+        // Smooth animations
+        animationProgress1 += delta * 6 * ((module.isActive() || mouseOver) ? 1 : -1);
         animationProgress1 = Mth.clamp(animationProgress1, 0, 1);
 
-        animationProgress2 += delta * 6 * (module.isActive() ? 1 : -1);
+        animationProgress2 += delta * 10 * (module.isActive() ? 1 : -1);
         animationProgress2 = Mth.clamp(animationProgress2, 0, 1);
 
-        if (animationProgress1 > 0) {
-            renderer.quad(x, y, width * animationProgress1, height, theme.moduleBackground.get());
-        }
-        if (animationProgress2 > 0) {
-            renderer.quad(x, y + height * (1 - animationProgress2), theme.scale(2), height * animationProgress2, theme.accentColor.get());
+        // Eased animation
+        double eased1 = animationProgress1 * animationProgress1 * (3 - 2 * animationProgress1);
+        double eased2 = animationProgress2 * animationProgress2 * (3 - 2 * animationProgress2);
+
+        Color accent = theme.accentColor.get();
+
+        // Hover effect - full width glow
+        if (eased1 > 0) {
+            Color hoverBg = new Color(accent.r, accent.g, accent.b, (int)(30 * eased1));
+            renderer.quad(x, y, width, height, hoverBg);
         }
 
-        double x = this.x + pad;
+        // Active state - vibrant left bar + glow
+        if (eased2 > 0) {
+            // Left accent bar
+            renderer.quad(x, y, 3, height, new Color(accent.r, accent.g, accent.b, (int)(255 * eased2)));
+
+            // Horizontal glow from left bar
+            Color glowStart = new Color(accent.r, accent.g, accent.b, (int)(60 * eased2));
+            Color glowEnd = new Color(accent.r, accent.g, accent.b, 0);
+            renderer.quad(x + 3, y, width * 0.4, height, glowStart, glowEnd, glowEnd, glowStart);
+
+            // Bottom line
+            Color bottomLine = new Color(accent.r, accent.g, accent.b, (int)(80 * eased2));
+            renderer.quad(x, y + height - 1, width, 1, bottomLine);
+        }
+
+        double x = this.x + pad + (eased2 > 0 ? 4 : 0); // Indent when active
         double w = width - pad * 2;
 
         if (theme.moduleAlignment.get() == AlignmentX.Center) {
@@ -89,6 +111,16 @@ public class WMeteorModule extends WPressable implements MeteorWidget {
             x += w - titleWidth;
         }
 
-        renderer.text(title, x, y + pad, theme.textColor.get(), false);
+        // Text color - accent tint when active
+        Color textColor = theme.textColor.get();
+        if (eased2 > 0) {
+            textColor = new Color(
+                (int)(textColor.r + (accent.r - textColor.r) * 0.5 * eased2),
+                (int)(textColor.g + (accent.g - textColor.g) * 0.4 * eased2),
+                (int)(textColor.b + (accent.b - textColor.b) * 0.3 * eased2),
+                textColor.a
+            );
+        }
+        renderer.text(title, x, y + pad, textColor, false);
     }
 }

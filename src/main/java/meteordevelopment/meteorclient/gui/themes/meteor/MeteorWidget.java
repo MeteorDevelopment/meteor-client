@@ -17,14 +17,28 @@ public interface MeteorWidget extends BaseWidget {
 
     default void renderBackground(GuiRenderer renderer, WWidget widget, Color outlineColor, Color backgroundColor) {
         MeteorGuiTheme theme = theme();
-        double s = theme.scale(2);
+        Color accent = theme.accentColor.get();
 
-        renderer.quad(widget.x + s, widget.y + s, widget.width - s * 2, widget.height - s * 2, backgroundColor);
+        // Glass-like background
+        Color bgMain = new Color(backgroundColor.r, backgroundColor.g, backgroundColor.b, 160);
+        renderer.quad(widget.x, widget.y, widget.width, widget.height, bgMain);
 
-        renderer.quad(widget.x, widget.y, widget.width, s, outlineColor);
-        renderer.quad(widget.x, widget.y + widget.height - s, widget.width, s, outlineColor);
-        renderer.quad(widget.x, widget.y + s, s, widget.height - s * 2, outlineColor);
-        renderer.quad(widget.x + widget.width - s, widget.y + s, s, widget.height - s * 2, outlineColor);
+        // Top edge highlight
+        Color highlight = new Color(255, 255, 255, 35);
+        renderer.quad(widget.x, widget.y, widget.width, 1, highlight);
+
+        // Bottom edge shadow
+        Color shadow = new Color(0, 0, 0, 50);
+        renderer.quad(widget.x, widget.y + widget.height - 1, widget.width, 1, shadow);
+
+        // Left accent line
+        Color accentLine = new Color(accent.r, accent.g, accent.b, 120);
+        renderer.quad(widget.x, widget.y, 2, widget.height, accentLine);
+
+        // Inner glow from left
+        Color glowStart = new Color(accent.r, accent.g, accent.b, 20);
+        Color glowEnd = new Color(accent.r, accent.g, accent.b, 0);
+        renderer.quad(widget.x + 2, widget.y, 10, widget.height, glowStart, glowEnd, glowEnd, glowStart);
     }
 
     default void renderBackground(GuiRenderer renderer, WWidget widget, boolean pressed, boolean mouseOver) {

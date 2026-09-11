@@ -25,7 +25,7 @@ public class Spam extends Module {
     private final Setting<List<String>> messages = sgGeneral.add(new StringListSetting.Builder()
         .name("messages")
         .description("Messages to use for spam.")
-        .defaultValue(List.of("Meteor on Crack!"))
+        .defaultValue(List.of("Ember Client!"))
         .build()
     );
 

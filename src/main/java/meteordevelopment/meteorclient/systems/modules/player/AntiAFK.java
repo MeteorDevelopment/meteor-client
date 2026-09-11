@@ -135,8 +135,8 @@ public class AntiAFK extends Module {
         .name("messages")
         .description("The messages to choose from.")
         .defaultValue(
-            "Meteor on top!",
-            "Meteor on crack!"
+            "Ember on top!",
+            "Ember Client!"
         )
         .visible(sendMessages::get)
         .build()

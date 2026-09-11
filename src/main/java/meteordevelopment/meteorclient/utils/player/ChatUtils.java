@@ -36,7 +36,7 @@ public class ChatUtils {
         PREFIX = Component.empty()
             .setStyle(Style.EMPTY.applyFormats(ChatFormatting.GRAY))
             .append("[")
-            .append(Component.literal("Meteor").setStyle(Style.EMPTY.withColor(TextColor.fromRgb(MeteorClient.ADDON.color.getPacked()))))
+            .append(Component.literal("Ember").setStyle(Style.EMPTY.withColor(TextColor.fromRgb(MeteorClient.ADDON.color.getPacked()))))
             .append("] ");
     }
 

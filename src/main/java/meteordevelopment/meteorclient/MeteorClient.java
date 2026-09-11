@@ -30,6 +30,8 @@ import meteordevelopment.meteorclient.utils.misc.Version;
 import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
 import meteordevelopment.meteorclient.utils.misc.input.KeyBinds;
 import meteordevelopment.meteorclient.utils.network.OnlinePlayers;
+import meteordevelopment.meteorclient.mixin.KeyMappingAccessor;
+import com.mojang.blaze3d.platform.InputConstants;
 import meteordevelopment.orbit.EventBus;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
@@ -98,7 +100,11 @@ public class MeteorClient implements ClientModInitializer {
         if (!FOLDER.exists()) {
             FOLDER.getParentFile().mkdirs();
             FOLDER.mkdir();
-            Systems.addPreLoadTask(() -> Modules.get().get(DiscordPresence.class).enable());
+            Systems.addPreLoadTask(() -> {
+                Modules.get().get(DiscordPresence.class).enable();
+                // Enable blur by default for new installs
+                Modules.get().get(meteordevelopment.meteorclient.systems.modules.render.Blur.class).enable();
+            });
         }
 
         // Register addons
@@ -153,18 +159,9 @@ public class MeteorClient implements ClientModInitializer {
         if (mc.gui.screen() == null && mc.gui.overlay() == null && KeyBinds.OPEN_COMMANDS.consumeClick()) {
             mc.gui.setScreen(new ChatScreen(Config.get().prefix.get(), true));
         }
-    }
 
-    @EventHandler
-    private void onKey(KeyInputEvent event) {
-        if (event.action == KeyAction.Press && KeyBinds.OPEN_GUI.matches(event.input)) {
-            toggleGui();
-        }
-    }
-
-    @EventHandler
-    private void onMouseClick(MouseClickEvent event) {
-        if (event.action == KeyAction.Press && KeyBinds.OPEN_GUI.matchesMouse(event.click)) {
+        // Check GUI keybind every tick
+        if (KeyBinds.OPEN_GUI.consumeClick()) {
             toggleGui();
         }
     }

@@ -29,7 +29,7 @@ import java.util.*;
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class Hud extends System<Hud> implements Iterable<HudElement> {
-    public static final HudGroup GROUP = new HudGroup("Meteor");
+    public static final HudGroup GROUP = new HudGroup("Ember");
 
     public boolean active;
     public Settings settings = new Settings();
@@ -118,6 +118,8 @@ public class Hud extends System<Hud> implements Iterable<HudElement> {
         settings.registerColorSettings(null);
 
         register(MeteorTextHud.INFO);
+        register(EmberTopBarHud.INFO);
+        register(SpotifyHud.INFO);
         register(ItemHud.INFO);
         register(InventoryHud.INFO);
         register(CompassHud.INFO);

@@ -131,10 +131,52 @@ public class HudRenderer {
         Renderer2D.COLOR.triangle(x1, y1, x2, y2, x3, y3, color);
     }
 
+    public void roundedQuad(double x, double y, double width, double height, double radius, Color color) {
+        if (radius <= 0) {
+            quad(x, y, width, height, color);
+            return;
+        }
+
+        radius = Math.min(radius, Math.min(width, height) / 2);
+
+        quad(x, y + radius, width, height - radius * 2, color);
+        quad(x + radius, y, width - radius * 2, radius, color);
+        quad(x + radius, y + height - radius, width - radius * 2, radius, color);
+
+        int steps = Math.max(4, (int) Math.ceil(radius * 2));
+        for (int i = 0; i < steps; i++) {
+            double sliceTop = i * radius / steps;
+            double sliceBottom = (i + 1) * radius / steps;
+            double dy = radius - sliceTop;
+            double inset = radius - Math.sqrt(Math.max(0, radius * radius - dy * dy));
+            double sliceHeight = sliceBottom - sliceTop;
+            double sliceWidth = radius - inset;
+            if (sliceWidth <= 0) continue;
+
+            quad(x + inset, y + sliceTop, sliceWidth, sliceHeight, color);
+            quad(x + width - radius, y + sliceTop, sliceWidth, sliceHeight, color);
+            quad(x + inset, y + height - sliceBottom, sliceWidth, sliceHeight, color);
+            quad(x + width - radius, y + height - sliceBottom, sliceWidth, sliceHeight, color);
+        }
+    }
+
     public void texture(Identifier id, double x, double y, double width, double height, Color color) {
         Renderer2D.TEXTURE.begin();
         Renderer2D.TEXTURE.texQuad(x, y, width, height, color);
         Renderer2D.TEXTURE.render(mc.getTextureManager().getTexture(id).getTextureView(), mc.getTextureManager().getTexture(id).getSampler());
+    }
+
+    /**
+     * Soft glow, same look as the GUI's. Drawn immediately, while widget bodies are batched
+     * until the end of the frame, so it always sits underneath every widget.
+     */
+    public void glow(double x, double y, double width, double height, double size, Color color) {
+        if (width <= 0 || height <= 0 || size <= 0 || color.a <= 0) return;
+
+        Renderer2D.TEXTURE.begin();
+        meteordevelopment.meteorclient.gui.renderer.GuiRenderer.addGlowQuads(Renderer2D.TEXTURE, x, y, width, height, size, color);
+        Renderer2D.TEXTURE.end();
+        meteordevelopment.meteorclient.gui.renderer.GuiRenderer.renderGlow(Renderer2D.TEXTURE);
     }
 
     public double text(String text, double x, double y, Color color, boolean shadow, double scale) {

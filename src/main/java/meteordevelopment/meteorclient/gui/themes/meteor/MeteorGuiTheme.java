@@ -9,6 +9,10 @@ import com.mojang.blaze3d.platform.MacosUtil;
 import meteordevelopment.meteorclient.gui.DefaultSettingsWidgetFactory;
 import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.WidgetScreen;
+import meteordevelopment.meteorclient.gui.screens.EmberClickGui;
+import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.gui.tabs.TabScreen;
+import net.minecraft.client.gui.screens.Screen;
 import meteordevelopment.meteorclient.gui.renderer.packer.GuiTexture;
 import meteordevelopment.meteorclient.gui.themes.meteor.widgets.*;
 import meteordevelopment.meteorclient.gui.themes.meteor.widgets.input.WMeteorDropdown;
@@ -95,11 +99,11 @@ public class MeteorGuiTheme extends GuiTheme {
 
     // Colors
 
-    public final Setting<SettingColor> accentColor = color("accent", "Main color of the GUI.", new SettingColor(145, 61, 226));
-    public final Setting<SettingColor> checkboxColor = color("checkbox", "Color of checkbox.", new SettingColor(145, 61, 226));
-    public final Setting<SettingColor> plusColor = color("plus", "Color of plus button.", new SettingColor(50, 255, 50));
-    public final Setting<SettingColor> minusColor = color("minus", "Color of minus button.", new SettingColor(255, 50, 50));
-    public final Setting<SettingColor> favoriteColor = color("favorite", "Color of checked favorite button.", new SettingColor(250, 215, 0));
+    public final Setting<SettingColor> accentColor = color("accent", "Main color of the GUI.", new SettingColor(255, 100, 30));
+    public final Setting<SettingColor> checkboxColor = color("checkbox", "Color of checkbox.", new SettingColor(255, 120, 40));
+    public final Setting<SettingColor> plusColor = color("plus", "Color of plus button.", new SettingColor(100, 255, 100));
+    public final Setting<SettingColor> minusColor = color("minus", "Color of minus button.", new SettingColor(255, 80, 80));
+    public final Setting<SettingColor> favoriteColor = color("favorite", "Color of checked favorite button.", new SettingColor(255, 180, 50));
 
     // Text
 
@@ -115,12 +119,12 @@ public class MeteorGuiTheme extends GuiTheme {
     public final ThreeStateColorSetting backgroundColor = new ThreeStateColorSetting(
         sgBackgroundColors,
         "background",
-        new SettingColor(20, 20, 20, 200),
-        new SettingColor(30, 30, 30, 200),
-        new SettingColor(40, 40, 40, 200)
+        new SettingColor(12, 12, 16, 200),
+        new SettingColor(22, 22, 28, 210),
+        new SettingColor(32, 32, 40, 220)
     );
 
-    public final Setting<SettingColor> moduleBackground = color(sgBackgroundColors, "module-background", "Color of module background when active.", new SettingColor(50, 50, 50));
+    public final Setting<SettingColor> moduleBackground = color(sgBackgroundColors, "module-background", "Color of module background when active.", new SettingColor(60, 45, 35, 180));
 
     // Outline
 
@@ -153,13 +157,13 @@ public class MeteorGuiTheme extends GuiTheme {
     public final ThreeStateColorSetting sliderHandle = new ThreeStateColorSetting(
         sgSlider,
         "slider-handle",
-        new SettingColor(130, 0, 255),
-        new SettingColor(140, 30, 255),
-        new SettingColor(150, 60, 255)
+        new SettingColor(255, 100, 30),
+        new SettingColor(255, 130, 50),
+        new SettingColor(255, 160, 70)
     );
 
-    public final Setting<SettingColor> sliderLeft = color(sgSlider, "slider-left", "Color of slider left part.", new SettingColor(100, 35, 170));
-    public final Setting<SettingColor> sliderRight = color(sgSlider, "slider-right", "Color of slider right part.", new SettingColor(50, 50, 50));
+    public final Setting<SettingColor> sliderLeft = color(sgSlider, "slider-left", "Color of slider left part.", new SettingColor(220, 80, 20));
+    public final Setting<SettingColor> sliderRight = color(sgSlider, "slider-right", "Color of slider right part.", new SettingColor(45, 45, 55));
 
     // Starscript
 
@@ -175,7 +179,7 @@ public class MeteorGuiTheme extends GuiTheme {
     private final Setting<SettingColor> starscriptAccessedObjects = color(sgStarscript, "starscript-accessed-objects", "Color of accessed objects (before a dot) in Starscript code.", new SettingColor(152, 118, 170));
 
     public MeteorGuiTheme() {
-        super("Meteor");
+        super("Ember");
 
         settingsFactory = new DefaultSettingsWidgetFactory(this);
     }
@@ -400,6 +404,24 @@ public class MeteorGuiTheme extends GuiTheme {
     @Override
     public boolean hideHUD() {
         return hideHUD.get();
+    }
+
+    @Override
+    public TabScreen modulesScreen() {
+        return new EmberClickGui(this);
+    }
+
+    @Override
+    public WidgetScreen moduleScreen(Module module) {
+        // Every route into module settings (right-click, .settings) opens the same themed popup.
+        EmberClickGui gui = new EmberClickGui(this);
+        gui.openSettingsFor(module);
+        return gui;
+    }
+
+    @Override
+    public boolean isModulesScreen(Screen screen) {
+        return screen instanceof EmberClickGui;
     }
 
     public class ThreeStateColorSetting {

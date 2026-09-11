@@ -10,6 +10,8 @@ import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.meteorclient.utils.PostInit;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.text.RunnableClickEvent;
 import meteordevelopment.orbit.EventHandler;
@@ -79,6 +81,16 @@ public class ServerSpoof extends Module {
         super(Categories.Misc, "server-spoof", "Spoof client brand, resource pack and channels.");
 
         runInMainMenu = true;
+    }
+
+    /**
+     * Ember keeps this on so servers cannot fingerprint the client. Runs after configs
+     * are loaded, so it applies to a fresh install and to a saved config that had it off.
+     */
+    @PostInit
+    public static void enableByDefault() {
+        ServerSpoof spoof = Modules.get().get(ServerSpoof.class);
+        if (spoof != null && !spoof.isActive()) spoof.toggle();
     }
 
     @EventHandler
