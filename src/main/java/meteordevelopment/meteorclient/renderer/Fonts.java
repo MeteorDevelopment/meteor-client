@@ -60,7 +60,16 @@ public class Fonts {
         DEFAULT_FONT = getFamily(DEFAULT_FONT_FAMILY).get(FontInfo.Type.Regular);
 
         Config config = Config.get();
-        load(config != null ? config.font.get() : DEFAULT_FONT);
+        FontFace chosen = config != null ? config.font.get() : DEFAULT_FONT;
+
+        // Configs written before Inter shipped still name the old Comfortaa default, so
+        // move them across once instead of leaving everyone on the rounded font.
+        if (config != null && chosen != null && "Comfortaa".equalsIgnoreCase(chosen.info.family())) {
+            chosen = DEFAULT_FONT;
+            config.font.set(DEFAULT_FONT);
+        }
+
+        load(chosen);
     }
 
     public static void load(FontFace fontFace) {

@@ -247,6 +247,7 @@ public class EmberClickGui extends TabScreen {
 
         drawSearchBar(r, fade);
         drawConfigButton(r, delta, fade);
+        drawGearButton(r, fade);
         r.end();
 
         for (Panel p : panels) {
@@ -298,6 +299,47 @@ public class EmberClickGui extends TabScreen {
         Color gc = accentAlpha((int)(210 + 45 * hA));
         r.roundedRect(gx - 7, gy - 5, 14, 10, 2, gc);
         r.roundedRect(gx - 7, gy - 7, 6, 3, 1, gc);
+    }
+
+    private static final double GEAR = 26;
+
+    private double gearX() {
+        return configButtonX() + CFG_W + 8;
+    }
+
+    private double gearY() {
+        return configButtonY() + (CFG_H - GEAR) / 2;
+    }
+
+    /** Small round settings button beside Configs, opening Ember's own settings screen. */
+    private void drawGearButton(GuiRenderer r, float fade) {
+        double bx = gearX(), by = gearY();
+        boolean hover = mx >= bx && mx < bx + GEAR && my >= by && my < by + GEAR;
+        float hA = anim("gearbtn", hoverAnims, hover ? 1f : 0f, 12f, frameDt);
+
+        r.glow(bx, by + 3, GEAR, GEAR, 8, new Color(0, 0, 0, (int)(90 * fade)), false);
+        if (hA > 0.01f) r.glow(bx, by, GEAR, GEAR, 14, accentAlpha((int)(150 * hA * fade)), false);
+
+        Color bg = new Color(
+            (int) Mth.lerp(hA, HEADER_BG.r, Math.min(255, HEADER_BG.r + 16)),
+            (int) Mth.lerp(hA, HEADER_BG.g, Math.min(255, HEADER_BG.g + 14)),
+            (int) Mth.lerp(hA, HEADER_BG.b, Math.min(255, HEADER_BG.b + 20)),
+            (int)(248 * fade));
+        r.quad(bx, by, GEAR, GEAR, GuiRenderer.CIRCLE, bg);
+
+        // Gear glyph: a ring with four teeth that turn a little as it lights up.
+        double cx = bx + GEAR / 2, cy = by + GEAR / 2;
+        Color gc = accentAlpha((int) Math.min(255, (200 + 55 * hA) * fade));
+
+        double tooth = 3.2, reach = 6.6;
+        for (int i = 0; i < 4; i++) {
+            double a = Math.toRadians(45 * hA + i * 90);
+            r.roundedRect(cx + Math.cos(a) * reach - tooth / 2, cy + Math.sin(a) * reach - tooth / 2,
+                tooth, tooth, 1, gc);
+        }
+
+        r.quad(cx - 4.5, cy - 4.5, 9, 9, GuiRenderer.CIRCLE, gc);
+        r.quad(cx - 2, cy - 2, 4, 4, GuiRenderer.CIRCLE, bg);
     }
 
     private void drawConfigButtonText(GuiGraphicsExtractor gfx) {
@@ -700,6 +742,12 @@ public class EmberClickGui extends TabScreen {
         double bx = configButtonX(), by = configButtonY();
         if (cx >= bx && cx < bx + CFG_W && cy >= by && cy < by + CFG_H) {
             mc.gui.setScreen(new EmberConfigScreen(theme));
+            return true;
+        }
+
+        double gx = gearX(), gy = gearY();
+        if (cx >= gx && cx < gx + GEAR && cy >= gy && cy < gy + GEAR) {
+            mc.gui.setScreen(new EmberClientSettingsScreen(theme));
             return true;
         }
 

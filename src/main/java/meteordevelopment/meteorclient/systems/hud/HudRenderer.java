@@ -173,11 +173,18 @@ public class HudRenderer {
     public void glow(double x, double y, double width, double height, double size, Color color) {
         if (width <= 0 || height <= 0 || size <= 0 || color.a <= 0) return;
 
-        Renderer2D.TEXTURE.begin();
-        meteordevelopment.meteorclient.gui.renderer.GuiRenderer.addGlowQuads(Renderer2D.TEXTURE, x, y, width, height, size, color);
-        Renderer2D.TEXTURE.end();
-        meteordevelopment.meteorclient.gui.renderer.GuiRenderer.renderGlow(Renderer2D.TEXTURE);
+        // Its own batch: the shared TEXTURE one is mid-build for widget textures during a
+        // frame, and beginning it here threw those quads away. Built lazily so it is not
+        // constructed before the render context exists.
+        if (glowBatch == null) glowBatch = new Renderer2D(true);
+
+        glowBatch.begin();
+        meteordevelopment.meteorclient.gui.renderer.GuiRenderer.addGlowQuads(glowBatch, x, y, width, height, size, color);
+        glowBatch.end();
+        meteordevelopment.meteorclient.gui.renderer.GuiRenderer.renderGlow(glowBatch);
     }
+
+    private static Renderer2D glowBatch;
 
     public double text(String text, double x, double y, Color color, boolean shadow, double scale) {
         if (scale == -1) scale = hud.getTextScale();

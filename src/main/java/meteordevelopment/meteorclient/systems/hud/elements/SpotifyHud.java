@@ -163,10 +163,14 @@ public class SpotifyHud extends HudElement {
 
         setSize(w, h);
 
-        // A faint black shadow is invisible against a dark game scene, so it has to be
-        // strong to read at all: a wide deep pool plus a tight dark one under the edge.
-        renderer.glow(x, y + 6 * s, w, h, 18 * s, new Color(0, 0, 0, 175));
-        renderer.glow(x, y + 2 * s, w, h, 8 * s, new Color(0, 0, 0, 215));
+        // Built from the same rounded quads as the box itself. The texture-based glow was
+        // not reaching the HUD at all, so the shadow it drew never appeared; stacked quads
+        // fading outwards use the one call that demonstrably renders here.
+        for (int i = 6; i >= 1; i--) {
+            double spread = i * 1.8 * s;
+            renderer.roundedQuad(x - spread, y - spread + 2.5 * s, w + spread * 2, h + spread * 2,
+                radius + spread, new Color(0, 0, 0, 30 - i * 3));
+        }
         if (glow.get()) renderer.glow(x, y, w, h, 10 * s, new Color(accent.r, accent.g, accent.b, 120));
 
         renderer.roundedQuad(x, y, w, h, radius, bg);

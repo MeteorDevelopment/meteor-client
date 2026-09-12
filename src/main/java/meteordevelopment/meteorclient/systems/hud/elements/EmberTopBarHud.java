@@ -10,7 +10,11 @@ import meteordevelopment.meteorclient.systems.hud.HudElementInfo;
 import meteordevelopment.meteorclient.systems.hud.HudRenderer;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.EmberPalette;
+import meteordevelopment.meteorclient.utils.world.TickRate;
+import net.minecraft.world.item.ItemStack;
 
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -59,6 +63,41 @@ public class EmberTopBarHud extends HudElement {
         .build()
     );
 
+    private final Setting<Boolean> showCoords = sgGeneral.add(new BoolSetting.Builder()
+        .name("show-coords")
+        .description("Show your coordinates.")
+        .defaultValue(false)
+        .build()
+    );
+
+    private final Setting<Boolean> showDirection = sgGeneral.add(new BoolSetting.Builder()
+        .name("show-direction")
+        .description("Show the direction you are facing.")
+        .defaultValue(false)
+        .build()
+    );
+
+    private final Setting<Boolean> showTps = sgGeneral.add(new BoolSetting.Builder()
+        .name("show-tps")
+        .description("Show the server's ticks per second.")
+        .defaultValue(false)
+        .build()
+    );
+
+    private final Setting<Boolean> showTime = sgGeneral.add(new BoolSetting.Builder()
+        .name("show-time")
+        .description("Show the real world clock.")
+        .defaultValue(false)
+        .build()
+    );
+
+    private final Setting<Boolean> showDurability = sgGeneral.add(new BoolSetting.Builder()
+        .name("show-durability")
+        .description("Show the durability left on the item you are holding.")
+        .defaultValue(false)
+        .build()
+    );
+
     private final Setting<Boolean> glow = sgGeneral.add(new BoolSetting.Builder()
         .name("glow")
         .description("Soft glow behind the bar.")
@@ -66,8 +105,20 @@ public class EmberTopBarHud extends HudElement {
         .build()
     );
 
+    private static final DateTimeFormatter CLOCK = DateTimeFormatter.ofPattern("HH:mm");
+
     public EmberTopBarHud() {
         super(INFO);
+    }
+
+    private String facing() {
+        return switch (mc.player.getDirection()) {
+            case NORTH -> "North";
+            case SOUTH -> "South";
+            case WEST -> "West";
+            case EAST -> "East";
+            default -> "-";
+        };
     }
 
     @Override
@@ -118,6 +169,34 @@ public class EmberTopBarHud extends HudElement {
             colors.add(white);
         }
 
+        if (showCoords.get() && mc.player != null) {
+            parts.add(String.format("%.0f, %.0f, %.0f", mc.player.getX(), mc.player.getY(), mc.player.getZ()));
+            colors.add(white);
+        }
+
+        if (showDirection.get() && mc.player != null) {
+            parts.add(facing());
+            colors.add(gray);
+        }
+
+        if (showTps.get()) {
+            parts.add(String.format("%.1f TPS", TickRate.INSTANCE.getTickRate()));
+            colors.add(gray);
+        }
+
+        if (showTime.get()) {
+            parts.add(LocalTime.now().format(CLOCK));
+            colors.add(gray);
+        }
+
+        if (showDurability.get() && mc.player != null) {
+            ItemStack held = mc.player.getMainHandItem();
+            if (held.isDamageableItem()) {
+                parts.add((held.getMaxDamage() - held.getDamageValue()) + " dur");
+                colors.add(white);
+            }
+        }
+
         if (showServer.get()) {
             parts.add(mc.getCurrentServer() != null ? mc.getCurrentServer().ip : "Singleplayer");
             colors.add(gray);
@@ -133,7 +212,12 @@ public class EmberTopBarHud extends HudElement {
 
         setSize(total, height);
 
-        renderer.glow(x, y + 2 * s, total, height, 6 * s, new Color(0, 0, 0, 90));
+        // Stacked rounded quads rather than the texture glow, which does not render in the HUD.
+        for (int i = 6; i >= 1; i--) {
+            double spread = i * 1.8 * s;
+            renderer.roundedQuad(x - spread, y - spread + 2.5 * s, total + spread * 2, height + spread * 2,
+                radius + spread, new Color(0, 0, 0, 30 - i * 3));
+        }
         if (glow.get()) renderer.glow(x, y, total, height, 10 * s, new Color(accent.r, accent.g, accent.b, 120));
 
         renderer.roundedQuad(x, y, total, height, radius, bg);

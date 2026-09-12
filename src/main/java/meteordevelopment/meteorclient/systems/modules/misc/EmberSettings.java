@@ -4,13 +4,28 @@
 
 package meteordevelopment.meteorclient.systems.modules.misc;
 
+import meteordevelopment.meteorclient.renderer.Fonts;
+import meteordevelopment.meteorclient.renderer.text.FontFace;
 import meteordevelopment.meteorclient.settings.*;
+import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 
 public class EmberSettings extends Module {
+    private final SettingGroup sgFont = settings.createGroup("Font");
     private final SettingGroup sgUI = settings.createGroup("UI");
+
+    /** Drives Meteor's own font config, so the ClickGUI and every HUD widget change together. */
+    public final Setting<FontFace> font = sgFont.add(new FontFaceSetting.Builder()
+        .name("font")
+        .description("Font used by the whole client - ClickGUI and HUD.")
+        .onChanged(face -> {
+            Config.get().font.set(face);
+            Fonts.load(face);
+        })
+        .build()
+    );
     private final SettingGroup sgTopBar = settings.createGroup("Top Bar");
 
     // UI Settings
