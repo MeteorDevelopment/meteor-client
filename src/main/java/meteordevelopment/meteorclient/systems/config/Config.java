@@ -154,6 +154,13 @@ public class Config extends System<Config> {
         .build()
     );
 
+    public final Setting<Boolean> moduleKeyboardNavigation = sgModules.add(new BoolSetting.Builder()
+        .name("navigate-modules-with-keyboard")
+        .description("Navigate the module search bar with the arrow keys, toggle with enter and open settings with shift + enter.")
+        .defaultValue(false)
+        .build()
+    );
+
     // Chat
 
     public final Setting<String> prefix = sgChat.add(new StringSetting.Builder()

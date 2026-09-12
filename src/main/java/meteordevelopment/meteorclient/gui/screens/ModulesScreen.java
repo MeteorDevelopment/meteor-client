@@ -11,6 +11,8 @@ import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.tabs.TabScreen;
 import meteordevelopment.meteorclient.gui.tabs.Tabs;
 import meteordevelopment.meteorclient.gui.utils.Cell;
+import meteordevelopment.meteorclient.gui.utils.ISelectableModule;
+import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.gui.widgets.containers.WContainer;
 import meteordevelopment.meteorclient.gui.widgets.containers.WSection;
 import meteordevelopment.meteorclient.gui.widgets.containers.WVerticalList;
@@ -30,6 +32,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 import static meteordevelopment.meteorclient.utils.Utils.getWindowHeight;
 import static meteordevelopment.meteorclient.utils.Utils.getWindowWidth;
 import static com.mojang.blaze3d.platform.InputConstants.*;
@@ -38,6 +41,8 @@ public class ModulesScreen extends TabScreen {
     private WCategoryController controller;
     private WWindow searchWindow;
     private WTextBox searchTextBox;
+    private final List<SearchResult> searchResults = new ArrayList<>();
+    private int selectedIndex;
 
     public ModulesScreen(GuiTheme theme) {
         super(theme, Tabs.get().getFirst());
@@ -59,6 +64,11 @@ public class ModulesScreen extends TabScreen {
     protected void init() {
         super.init();
         controller.refresh();
+
+        if (Config.get().moduleKeyboardNavigation.get() && searchTextBox != null && !searchTextBox.get().isEmpty()) {
+            searchTextBox.setFocused(true);
+            searchTextBox.setCursorMax();
+        }
     }
 
     // Category
@@ -88,6 +98,8 @@ public class ModulesScreen extends TabScreen {
     // Search
 
     protected void createSearchW(WContainer w, String text) {
+        searchResults.clear();
+
         if (!text.isEmpty()) {
             // Titles
             List<Pair<Module, String>> modules = Modules.get().searchTitles(text);
@@ -99,7 +111,8 @@ public class ModulesScreen extends TabScreen {
                 int count = 0;
                 for (Pair<Module, String> p : modules) {
                     if (count >= Config.get().moduleSearchCount.get() || count >= modules.size()) break;
-                    section.add(theme.module(p.getFirst(), p.getSecond())).expandX();
+                    WWidget widget = section.add(theme.module(p.getFirst(), p.getSecond())).expandX().widget();
+                    searchResults.add(new SearchResult(widget, p.getFirst()));
                     count++;
                 }
             }
@@ -114,7 +127,8 @@ public class ModulesScreen extends TabScreen {
                 int count = 0;
                 for (Module module : settings) {
                     if (count >= Config.get().moduleSearchCount.get() || count >= settings.size()) break;
-                    section.add(theme.module(module)).expandX();
+                    WWidget widget = section.add(theme.module(module)).expandX().widget();
+                    searchResults.add(new SearchResult(widget, module));
                     count++;
                 }
             }
@@ -142,13 +156,38 @@ public class ModulesScreen extends TabScreen {
         searchTextBox = text;
         text.action = () -> {
             l.clear();
+            selectedIndex = 0;
             createSearchW(l, text.get());
+            applySelection();
         };
 
         w.add(l).expandX();
         createSearchW(l, text.get());
+        applySelection();
 
         return w;
+    }
+
+    private record SearchResult(WWidget widget, Module module) {}
+
+    private boolean keyboardNavigationActive() {
+        return Config.get().moduleKeyboardNavigation.get() && searchTextBox != null && searchTextBox.isFocused() && !searchResults.isEmpty();
+    }
+
+    private void applySelection() {
+        boolean active = Config.get().moduleKeyboardNavigation.get() && !searchResults.isEmpty();
+
+        for (int i = 0; i < searchResults.size(); i++) {
+            if (searchResults.get(i).widget() instanceof ISelectableModule selectable) selectable.setSelected(active && i == selectedIndex);
+        }
+    }
+
+    private void moveSelection(int amount) {
+        int size = searchResults.size();
+        selectedIndex = ((selectedIndex + amount) % size + size) % size;
+
+        applySelection();
+        if (searchWindow != null) searchWindow.view.scrollIntoView(searchResults.get(selectedIndex).widget());
     }
 
     @Override
@@ -165,6 +204,27 @@ public class ModulesScreen extends TabScreen {
             }
 
             return true;
+        }
+
+        if (keyboardNavigationActive()) {
+            if (value.key() == KEY_DOWN) {
+                moveSelection(1);
+                return true;
+            }
+
+            if (value.key() == KEY_UP) {
+                moveSelection(-1);
+                return true;
+            }
+
+            if (value.key() == KEY_RETURN || value.key() == KEY_NUMPADENTER) {
+                Module module = searchResults.get(selectedIndex).module();
+
+                if ((value.modifiers() & MOD_SHIFT) != 0) mc.gui.setScreen(theme.moduleScreen(module));
+                else module.toggle();
+
+                return true;
+            }
         }
 
         return super.keyPressed(value);
