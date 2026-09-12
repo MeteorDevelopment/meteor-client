@@ -131,7 +131,7 @@ public class SpotifyHud extends HudElement {
         // The custom font rasterises a real typeface at scale*18px, so any scale is
         // smooth - no snapping, unlike Minecraft's bitmap font.
         double s = scale.get();
-        double titleScale = 1.05 * s;
+        double titleScale = 0.92 * s;
         double subScale = 0.85 * s;
 
         double titleH = renderer.textHeight(true, titleScale);
@@ -163,7 +163,9 @@ public class SpotifyHud extends HudElement {
 
         setSize(w, h);
 
-        renderer.glow(x, y + 2 * s, w, h, 6 * s, new Color(0, 0, 0, 90));
+        // Layered drop shadow: a wide soft pool, plus a tighter one right under the box.
+        renderer.glow(x, y + 5 * s, w, h, 16 * s, new Color(0, 0, 0, 75));
+        renderer.glow(x, y + 2 * s, w, h, 7 * s, new Color(0, 0, 0, 120));
         if (glow.get()) renderer.glow(x, y, w, h, 10 * s, new Color(accent.r, accent.g, accent.b, 120));
 
         renderer.roundedQuad(x, y, w, h, radius, bg);
@@ -195,7 +197,14 @@ public class SpotifyHud extends HudElement {
 
         if (withArtist) {
             ty += titleH + rowGap;
-            renderer.text(truncate(renderer, artist, contentW, subScale), cx, ty, gray, true, subScale);
+            // No per-glyph shadow: at this size it thickens thin strokes and reads as fuzz.
+            // The box already casts its own shadow, so the artist line stays crisp instead.
+            Color artistColor = new Color(
+                (gray.r * 2 + white.r) / 3,
+                (gray.g * 2 + white.g) / 3,
+                (gray.b * 2 + white.b) / 3,
+                235);
+            renderer.text(truncate(renderer, artist, contentW, subScale), cx, ty, artistColor, false, subScale);
         }
 
         if (withProgress) {
@@ -207,8 +216,8 @@ public class SpotifyHud extends HudElement {
             double elapsedW = renderer.textWidth(elapsed, true, subScale);
             double totalW = renderer.textWidth(total, true, subScale);
 
-            renderer.text(elapsed, cx, ty, gray, true, subScale);
-            renderer.text(total, cx + contentW - totalW, ty, gray, true, subScale);
+            renderer.text(elapsed, cx, ty, gray, false, subScale);
+            renderer.text(total, cx + contentW - totalW, ty, gray, false, subScale);
 
             double barX = cx + elapsedW + 5 * s;
             double barW = contentW - elapsedW - totalW - 10 * s;
