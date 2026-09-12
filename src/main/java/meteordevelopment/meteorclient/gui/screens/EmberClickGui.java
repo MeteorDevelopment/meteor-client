@@ -381,6 +381,11 @@ public class EmberClickGui extends TabScreen {
         return new Color(c.r, c.g, c.b, (int)(c.a * fade));
     }
 
+    /** Accent glow around an enabled row, so turning something on lights it up. */
+    private void activeGlow(GuiRenderer r, double x, double y, double w, double h, float amount) {
+        r.glow(x, y, w, h, 14, accentAlpha((int)(125 * amount)), false);
+    }
+
     /** Soft accent halo behind a hovered row, drawn over the panel body but under the row. */
     private void rowGlow(GuiRenderer r, double x, double y, double w, double h, float amount) {
         r.glow(x, y, w, h, 10, accentAlpha((int)(110 * amount)), false);
@@ -431,6 +436,7 @@ public class EmberClickGui extends TabScreen {
                 float aA = anim(m, activeAnims, active ? 1f : 0f, 8f, frameDt);
 
                 if (hA > 0.01f) rowGlow(r, x + 4, rowY + 1, PW - 8, MH - 2, hA);
+                if (aA > 0.01f) activeGlow(r, x + 4, rowY + 1, PW - 8, MH - 2, aA);
                 if (aA > 0.01f) r.roundedRect(x + 4, rowY + 1, PW - 8, MH - 2, (MH - 2) / 2, activeRowColor(aA));
                 if (hA > 0.01f) r.roundedRect(x + 4, rowY + 1, PW - 8, MH - 2, (MH - 2) / 2,
                     new Color(255, 255, 255, (int)(16 * hA)));
@@ -467,6 +473,7 @@ public class EmberClickGui extends TabScreen {
                 float aA = anim("cl_" + entry.name, activeAnims, active ? 1f : 0f, 8f, frameDt);
 
                 if (hA > 0.01f) rowGlow(r, x + 4, rowY + 1, PW - 8, MH - 2, hA);
+                if (aA > 0.01f) activeGlow(r, x + 4, rowY + 1, PW - 8, MH - 2, aA);
                 if (aA > 0.01f) r.roundedRect(x + 4, rowY + 1, PW - 8, MH - 2, (MH - 2) / 2, activeRowColor(aA));
                 if (hA > 0.01f) r.roundedRect(x + 4, rowY + 1, PW - 8, MH - 2, (MH - 2) / 2,
                     new Color(255, 255, 255, (int)(16 * hA)));
@@ -510,6 +517,7 @@ public class EmberClickGui extends TabScreen {
                 float hA = anim("th_" + i, hoverAnims, hover ? 1f : 0f, 12f, frameDt);
 
                 if (hA > 0.01f) rowGlow(r, x + 4, rowY + 1, PW - 8, MH - 2, hA);
+                if (sel) activeGlow(r, x + 4, rowY + 1, PW - 8, MH - 2, 1f);
                 if (sel) r.roundedRect(x + 4, rowY + 1, PW - 8, MH - 2, (MH - 2) / 2, activeRowColor(1f));
                 if (hA > 0.01f) r.roundedRect(x + 4, rowY + 1, PW - 8, MH - 2, (MH - 2) / 2,
                     new Color(255, 255, 255, (int)(16 * hA)));
