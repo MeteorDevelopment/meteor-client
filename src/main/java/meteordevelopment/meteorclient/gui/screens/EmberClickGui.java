@@ -386,9 +386,21 @@ public class EmberClickGui extends TabScreen {
         r.glow(x, y, w, h, 14, accentAlpha((int)(125 * amount)), false);
     }
 
-    /** Soft accent halo behind a hovered row, drawn over the panel body but under the row. */
-    private void rowGlow(GuiRenderer r, double x, double y, double w, double h, float amount) {
-        r.glow(x, y, w, h, 10, accentAlpha((int)(110 * amount)), false);
+    /**
+     * Hover highlight for a row. A halo is wrong here: on a row with no pill behind it
+     * the glow's square edges show against the panel, so the row is tinted instead and
+     * an accent edge grows in on the left.
+     */
+    private void rowHover(GuiRenderer r, double x, double y, double w, double h, float amount, boolean active) {
+        double radius = h / 2;
+
+        r.roundedRect(x, y, w, h, radius, accentAlpha((int)(30 * amount)));
+        r.roundedRect(x, y, w, h, radius, new Color(255, 255, 255, (int)(12 * amount)));
+
+        if (!active) {
+            double barH = (h - 11) * amount;
+            if (barH > 1) r.roundedRect(x + 3.5, y + (h - barH) / 2, 2.5, barH, 1.25, accentAlpha((int)(210 * amount)));
+        }
     }
 
     /** Row pill for an enabled module, tinted by the theme. */
@@ -435,11 +447,9 @@ public class EmberClickGui extends TabScreen {
                 float hA = anim(m, hoverAnims, hover ? 1f : 0f, 12f, frameDt);
                 float aA = anim(m, activeAnims, active ? 1f : 0f, 8f, frameDt);
 
-                if (hA > 0.01f) rowGlow(r, x + 4, rowY + 1, PW - 8, MH - 2, hA);
                 if (aA > 0.01f) activeGlow(r, x + 4, rowY + 1, PW - 8, MH - 2, aA);
                 if (aA > 0.01f) r.roundedRect(x + 4, rowY + 1, PW - 8, MH - 2, (MH - 2) / 2, activeRowColor(aA));
-                if (hA > 0.01f) r.roundedRect(x + 4, rowY + 1, PW - 8, MH - 2, (MH - 2) / 2,
-                    new Color(255, 255, 255, (int)(16 * hA)));
+                if (hA > 0.01f) rowHover(r, x + 4, rowY + 1, PW - 8, MH - 2, hA, active);
 
                 int dr = (int) Mth.lerp(aA, DOT_OFF.r, DOT_ON.r);
                 int dg = (int) Mth.lerp(aA, DOT_OFF.g, DOT_ON.g);
@@ -472,11 +482,9 @@ public class EmberClickGui extends TabScreen {
                 float hA = anim("cl_" + entry.name, hoverAnims, hover ? 1f : 0f, 12f, frameDt);
                 float aA = anim("cl_" + entry.name, activeAnims, active ? 1f : 0f, 8f, frameDt);
 
-                if (hA > 0.01f) rowGlow(r, x + 4, rowY + 1, PW - 8, MH - 2, hA);
                 if (aA > 0.01f) activeGlow(r, x + 4, rowY + 1, PW - 8, MH - 2, aA);
                 if (aA > 0.01f) r.roundedRect(x + 4, rowY + 1, PW - 8, MH - 2, (MH - 2) / 2, activeRowColor(aA));
-                if (hA > 0.01f) r.roundedRect(x + 4, rowY + 1, PW - 8, MH - 2, (MH - 2) / 2,
-                    new Color(255, 255, 255, (int)(16 * hA)));
+                if (hA > 0.01f) rowHover(r, x + 4, rowY + 1, PW - 8, MH - 2, hA, active);
 
                 if (entry.element == null) {
                     // Action row (HUD editor) - arrow instead of a toggle dot
@@ -516,11 +524,9 @@ public class EmberClickGui extends TabScreen {
                 boolean sel = i == EmberPalette.selected();
                 float hA = anim("th_" + i, hoverAnims, hover ? 1f : 0f, 12f, frameDt);
 
-                if (hA > 0.01f) rowGlow(r, x + 4, rowY + 1, PW - 8, MH - 2, hA);
                 if (sel) activeGlow(r, x + 4, rowY + 1, PW - 8, MH - 2, 1f);
                 if (sel) r.roundedRect(x + 4, rowY + 1, PW - 8, MH - 2, (MH - 2) / 2, activeRowColor(1f));
-                if (hA > 0.01f) r.roundedRect(x + 4, rowY + 1, PW - 8, MH - 2, (MH - 2) / 2,
-                    new Color(255, 255, 255, (int)(16 * hA)));
+                if (hA > 0.01f) rowHover(r, x + 4, rowY + 1, PW - 8, MH - 2, hA, sel);
 
                 r.quad(x + 11, rowY + (MH - 8) / 2, 8, 8, GuiRenderer.CIRCLE, EmberPalette.swatch(i));
 
