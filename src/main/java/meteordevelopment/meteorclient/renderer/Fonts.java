@@ -24,7 +24,10 @@ import java.util.List;
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class Fonts {
-    public static final String[] BUILTIN_FONTS = {"JetBrains Mono", "Comfortaa", "Tw Cen MT", "Pixelation"};
+    public static final String[] BUILTIN_FONTS = {"JetBrains Mono", "Comfortaa", "Tw Cen MT", "Pixelation", "Inter"};
+
+    /** Inter is drawn for interfaces and keeps its shape at the small sizes the HUD uses. */
+    public static final String DEFAULT_BUILTIN = "Inter";
 
     public static String DEFAULT_FONT_FAMILY;
     public static FontFace DEFAULT_FONT;
@@ -51,7 +54,9 @@ public class Fonts {
 
         MeteorClient.LOG.info("Found {} font families.", FONT_FAMILIES.size());
 
-        DEFAULT_FONT_FAMILY = FontUtils.getBuiltinFontInfo(BUILTIN_FONTS[1]).family();
+        // Named outright rather than by index, which silently picked a different font
+        // whenever the builtin list changed.
+        DEFAULT_FONT_FAMILY = FontUtils.getBuiltinFontInfo(DEFAULT_BUILTIN).family();
         DEFAULT_FONT = getFamily(DEFAULT_FONT_FAMILY).get(FontInfo.Type.Regular);
 
         Config config = Config.get();

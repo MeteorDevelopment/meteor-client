@@ -163,12 +163,17 @@ public class SpotifyHud extends HudElement {
 
         setSize(w, h);
 
-        // Layered drop shadow: a wide soft pool, plus a tighter one right under the box.
-        renderer.glow(x, y + 5 * s, w, h, 16 * s, new Color(0, 0, 0, 75));
-        renderer.glow(x, y + 2 * s, w, h, 7 * s, new Color(0, 0, 0, 120));
+        // A faint black shadow is invisible against a dark game scene, so it has to be
+        // strong to read at all: a wide deep pool plus a tight dark one under the edge.
+        renderer.glow(x, y + 6 * s, w, h, 18 * s, new Color(0, 0, 0, 175));
+        renderer.glow(x, y + 2 * s, w, h, 8 * s, new Color(0, 0, 0, 215));
         if (glow.get()) renderer.glow(x, y, w, h, 10 * s, new Color(accent.r, accent.g, accent.b, 120));
 
         renderer.roundedQuad(x, y, w, h, radius, bg);
+
+        // A lit top edge is what actually sells depth on a dark background; the shadow
+        // alone has nothing darker to fall against.
+        renderer.quad(x + radius, y, w - radius * 2, Math.max(1, 0.9 * s), new Color(255, 255, 255, 30));
 
         double cx = x + pad;
 
