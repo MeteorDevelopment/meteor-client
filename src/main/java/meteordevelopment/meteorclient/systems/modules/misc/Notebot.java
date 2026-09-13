@@ -388,7 +388,7 @@ public class Notebot extends Module {
 
             TextRenderer text = TextRenderer.get();
 
-            NametagUtils.begin(pos);
+            NametagUtils.begin(pos, event.graphics);
             text.beginBig(event.graphics);
 
             double xScreen = text.getWidth(levelText) / 2.0;
@@ -402,7 +402,7 @@ public class Notebot extends Module {
             }
             text.end();
 
-            NametagUtils.end();
+            NametagUtils.end(event.graphics);
         }
     }
 
