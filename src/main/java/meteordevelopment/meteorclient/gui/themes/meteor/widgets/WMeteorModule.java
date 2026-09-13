@@ -9,6 +9,7 @@ import meteordevelopment.meteorclient.gui.renderer.GuiRenderer;
 import meteordevelopment.meteorclient.gui.themes.meteor.MeteorGuiTheme;
 import meteordevelopment.meteorclient.gui.themes.meteor.MeteorWidget;
 import meteordevelopment.meteorclient.gui.utils.AlignmentX;
+import meteordevelopment.meteorclient.gui.utils.ISelectableModule;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WPressable;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import net.minecraft.util.Mth;
@@ -17,9 +18,11 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 import static com.mojang.blaze3d.platform.InputConstants.MOUSE_BUTTON_LEFT;
 import static com.mojang.blaze3d.platform.InputConstants.MOUSE_BUTTON_RIGHT;
 
-public class WMeteorModule extends WPressable implements MeteorWidget {
+public class WMeteorModule extends WPressable implements MeteorWidget, ISelectableModule {
     private final Module module;
     private final String title;
+
+    private boolean selected;
 
     private double titleWidth;
 
@@ -39,6 +42,11 @@ public class WMeteorModule extends WPressable implements MeteorWidget {
             animationProgress1 = 0;
             animationProgress2 = 0;
         }
+    }
+
+    @Override
+    public void setSelected(boolean selected) {
+        this.selected = selected;
     }
 
     @Override
@@ -78,6 +86,15 @@ public class WMeteorModule extends WPressable implements MeteorWidget {
         }
         if (animationProgress2 > 0) {
             renderer.quad(x, y + height * (1 - animationProgress2), theme.scale(2), height * animationProgress2, theme.accentColor.get());
+        }
+
+        if (selected) {
+            double t = theme.scale(2);
+
+            renderer.quad(this.x, this.y, width, t, theme.accentColor.get());
+            renderer.quad(this.x, this.y + height - t, width, t, theme.accentColor.get());
+            renderer.quad(this.x, this.y + t, t, height - t * 2, theme.accentColor.get());
+            renderer.quad(this.x + width - t, this.y + t, t, height - t * 2, theme.accentColor.get());
         }
 
         double x = this.x + pad;
