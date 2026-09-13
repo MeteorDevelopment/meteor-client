@@ -9,8 +9,13 @@ import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPipeline;
+import io.netty.handler.proxy.HttpProxyHandler;
 import io.netty.handler.proxy.Socks4ProxyHandler;
 import io.netty.handler.proxy.Socks5ProxyHandler;
+import io.netty.handler.ssl.SslContext;
+import io.netty.handler.ssl.SslContextBuilder;
+import io.netty.handler.ssl.SslHandler;
+import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
 import io.netty.handler.timeout.TimeoutException;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
@@ -40,6 +45,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.net.InetSocketAddress;
 import java.util.Iterator;
+import javax.net.ssl.SSLEngine;
+import javax.net.ssl.SSLException;
 
 @Mixin(Connection.class)
 public abstract class ConnectionMixin {
@@ -99,10 +106,34 @@ public abstract class ConnectionMixin {
         if (proxy == null) return;
 
         switch (proxy.type.get()) {
-            case Socks4 ->
-                pipeline.addFirst(new Socks4ProxyHandler(new InetSocketAddress(proxy.address.get(), proxy.port.get()), proxy.username.get()));
-            case Socks5 ->
-                pipeline.addFirst(new Socks5ProxyHandler(new InetSocketAddress(proxy.address.get(), proxy.port.get()), proxy.username.get(), proxy.password.get()));
+            case HTTP -> pipeline.addFirst(new HttpProxyHandler(
+                new InetSocketAddress(proxy.address.get(), proxy.port.get()),
+                proxy.username.get(), proxy.password.get()
+            ));
+            case SOCKS5 -> pipeline.addFirst(new Socks5ProxyHandler(
+                new InetSocketAddress(proxy.address.get(), proxy.port.get()),
+                proxy.username.get(), proxy.password.get()
+            ));
+            case SOCKS4 -> pipeline.addFirst(new Socks4ProxyHandler(
+                new InetSocketAddress(proxy.address.get(), proxy.port.get()),
+                proxy.username.get()
+            ));
+        }
+
+        if (proxy.secure.get()) {
+            try {
+                SslContext sslContext = SslContextBuilder.forClient()
+                    .trustManager(InsecureTrustManagerFactory.INSTANCE)
+                    .build();
+                SSLEngine engine = sslContext.newEngine(
+                    pipeline.channel().alloc(),
+                    proxy.address.get(),
+                    proxy.port.get()
+                );
+                pipeline.addFirst(new SslHandler(engine));
+            } catch (SSLException e) {
+                throw new RuntimeException("Failed to create SSL context for proxy", e);
+            }
         }
     }
 }

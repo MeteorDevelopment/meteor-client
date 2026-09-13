@@ -110,7 +110,7 @@ public class ProxiesScreen extends WindowScreen {
             WLabel name = table.add(theme.label(proxy.name.get())).widget();
             name.color = theme.textColor();
 
-            WLabel type = table.add(theme.label("(" + proxy.type.get() + ")")).widget();
+            WLabel type = table.add(theme.label("(" + proxy.type.get() + (proxy.secure.get() ? "S" : "") + ")")).widget();
             type.color = theme.textSecondaryColor();
 
             WHorizontalList ipList = table.add(theme.horizontalList()).expandCellX().widget();
