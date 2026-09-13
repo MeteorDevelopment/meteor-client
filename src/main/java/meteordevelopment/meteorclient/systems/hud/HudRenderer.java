@@ -141,6 +141,7 @@ public class HudRenderer {
         if (scale == -1) scale = hud.getTextScale();
 
         if (!hud.hasCustomFont()) {
+            VanillaTextRenderer.INSTANCE.scale = scale * 2;
             return VanillaTextRenderer.INSTANCE.render(text, x, y, color, shadow);
         }
 
