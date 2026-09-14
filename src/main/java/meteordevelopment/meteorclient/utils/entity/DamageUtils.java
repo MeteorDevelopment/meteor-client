@@ -7,6 +7,7 @@ package meteordevelopment.meteorclient.utils.entity;
 
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+import meteordevelopment.meteorclient.mixininterface.IVec3;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.entity.fakeplayer.FakePlayerEntity;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
@@ -306,10 +307,11 @@ public class DamageUtils {
 
         int damageProtection = 0;
 
+        Object2IntMap<Holder<Enchantment>> enchantments = new Object2IntOpenHashMap<>();
+
         for (EquipmentSlot slot : EquipmentSlotGroup.ARMOR) {
             ItemStack stack = player.getItemBySlot(slot);
 
-            Object2IntMap<Holder<Enchantment>> enchantments = new Object2IntOpenHashMap<>();
             Utils.getEnchantments(stack, enchantments);
 
             int protection = Utils.getEnchantmentLevel(enchantments, Enchantments.PROTECTION);
@@ -384,12 +386,15 @@ public class DamageUtils {
             double endY = box.maxY;
             double endZ = box.maxZ + zOffset;
 
+            Vec3 position = new Vec3(0, 0, 0);
+            ExposureRaycastContext context = new ExposureRaycastContext(position, source);
+
             for (double x = startX; x <= endX; x += xStep) {
                 for (double y = startY; y <= endY; y += yStep) {
                     for (double z = startZ; z <= endZ; z += zStep) {
-                        Vec3 position = new Vec3(x, y, z);
+                        ((IVec3) position).meteor$set(x, y, z);
 
-                        if (raycast(new ExposureRaycastContext(position, source), raycastFactory) == null) misses++;
+                        if (raycast(context, raycastFactory) == null) misses++;
 
                         hits++;
                     }
