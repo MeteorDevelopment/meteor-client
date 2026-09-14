@@ -152,7 +152,6 @@ public class MapHud extends HudElement {
 
             Matrix3x2fStack matrices = renderer.graphics.pose();
             matrices.pushMatrix();
-            matrices.scale(1f / mc.getWindow().getGuiScale());
             matrices.translate(this.x, this.y);
             matrices.scale(scale.get().floatValue());
             renderer.graphics.map(renderState);
