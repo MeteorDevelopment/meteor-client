@@ -57,7 +57,7 @@ public class ProxiesScreen extends WindowScreen {
 
         // New
         WButton newBtn = l.add(theme.button("New")).expandX().widget();
-        newBtn.action = () -> mc.setScreen(new EditProxyScreen(theme, null, this::reload));
+        newBtn.action = () -> mc.gui.setScreen(new EditProxyScreen(theme, null, this::reload));
 
         // Import
         PointerBuffer filters = BufferUtils.createPointerBuffer(1);
@@ -72,7 +72,7 @@ public class ProxiesScreen extends WindowScreen {
             String selectedFile = TinyFileDialogs.tinyfd_openFileDialog("Import Proxies", null, filters, null, false);
             if (selectedFile != null) {
                 File file = new File(selectedFile);
-                mc.setScreen(new ProxiesImportScreen(theme, file));
+                mc.gui.setScreen(new ProxiesImportScreen(theme, file));
             }
         };
 
@@ -87,7 +87,7 @@ public class ProxiesScreen extends WindowScreen {
         };
 
         WButton configButton = l.add(theme.button(GuiRenderer.EDIT)).widget();
-        configButton.action = () -> mc.setScreen(new ConfigScreen(theme));
+        configButton.action = () -> mc.gui.setScreen(new ConfigScreen(theme));
         configButton.tooltip = "Proxies Config";
     }
 
@@ -130,7 +130,7 @@ public class ProxiesScreen extends WindowScreen {
             refresh.tooltip = "Refresh";
 
             WButton edit = table.add(theme.button(GuiRenderer.EDIT)).widget();
-            edit.action = () -> mc.setScreen(new EditProxyScreen(theme, proxy, this::reload));
+            edit.action = () -> mc.gui.setScreen(new EditProxyScreen(theme, proxy, this::reload));
 
             WMinus remove = table.add(theme.minus()).widget();
             remove.action = () -> {
@@ -151,10 +151,8 @@ public class ProxiesScreen extends WindowScreen {
             if (timer > 2) {
                 refreshButton.set(getNext(refreshButton));
                 timer = 0;
-            }
-            else timer++;
-        }
-        else {
+            } else timer++;
+        } else {
             if (!refreshButton.getText().equals("Refresh")) {
                 refreshButton.set("Refresh");
             }
@@ -163,7 +161,7 @@ public class ProxiesScreen extends WindowScreen {
             }
         }
 
-        for (Map.Entry<Proxy, WLabel> entry : statuses.entrySet()) {
+        for (var entry : statuses.entrySet()) {
             Proxy proxy = entry.getKey();
             WLabel label = entry.getValue();
 

@@ -9,12 +9,13 @@ import meteordevelopment.meteorclient.systems.System;
 import meteordevelopment.meteorclient.systems.Systems;
 import meteordevelopment.meteorclient.systems.accounts.types.CrackedAccount;
 import meteordevelopment.meteorclient.systems.accounts.types.MicrosoftAccount;
+import meteordevelopment.meteorclient.systems.accounts.types.SessionAccount;
 import meteordevelopment.meteorclient.systems.accounts.types.TheAlteningAccount;
 import meteordevelopment.meteorclient.utils.misc.NbtException;
 import meteordevelopment.meteorclient.utils.misc.NbtUtils;
 import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
-import net.minecraft.nbt.NbtCompound;
-import org.jetbrains.annotations.NotNull;
+import net.minecraft.nbt.CompoundTag;
+import org.jspecify.annotations.NonNull;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -51,13 +52,13 @@ public class Accounts extends System<Accounts> implements Iterable<Account<?>> {
     }
 
     @Override
-    public @NotNull Iterator<Account<?>> iterator() {
+    public @NonNull Iterator<Account<?>> iterator() {
         return accounts.iterator();
     }
 
     @Override
-    public NbtCompound toTag() {
-        NbtCompound tag = new NbtCompound();
+    public CompoundTag toTag() {
+        CompoundTag tag = new CompoundTag();
 
         tag.put("accounts", NbtUtils.listToTag(accounts));
 
@@ -65,20 +66,21 @@ public class Accounts extends System<Accounts> implements Iterable<Account<?>> {
     }
 
     @Override
-    public Accounts fromTag(NbtCompound tag) {
+    public Accounts fromTag(CompoundTag tag) {
         MeteorExecutor.execute(() -> accounts = NbtUtils.listFromTag(tag.getListOrEmpty("accounts"), tag1 -> {
-            NbtCompound t = (NbtCompound) tag1;
+            CompoundTag t = (CompoundTag) tag1;
             if (!t.contains("type")) return null;
 
-            AccountType type = AccountType.valueOf(t.getString("type", ""));
+            AccountType type = AccountType.valueOf(t.getStringOr("type", ""));
 
             try {
                 return switch (type) {
-                    case Cracked ->     new CrackedAccount(null).fromTag(t);
-                    case Microsoft ->   new MicrosoftAccount(null).fromTag(t);
+                    case Cracked -> new CrackedAccount(null).fromTag(t);
+                    case Microsoft -> new MicrosoftAccount(null).fromTag(t);
                     case TheAltening -> new TheAlteningAccount(null).fromTag(t);
+                    case Session -> new SessionAccount(null).fromTag(t);
                 };
-            } catch (NbtException e) {
+            } catch (NbtException _) {
                 return null;
             }
         }));

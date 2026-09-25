@@ -6,15 +6,13 @@
 package meteordevelopment.meteorclient.systems.modules.render;
 
 import meteordevelopment.meteorclient.MeteorClient;
-import meteordevelopment.meteorclient.renderer.MeteorRenderPipelines;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
-import meteordevelopment.meteorclient.utils.render.postprocess.PostProcessShaders;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.util.Identifier;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.resources.Identifier;
 
 import java.util.Set;
 
@@ -37,8 +35,6 @@ public class Chams extends Module {
         .name("shader")
         .description("Renders a shader over of the entities.")
         .defaultValue(Shader.Image)
-        .onModuleActivated(setting -> updateShader(setting.get()))
-        .onChanged(this::updateShader)
         .build()
     );
 
@@ -188,11 +184,6 @@ public class Chams extends Module {
 
     public boolean isShader() {
         return isActive() && shader.get() != Shader.None;
-    }
-
-    public void updateShader(Shader value) {
-        if (value == Shader.None) return;
-        PostProcessShaders.CHAMS.init(MeteorRenderPipelines.POST_IMAGE);
     }
 
     public enum Shader {

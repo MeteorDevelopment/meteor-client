@@ -14,8 +14,8 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import meteordevelopment.meteorclient.systems.waypoints.Waypoint;
 import meteordevelopment.meteorclient.systems.waypoints.Waypoints;
-import net.minecraft.command.CommandSource;
-import net.minecraft.text.Text;
+import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.network.chat.Component;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -25,7 +25,7 @@ import java.util.concurrent.CompletableFuture;
 public class WaypointArgumentType implements ArgumentType<String> {
     private static final WaypointArgumentType GREEDY = new WaypointArgumentType(true);
     private static final WaypointArgumentType QUOTED = new WaypointArgumentType(false);
-    private static final DynamicCommandExceptionType NO_SUCH_WAYPOINT = new DynamicCommandExceptionType(name -> Text.literal("Waypoint with name '" + name + "' doesn't exist."));
+    private static final DynamicCommandExceptionType NO_SUCH_WAYPOINT = new DynamicCommandExceptionType(name -> Component.literal("Waypoint with name '" + name + "' doesn't exist."));
     private final boolean greedyString;
 
     private WaypointArgumentType(boolean greedyString) {
@@ -62,7 +62,7 @@ public class WaypointArgumentType implements ArgumentType<String> {
 
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-        return CommandSource.suggestMatching(getExamples(), builder);
+        return SharedSuggestionProvider.suggest(getExamples(), builder);
     }
 
     @Override

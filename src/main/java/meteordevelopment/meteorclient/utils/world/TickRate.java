@@ -10,8 +10,8 @@ import meteordevelopment.meteorclient.events.game.GameJoinedEvent;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.network.packet.s2c.play.WorldTimeUpdateS2CPacket;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.network.protocol.game.ClientboundSetTimePacket;
+import net.minecraft.util.Mth;
 
 import java.util.Arrays;
 
@@ -32,10 +32,10 @@ public class TickRate {
 
     @EventHandler
     private void onReceivePacket(PacketEvent.Receive event) {
-        if (event.packet instanceof WorldTimeUpdateS2CPacket) {
+        if (event.packet instanceof ClientboundSetTimePacket) {
             long now = System.currentTimeMillis();
             float timeElapsed = (now - timeLastTimeUpdate) / 1000.0F;
-            tickRates[nextIndex] = MathHelper.clamp(20.0f / timeElapsed, 0.0f, 20.0f);
+            tickRates[nextIndex] = Mth.clamp(20.0f / timeElapsed, 0.0f, 20.0f);
             nextIndex = (nextIndex + 1) % tickRates.length;
             timeLastTimeUpdate = now;
         }

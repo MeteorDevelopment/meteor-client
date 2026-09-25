@@ -8,9 +8,10 @@ package meteordevelopment.meteorclient.gui.widgets.containers;
 import meteordevelopment.meteorclient.gui.renderer.GuiRenderer;
 import meteordevelopment.meteorclient.gui.utils.Cell;
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.util.Mth;
 
-import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_LEFT;
+import static com.mojang.blaze3d.platform.InputConstants.MOUSE_BUTTON_LEFT;
 
 public abstract class WSection extends WVerticalList {
     public Runnable action;
@@ -65,8 +66,7 @@ public abstract class WSection extends WVerticalList {
 
             actualWidth = width;
             actualHeight = height;
-        }
-        else {
+        } else {
             width = actualWidth;
             height = forcedHeight;
 
@@ -88,7 +88,7 @@ public abstract class WSection extends WVerticalList {
         double preProgress = animProgress;
 
         animProgress += (expanded ? 1 : -1) * delta * 14;
-        animProgress = MathHelper.clamp(animProgress, 0, 1);
+        animProgress = Mth.clamp(animProgress, 0, 1);
 
         if (animProgress != preProgress) {
             forcedHeight = (actualHeight - header.height) * animProgress + header.height;
@@ -123,8 +123,8 @@ public abstract class WSection extends WVerticalList {
         }
 
         @Override
-        public boolean onMouseClicked(double mouseX, double mouseY, int button, boolean used) {
-            if (mouseOver && button == GLFW_MOUSE_BUTTON_LEFT && !used) {
+        public boolean onMouseClicked(MouseButtonEvent click, boolean doubled) {
+            if (mouseOver && click.button() == MOUSE_BUTTON_LEFT && !doubled) {
                 onClick();
                 return true;
             }

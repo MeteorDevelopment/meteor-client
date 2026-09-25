@@ -1,20 +1,21 @@
+import net.ltgt.gradle.errorprone.errorprone
+
 plugins {
-    id("fabric-loom") version "1.10-SNAPSHOT"
+    alias(libs.plugins.fabric.loom)
     id("maven-publish")
-    id("com.gradleup.shadow") version "9.0.0-beta11"
+    alias(libs.plugins.errorprone)
 }
 
+val archivesBaseName = providers.gradleProperty("archives_base_name").get()
+val mavenGroup = providers.gradleProperty("maven_group").get()
+val runErrorProne = providers.gradleProperty("errorprone").isPresent
+
 base {
-    archivesName = properties["archives_base_name"] as String
-    group = properties["maven_group"] as String
+    archivesName = archivesBaseName
+    group = mavenGroup
 
-    val suffix = if (project.hasProperty("build_number")) {
-        project.findProperty("build_number")
-    } else {
-        "local"
-    }
-
-    version = properties["minecraft_version"] as String + "-" + suffix
+    val suffix = providers.gradleProperty("build_number").getOrElse("local")
+    version = "${libs.versions.minecraft.get()}-$suffix"
 }
 
 repositories {
@@ -25,10 +26,6 @@ repositories {
     maven {
         name = "meteor-maven-snapshots"
         url = uri("https://maven.meteordev.org/snapshots")
-    }
-    maven {
-        name = "Terraformers"
-        url = uri("https://maven.terraformersmc.com")
     }
     maven {
         name = "ViaVersion"
@@ -49,83 +46,142 @@ repositories {
     }
 }
 
-val modInclude: Configuration by configurations.creating
-val library: Configuration by configurations.creating
+val modInclude = configurations.create("modInclude")
+val jij = configurations.create("jij")
+val launcher = sourceSets.create("launcher") {
+    java.srcDir("src/launcher/java")
+}
 
 configurations {
     // include mods
-    modImplementation.configure {
+    implementation.configure {
         extendsFrom(modInclude)
     }
     include.configure {
         extendsFrom(modInclude)
     }
 
-    // include libraries
+    // include libraries (jar-in-jar)
     implementation.configure {
-        extendsFrom(library)
+        extendsFrom(jij)
     }
-    shadow.configure {
-        extendsFrom(library)
+    include.configure {
+        extendsFrom(jij)
     }
 }
 
 dependencies {
     // Fabric
-    minecraft("com.mojang:minecraft:${properties["minecraft_version"] as String}")
-    mappings("net.fabricmc:yarn:${properties["yarn_mappings"] as String}:v2")
-    modImplementation("net.fabricmc:fabric-loader:${properties["loader_version"] as String}")
+    minecraft(libs.minecraft)
+    implementation(libs.fabric.loader)
 
-    modInclude(fabricApi.module("fabric-api-base", properties["fapi_version"] as String))
-    modInclude(fabricApi.module("fabric-resource-loader-v0", properties["fapi_version"] as String))
+    val fapiVersion = libs.versions.fabric.api.get()
+    modInclude(fabricApi.module("fabric-api-base", fapiVersion))
+    modInclude(fabricApi.module("fabric-resource-loader-v1", fapiVersion))
 
     // Compat fixes
-    modCompileOnly(fabricApi.module("fabric-renderer-indigo", properties["fapi_version"] as String))
-    modCompileOnly("maven.modrinth:sodium:${properties["sodium_version"] as String}") { isTransitive = false }
-    modCompileOnly("maven.modrinth:lithium:${properties["lithium_version"] as String}") { isTransitive = false }
-    modCompileOnly("maven.modrinth:iris:${properties["iris_version"] as String}") { isTransitive = false }
-    modCompileOnly("com.viaversion:viafabricplus:${properties["viafabricplus_version"] as String}") { isTransitive = false }
-    modCompileOnly("com.viaversion:viafabricplus-api:${properties["viafabricplus_version"] as String}") { isTransitive = false }
+    compileOnly(fabricApi.module("fabric-renderer-indigo", fapiVersion))
+    compileOnly(libs.sodium) { isTransitive = false }
+    compileOnly(libs.lithium) { isTransitive = false }
+    compileOnly(libs.iris) { isTransitive = false }
+    compileOnly(libs.viafabricplus) { isTransitive = false }
+    compileOnly(libs.viafabricplus.api) { isTransitive = false }
 
-    // Baritone (https://github.com/MeteorDevelopment/baritone)
-    modCompileOnly("meteordevelopment:baritone:${properties["baritone_version"] as String}-SNAPSHOT")
-    // ModMenu (https://github.com/TerraformersMC/ModMenu)
-    modCompileOnly("com.terraformersmc:modmenu:${properties["modmenu_version"] as String}")
+    compileOnly(libs.baritone)
+    compileOnly(libs.modmenu)
 
-    // Libraries
-    library("meteordevelopment:orbit:${properties["orbit_version"] as String}")
-    library("org.meteordev:starscript:${properties["starscript_version"] as String}")
-    library("meteordevelopment:discord-ipc:${properties["discordipc_version"] as String}")
-    library("org.reflections:reflections:${properties["reflections_version"] as String}")
-    library("io.netty:netty-handler-proxy:${properties["netty_version"] as String}") { isTransitive = false }
-    library("io.netty:netty-codec-socks:${properties["netty_version"] as String}") { isTransitive = false }
-    library("de.florianmichael:WaybackAuthLib:${properties["waybackauthlib_version"] as String}")
+    // Libraries (JAR-in-JAR)
+    jij(libs.orbit)
+    jij(libs.starscript)
+    jij(libs.discord.ipc)
+    jij(libs.reflections)
+    jij(libs.netty.handler.proxy) { isTransitive = false }
+    jij(libs.netty.codec.socks) { isTransitive = false }
+    jij(libs.waybackauthlib)
+    jij(libs.minecraft.auth) {
+        exclude("com.google.code.gson")
+        exclude("com.google.errorprone")
+    }
 
-    // Launch sub project
-    shadow(project(":launch"))
+    // Error Prone
+    errorprone(libs.errorprone.core)
+    errorprone(libs.nullaway)
+}
+
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(libs.versions.jdk.get().toInt()))
+    }
+
+    if (System.getenv("CI")?.toBoolean() == true) {
+        withSourcesJar()
+        withJavadocJar()
+    }
+}
+
+// Handle transitive dependencies for jar-in-jar
+// Based on implementation from BaseProject by florianreuth/EnZaXD
+// Source: https://github.com/florianreuth/BaseProject/blob/main/src/main/kotlin/de/florianreuth/baseproject/Fabric.kt
+// Licensed under Apache License 2.0
+val jijExcluded = setOf("org.slf4j", "jsr305")
+listOf("api", "implementation", "include").forEach { configName ->
+    configurations.named(configName).configure {
+        defaultDependencies {
+            configurations.getByName("jij").incoming.resolutionResult.allComponents
+                .mapNotNull { it.id as? ModuleComponentIdentifier }
+                .forEach { id ->
+                    val notation = "${id.group}:${id.module}:${id.version}"
+                    if (jijExcluded.none { notation.contains(it) }) {
+                        add(project.dependencies.create(notation) {
+                            isTransitive = false
+                        })
+                    }
+                }
+        }
+    }
 }
 
 loom {
-    accessWidenerPath = file("src/main/resources/meteor-client.accesswidener")
+    accessWidenerPath = file("src/main/resources/meteor-client.classtweaker")
 }
 
-afterEvaluate {
-    tasks.migrateMappings.configure {
-        outputDir.set(project.file("src/main/java"))
+fun toMinecraftCompat(version: String): String {
+    // Stable release
+    val stable = Regex("""^(\d{2})\.([1-9]\d*)(?:\.(\d+))?$""")
+
+    stable.matchEntire(version)?.let {
+        val (year, drop, _) = it.destructured
+        return "~$year.$drop"
     }
+
+    // Prerelease
+    val pre = Regex("""^(\d{2})\.([1-9]\d*)-pre[-.](\d+)$""")
+    pre.matchEntire(version)?.let {
+        return version.replace("-pre-", "-pre.")
+    }
+
+    // Release Candidate
+    val rc = Regex("""^(\d{2})\.([1-9]\d*)-rc[-.](\d+)$""")
+    rc.matchEntire(version)?.let {
+        return version.replace("-rc-", "-rc.")
+    }
+
+    // fallback
+    return version
 }
 
 tasks {
     processResources {
-        val buildNumber = project.findProperty("build_number")?.toString() ?: ""
-        val commit = project.findProperty("commit")?.toString() ?: ""
+        val buildNumber = providers.gradleProperty("build_number").getOrElse("")
+        val commit = providers.gradleProperty("commit").getOrElse("")
 
         val propertyMap = mapOf(
             "version" to project.version,
             "build_number" to buildNumber,
             "commit" to commit,
-            "minecraft_version" to project.property("minecraft_version"),
-            "loader_version" to project.property("loader_version")
+            "jdk_version" to libs.versions.jdk.get(),
+            "minecraft_version" to toMinecraftCompat(libs.versions.minecraft.get()),
+            "loader_version" to libs.versions.fabric.loader.get()
         )
 
         inputs.properties(propertyMap)
@@ -134,53 +190,47 @@ tasks {
         }
     }
 
+    // Compile launcher with Java 8 for backwards compatibility
+    named<JavaCompile>("compileLauncherJava").configure {
+        sourceCompatibility = JavaVersion.VERSION_1_8.toString()
+        targetCompatibility = JavaVersion.VERSION_1_8.toString()
+        options.compilerArgs.add("-Xlint:-options")
+    }
+
     jar {
-        inputs.property("archivesName", project.base.archivesName.get())
+        inputs.property("archivesName", archivesBaseName)
 
         from("LICENSE") {
-            rename { "${it}_${inputs.properties["archivesName"]}" }
+            rename { "${it}_$archivesBaseName" }
         }
+
+        // Include launcher classes
+        from(launcher.output)
 
         manifest {
             attributes["Main-Class"] = "meteordevelopment.meteorclient.Main"
         }
     }
 
-    java {
-        sourceCompatibility = JavaVersion.VERSION_21
-        targetCompatibility = JavaVersion.VERSION_21
+    withType<JavaCompile>().configureEach {
+        options.compilerArgs.addAll(
+            listOf(
+                "-Xlint:deprecation",
+                "-Xlint:unchecked"
+            )
+        )
 
-        if (System.getenv("CI")?.toBoolean() == true) {
-            withSourcesJar()
-            withJavadocJar()
-        }
-    }
+        options.errorprone.enabled.set(runErrorProne)
 
-    withType<JavaCompile> {
-        options.release = 21
-        options.compilerArgs.add("-Xlint:deprecation")
-        options.compilerArgs.add("-Xlint:unchecked")
-    }
-
-    shadowJar {
-        configurations = listOf(project.configurations.shadow.get())
-
-        inputs.property("archivesName", project.base.archivesName.get())
-
-        from("LICENSE") {
-            rename { "${it}_${inputs.properties["archivesName"]}" }
-        }
-
-        dependencies {
-            exclude {
-                it.moduleGroup == "org.slf4j"
+        if (runErrorProne) {
+            options.errorprone {
+                check("NullAway", net.ltgt.gradle.errorprone.CheckSeverity.ERROR)
+                option("NullAway:AnnotatedPackages", "meteordevelopment.meteorclient")
+                option("NullAway:JSpecifyMode", "true")
+                // Event handlers are discovered reflectively by Orbit.
+                option("UnusedMethod:ExcludedAnnotations", "meteordevelopment.orbit.EventHandler")
             }
         }
-    }
-
-    remapJar {
-        dependsOn(shadowJar)
-        inputFile.set(shadowJar.get().archiveFile)
     }
 
     javadoc {
@@ -204,7 +254,7 @@ publishing {
             from(components["java"])
             artifactId = "meteor-client"
 
-            version = properties["minecraft_version"] as String + "-SNAPSHOT"
+            version = "${libs.versions.minecraft.get()}-SNAPSHOT"
         }
     }
 

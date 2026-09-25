@@ -11,7 +11,7 @@ import meteordevelopment.meteorclient.systems.hud.HudElement;
 import meteordevelopment.meteorclient.systems.hud.HudElementInfo;
 import meteordevelopment.meteorclient.systems.hud.HudRenderer;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.Mth;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
@@ -24,7 +24,7 @@ public class CompassHud extends HudElement {
 
     // General
 
-    private final Setting<CompassHud.Mode> mode = sgGeneral.add(new EnumSetting.Builder<CompassHud.Mode>()
+    private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
         .name("type")
         .description("Which type of direction information to show.")
         .defaultValue(Mode.Axis)
@@ -39,7 +39,7 @@ public class CompassHud extends HudElement {
     );
 
     private final Setting<SettingColor> colorOther = sgGeneral.add(new ColorSetting.Builder()
-        .name("color-north")
+        .name("color-other")
         .description("Color of other directions.")
         .defaultValue(new SettingColor())
         .build()
@@ -58,7 +58,7 @@ public class CompassHud extends HudElement {
         .name("custom-scale")
         .description("Apply custom scales to this hud element.")
         .defaultValue(false)
-        .onChanged(aBoolean -> calculateSize())
+        .onChanged(_ -> calculateSize())
         .build()
     );
 
@@ -79,7 +79,7 @@ public class CompassHud extends HudElement {
         .defaultValue(1)
         .min(0.5)
         .sliderRange(0.5, 3)
-        .onChanged(aDouble -> calculateSize())
+        .onChanged(_ -> calculateSize())
         .build()
     );
 
@@ -115,10 +115,10 @@ public class CompassHud extends HudElement {
         double x = this.x + (getWidth() / 2.0);
         double y = this.y + (getHeight() / 2.0);
 
-        double pitch = isInEditor() ? 120 : MathHelper.clamp(mc.player.getPitch() + 30, -90, 90);
+        double pitch = isInEditor() ? 120 : Mth.clamp(mc.player.getXRot() + 30, -90, 90);
         pitch = Math.toRadians(pitch);
 
-        double yaw = isInEditor() ? 180 : MathHelper.wrapDegrees(mc.player.getYaw());
+        double yaw = isInEditor() ? 180 : Mth.wrapDegrees(mc.player.getYRot());
         yaw = Math.toRadians(yaw);
 
         for (Direction direction : Direction.values()) {

@@ -9,8 +9,14 @@ import meteordevelopment.meteorclient.gui.renderer.GuiRenderer;
 import meteordevelopment.meteorclient.gui.utils.Cell;
 import meteordevelopment.meteorclient.gui.widgets.WRoot;
 import meteordevelopment.meteorclient.gui.widgets.containers.WVerticalList;
+import meteordevelopment.meteorclient.gui.widgets.containers.WView;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WPressable;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.input.CharacterEvent;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.util.Mth;
+
+import static meteordevelopment.meteorclient.utils.Utils.getWindowHeight;
 
 public abstract class WDropdown<T> extends WPressable {
     public Runnable action;
@@ -81,6 +87,8 @@ public abstract class WDropdown<T> extends WPressable {
     @Override
     protected void onPressed(int button) {
         expanded = !expanded;
+        root.setFocused(expanded);
+        setFocused(expanded);
     }
 
     public T get() {
@@ -103,11 +111,17 @@ public abstract class WDropdown<T> extends WPressable {
         boolean render = super.render(renderer, mouseX, mouseY, delta);
 
         animProgress += (expanded ? 1 : -1) * delta * 14;
-        animProgress = MathHelper.clamp(animProgress, 0, 1);
+        animProgress = Mth.clamp(animProgress, 0, 1);
 
-        if (!render && animProgress > 0) {
+        WView view = getView();
+        boolean rootInView = view == null || view.isWidgetInView(this);
+
+        if (!render && animProgress > 0 && rootInView) {
+            double dropdownY = y + height;
+            double scissorHeight = Math.min(root.height * animProgress, getWindowHeight() - dropdownY);
+
             renderer.absolutePost(() -> {
-                renderer.scissorStart(x, y + height, width, root.height * animProgress);
+                renderer.scissorStart(x, dropdownY, width, scissorHeight);
                 root.render(renderer, mouseX, mouseY, delta);
                 renderer.scissorEnd();
             });
@@ -121,20 +135,21 @@ public abstract class WDropdown<T> extends WPressable {
     // Events
 
     @Override
-    public boolean onMouseClicked(double mouseX, double mouseY, int button, boolean used) {
+    public boolean onMouseClicked(MouseButtonEvent click, boolean doubled) {
+        boolean used = false;
         if (!mouseOver && !root.mouseOver) expanded = false;
 
-        if (super.onMouseClicked(mouseX, mouseY, button, used)) used = true;
-        if (expanded && root.mouseClicked(mouseX, mouseY, button, used)) used = true;
+        if (super.onMouseClicked(click, doubled)) used = true;
+        if (expanded && root.mouseClicked(click, doubled)) used = true;
 
         return used;
     }
 
     @Override
-    public boolean onMouseReleased(double mouseX, double mouseY, int button) {
-        if (super.onMouseReleased(mouseX, mouseY, button)) return true;
+    public boolean onMouseReleased(MouseButtonEvent click) {
+        if (super.onMouseReleased(click)) return true;
 
-        return expanded && root.mouseReleased(mouseX, mouseY, button);
+        return expanded && root.mouseReleased(click);
     }
 
     @Override
@@ -156,31 +171,32 @@ public abstract class WDropdown<T> extends WPressable {
     }
 
     @Override
-    public boolean onKeyPressed(int key, int mods) {
-        if (super.onKeyPressed(key, mods)) return true;
+    public boolean onKeyPressed(KeyEvent input) {
+        if (super.onKeyPressed(input)) return true;
 
-        return expanded && root.keyPressed(key, mods);
+        return expanded && root.keyPressed(input);
     }
 
     @Override
-    public boolean onKeyRepeated(int key, int mods) {
-        if (super.onKeyRepeated(key, mods)) return true;
+    public boolean onKeyRepeated(KeyEvent input) {
+        if (super.onKeyRepeated(input)) return true;
 
-        return expanded && root.keyRepeated(key, mods);
+        return expanded && root.keyRepeated(input);
     }
 
     @Override
-    public boolean onCharTyped(char c) {
-        if (super.onCharTyped(c)) return true;
+    public boolean onCharTyped(CharacterEvent input) {
+        if (super.onCharTyped(input)) return true;
 
-        return expanded && root.charTyped(c);
+        return expanded && root.charTyped(input);
     }
 
     // Widgets
 
     protected abstract static class WDropdownRoot extends WVerticalList implements WRoot {
         @Override
-        public void invalidate() {}
+        public void invalidate() {
+        }
     }
 
     protected abstract class WDropdownValue extends WPressable {

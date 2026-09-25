@@ -17,10 +17,10 @@ import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.ShapeContext;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.phys.shapes.CollisionContext;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -126,7 +126,7 @@ public class SelfTrap extends Module {
     private boolean placed;
     private int delay;
 
-    public SelfTrap(){
+    public SelfTrap() {
         super(Categories.Combat, "self-trap", "Places blocks above your head.");
     }
 
@@ -165,8 +165,7 @@ public class SelfTrap extends Module {
                 }
 
                 delay = 0;
-            }
-            else delay++;
+            } else delay++;
             return;
         }
     }
@@ -174,37 +173,39 @@ public class SelfTrap extends Module {
     @EventHandler
     private void onRender(Render3DEvent event) {
         if (!render.get() || placePositions.isEmpty()) return;
-        for (BlockPos pos : placePositions) event.renderer.box(pos, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+        for (BlockPos pos : placePositions)
+            event.renderer.box(pos, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
     }
 
     private void findPlacePos(Block block) {
         placePositions.clear();
-        BlockPos pos = mc.player.getBlockPos();
+        BlockPos pos = mc.player.blockPosition();
 
         switch (topPlacement.get()) {
             case Full -> {
-                add(pos.add(0, 2, 0), block);
-                add(pos.add(1, 1, 0), block);
-                add(pos.add(-1, 1, 0), block);
-                add(pos.add(0, 1, 1), block);
-                add(pos.add(0, 1, -1), block);
+                add(pos.offset(0, 2, 0), block);
+                add(pos.offset(1, 1, 0), block);
+                add(pos.offset(-1, 1, 0), block);
+                add(pos.offset(0, 1, 1), block);
+                add(pos.offset(0, 1, -1), block);
             }
-            case Top -> add(pos.add(0, 2, 0), block);
+            case Top -> add(pos.offset(0, 2, 0), block);
             case AntiFacePlace -> {
-                add(pos.add(1, 1, 0), block);
-                add(pos.add(-1, 1, 0), block);
-                add(pos.add(0, 1, 1), block);
-                add(pos.add(0, 1, -1), block);
+                add(pos.offset(1, 1, 0), block);
+                add(pos.offset(-1, 1, 0), block);
+                add(pos.offset(0, 1, 1), block);
+                add(pos.offset(0, 1, -1), block);
             }
         }
 
-        if (bottomPlacement.get() == BottomMode.Single) add(pos.add(0, -1, 0), block);
+        if (bottomPlacement.get() == BottomMode.Single) add(pos.offset(0, -1, 0), block);
     }
 
 
     private void add(BlockPos blockPos, Block block) {
         if (!placePositions.contains(blockPos) &&
-            mc.world.getBlockState(blockPos).isReplaceable() &&
-            mc.world.canPlace(block.getDefaultState(), blockPos, ShapeContext.absent())) placePositions.add(blockPos);
+            mc.level.getBlockState(blockPos).canBeReplaced() &&
+            mc.level.isUnobstructed(block.defaultBlockState(), blockPos, CollisionContext.empty()))
+            placePositions.add(blockPos);
     }
 }

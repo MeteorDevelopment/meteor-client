@@ -6,16 +6,16 @@
 package meteordevelopment.meteorclient.systems.macros;
 
 import meteordevelopment.meteorclient.MeteorClient;
-import meteordevelopment.meteorclient.events.meteor.KeyEvent;
-import meteordevelopment.meteorclient.events.meteor.MouseButtonEvent;
+import meteordevelopment.meteorclient.events.meteor.KeyInputEvent;
+import meteordevelopment.meteorclient.events.meteor.MouseClickEvent;
 import meteordevelopment.meteorclient.systems.System;
 import meteordevelopment.meteorclient.systems.Systems;
 import meteordevelopment.meteorclient.utils.misc.NbtUtils;
 import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
-import net.minecraft.nbt.NbtCompound;
-import org.jetbrains.annotations.NotNull;
+import net.minecraft.nbt.CompoundTag;
+import org.jspecify.annotations.NonNull;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -58,20 +58,20 @@ public class Macros extends System<Macros> implements Iterable<Macro> {
     }
 
     @EventHandler(priority = EventPriority.HIGH)
-    private void onKey(KeyEvent event) {
+    private void onKey(KeyInputEvent event) {
         if (event.action == KeyAction.Release) return;
 
         for (Macro macro : macros) {
-            if (macro.onAction(true, event.key, event.modifiers)) return;
+            if (macro.onAction(true, event.key(), event.modifiers())) return;
         }
     }
 
     @EventHandler(priority = EventPriority.HIGH)
-    private void onButton(MouseButtonEvent event) {
+    private void onMouse(MouseClickEvent event) {
         if (event.action == KeyAction.Release) return;
 
         for (Macro macro : macros) {
-            if (macro.onAction(false, event.button, 0)) return;
+            if (macro.onAction(false, event.button(), 0)) return;
         }
     }
 
@@ -80,19 +80,19 @@ public class Macros extends System<Macros> implements Iterable<Macro> {
     }
 
     @Override
-    public @NotNull Iterator<Macro> iterator() {
+    public @NonNull Iterator<Macro> iterator() {
         return macros.iterator();
     }
 
     @Override
-    public NbtCompound toTag() {
-        NbtCompound tag = new NbtCompound();
+    public CompoundTag toTag() {
+        CompoundTag tag = new CompoundTag();
         tag.put("macros", NbtUtils.listToTag(macros));
         return tag;
     }
 
     @Override
-    public Macros fromTag(NbtCompound tag) {
+    public Macros fromTag(CompoundTag tag) {
         for (Macro macro : macros) MeteorClient.EVENT_BUS.unsubscribe(macro);
 
         macros = NbtUtils.listFromTag(tag.getListOrEmpty("macros"), Macro::new);

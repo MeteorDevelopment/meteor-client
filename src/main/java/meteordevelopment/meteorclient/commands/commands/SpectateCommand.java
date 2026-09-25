@@ -9,10 +9,12 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.commands.Command;
 import meteordevelopment.meteorclient.commands.arguments.PlayerArgumentType;
-import meteordevelopment.meteorclient.events.meteor.KeyEvent;
+import meteordevelopment.meteorclient.events.meteor.KeyInputEvent;
+import meteordevelopment.meteorclient.events.meteor.MouseClickEvent;
+import meteordevelopment.meteorclient.utils.misc.input.Input;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.command.CommandSource;
-import net.minecraft.text.Text;
+import net.minecraft.client.multiplayer.ClientSuggestionProvider;
+import net.minecraft.network.chat.Component;
 
 public class SpectateCommand extends Command {
 
@@ -23,15 +25,15 @@ public class SpectateCommand extends Command {
     }
 
     @Override
-    public void build(LiteralArgumentBuilder<CommandSource> builder) {
-        builder.then(literal("reset").executes(context -> {
+    public void build(LiteralArgumentBuilder<ClientSuggestionProvider> builder) {
+        builder.then(literal("reset").executes(_ -> {
             mc.setCameraEntity(mc.player);
             return SINGLE_SUCCESS;
         }));
 
         builder.then(argument("player", PlayerArgumentType.create()).executes(context -> {
             mc.setCameraEntity(PlayerArgumentType.get(context));
-            mc.player.sendMessage(Text.literal("Sneak to un-spectate."), true);
+            mc.player.sendSystemMessage(Component.literal("Sneak to un-spectate."));
             MeteorClient.EVENT_BUS.subscribe(shiftListener);
             return SINGLE_SUCCESS;
         }));
@@ -39,8 +41,17 @@ public class SpectateCommand extends Command {
 
     private static class StaticListener {
         @EventHandler
-        private void onKey(KeyEvent event) {
-            if (mc.options.sneakKey.matchesKey(event.key, 0) || mc.options.sneakKey.matchesMouse(event.key)) {
+        private void onKey(KeyInputEvent event) {
+            if (Input.isPressed(mc.options.keyShift)) {
+                mc.setCameraEntity(mc.player);
+                event.cancel();
+                MeteorClient.EVENT_BUS.unsubscribe(this);
+            }
+        }
+
+        @EventHandler
+        private void onMouse(MouseClickEvent event) {
+            if (Input.isPressed(mc.options.keyShift)) {
                 mc.setCameraEntity(mc.player);
                 event.cancel();
                 MeteorClient.EVENT_BUS.unsubscribe(this);

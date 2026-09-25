@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.gui.renderer;
 
+import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.gui.utils.Cell;
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.gui.widgets.containers.WContainer;
@@ -12,7 +13,8 @@ import meteordevelopment.meteorclient.renderer.MeshBuilder;
 import meteordevelopment.meteorclient.renderer.MeshRenderer;
 import meteordevelopment.meteorclient.renderer.MeteorRenderPipelines;
 import meteordevelopment.meteorclient.utils.render.color.Color;
-import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.input.MouseButtonEvent;
 
 public class GuiDebugRenderer {
     private static final Color CELL_COLOR = new Color(25, 225, 25);
@@ -28,17 +30,31 @@ public class GuiDebugRenderer {
         mesh.end();
 
         MeshRenderer.begin()
-            .attachments(MinecraftClient.getInstance().getFramebuffer())
+            .attachments(Minecraft.getInstance().gameRenderer.mainRenderTarget())
             .pipeline(MeteorRenderPipelines.WORLD_COLORED_LINES)
             .mesh(mesh)
             .end();
     }
 
+    public void mouseReleased(WWidget widget, MouseButtonEvent click, int i) {
+        if (widget == null) return;
+
+        MeteorClient.LOG.info("{} {}", widget.getClass(), i);
+
+        if (widget instanceof WContainer container) {
+            for (Cell<?> cell : container.cells) {
+                if (cell.widget().isOver(click.x(), click.y())) {
+                    mouseReleased(cell.widget(), click, i + 1);
+                }
+            }
+        }
+    }
+
     private void renderWidget(WWidget widget) {
         lineBox(widget.x, widget.y, widget.width, widget.height, WIDGET_COLOR);
 
-        if (widget instanceof WContainer) {
-            for (Cell<?> cell : ((WContainer) widget).cells) {
+        if (widget instanceof WContainer container) {
+            for (Cell<?> cell : container.cells) {
                 lineBox(cell.x, cell.y, cell.width, cell.height, CELL_COLOR);
                 renderWidget(cell.widget());
             }

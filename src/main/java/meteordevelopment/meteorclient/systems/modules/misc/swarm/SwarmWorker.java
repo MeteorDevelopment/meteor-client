@@ -8,7 +8,7 @@ package meteordevelopment.meteorclient.systems.modules.misc.swarm;
 import meteordevelopment.meteorclient.commands.Commands;
 import meteordevelopment.meteorclient.pathing.PathManagers;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
-import net.minecraft.block.Block;
+import net.minecraft.world.level.block.Block;
 
 import java.io.DataInputStream;
 import java.io.IOException;

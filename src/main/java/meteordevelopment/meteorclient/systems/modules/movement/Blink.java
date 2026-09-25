@@ -5,6 +5,8 @@
 
 package meteordevelopment.meteorclient.systems.modules.movement;
 
+import meteordevelopment.meteorclient.events.game.GameJoinedEvent;
+import meteordevelopment.meteorclient.events.game.GameLeftEvent;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
@@ -14,8 +16,8 @@ import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.entity.fakeplayer.FakePlayerEntity;
 import meteordevelopment.meteorclient.utils.misc.Keybind;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
+import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3d;
 
 import java.util.ArrayList;
@@ -47,12 +49,12 @@ public class Blink extends Module {
         .defaultValue(Keybind.none())
         .action(() -> {
             cancelled = true;
-            if (isActive()) toggle();
+            disable();
         })
         .build()
     );
 
-    private final List<PlayerMoveC2SPacket> packets = new ArrayList<>();
+    private final List<ServerboundMovePlayerPacket> packets = new ArrayList<>();
     private FakePlayerEntity model;
     private final Vector3d start = new Vector3d();
 
@@ -61,28 +63,34 @@ public class Blink extends Module {
 
     public Blink() {
         super(Categories.Movement, "blink", "Allows you to essentially teleport while suspending motion updates.");
+
+        runInMainMenu = true;
     }
 
     @Override
     public void onActivate() {
+        if (!Utils.canUpdate()) return;
+
         if (renderOriginal.get()) {
-            model = new FakePlayerEntity(mc.player, mc.player.getGameProfile().getName(), 20, true);
+            model = new FakePlayerEntity(mc.player, mc.player.getGameProfile().name(), 20, true);
             model.doNotPush = true;
             model.hideWhenInsideCamera = true;
             model.noHit = true;
             model.spawn();
         }
 
-        Utils.set(start, mc.player.getPos());
+        Utils.set(start, mc.player.position());
     }
 
     @Override
     public void onDeactivate() {
+        if (!Utils.canUpdate()) return;
+
         dumpPackets(!cancelled);
 
         if (cancelled) {
             mc.player.setPos(start.x, start.y, start.z);
-            mc.player.setVelocity(Vec3d.ZERO);
+            mc.player.setDeltaMovement(Vec3.ZERO);
         }
 
         cancelled = false;
@@ -90,6 +98,8 @@ public class Blink extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
+        if (!Utils.canUpdate()) return;
+
         timer++;
 
         if (delay.get() != 0 && delay.get() <= timer) {
@@ -100,24 +110,37 @@ public class Blink extends Module {
 
     @EventHandler
     private void onSendPacket(PacketEvent.Send event) {
+        if (!Utils.canUpdate()) return;
+
         if (sending) return;
-        if (!(event.packet instanceof PlayerMoveC2SPacket p)) return;
+        if (!(event.packet instanceof ServerboundMovePlayerPacket p)) return;
         event.cancel();
 
-        PlayerMoveC2SPacket prev = packets.isEmpty() ? null : packets.getLast();
+        ServerboundMovePlayerPacket prev = packets.isEmpty() ? null : packets.getLast();
 
         if (prev != null &&
-                p.isOnGround() == prev.isOnGround() &&
-                p.getYaw(-1) == prev.getYaw(-1) &&
-                p.getPitch(-1) == prev.getPitch(-1) &&
-                p.getX(-1) == prev.getX(-1) &&
-                p.getY(-1) == prev.getY(-1) &&
-                p.getZ(-1) == prev.getZ(-1)
+            p.isOnGround() == prev.isOnGround() &&
+            p.getYRot(-1) == prev.getYRot(-1) &&
+            p.getXRot(-1) == prev.getXRot(-1) &&
+            p.getX(-1) == prev.getX(-1) &&
+            p.getY(-1) == prev.getY(-1) &&
+            p.getZ(-1) == prev.getZ(-1)
         ) return;
 
         synchronized (packets) {
             packets.add(p);
         }
+    }
+
+    @EventHandler
+    private void onJoinGame(GameJoinedEvent event) {
+        warning("Blink is currently enabled; you won't be able to interact with anything properly until you disable it!");
+    }
+
+    @EventHandler
+    private void onLeaveGame(GameLeftEvent event) {
+        dumpPackets(false);
+        cancelled = false;
     }
 
     @Override
@@ -128,7 +151,7 @@ public class Blink extends Module {
     private void dumpPackets(boolean send) {
         sending = true;
         synchronized (packets) {
-            if (send) packets.forEach(mc.player.networkHandler::sendPacket);
+            if (send) packets.forEach(mc.player.connection::send);
             packets.clear();
         }
         sending = false;

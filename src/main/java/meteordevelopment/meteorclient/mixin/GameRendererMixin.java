@@ -6,62 +6,57 @@
 package meteordevelopment.meteorclient.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
-import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import meteordevelopment.meteorclient.MeteorClient;
-import meteordevelopment.meteorclient.events.render.GetFovEvent;
+import meteordevelopment.meteorclient.MixinPlugin;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.events.render.RenderAfterWorldEvent;
-import meteordevelopment.meteorclient.mixininterface.IVec3d;
 import meteordevelopment.meteorclient.renderer.MeteorRenderPipelines;
 import meteordevelopment.meteorclient.renderer.Renderer3D;
 import meteordevelopment.meteorclient.systems.modules.Modules;
-import meteordevelopment.meteorclient.systems.modules.player.LiquidInteract;
-import meteordevelopment.meteorclient.systems.modules.player.NoMiningTrace;
 import meteordevelopment.meteorclient.systems.modules.render.Freecam;
 import meteordevelopment.meteorclient.systems.modules.render.NoRender;
 import meteordevelopment.meteorclient.systems.modules.render.Zoom;
-import meteordevelopment.meteorclient.systems.modules.world.HighwayBuilder;
 import meteordevelopment.meteorclient.utils.Utils;
-import meteordevelopment.meteorclient.utils.entity.fakeplayer.FakePlayerEntity;
+import meteordevelopment.meteorclient.utils.render.CustomBannerGuiElementRenderer;
 import meteordevelopment.meteorclient.utils.render.NametagUtils;
 import meteordevelopment.meteorclient.utils.render.RenderUtils;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.Camera;
-import net.minecraft.client.render.GameRenderer;
-import net.minecraft.client.render.RenderTickCounter;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.entity.Entity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.util.hit.EntityHitResult;
-import net.minecraft.util.hit.HitResult;
-import net.minecraft.util.profiler.Profilers;
+import net.minecraft.client.Camera;
+import net.minecraft.client.DeltaTracker;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.render.pip.PictureInPictureRenderer;
+import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.RenderBuffers;
+import net.minecraft.client.renderer.state.GameRenderState;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
+import net.minecraft.util.profiling.Profiler;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import org.joml.Matrix4f;
+import org.joml.Matrix4fc;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Mixin(GameRenderer.class)
 public abstract class GameRendererMixin {
     @Shadow
     @Final
-    private MinecraftClient client;
-
-    @Shadow
-    public abstract void updateCrosshairTarget(float tickDelta);
-
-    @Shadow
-    public abstract void reset();
+    private Minecraft minecraft;
 
     @Shadow
     @Final
-    private Camera camera;
+    private Camera mainCamera;
 
     @Unique
     private Renderer3D renderer;
@@ -70,156 +65,100 @@ public abstract class GameRendererMixin {
     private Renderer3D depthRenderer;
 
     @Unique
-    private final MatrixStack matrices = new MatrixStack();
+    private final PoseStack matrices = new PoseStack();
 
     @Shadow
-    protected abstract void bobView(MatrixStack matrices, float tickDelta);
+    protected abstract void bobView(final CameraRenderState cameraState, final PoseStack poseStack);
 
     @Shadow
-    protected abstract void tiltViewWhenHurt(MatrixStack matrices, float tickDelta);
+    protected abstract void bobHurt(final CameraRenderState cameraState, final PoseStack poseStack);
 
-    @Inject(method = "renderWorld", at = @At(value = "INVOKE_STRING", target = "Lnet/minecraft/util/profiler/Profiler;swap(Ljava/lang/String;)V", args = {"ldc=hand"}))
-    private void onRenderWorld(RenderTickCounter tickCounter, CallbackInfo ci, @Local(ordinal = 0) Matrix4f projection, @Local(ordinal = 2) Matrix4f view, @Local(ordinal = 1) float tickDelta, @Local MatrixStack matrixStack) {
+    @Shadow
+    @Final
+    private RenderBuffers renderBuffers;
+
+    @Shadow
+    @Final
+    private GameRenderState gameRenderState;
+
+    @ModifyArg(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/render/GuiRenderer;<init>(Lnet/minecraft/client/renderer/state/gui/GuiRenderState;Lnet/minecraft/client/renderer/feature/FeatureRenderDispatcher;Ljava/util/List;)V"))
+    private List<PictureInPictureRenderer<?>> meteor$addSpecialRenderers(List<PictureInPictureRenderer<?>> list) {
+        List<PictureInPictureRenderer<?>> result = new ArrayList<>(list.size() + 1);
+        result.addAll(list);
+        result.add(new CustomBannerGuiElementRenderer(minecraft.getAtlasManager()));
+        return result;
+    }
+
+    @Inject(method = "renderLevel", at = @At(value = "INVOKE_STRING", target = "Lnet/minecraft/util/profiling/ProfilerFiller;popPush(Ljava/lang/String;)V", args = "ldc=hand"))
+    private void onRenderLevel(DeltaTracker deltaTracker, CallbackInfo ci, @Local(name = "projectionMatrix") Matrix4f projectionMatrix, @Local(name = "modelViewMatrix") Matrix4fc modelViewMatrix, @Local(name = "worldPartialTicks") float worldPartialTicks, @Local(name = "bobStack") PoseStack bobStack) {
         if (!Utils.canUpdate()) return;
 
-        Profilers.get().push(MeteorClient.MOD_ID + "_render");
+        Profiler.get().push(MeteorClient.MOD_ID + "_render");
 
         // Create renderer and event
 
-        if (renderer == null) renderer = new Renderer3D(MeteorRenderPipelines.WORLD_COLORED_LINES, MeteorRenderPipelines.WORLD_COLORED);
-        if (depthRenderer == null) depthRenderer = new Renderer3D(MeteorRenderPipelines.WORLD_COLORED_LINES_DEPTH, MeteorRenderPipelines.WORLD_COLORED_DEPTH);
-        Render3DEvent event = Render3DEvent.get(matrixStack, renderer, depthRenderer, tickDelta, camera.getPos().x, camera.getPos().y, camera.getPos().z);
-
-        // Call utility classes
-
-        RenderUtils.updateScreenCenter(projection, view);
-        NametagUtils.onRender(view);
+        if (renderer == null)
+            renderer = new Renderer3D(MeteorRenderPipelines.WORLD_COLORED_LINES, MeteorRenderPipelines.WORLD_COLORED);
+        if (depthRenderer == null)
+            depthRenderer = new Renderer3D(MeteorRenderPipelines.WORLD_COLORED_LINES_DEPTH, MeteorRenderPipelines.WORLD_COLORED_DEPTH);
+        Render3DEvent event = Render3DEvent.get(bobStack, renderer, depthRenderer, worldPartialTicks, mainCamera.position().x, mainCamera.position().y, mainCamera.position().z);
 
         // Update model view matrix
 
-        RenderSystem.getModelViewStack().pushMatrix().mul(view);
+        RenderSystem.getModelViewStack().pushMatrix().mul(modelViewMatrix);
 
-        matrices.push();
-        tiltViewWhenHurt(matrices, camera.getLastTickProgress());
-        if (client.options.getBobView().getValue()) bobView(matrices, camera.getLastTickProgress());
-        RenderSystem.getModelViewStack().mul(matrices.peek().getPositionMatrix().invert());
-        matrices.pop();
+        matrices.pushPose();
+        bobHurt(this.gameRenderState.levelRenderState.cameraRenderState, matrices);
+        if (minecraft.options.bobView().get()) {
+            bobView(this.gameRenderState.levelRenderState.cameraRenderState, matrices);
+        }
+
+        Matrix4f inverseBob = new Matrix4f(matrices.last().pose()).invert();
+        RenderSystem.getModelViewStack().mul(inverseBob);
+        matrices.popPose();
+
+        // Call utility classes (apply bob correction when Iris shaders are active)
+
+        Matrix4fc correctedPosition = MixinPlugin.isIrisPresent && RenderUtils.isShaderPackInUse() ? new Matrix4f(modelViewMatrix).mul(inverseBob) : modelViewMatrix;
+        RenderUtils.updateScreenCenter(projectionMatrix, correctedPosition);
+        NametagUtils.onRender(modelViewMatrix);
 
         // Render
 
         renderer.begin();
         depthRenderer.begin();
         MeteorClient.EVENT_BUS.post(event);
-        renderer.render(matrixStack);
-        depthRenderer.render(matrixStack);
+        renderer.render(bobStack);
+        depthRenderer.render(bobStack);
 
         // Revert model view matrix
 
         RenderSystem.getModelViewStack().popMatrix();
 
-        Profilers.get().pop();
+        Profiler.get().pop();
     }
 
-    @Inject(method = "renderWorld", at = @At("TAIL"))
-    private void onRenderWorldTail(CallbackInfo info) {
+    @Inject(method = "renderLevel", at = @At("TAIL"))
+    private void onRenderLevelTail(CallbackInfo ci) {
         MeteorClient.EVENT_BUS.post(RenderAfterWorldEvent.get());
     }
 
-    @ModifyReturnValue(method = "findCrosshairTarget", at = @At("RETURN"))
-    private HitResult onUpdateTargetedEntity(HitResult original, @Local HitResult hitResult) {
-        if (Modules.get().get(NoMiningTrace.class).canWork(original instanceof EntityHitResult ehr ? ehr.getEntity() : null) && hitResult.getType() == HitResult.Type.BLOCK) {
-            return hitResult;
-        }
-        else if (original instanceof EntityHitResult entityHitResult && entityHitResult.getEntity() instanceof FakePlayerEntity fakePlayer && fakePlayer.noHit) {
-            return hitResult;
-        }
-
-        return original;
-    }
-
-    @ModifyExpressionValue(method = "findCrosshairTarget", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;raycast(DFZ)Lnet/minecraft/util/hit/HitResult;"))
-    private HitResult modifyRaycastResult(HitResult original, Entity entity, double blockInteractionRange, double entityInteractionRange, float tickProgress, @Local(ordinal = 0, argsOnly = true) double maxDistance) {
-        if (!Modules.get().isActive(LiquidInteract.class)) return original;
-        if (original.getType() != HitResult.Type.MISS) return original;
-
-        return entity.raycast(maxDistance, tickProgress, true);
-    }
-
-    @Inject(method = "showFloatingItem", at = @At("HEAD"), cancellable = true)
-    private void onShowFloatingItem(ItemStack floatingItem, CallbackInfo info) {
-        if (floatingItem.getItem() == Items.TOTEM_OF_UNDYING && Modules.get().get(NoRender.class).noTotemAnimation()) {
-            info.cancel();
+    @Inject(method = "displayItemActivation", at = @At("HEAD"), cancellable = true)
+    private void onDisplayItemActivation(ItemStack itemStack, CallbackInfo ci) {
+        if (itemStack.getItem() == Items.TOTEM_OF_UNDYING && Modules.get().get(NoRender.class).noTotemAnimation()) {
+            ci.cancel();
         }
     }
 
-    @ModifyExpressionValue(method = "renderWorld", at = @At(value = "INVOKE", target = "Ljava/lang/Math;max(FF)F", ordinal = 0))
+    @ModifyExpressionValue(method = "renderLevel", at = @At(value = "INVOKE", target = "Ljava/lang/Math;max(FF)F", ordinal = 0))
     private float applyCameraTransformationsMathHelperLerpProxy(float original) {
         return Modules.get().get(NoRender.class).noNausea() ? 0 : original;
     }
 
-    @ModifyReturnValue(method = "getFov", at = @At("RETURN"))
-    private float modifyFov(float original) {
-        return MeteorClient.EVENT_BUS.post(GetFovEvent.get(original)).fov;
-    }
-
-    // Freecam
-
-    @Unique
-    private boolean freecamSet = false;
-
-    @Inject(method = "updateCrosshairTarget", at = @At("HEAD"), cancellable = true)
-    private void updateTargetedEntityInvoke(float tickDelta, CallbackInfo info) {
-        Freecam freecam = Modules.get().get(Freecam.class);
-        boolean highwayBuilder = Modules.get().isActive(HighwayBuilder.class);
-
-        if ((freecam.isActive() || highwayBuilder) && client.getCameraEntity() != null && !freecamSet) {
-            info.cancel();
-            Entity cameraE = client.getCameraEntity();
-
-            double x = cameraE.getX();
-            double y = cameraE.getY();
-            double z = cameraE.getZ();
-            double lastX = cameraE.lastX;
-            double lastY = cameraE.lastY;
-            double lastZ = cameraE.lastZ;
-            float yaw = cameraE.getYaw();
-            float pitch = cameraE.getPitch();
-            float lastYaw = cameraE.lastYaw;
-            float lastPitch = cameraE.lastPitch;
-
-            if (highwayBuilder) {
-                cameraE.setYaw(camera.getYaw());
-                cameraE.setPitch(camera.getPitch());
-            } else {
-                ((IVec3d) cameraE.getPos()).meteor$set(freecam.pos.x, freecam.pos.y - cameraE.getEyeHeight(cameraE.getPose()), freecam.pos.z);
-                cameraE.lastX = freecam.prevPos.x;
-                cameraE.lastY = freecam.prevPos.y - cameraE.getEyeHeight(cameraE.getPose());
-                cameraE.lastZ = freecam.prevPos.z;
-                cameraE.setYaw(freecam.yaw);
-                cameraE.setPitch(freecam.pitch);
-                cameraE.lastYaw = freecam.lastYaw;
-                cameraE.lastPitch = freecam.lastPitch;
-            }
-
-            freecamSet = true;
-            updateCrosshairTarget(tickDelta);
-            freecamSet = false;
-
-            ((IVec3d) cameraE.getPos()).meteor$set(x, y, z);
-            cameraE.lastX = lastX;
-            cameraE.lastY = lastY;
-            cameraE.lastZ = lastZ;
-            cameraE.setYaw(yaw);
-            cameraE.setPitch(pitch);
-            cameraE.lastYaw = lastYaw;
-            cameraE.lastPitch = lastPitch;
-        }
-    }
-
-    @Inject(method = "renderHand", at = @At("HEAD"), cancellable = true)
-    private void renderHand(float tickProgress, boolean sleeping, Matrix4f positionMatrix, CallbackInfo ci) {
-        if (!Modules.get().get(Freecam.class).renderHands() ||
-            !Modules.get().get(Zoom.class).renderHands())
+    @Inject(method = "renderItemInHand", at = @At("HEAD"), cancellable = true)
+    private void renderItemInHand(CameraRenderState cameraState, float deltaPartialTick, Matrix4fc modelViewMatrix, CallbackInfo ci) {
+        if (!Modules.get().get(Freecam.class).renderHands() || !Modules.get().get(Zoom.class).renderHands()) {
             ci.cancel();
+        }
     }
 }

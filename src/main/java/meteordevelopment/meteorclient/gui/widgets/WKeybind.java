@@ -71,6 +71,7 @@ public class WKeybind extends WHorizontalList {
         if (Modules.get().isBinding()) {
             Modules.get().setModuleToBind(null);
         }
+        if (action != null) action.run();
     }
 
     private void refreshLabel() {

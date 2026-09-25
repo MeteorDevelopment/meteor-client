@@ -5,14 +5,14 @@
 
 package meteordevelopment.meteorclient.mixin;
 
-import net.minecraft.client.texture.MapTextureManager;
-import net.minecraft.component.type.MapIdComponent;
-import net.minecraft.item.map.MapState;
+import net.minecraft.client.resources.MapTextureManager;
+import net.minecraft.world.level.saveddata.maps.MapId;
+import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
 @Mixin(MapTextureManager.class)
 public interface MapTextureManagerAccessor {
-    @Invoker("getMapTexture")
-    MapTextureManager.MapTexture meteor$invokeGetMapTexture(MapIdComponent id, MapState state);
+    @Invoker("getOrCreateMapInstance")
+    MapTextureManager.MapInstance meteor$invokeGetOrCreateMapInstance(MapId id, MapItemSavedData state);
 }

@@ -6,15 +6,17 @@
 package meteordevelopment.meteorclient.systems.modules.movement;
 
 import meteordevelopment.meteorclient.events.world.TickEvent;
-import meteordevelopment.meteorclient.mixininterface.IVec3d;
+import meteordevelopment.meteorclient.mixininterface.IVec3;
+import meteordevelopment.meteorclient.settings.BoolSetting;
 import meteordevelopment.meteorclient.settings.DoubleSetting;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.BedBlock;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.block.BedBlock;
 
 public class ReverseStep extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -35,19 +37,40 @@ public class ReverseStep extends Module {
         .build()
     );
 
+    private final Setting<Boolean> vehicles = sgGeneral.add(new BoolSetting.Builder()
+        .name("vehicles")
+        .description("Whether or not reverse step should affect vehicles.")
+        .defaultValue(false)
+        .build()
+    );
+
     public ReverseStep() {
         super(Categories.Movement, "reverse-step", "Allows you to fall down blocks at a greater speed.");
     }
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
-        if (!mc.player.isOnGround() || mc.player.isHoldingOntoLadder() || mc.player.isSubmergedInWater() || mc.player.isInLava() ||mc.options.jumpKey.isPressed() || mc.player.noClip || mc.player.forwardSpeed == 0 && mc.player.sidewaysSpeed == 0) return;
+        Entity vehicle = mc.player.getVehicle();
+        if (vehicle != null && vehicles.get()) {
+            if (canSnap(vehicle)) {
+                ((IVec3) vehicle.getDeltaMovement()).meteor$setY(-fallSpeed.get());
+            }
+        } else {
+            if (mc.player.isSuppressingSlidingDownLadder() || mc.player.zza == 0 && mc.player.xxa == 0) return;
+            if (!isOnBed() && canSnap(mc.player)) {
+                ((IVec3) mc.player.getDeltaMovement()).meteor$setY(-fallSpeed.get());
+            }
+        }
+    }
 
-        if (!isOnBed() && !mc.world.isSpaceEmpty(mc.player.getBoundingBox().offset(0.0, (float) -(fallDistance.get() + 0.01), 0.0))) ((IVec3d) mc.player.getVelocity()).meteor$setY(-fallSpeed.get());
+    private boolean canSnap(Entity entity) {
+        if (!entity.onGround() || entity.isUnderWater() || entity.isInLava() || mc.options.keyJump.isDown() || entity.noPhysics)
+            return false;
+        return !mc.level.noCollision(entity.getBoundingBox().move(0.0, (float) -(fallDistance.get() + 0.01), 0.0));
     }
 
     private boolean isOnBed() {
-        BlockPos.Mutable blockPos = mc.player.getBlockPos().mutableCopy();
+        BlockPos.MutableBlockPos blockPos = mc.player.blockPosition().mutable();
 
         if (check(blockPos, 0, 0)) return true;
 
@@ -65,9 +88,9 @@ public class ReverseStep extends Module {
         return xa >= 0.7 && za >= 0.7 && check(blockPos, 1, 1);
     }
 
-    private boolean check(BlockPos.Mutable blockPos, int x, int z) {
+    private boolean check(BlockPos.MutableBlockPos blockPos, int x, int z) {
         blockPos.move(x, 0, z);
-        boolean is = mc.world.getBlockState(blockPos).getBlock() instanceof BedBlock;
+        boolean is = mc.level.getBlockState(blockPos).getBlock() instanceof BedBlock;
         blockPos.move(-x, 0, -z);
 
         return is;

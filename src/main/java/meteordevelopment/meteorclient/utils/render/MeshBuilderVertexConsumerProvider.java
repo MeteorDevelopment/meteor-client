@@ -5,10 +5,12 @@
 
 package meteordevelopment.meteorclient.utils.render;
 
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import meteordevelopment.meteorclient.renderer.MeshBuilder;
 import meteordevelopment.meteorclient.utils.render.color.Color;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.VertexConsumer;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.NullMarked;
 
 public class MeshBuilderVertexConsumerProvider implements IVertexConsumerProvider {
     private final MeshBuilderVertexConsumer vertexConsumer;
@@ -18,8 +20,53 @@ public class MeshBuilderVertexConsumerProvider implements IVertexConsumerProvide
     }
 
     @Override
-    public VertexConsumer getBuffer(RenderLayer layer) {
-        return vertexConsumer;
+    public VertexConsumer getBuffer(RenderType layer) {
+        return new W(vertexConsumer); // new instance each call to fix duplicate delegates
+    }
+
+    @NullMarked
+    private record W(MeshBuilderVertexConsumer d) implements VertexConsumer {
+        public VertexConsumer addVertex(float x, float y, float z) {
+            d.addVertex(x, y, z);
+            return this;
+        }
+
+        public VertexConsumer setColor(int r, int g, int b, int a) {
+            return this;
+        }
+
+        public VertexConsumer setColor(int c) {
+            return this;
+        }
+
+        /**
+         * Set texture coordinates
+         */
+        public VertexConsumer setUv(float u, float v) {
+            return this;
+        }
+
+        /**
+         * Set overlay coordinates
+         */
+        public VertexConsumer setUv1(int u, int v) {
+            return this;
+        }
+
+        /**
+         * Set lightmap coordinates
+         */
+        public VertexConsumer setUv2(int u, int v) {
+            return this;
+        }
+
+        public VertexConsumer setNormal(float x, float y, float z) {
+            return this;
+        }
+
+        public VertexConsumer setLineWidth(float w) {
+            return this;
+        }
     }
 
     public void setColor(Color color) {
@@ -54,7 +101,7 @@ public class MeshBuilderVertexConsumerProvider implements IVertexConsumerProvide
         }
 
         @Override
-        public VertexConsumer vertex(float x, float y, float z) {
+        public @NonNull VertexConsumer addVertex(float x, float y, float z) {
             xs[i] = (double) offsetX + x;
             ys[i] = (double) offsetY + y;
             zs[i] = (double) offsetZ + z;
@@ -76,28 +123,47 @@ public class MeshBuilderVertexConsumerProvider implements IVertexConsumerProvide
         }
 
         @Override
-        public VertexConsumer color(int red, int green, int blue, int alpha) {
+        public @NonNull VertexConsumer setColor(int red, int green, int blue, int alpha) {
             return this;
         }
 
         @Override
-        public VertexConsumer texture(float u, float v) {
+        public @NonNull VertexConsumer setColor(int argb) {
+            return this;
+        }
+
+        /**
+         * Set texture coordinates
+         */
+        @Override
+        public @NonNull VertexConsumer setUv(float u, float v) {
+            return this;
+        }
+
+        /**
+         * Set overlay coordinates
+         */
+        @Override
+        public @NonNull VertexConsumer setUv1(int u, int v) {
+            return this;
+        }
+
+        /**
+         * Set lightmap coordinates
+         */
+        @Override
+        public @NonNull VertexConsumer setUv2(int u, int v) {
             return this;
         }
 
         @Override
-        public VertexConsumer overlay(int u, int v) {
+        public @NonNull VertexConsumer setNormal(float x, float y, float z) {
             return this;
         }
 
         @Override
-        public VertexConsumer light(int u, int v) {
+        public @NonNull VertexConsumer setLineWidth(float width) {
             return this;
-        }
-
-        @Override
-        public VertexConsumer normal(float x, float y, float z) {
-            return null;
         }
 
         public void fixedColor(int red, int green, int blue, int alpha) {

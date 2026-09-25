@@ -8,11 +8,11 @@ package meteordevelopment.meteorclient.renderer.text;
 import meteordevelopment.meteorclient.renderer.MeshBuilder;
 import meteordevelopment.meteorclient.renderer.MeshRenderer;
 import meteordevelopment.meteorclient.renderer.MeteorRenderPipelines;
-import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
-import net.minecraft.client.MinecraftClient;
-import org.lwjgl.BufferUtils;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 
 public class CustomTextRenderer implements TextRenderer {
@@ -30,11 +30,10 @@ public class CustomTextRenderer implements TextRenderer {
     private double fontScale = 1;
     private double scale = 1;
 
-    public CustomTextRenderer(FontFace fontFace) {
+    public CustomTextRenderer(FontFace fontFace) throws IOException {
         this.fontFace = fontFace;
 
-        byte[] bytes = Utils.readBytes(fontFace.toStream());
-        ByteBuffer buffer = BufferUtils.createByteBuffer(bytes.length).put(bytes).flip();
+        ByteBuffer buffer = fontFace.readToDirectByteBuffer();
 
         fonts = new Font[5];
         for (int i = 0; i < fonts.length; i++) {
@@ -48,15 +47,14 @@ public class CustomTextRenderer implements TextRenderer {
     }
 
     @Override
-    public void begin(double scale, boolean scaleOnly, boolean big) {
+    public void begin(GuiGraphicsExtractor graphics, double scale, boolean scaleOnly, boolean big) {
         if (building) throw new RuntimeException("CustomTextRenderer.begin() called twice");
 
         if (!scaleOnly) mesh.begin();
 
         if (big) {
             this.font = fonts[fonts.length - 1];
-        }
-        else {
+        } else {
             double scaleA = Math.floor(scale * 10) / 10;
 
             int scaleI;
@@ -92,8 +90,7 @@ public class CustomTextRenderer implements TextRenderer {
 
     @Override
     public double render(String text, double x, double y, Color color, boolean shadow) {
-        boolean wasBuilding = building;
-        if (!wasBuilding) begin();
+        if (!building) throw new RuntimeException("VanillaTextRenderer.render() called without calling begin()");
 
         double width;
         if (shadow) {
@@ -104,12 +101,10 @@ public class CustomTextRenderer implements TextRenderer {
             font.render(mesh, text, x, y, color, scale / 1.5);
 
             SHADOW_COLOR.a = preShadowA;
-        }
-        else {
+        } else {
             width = font.render(mesh, text, x, y, color, scale / 1.5);
         }
 
-        if (!wasBuilding) end();
         return width;
     }
 
@@ -126,10 +121,10 @@ public class CustomTextRenderer implements TextRenderer {
             mesh.end();
 
             MeshRenderer.begin()
-                .attachments(MinecraftClient.getInstance().getFramebuffer())
+                .attachments(Minecraft.getInstance().gameRenderer.mainRenderTarget())
                 .pipeline(MeteorRenderPipelines.UI_TEXT)
                 .mesh(mesh)
-                .sampler("u_Texture", font.texture.getGlTextureView())
+                .sampler("u_Texture", font.texture.getTextureView(), font.texture.getSampler())
                 .end();
         }
 

@@ -5,11 +5,11 @@
 
 package meteordevelopment.meteorclient.gui.renderer.packer;
 
+import com.mojang.blaze3d.GpuFormat;
 import com.mojang.blaze3d.platform.TextureUtil;
 import com.mojang.blaze3d.textures.FilterMode;
-import com.mojang.blaze3d.textures.TextureFormat;
 import meteordevelopment.meteorclient.renderer.Texture;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.Identifier;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.stb.STBImage;
 import org.lwjgl.stb.STBImageResize;
@@ -33,7 +33,7 @@ public class TexturePacker {
 
     public GuiTexture add(Identifier id) {
         try {
-            InputStream in = mc.getResourceManager().getResource(id).get().getInputStream();
+            InputStream in = mc.getResourceManager().getResource(id).get().open();
             GuiTexture texture = new GuiTexture();
 
             try (MemoryStack stack = MemoryStack.stackPush()) {
@@ -80,7 +80,7 @@ public class TexturePacker {
         int height = (int) (srcHeight * scaleFactor);
 
         ByteBuffer imageBuffer = BufferUtils.createByteBuffer(width * height * 4);
-        STBImageResize.stbir_resize_uint8(srcImageBuffer, srcWidth, srcHeight, 0, imageBuffer, width, height, 0, 4);
+        STBImageResize.stbir_resize_uint8_linear(srcImageBuffer, srcWidth, srcHeight, 0, imageBuffer, width, height, 0, 4);
 
         TextureRegion region = new TextureRegion(width, height);
         texture.add(region);
@@ -142,7 +142,7 @@ public class TexturePacker {
 
         ((Buffer) buffer).rewind();
 
-        Texture texture = new Texture(width, height, TextureFormat.RGBA8, FilterMode.LINEAR, FilterMode.LINEAR);
+        Texture texture = new Texture(width, height, GpuFormat.RGBA8_UNORM, FilterMode.LINEAR, FilterMode.LINEAR);
         texture.upload(buffer);
 
         return texture;

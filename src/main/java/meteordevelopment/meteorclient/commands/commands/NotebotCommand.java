@@ -9,6 +9,8 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.commands.Command;
 import meteordevelopment.meteorclient.commands.arguments.NotebotSongArgumentType;
@@ -18,64 +20,63 @@ import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.misc.Notebot;
 import meteordevelopment.meteorclient.utils.notebot.song.Note;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.enums.NoteBlockInstrument;
-import net.minecraft.command.CommandSource;
-import net.minecraft.network.packet.s2c.play.PlaySoundS2CPacket;
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.text.Text;
+import net.minecraft.client.multiplayer.ClientSuggestionProvider;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.game.ClientboundSoundPacket;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.Util;
+import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class NotebotCommand extends Command {
-    private static final SimpleCommandExceptionType INVALID_SONG = new SimpleCommandExceptionType(Text.literal("Invalid song."));
-    private static final DynamicCommandExceptionType INVALID_PATH = new DynamicCommandExceptionType(object -> Text.literal("'%s' is not a valid path.".formatted(object)));
+    private static final SimpleCommandExceptionType INVALID_SONG = new SimpleCommandExceptionType(Component.literal("Invalid song."));
+    private static final DynamicCommandExceptionType INVALID_PATH = new DynamicCommandExceptionType(object -> Component.literal("'%s' is not a valid path.".formatted(object)));
 
-    int ticks = -1;
-    private final Map<Integer, List<Note>> song = new HashMap<>(); // tick -> notes
+    private int ticks = -1;
+    private final Int2ObjectMap<List<Note>> song = new Int2ObjectOpenHashMap<>(); // tick -> notes
 
     public NotebotCommand() {
         super("notebot", "Allows you load notebot files");
     }
 
     @Override
-    public void build(LiteralArgumentBuilder<CommandSource> builder) {
-        builder.then(literal("help").executes(ctx -> {
-            Util.getOperatingSystem().open("https://github.com/MeteorDevelopment/meteor-client/wiki/Notebot-Guide");
+    public void build(LiteralArgumentBuilder<ClientSuggestionProvider> builder) {
+        builder.then(literal("help").executes(_ -> {
+            Util.getPlatform().openUri("https://github.com/MeteorDevelopment/meteor-client/wiki/Notebot-Guide");
             return SINGLE_SUCCESS;
         }));
 
-        builder.then(literal("status").executes(ctx -> {
+        builder.then(literal("status").executes(_ -> {
             Notebot notebot = Modules.get().get(Notebot.class);
             info(notebot.getStatus());
             return SINGLE_SUCCESS;
         }));
 
-        builder.then(literal("pause").executes(ctx -> {
+        builder.then(literal("pause").executes(_ -> {
             Notebot notebot = Modules.get().get(Notebot.class);
             notebot.pause();
             return SINGLE_SUCCESS;
         }));
 
-        builder.then(literal("resume").executes(ctx -> {
+        builder.then(literal("resume").executes(_ -> {
             Notebot notebot = Modules.get().get(Notebot.class);
             notebot.pause();
             return SINGLE_SUCCESS;
         }));
 
-        builder.then(literal("stop").executes(ctx -> {
+        builder.then(literal("stop").executes(_ -> {
             Notebot notebot = Modules.get().get(Notebot.class);
             notebot.stop();
             return SINGLE_SUCCESS;
         }));
 
-        builder.then(literal("randomsong").executes(ctx -> {
+        builder.then(literal("randomsong").executes(_ -> {
             Notebot notebot = Modules.get().get(Notebot.class);
             notebot.playRandomSong();
             return SINGLE_SUCCESS;
@@ -86,7 +87,7 @@ public class NotebotCommand extends Command {
                 argument("song", NotebotSongArgumentType.create()).executes(ctx -> {
                     Notebot notebot = Modules.get().get(Notebot.class);
                     Path songPath = ctx.getArgument("song", Path.class);
-                    if (songPath == null || !songPath.toFile().exists()) {
+                    if (songPath == null || !Files.exists(songPath)) {
                         throw INVALID_SONG.create();
                     }
                     notebot.loadSong(songPath.toFile());
@@ -100,14 +101,14 @@ public class NotebotCommand extends Command {
                 argument("song", NotebotSongArgumentType.create()).executes(ctx -> {
                     Notebot notebot = Modules.get().get(Notebot.class);
                     Path songPath = ctx.getArgument("song", Path.class);
-                    if (songPath == null || !songPath.toFile().exists()) {
+                    if (songPath == null || !Files.exists(songPath)) {
                         throw INVALID_SONG.create();
                     }
                     notebot.previewSong(songPath.toFile());
                     return SINGLE_SUCCESS;
-        })));
+                })));
 
-        builder.then(literal("record").then(literal("start").executes(ctx -> {
+        builder.then(literal("record").then(literal("start").executes(_ -> {
             ticks = -1;
             song.clear();
             MeteorClient.EVENT_BUS.subscribe(this);
@@ -115,7 +116,7 @@ public class NotebotCommand extends Command {
             return SINGLE_SUCCESS;
         })));
 
-        builder.then(literal("record").then(literal("cancel").executes(ctx -> {
+        builder.then(literal("record").then(literal("cancel").executes(_ -> {
             MeteorClient.EVENT_BUS.unsubscribe(this);
             info("Recording cancelled");
             return SINGLE_SUCCESS;
@@ -144,9 +145,9 @@ public class NotebotCommand extends Command {
 
     @EventHandler
     private void onReadPacket(PacketEvent.Receive event) {
-        if (event.packet instanceof PlaySoundS2CPacket sound && sound.getSound().value().id().getPath().contains("note_block")) {
+        if (event.packet instanceof ClientboundSoundPacket sound && sound.getSound().value().location().getPath().contains("note_block")) {
             if (ticks == -1) ticks = 0;
-            List<Note> notes = song.computeIfAbsent(ticks, tick -> new ArrayList<>());
+            List<Note> notes = song.computeIfAbsent(ticks, _ -> new ArrayList<>());
             var note = getNote(sound);
             if (note != null) {
                 notes.add(note);
@@ -163,8 +164,8 @@ public class NotebotCommand extends Command {
             MeteorClient.EVENT_BUS.unsubscribe(this);
 
             FileWriter file = new FileWriter(path.toFile());
-            for (var entry : song.entrySet()) {
-                int tick = entry.getKey();
+            for (var entry : song.int2ObjectEntrySet()) {
+                int tick = entry.getIntKey();
                 List<Note> notes = entry.getValue();
 
                 for (var note : notes) {
@@ -177,14 +178,14 @@ public class NotebotCommand extends Command {
 
             file.close();
             info("Song saved.");
-        } catch (IOException e) {
+        } catch (IOException _) {
             info("Couldn't create the file.");
             MeteorClient.EVENT_BUS.unsubscribe(this);
         }
 
     }
 
-    private Note getNote(PlaySoundS2CPacket soundPacket) {
+    private Note getNote(ClientboundSoundPacket soundPacket) {
         float pitch = soundPacket.getPitch();
 
         // Bruteforce note level
@@ -212,7 +213,7 @@ public class NotebotCommand extends Command {
     }
 
     private NoteBlockInstrument getInstrumentFromSound(SoundEvent sound) {
-        String path = sound.id().getPath();
+        String path = sound.location().getPath();
         if (path.contains("harp"))
             return NoteBlockInstrument.HARP;
         else if (path.contains("basedrum"))

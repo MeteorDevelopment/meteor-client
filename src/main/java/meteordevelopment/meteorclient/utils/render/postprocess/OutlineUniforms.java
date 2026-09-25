@@ -8,7 +8,8 @@ package meteordevelopment.meteorclient.utils.render.postprocess;
 import com.mojang.blaze3d.buffers.GpuBufferSlice;
 import com.mojang.blaze3d.buffers.Std140Builder;
 import com.mojang.blaze3d.buffers.Std140SizeCalculator;
-import net.minecraft.client.gl.DynamicUniformStorage;
+import net.minecraft.client.renderer.DynamicUniformStorage;
+import org.jspecify.annotations.NonNull;
 
 import java.nio.ByteBuffer;
 
@@ -23,16 +24,17 @@ public class OutlineUniforms {
     private static final DynamicUniformStorage<Data> STORAGE = new DynamicUniformStorage<>("Meteor - Outline UBO", UNIFORM_SIZE, 16);
 
     public static void flipFrame() {
-        STORAGE.clear();
+        STORAGE.endFrame();
     }
 
     public static GpuBufferSlice write(int width, float fillOpacity, int shapeMode, float glowMultiplier) {
-        return STORAGE.write(new Data(width, fillOpacity, shapeMode, glowMultiplier));
+        return STORAGE.writeUniform(new Data(width, fillOpacity, shapeMode, glowMultiplier));
     }
 
-    private record Data(int width, float fillOpacity, int shapeMode, float glowMultiplier) implements DynamicUniformStorage.Uploadable {
+    private record Data(int width, float fillOpacity, int shapeMode,
+                        float glowMultiplier) implements DynamicUniformStorage.DynamicUniform {
         @Override
-        public void write(ByteBuffer buffer) {
+        public void write(@NonNull ByteBuffer buffer) {
             Std140Builder.intoBuffer(buffer)
                 .putInt(width)
                 .putFloat(fillOpacity)

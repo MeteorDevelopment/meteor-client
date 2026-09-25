@@ -17,4 +17,12 @@ public enum Dimension {
             default -> this;
         };
     }
+
+    public String toString() {
+        return switch (this) {
+            case Nether -> "minecraft:the_nether";
+            case End -> "minecraft:the_end";
+            default -> "minecraft:overworld";
+        };
+    }
 }

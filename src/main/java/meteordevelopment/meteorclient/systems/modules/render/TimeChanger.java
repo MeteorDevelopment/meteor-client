@@ -13,7 +13,7 @@ import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.network.packet.s2c.play.WorldTimeUpdateS2CPacket;
+import net.minecraft.network.protocol.game.ClientboundSetTimePacket;
 
 public class TimeChanger extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -34,24 +34,24 @@ public class TimeChanger extends Module {
 
     @Override
     public void onActivate() {
-        oldTime = mc.world.getTime();
+        oldTime = mc.level.getGameTime();
     }
 
     @Override
     public void onDeactivate() {
-        mc.world.getLevelProperties().setTimeOfDay(oldTime);
+        mc.level.getLevelData().setGameTime(oldTime);
     }
 
     @EventHandler
     private void onPacketReceive(PacketEvent.Receive event) {
-        if (event.packet instanceof WorldTimeUpdateS2CPacket) {
-            oldTime = ((WorldTimeUpdateS2CPacket) event.packet).timeOfDay();
+        if (event.packet instanceof ClientboundSetTimePacket packet) {
+            oldTime = packet.gameTime();
             event.cancel();
         }
     }
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
-        mc.world.getLevelProperties().setTimeOfDay(time.get().longValue());
+        mc.level.getLevelData().setGameTime(time.get().longValue());
     }
 }

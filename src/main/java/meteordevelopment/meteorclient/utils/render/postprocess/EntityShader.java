@@ -1,34 +1,28 @@
 package meteordevelopment.meteorclient.utils.render.postprocess;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import meteordevelopment.meteorclient.mixininterface.IWorldRenderer;
-
-import java.util.OptionalInt;
+import com.mojang.blaze3d.pipeline.RenderPipeline;
+import meteordevelopment.meteorclient.mixininterface.ILevelRenderer;
+import net.minecraft.world.entity.Entity;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public abstract class EntityShader extends PostProcessShader {
-    @Override
-    public boolean beginRender() {
-        if (super.beginRender()) {
-            RenderSystem.getDevice().createCommandEncoder().createRenderPass(() -> "Meteor EntityShader", framebuffer.getColorAttachmentView(), OptionalInt.of(0)).close();
-            return true;
-        }
-
-        return false;
+    protected EntityShader(RenderPipeline pipeline) {
+        super(pipeline);
     }
+
+    public abstract boolean shouldDraw(Entity entity);
 
     @Override
     protected void preDraw() {
-        ((IWorldRenderer) mc.worldRenderer).meteor$pushEntityOutlineFramebuffer(framebuffer);
+        ((ILevelRenderer) mc.levelRenderer).meteor$pushEntityOutlineFramebuffer(framebuffer);
     }
 
     @Override
     protected void postDraw() {
-        ((IWorldRenderer) mc.worldRenderer).meteor$popEntityOutlineFramebuffer();
+        ((ILevelRenderer) mc.levelRenderer).meteor$popEntityOutlineFramebuffer();
     }
 
-    public void endRender() {
-        endRender(() -> vertexConsumerProvider.draw());
+    public void submitVertices() {
     }
 }

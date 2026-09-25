@@ -6,14 +6,14 @@
 package meteordevelopment.meteorclient.events.game;
 
 import meteordevelopment.meteorclient.events.Cancellable;
-import net.minecraft.client.option.Perspective;
+import net.minecraft.client.CameraType;
 
 public class ChangePerspectiveEvent extends Cancellable {
     private static final ChangePerspectiveEvent INSTANCE = new ChangePerspectiveEvent();
 
-    public Perspective perspective;
+    public CameraType perspective;
 
-    public static ChangePerspectiveEvent get(Perspective perspective) {
+    public static ChangePerspectiveEvent get(CameraType perspective) {
         INSTANCE.setCancelled(false);
         INSTANCE.perspective = perspective;
         return INSTANCE;

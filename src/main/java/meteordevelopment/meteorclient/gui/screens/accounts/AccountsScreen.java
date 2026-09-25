@@ -12,10 +12,11 @@ import meteordevelopment.meteorclient.gui.widgets.containers.WContainer;
 import meteordevelopment.meteorclient.gui.widgets.containers.WHorizontalList;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 import meteordevelopment.meteorclient.systems.accounts.Account;
+import meteordevelopment.meteorclient.systems.accounts.AccountType;
 import meteordevelopment.meteorclient.systems.accounts.Accounts;
 import meteordevelopment.meteorclient.utils.misc.NbtUtils;
 import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
@@ -35,9 +36,10 @@ public class AccountsScreen extends WindowScreen {
         // Add account
         WHorizontalList l = add(theme.horizontalList()).expandX().widget();
 
-        addButton(l, "Cracked", () -> mc.setScreen(new AddCrackedAccountScreen(theme, this)));
-        addButton(l, "Altening", () -> mc.setScreen(new AddAlteningAccountScreen(theme, this)));
-        addButton(l, "Microsoft", () -> mc.setScreen(new AddMicrosoftAccountScreen(theme, this)));
+        addButton(l, "Cracked", () -> mc.gui.setScreen(new AddCrackedAccountScreen(theme, this)));
+        addButton(l, "Altening", () -> mc.gui.setScreen(new AddAlteningAccountScreen(theme, this)));
+        addButton(l, "Session", () -> mc.gui.setScreen(new AddSessionAccountScreen(theme, this)));
+        addButton(l, "Microsoft", () -> mc.gui.setScreen(new AddMicrosoftAccountScreen(theme, this)));
     }
 
     private void addButton(WContainer c, String text, Runnable action) {
@@ -49,23 +51,28 @@ public class AccountsScreen extends WindowScreen {
         if (screen != null) screen.locked = true;
 
         MeteorExecutor.execute(() -> {
-            if (account.fetchInfo()) {
-                account.getCache().loadHead();
-
-                Accounts.get().add(account);
-                if (account.login()) Accounts.get().save();
-
-                if (screen != null) {
-                    screen.locked = false;
-                    screen.close();
-                }
-
-                parent.reload();
-
+            if (!account.fetchInfo()) {
+                mc.execute(() -> {
+                    if (screen != null) screen.locked = false;
+                });
                 return;
             }
 
-            if (screen != null) screen.locked = false;
+            Accounts.get().add(account);
+
+            if (account.login()) {
+                if (account.getType() != AccountType.Cracked) account.getCache().loadHead(parent::reload);
+                Accounts.get().save();
+            }
+
+            mc.execute(() -> {
+                if (screen != null) {
+                    screen.locked = false;
+                    screen.onClose();
+                }
+
+                parent.reload();
+            });
         });
     }
 

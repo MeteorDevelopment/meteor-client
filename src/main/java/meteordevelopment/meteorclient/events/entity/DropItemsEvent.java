@@ -6,7 +6,7 @@
 package meteordevelopment.meteorclient.events.entity;
 
 import meteordevelopment.meteorclient.events.Cancellable;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 
 public class DropItemsEvent extends Cancellable {
     private static final DropItemsEvent INSTANCE = new DropItemsEvent();

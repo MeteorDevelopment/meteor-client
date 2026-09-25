@@ -8,8 +8,8 @@ package meteordevelopment.meteorclient.utils.network;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import meteordevelopment.meteorclient.utils.other.JsonDateDeserializer;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Type;
@@ -19,6 +19,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.Date;
+import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
@@ -29,7 +30,9 @@ public class Http {
     public static final int FORBIDDEN = 403;
     public static final int NOT_FOUND = 404;
 
-    private static final HttpClient CLIENT = HttpClient.newHttpClient();
+    private static final HttpClient CLIENT = HttpClient.newBuilder()
+        .executor(Executors.newVirtualThreadPerTaskExecutor())
+        .build();
 
     private static final Gson GSON = new GsonBuilder()
         .registerTypeAdapter(Date.class, new JsonDateDeserializer())
@@ -99,7 +102,8 @@ public class Http {
         }
 
         public Request ignoreExceptions() {
-            exceptionHandler = e -> {};
+            exceptionHandler = _ -> {
+            };
             return this;
         }
 

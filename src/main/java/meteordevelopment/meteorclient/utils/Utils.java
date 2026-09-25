@@ -5,7 +5,7 @@
 
 package meteordevelopment.meteorclient.utils;
 
-import com.mojang.blaze3d.systems.ProjectionType;
+import com.mojang.blaze3d.ProjectionType;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.serialization.DataResult;
 import it.unimi.dsi.fastutil.objects.*;
@@ -13,7 +13,7 @@ import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.gui.tabs.TabScreen;
 import meteordevelopment.meteorclient.mixin.*;
-import meteordevelopment.meteorclient.mixininterface.IMinecraftClient;
+import meteordevelopment.meteorclient.mixininterface.IMinecraft;
 import meteordevelopment.meteorclient.settings.StatusEffectAmplifierMapSetting;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.BetterTooltips;
@@ -26,40 +26,42 @@ import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.world.BlockEntityIterator;
 import meteordevelopment.meteorclient.utils.world.ChunkIterator;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.ShulkerBoxBlock;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.TitleScreen;
-import net.minecraft.client.gui.screen.multiplayer.MultiplayerScreen;
-import net.minecraft.client.gui.screen.world.SelectWorldScreen;
-import net.minecraft.client.render.ProjectionMatrix2;
-import net.minecraft.client.resource.ResourceReloadLogger;
-import net.minecraft.component.ComponentMap;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.ItemEnchantmentsComponent;
-import net.minecraft.component.type.NbtComponent;
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.effect.StatusEffect;
-import net.minecraft.inventory.StackWithSlot;
-import net.minecraft.item.*;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtList;
+import net.minecraft.client.ResourceLoadStateTracker;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.TitleScreen;
+import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
+import net.minecraft.client.gui.screens.worldselection.SelectWorldScreen;
+import net.minecraft.client.renderer.Projection;
+import net.minecraft.client.renderer.ProjectionMatrixBuffer;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.component.DataComponentMap;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtOps;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.util.DyeColor;
-import net.minecraft.util.collection.DefaultedList;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.chunk.Chunk;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.util.Mth;
+import net.minecraft.world.ItemStackWithSlot;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.item.*;
+import net.minecraft.world.item.component.TypedEntityData;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.enchantment.ItemEnchantments;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.ColorCollection;
+import net.minecraft.world.level.block.ShulkerBoxBlock;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.phys.Vec3;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Range;
+import org.joml.Matrix4f;
 import org.joml.Vector3d;
 
 import java.io.File;
@@ -71,7 +73,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
-import static org.lwjgl.glfw.GLFW.*;
 
 public class Utils {
     public static final Pattern FILE_NAME_INVALID_CHARS_PATTERN = Pattern.compile("[\\s\\\\/:*?\"<>|]");
@@ -83,7 +84,7 @@ public class Utils {
     public static double frameTime;
     public static Screen screenToOpen;
 
-    private static final ProjectionMatrix2 matrix = new ProjectionMatrix2("meteor-projection-matrix", -10, 100, true);
+    private static final ProjectionMatrixBuffer matrixBuffer = new ProjectionMatrixBuffer("meteor-projection-matrix");
 
     private Utils() {
     }
@@ -95,18 +96,18 @@ public class Utils {
 
     @EventHandler
     private static void onTick(TickEvent.Post event) {
-        if (screenToOpen != null && mc.currentScreen == null) {
-            mc.setScreen(screenToOpen);
+        if (screenToOpen != null && mc.gui.screen() == null) {
+            mc.gui.setScreen(screenToOpen);
             screenToOpen = null;
         }
     }
 
-    public static Vec3d getPlayerSpeed() {
-        if (mc.player == null) return Vec3d.ZERO;
+    public static Vec3 getPlayerSpeed() {
+        if (mc.player == null) return Vec3.ZERO;
 
-        double tX = mc.player.getX() - mc.player.lastX;
-        double tY = mc.player.getY() - mc.player.lastY;
-        double tZ = mc.player.getZ() - mc.player.lastZ;
+        double tX = mc.player.getX() - mc.player.xo;
+        double tY = mc.player.getY() - mc.player.yo;
+        double tZ = mc.player.getZ() - mc.player.zo;
 
         Timer timer = Modules.get().get(Timer.class);
         if (timer.isActive()) {
@@ -119,24 +120,24 @@ public class Utils {
         tY *= 20;
         tZ *= 20;
 
-        return new Vec3d(tX, tY, tZ);
+        return new Vec3(tX, tY, tZ);
     }
 
     public static String getWorldTime() {
-        if (mc.world == null) return "00:00";
+        if (mc.level == null) return "00:00";
 
-        int ticks = (int) (mc.world.getTimeOfDay() % 24000);
+        int ticks = (int) (mc.level.getGameTime() % 24000);
         ticks += 6000;
         if (ticks > 24000) ticks -= 24000;
 
         return String.format("%02d:%02d", ticks / 1000, (int) (ticks % 1000 / 1000.0 * 60));
     }
 
-    public static Iterable<Chunk> chunks(boolean onlyWithLoadedNeighbours) {
+    public static Iterable<ChunkAccess> chunks(boolean onlyWithLoadedNeighbours) {
         return () -> new ChunkIterator(onlyWithLoadedNeighbours);
     }
 
-    public static Iterable<Chunk> chunks() {
+    public static Iterable<ChunkAccess> chunks() {
         return chunks(false);
     }
 
@@ -144,108 +145,124 @@ public class Utils {
         return BlockEntityIterator::new;
     }
 
-    public static void getEnchantments(ItemStack itemStack, Object2IntMap<RegistryEntry<Enchantment>> enchantments) {
+    public static void getEnchantments(ItemStack itemStack, Object2IntMap<Holder<Enchantment>> enchantments) {
         enchantments.clear();
 
         if (!itemStack.isEmpty()) {
-            Set<Object2IntMap.Entry<RegistryEntry<Enchantment>>> itemEnchantments = itemStack.getItem() == Items.ENCHANTED_BOOK
-                ? itemStack.getOrDefault(DataComponentTypes.STORED_ENCHANTMENTS, ItemEnchantmentsComponent.DEFAULT).getEnchantmentEntries()
-                : itemStack.getEnchantments().getEnchantmentEntries();
+            Set<Object2IntMap.Entry<Holder<Enchantment>>> itemEnchantments = itemStack.getItem() == Items.ENCHANTED_BOOK
+                ? itemStack.getOrDefault(DataComponents.STORED_ENCHANTMENTS, ItemEnchantments.EMPTY).entrySet()
+                : itemStack.getEnchantments().entrySet();
 
-            for (Object2IntMap.Entry<RegistryEntry<Enchantment>> entry : itemEnchantments) {
+            for (Object2IntMap.Entry<Holder<Enchantment>> entry : itemEnchantments) {
                 enchantments.put(entry.getKey(), entry.getIntValue());
             }
         }
     }
 
-    public static int getEnchantmentLevel(ItemStack itemStack, RegistryKey<Enchantment> enchantment) {
+    public static int getEnchantmentLevel(ItemStack itemStack, ResourceKey<Enchantment> enchantment) {
         if (itemStack.isEmpty()) return 0;
-        Object2IntMap<RegistryEntry<Enchantment>> itemEnchantments = new Object2IntArrayMap<>();
+        Object2IntMap<Holder<Enchantment>> itemEnchantments = new Object2IntArrayMap<>();
         getEnchantments(itemStack, itemEnchantments);
         return getEnchantmentLevel(itemEnchantments, enchantment);
     }
 
-    public static int getEnchantmentLevel(Object2IntMap<RegistryEntry<Enchantment>> itemEnchantments, RegistryKey<Enchantment> enchantment) {
-        for (Object2IntMap.Entry<RegistryEntry<Enchantment>> entry : Object2IntMaps.fastIterable(itemEnchantments)) {
-            if (entry.getKey().matchesKey(enchantment)) return entry.getIntValue();
+    public static int getEnchantmentLevel(Object2IntMap<Holder<Enchantment>> itemEnchantments, ResourceKey<Enchantment> enchantment) {
+        for (Object2IntMap.Entry<Holder<Enchantment>> entry : Object2IntMaps.fastIterable(itemEnchantments)) {
+            if (entry.getKey().is(enchantment)) return entry.getIntValue();
         }
         return 0;
     }
 
     @SafeVarargs
-    public static boolean hasEnchantments(ItemStack itemStack, RegistryKey<Enchantment>... enchantments) {
+    public static boolean hasEnchantments(ItemStack itemStack, ResourceKey<Enchantment>... enchantments) {
         if (itemStack.isEmpty()) return false;
-        Object2IntMap<RegistryEntry<Enchantment>> itemEnchantments = new Object2IntArrayMap<>();
+        Object2IntMap<Holder<Enchantment>> itemEnchantments = new Object2IntArrayMap<>();
         getEnchantments(itemStack, itemEnchantments);
 
-        for (RegistryKey<Enchantment> enchantment : enchantments) {
+        for (ResourceKey<Enchantment> enchantment : enchantments) {
             if (!hasEnchantment(itemEnchantments, enchantment)) return false;
         }
         return true;
     }
 
-    public static boolean hasEnchantment(ItemStack itemStack, RegistryKey<Enchantment> enchantmentKey) {
+    public static boolean hasEnchantment(ItemStack itemStack, ResourceKey<Enchantment> enchantmentKey) {
         if (itemStack.isEmpty()) return false;
-        Object2IntMap<RegistryEntry<Enchantment>> itemEnchantments = new Object2IntArrayMap<>();
+        Object2IntMap<Holder<Enchantment>> itemEnchantments = new Object2IntArrayMap<>();
         getEnchantments(itemStack, itemEnchantments);
         return hasEnchantment(itemEnchantments, enchantmentKey);
     }
 
-    private static boolean hasEnchantment(Object2IntMap<RegistryEntry<Enchantment>> itemEnchantments, RegistryKey<Enchantment> enchantmentKey) {
-        for (RegistryEntry<Enchantment> enchantment : itemEnchantments.keySet()) {
-            if (enchantment.matchesKey(enchantmentKey)) return true;
+    private static boolean hasEnchantment(Object2IntMap<Holder<Enchantment>> itemEnchantments, ResourceKey<Enchantment> enchantmentKey) {
+        for (Holder<Enchantment> enchantment : itemEnchantments.keySet()) {
+            if (enchantment.is(enchantmentKey)) return true;
         }
         return false;
     }
 
+    public static boolean isFood(ItemStack stack) {
+        return isFood(stack.getItem());
+    }
+
+    // Not every food item in minecraft is consumable for some reason (e.g. buckets of any fish)
+    public static boolean isFood(Item item) {
+        return item.components().has(DataComponents.FOOD) && item.components().has(DataComponents.CONSUMABLE);
+    }
+
     public static int getRenderDistance() {
-        return Math.max(mc.options.getViewDistance().getValue(), ((ClientPlayNetworkHandlerAccessor) mc.getNetworkHandler()).meteor$getChunkLoadDistance());
+        return Math.max(mc.options.renderDistance().get(), ((ClientPacketListenerAccessor) mc.getConnection()).meteor$getServerChunkRadius());
     }
 
     public static int getWindowWidth() {
-        return mc.getWindow().getFramebufferWidth();
+        return mc.getWindow().getWidth();
     }
 
     public static int getWindowHeight() {
-        return mc.getWindow().getFramebufferHeight();
+        return mc.getWindow().getHeight();
     }
 
     public static void unscaledProjection() {
-        float width = mc.getWindow().getFramebufferWidth();
-        float height = mc.getWindow().getFramebufferHeight();
+        float width = mc.getWindow().getWidth();
+        float height = mc.getWindow().getHeight();
 
-        RenderSystem.setProjectionMatrix(matrix.set(width, height), ProjectionType.ORTHOGRAPHIC);
-        RenderUtils.projection.set(((ProjectionMatrix2Accessor) matrix).meteor$callGetMatrix(width, height));
+        var proj = new Projection();
+        proj.setupOrtho(-10, 100, width, height, true);
+        var matrix = proj.getMatrix(new Matrix4f());
+
+        RenderSystem.setProjectionMatrix(matrixBuffer.getBuffer(matrix), ProjectionType.ORTHOGRAPHIC);
+        RenderUtils.projection.set(matrix);
 
         rendering3D = false;
     }
 
     public static void scaledProjection() {
-        float width = (float) (mc.getWindow().getFramebufferWidth() / mc.getWindow().getScaleFactor());
-        float height = (float) (mc.getWindow().getFramebufferHeight() / mc.getWindow().getScaleFactor());
+        float width = (float) (mc.getWindow().getWidth() / mc.getWindow().getGuiScale());
+        float height = (float) (mc.getWindow().getHeight() / mc.getWindow().getGuiScale());
 
-        RenderSystem.setProjectionMatrix(matrix.set(width, height), ProjectionType.PERSPECTIVE);
-        RenderUtils.projection.set(((ProjectionMatrix2Accessor) matrix).meteor$callGetMatrix(width, height));
+        var proj = new Projection();
+        proj.setupOrtho(-10, 100, width, height, true);
+        var matrix = proj.getMatrix(new Matrix4f());
+
+        RenderSystem.setProjectionMatrix(matrixBuffer.getBuffer(matrix), ProjectionType.PERSPECTIVE);
+        RenderUtils.projection.set(matrix);
 
         rendering3D = true;
     }
 
-    public static Vec3d vec3d(BlockPos pos) {
-        return new Vec3d(pos.getX(), pos.getY(), pos.getZ());
+    public static Vec3 vec3(BlockPos pos) {
+        return new Vec3(pos.getX(), pos.getY(), pos.getZ());
     }
 
     public static boolean openContainer(ItemStack itemStack, ItemStack[] contents, boolean pause) {
         if (hasItems(itemStack) || itemStack.getItem() == Items.ENDER_CHEST) {
             Utils.getItemsInContainerItem(itemStack, contents);
             if (pause) screenToOpen = new PeekScreen(itemStack, contents);
-            else mc.setScreen(new PeekScreen(itemStack, contents));
+            else mc.gui.setScreen(new PeekScreen(itemStack, contents));
             return true;
         }
 
         return false;
     }
 
-    @SuppressWarnings("deprecation") // Use of NbtCompound#getNbt
     public static void getItemsInContainerItem(ItemStack itemStack, ItemStack[] items) {
         if (itemStack.getItem() == Items.ENDER_CHEST) {
             for (int i = 0; i < EChestMemory.ITEMS.size(); i++) {
@@ -256,24 +273,21 @@ public class Utils {
         }
 
         Arrays.fill(items, ItemStack.EMPTY);
-        ComponentMap components = itemStack.getComponents();
+        DataComponentMap components = itemStack.getComponents();
 
-        if (components.contains(DataComponentTypes.CONTAINER)) {
-            ContainerComponentAccessor container = ((ContainerComponentAccessor) (Object) components.get(DataComponentTypes.CONTAINER));
-            DefaultedList<ItemStack> stacks = container.meteor$getStacks();
+        if (components.has(DataComponents.CONTAINER)) {
+            var stacks = components.get(DataComponents.CONTAINER).allItemsCopyStream().toList();
 
             for (int i = 0; i < stacks.size(); i++) {
                 if (i >= 0 && i < items.length) items[i] = stacks.get(i);
             }
-        }
-        // todo should we remove this? are there still instances where we might get presented container items in this
-        //  format? maybe on servers with weird multiversion setups - if they exist, test this code to ensure it works
-        else if (components.contains(DataComponentTypes.BLOCK_ENTITY_DATA)) {
-            NbtComponent nbt2 = components.getOrDefault(DataComponentTypes.BLOCK_ENTITY_DATA, NbtComponent.DEFAULT);
-            NbtList nbt3 = nbt2.getNbt().getListOrEmpty("Items");
+        } else if (components.has(DataComponents.BLOCK_ENTITY_DATA)) {
+            TypedEntityData<BlockEntityType<?>> blockEntityData = components.get(DataComponents.BLOCK_ENTITY_DATA);
+            if (blockEntityData == null) return;
+            ListTag nbt3 = blockEntityData.copyTagWithoutId().getListOrEmpty("Items");
 
             for (int i = 0; i < nbt3.size(); i++) {
-                Optional<NbtCompound> compound = nbt3.getCompound(i);
+                Optional<CompoundTag> compound = nbt3.getCompound(i);
                 if (compound.isEmpty()) continue;
 
                 Optional<Byte> slot = compound.get().getByte("Slot"); // Apparently shulker boxes can store more than 27 items, good job Mojang
@@ -281,9 +295,10 @@ public class Utils {
 
                 // now NPEs when mc.world == null
                 if (slot.get() >= 0 && slot.get() < items.length) {
-                    switch (StackWithSlot.CODEC.parse(mc.player.getRegistryManager().getOps(NbtOps.INSTANCE), compound.get())) {
-                        case DataResult.Success<StackWithSlot> success -> items[slot.get()] = success.value().stack();
-                        case DataResult.Error<StackWithSlot> ignored -> items[slot.get()] = ItemStack.EMPTY;
+                    switch (ItemStackWithSlot.CODEC.parse(mc.player.registryAccess().createSerializationContext(NbtOps.INSTANCE), compound.get())) {
+                        case DataResult.Success<ItemStackWithSlot> success ->
+                            items[slot.get()] = success.value().stack();
+                        case DataResult.Error<ItemStackWithSlot> _ -> items[slot.get()] = ItemStack.EMPTY;
                         default -> throw new MatchException(null, null);
                     }
                 }
@@ -300,7 +315,7 @@ public class Utils {
                 DyeColor dye = shulkerBlock.getColor();
                 if (dye == null) return WHITE;
 
-                final int color = dye.getEntityColor();
+                final int color = dye.getTextureDiffuseColor();
                 return new Color((color >> 16) & 0xFF, (color >> 8) & 0xFF, color & 0xFF, 255);
             }
         }
@@ -308,20 +323,23 @@ public class Utils {
         return WHITE;
     }
 
-    @SuppressWarnings("deprecation") // Use of NbtCompound#getNbt
     public static boolean hasItems(ItemStack itemStack) {
-        ContainerComponentAccessor container = ((ContainerComponentAccessor) (Object) itemStack.get(DataComponentTypes.CONTAINER));
-        if (container != null && !container.meteor$getStacks().isEmpty()) return true;
+        var container = itemStack.get(DataComponents.CONTAINER);
 
-        NbtCompound compoundTag = itemStack.getOrDefault(DataComponentTypes.BLOCK_ENTITY_DATA, NbtComponent.DEFAULT).getNbt();
-        return compoundTag != null && compoundTag.contains("Items");
+        if (container != null) {
+            var items = container.nonEmptyItems().iterator();
+            if (items.hasNext()) return true;
+        }
+
+        TypedEntityData<BlockEntityType<?>> blockEntityData = itemStack.get(DataComponents.BLOCK_ENTITY_DATA);
+        return blockEntityData != null && blockEntityData.contains("Items");
     }
 
-    public static Reference2IntMap<StatusEffect> createStatusEffectMap() {
+    public static Reference2IntMap<MobEffect> createStatusEffectMap() {
         return new Reference2IntArrayMap<>(StatusEffectAmplifierMapSetting.EMPTY_STATUS_EFFECT_MAP);
     }
 
-    public static String getEnchantSimpleName(RegistryEntry<Enchantment> enchantment, int length) {
+    public static String getEnchantSimpleName(Holder<Enchantment> enchantment, int length) {
         String name = Names.get(enchantment);
         return name.length() > length ? name.substring(0, length) : name;
     }
@@ -403,20 +421,20 @@ public class Utils {
      */
     public static String getWorldName() {
         // Singleplayer
-        if (mc.isInSingleplayer()) {
-            if (mc.world == null) return "";
-            if (mc.getServer() == null) return "FAILED_BECAUSE_LEFT_WORLD";
+        if (mc.isLocalServer()) {
+            if (mc.level == null) return "";
+            if (mc.getSingleplayerServer() == null) return "FAILED_BECAUSE_LEFT_WORLD";
 
-            File folder = ((MinecraftServerAccessor) mc.getServer()).meteor$getSession().getWorldDirectory(mc.world.getRegistryKey()).toFile();
-            if (folder.toPath().relativize(mc.runDirectory.toPath()).getNameCount() != 2) {
+            File folder = ((MinecraftServerAccessor) mc.getSingleplayerServer()).meteor$getStorageSource().getDimensionPath(mc.level.dimension()).toFile();
+            if (folder.toPath().relativize(mc.gameDirectory.toPath()).getNameCount() != 2) {
                 folder = folder.getParentFile();
             }
             return folder.getName();
         }
 
         // Multiplayer
-        if (mc.getCurrentServerEntry() != null) {
-            return mc.getCurrentServerEntry().isRealm() ? "realms" : mc.getCurrentServerEntry().address;
+        if (mc.getCurrentServer() != null) {
+            return mc.getCurrentServer().isRealm() ? "realms" : mc.getCurrentServer().ip;
         }
 
         return "";
@@ -428,84 +446,6 @@ public class Utils {
 
     public static String titleToName(String title) {
         return title.replace(" ", "-").toLowerCase(Locale.ROOT);
-    }
-
-    public static String getKeyName(int key) {
-        return switch (key) {
-            case GLFW_KEY_UNKNOWN -> "Unknown";
-            case GLFW_KEY_ESCAPE -> "Esc";
-            case GLFW_KEY_GRAVE_ACCENT -> "Grave Accent";
-            case GLFW_KEY_WORLD_1 -> "World 1";
-            case GLFW_KEY_WORLD_2 -> "World 2";
-            case GLFW_KEY_PRINT_SCREEN -> "Print Screen";
-            case GLFW_KEY_PAUSE -> "Pause";
-            case GLFW_KEY_INSERT -> "Insert";
-            case GLFW_KEY_DELETE -> "Delete";
-            case GLFW_KEY_HOME -> "Home";
-            case GLFW_KEY_PAGE_UP -> "Page Up";
-            case GLFW_KEY_PAGE_DOWN -> "Page Down";
-            case GLFW_KEY_END -> "End";
-            case GLFW_KEY_TAB -> "Tab";
-            case GLFW_KEY_LEFT_CONTROL -> "Left Control";
-            case GLFW_KEY_RIGHT_CONTROL -> "Right Control";
-            case GLFW_KEY_LEFT_ALT -> "Left Alt";
-            case GLFW_KEY_RIGHT_ALT -> "Right Alt";
-            case GLFW_KEY_LEFT_SHIFT -> "Left Shift";
-            case GLFW_KEY_RIGHT_SHIFT -> "Right Shift";
-            case GLFW_KEY_UP -> "Arrow Up";
-            case GLFW_KEY_DOWN -> "Arrow Down";
-            case GLFW_KEY_LEFT -> "Arrow Left";
-            case GLFW_KEY_RIGHT -> "Arrow Right";
-            case GLFW_KEY_APOSTROPHE -> "Apostrophe";
-            case GLFW_KEY_BACKSPACE -> "Backspace";
-            case GLFW_KEY_CAPS_LOCK -> "Caps Lock";
-            case GLFW_KEY_MENU -> "Menu";
-            case GLFW_KEY_LEFT_SUPER -> "Left Super";
-            case GLFW_KEY_RIGHT_SUPER -> "Right Super";
-            case GLFW_KEY_ENTER -> "Enter";
-            case GLFW_KEY_KP_ENTER -> "Numpad Enter";
-            case GLFW_KEY_NUM_LOCK -> "Num Lock";
-            case GLFW_KEY_SPACE -> "Space";
-            case GLFW_KEY_F1 -> "F1";
-            case GLFW_KEY_F2 -> "F2";
-            case GLFW_KEY_F3 -> "F3";
-            case GLFW_KEY_F4 -> "F4";
-            case GLFW_KEY_F5 -> "F5";
-            case GLFW_KEY_F6 -> "F6";
-            case GLFW_KEY_F7 -> "F7";
-            case GLFW_KEY_F8 -> "F8";
-            case GLFW_KEY_F9 -> "F9";
-            case GLFW_KEY_F10 -> "F10";
-            case GLFW_KEY_F11 -> "F11";
-            case GLFW_KEY_F12 -> "F12";
-            case GLFW_KEY_F13 -> "F13";
-            case GLFW_KEY_F14 -> "F14";
-            case GLFW_KEY_F15 -> "F15";
-            case GLFW_KEY_F16 -> "F16";
-            case GLFW_KEY_F17 -> "F17";
-            case GLFW_KEY_F18 -> "F18";
-            case GLFW_KEY_F19 -> "F19";
-            case GLFW_KEY_F20 -> "F20";
-            case GLFW_KEY_F21 -> "F21";
-            case GLFW_KEY_F22 -> "F22";
-            case GLFW_KEY_F23 -> "F23";
-            case GLFW_KEY_F24 -> "F24";
-            case GLFW_KEY_F25 -> "F25";
-            default -> {
-                String keyName = glfwGetKeyName(key, 0);
-                yield keyName == null ? "Unknown" : StringUtils.capitalize(keyName);
-            }
-        };
-    }
-
-    public static String getButtonName(int button) {
-        return switch (button) {
-            case -1 -> "Unknown";
-            case 0 -> "Mouse Left";
-            case 1 -> "Mouse Right";
-            case 2 -> "Mouse Middle";
-            default -> "Mouse " + button;
-        };
     }
 
     public static byte[] readBytes(InputStream in) {
@@ -520,17 +460,18 @@ public class Utils {
     }
 
     public static boolean canUpdate() {
-        return mc != null && mc.world != null && mc.player != null;
+        return mc != null && mc.level != null && mc.player != null;
     }
 
     public static boolean canOpenGui() {
-        if (canUpdate()) return mc.currentScreen == null;
-
-        return mc.currentScreen instanceof TitleScreen || mc.currentScreen instanceof MultiplayerScreen || mc.currentScreen instanceof SelectWorldScreen;
+        if (canUpdate()) return mc.gui.screen() == null;
+        return mc.gui.screen() instanceof TitleScreen
+            || mc.gui.screen() instanceof JoinMultiplayerScreen
+            || mc.gui.screen() instanceof SelectWorldScreen;
     }
 
     public static boolean canCloseGui() {
-        return mc.currentScreen instanceof TabScreen;
+        return mc.gui.screen() instanceof TabScreen;
     }
 
     public static int random(int min, int max) {
@@ -545,41 +486,60 @@ public class Utils {
         // check if a screen is open
         // see net.minecraft.client.Mouse.lockCursor
         // see net.minecraft.client.MinecraftClient.tick
-        int attackCooldown = ((MinecraftClientAccessor) mc).meteor$getAttackCooldown();
+        int attackCooldown = ((MinecraftAccessor) mc).meteor$getMissTime();
         if (attackCooldown == 10000) {
-            ((MinecraftClientAccessor) mc).meteor$setAttackCooldown(0);
+            ((MinecraftAccessor) mc).meteor$setMissTime(0);
         }
 
-        mc.options.attackKey.setPressed(true);
-        ((MinecraftClientAccessor) mc).meteor$leftClick();
-        mc.options.attackKey.setPressed(false);
+        mc.options.keyAttack.setDown(true);
+        ((MinecraftAccessor) mc).meteor$leftClick();
+        mc.options.keyAttack.setDown(false);
     }
 
     public static void rightClick() {
-        ((IMinecraftClient) mc).meteor$rightClick();
+        ((IMinecraft) mc).meteor$rightClick();
     }
 
     public static boolean isShulker(Item item) {
-        return item == Items.SHULKER_BOX || item == Items.WHITE_SHULKER_BOX || item == Items.ORANGE_SHULKER_BOX || item == Items.MAGENTA_SHULKER_BOX || item == Items.LIGHT_BLUE_SHULKER_BOX || item == Items.YELLOW_SHULKER_BOX || item == Items.LIME_SHULKER_BOX || item == Items.PINK_SHULKER_BOX || item == Items.GRAY_SHULKER_BOX || item == Items.LIGHT_GRAY_SHULKER_BOX || item == Items.CYAN_SHULKER_BOX || item == Items.PURPLE_SHULKER_BOX || item == Items.BLUE_SHULKER_BOX || item == Items.BROWN_SHULKER_BOX || item == Items.GREEN_SHULKER_BOX || item == Items.RED_SHULKER_BOX || item == Items.BLACK_SHULKER_BOX;
+        return item == Items.SHULKER_BOX || contains(Items.DYED_SHULKER_BOX, item);
+    }
+
+    public static <T> boolean contains(ColorCollection<T> collection, T value) {
+        return collection.white() == value
+            || collection.orange() == value
+            || collection.magenta() == value
+            || collection.lightBlue() == value
+            || collection.yellow() == value
+            || collection.lime() == value
+            || collection.pink() == value
+            || collection.gray() == value
+            || collection.lightGray() == value
+            || collection.cyan() == value
+            || collection.purple() == value
+            || collection.blue() == value
+            || collection.brown() == value
+            || collection.green() == value
+            || collection.red() == value
+            || collection.black() == value;
     }
 
     public static boolean isThrowable(Item item) {
-        return item instanceof ExperienceBottleItem || item instanceof BowItem || item instanceof CrossbowItem || item instanceof SnowballItem || item instanceof EggItem || item instanceof EnderPearlItem || item instanceof SplashPotionItem || item instanceof LingeringPotionItem || item instanceof FishingRodItem || item instanceof TridentItem;
+        return item instanceof ExperienceBottleItem || item instanceof BowItem || item instanceof CrossbowItem || item instanceof SnowballItem || item instanceof EggItem || item instanceof EnderpearlItem || item instanceof SplashPotionItem || item instanceof LingeringPotionItem || item instanceof FishingRodItem || item instanceof TridentItem;
     }
 
-    public static void addEnchantment(ItemStack itemStack, RegistryEntry<Enchantment> enchantment, int level) {
-        ItemEnchantmentsComponent.Builder b = new ItemEnchantmentsComponent.Builder(EnchantmentHelper.getEnchantments(itemStack));
-        b.add(enchantment, level);
+    public static void addEnchantment(ItemStack itemStack, Holder<Enchantment> enchantment, int level) {
+        ItemEnchantments.Mutable b = new ItemEnchantments.Mutable(EnchantmentHelper.getEnchantmentsForCrafting(itemStack));
+        b.set(enchantment, level);
 
-        EnchantmentHelper.set(itemStack, b.build());
+        EnchantmentHelper.setEnchantments(itemStack, b.toImmutable());
     }
 
     public static void clearEnchantments(ItemStack itemStack) {
-        EnchantmentHelper.apply(itemStack, components -> components.remove(a -> true));
+        EnchantmentHelper.updateEnchantments(itemStack, components -> components.removeIf(a -> true));
     }
 
     public static void removeEnchantment(ItemStack itemStack, Enchantment enchantment) {
-        EnchantmentHelper.apply(itemStack, components -> components.remove(enchantment1 -> enchantment1.value().equals(enchantment)));
+        EnchantmentHelper.updateEnchantments(itemStack, components -> components.removeIf(enchantment1 -> enchantment1.value().equals(enchantment)));
     }
 
     public static Color lerp(Color first, Color second, @Range(from = 0, to = 1) float v) {
@@ -591,7 +551,7 @@ public class Utils {
     }
 
     public static boolean isLoading() {
-        ResourceReloadLogger.ReloadState state = ((ResourceReloadLoggerAccessor) ((MinecraftClientAccessor) mc).meteor$getResourceReloadLogger()).meteor$getReloadState();
+        ResourceLoadStateTracker.ReloadState state = ((ResourceLoadStateTrackerAccessor) ((MinecraftAccessor) mc).meteor$getReloadStateTracker()).meteor$getReloadState();
         return state == null || !((ReloadStateAccessor) state).meteor$isFinished();
     }
 
@@ -602,7 +562,7 @@ public class Utils {
 
         try {
             port = Integer.parseInt(full.substring(full.lastIndexOf(':') + 1, full.length() - 1));
-        } catch (NumberFormatException ignored) {
+        } catch (NumberFormatException _) {
             port = -1;
         }
 
@@ -630,7 +590,7 @@ public class Utils {
         return !socketAddress.isUnresolved();
     }
 
-    public static Vector3d set(Vector3d vec, Vec3d v) {
+    public static Vector3d set(Vector3d vec, Vec3 v) {
         vec.x = v.x;
         vec.y = v.y;
         vec.z = v.z;
@@ -639,9 +599,9 @@ public class Utils {
     }
 
     public static Vector3d set(Vector3d vec, Entity entity, double tickDelta) {
-        vec.x = MathHelper.lerp(tickDelta, entity.lastRenderX, entity.getX());
-        vec.y = MathHelper.lerp(tickDelta, entity.lastRenderY, entity.getY());
-        vec.z = MathHelper.lerp(tickDelta, entity.lastRenderZ, entity.getZ());
+        vec.x = Mth.lerp(tickDelta, entity.xOld, entity.getX());
+        vec.y = Mth.lerp(tickDelta, entity.yOld, entity.getY());
+        vec.z = Mth.lerp(tickDelta, entity.zOld, entity.getZ());
 
         return vec;
     }
@@ -650,6 +610,10 @@ public class Utils {
 
     public static boolean nameFilter(String text, char character) {
         return (character >= 'a' && character <= 'z') || (character >= 'A' && character <= 'Z') || (character >= '0' && character <= '9') || character == '_' || character == '-' || character == '.' || character == ' ';
+    }
+
+    public static boolean fileNameFilter(String text, char character) {
+        return (character >= 'a' && character <= 'z') || (character >= 'A' && character <= 'Z') || (character >= '0' && character <= '9') || character == '_' || character == '-' || character == ' ';
     }
 
     public static boolean ipFilter(String text, char character) {

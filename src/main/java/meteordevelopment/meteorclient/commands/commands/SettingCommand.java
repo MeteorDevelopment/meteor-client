@@ -14,11 +14,14 @@ import meteordevelopment.meteorclient.gui.GuiThemes;
 import meteordevelopment.meteorclient.gui.WidgetScreen;
 import meteordevelopment.meteorclient.gui.tabs.TabScreen;
 import meteordevelopment.meteorclient.gui.tabs.Tabs;
+import meteordevelopment.meteorclient.gui.tabs.builtin.ConfigTab;
 import meteordevelopment.meteorclient.gui.tabs.builtin.HudTab;
 import meteordevelopment.meteorclient.settings.Setting;
+import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
-import net.minecraft.command.CommandSource;
+import meteordevelopment.meteorclient.utils.player.ChatUtils;
+import net.minecraft.client.multiplayer.ClientSuggestionProvider;
 
 public class SettingCommand extends Command {
     public SettingCommand() {
@@ -26,16 +29,62 @@ public class SettingCommand extends Command {
     }
 
     @Override
-    public void build(LiteralArgumentBuilder<CommandSource> builder) {
+    public void build(LiteralArgumentBuilder<ClientSuggestionProvider> builder) {
+        // Open hud screen
         builder.then(
             literal("hud")
-                .executes(context -> {
+                .executes(_ -> {
                     TabScreen screen = Tabs.get(HudTab.class).createScreen(GuiThemes.get());
                     screen.parent = null;
 
                     Utils.screenToOpen = screen;
                     return SINGLE_SUCCESS;
                 })
+        );
+
+        // Open config screen
+        builder.then(
+            literal("config")
+                .executes(_ -> {
+                    TabScreen screen = Tabs.get(ConfigTab.class).createScreen(GuiThemes.get());
+                    screen.parent = null;
+
+                    Utils.screenToOpen = screen;
+                    return SINGLE_SUCCESS;
+                })
+        );
+
+        // View or change config settings
+        builder.then(
+            literal("config").then(
+                argument("setting", SettingArgumentType.create())
+                    .executes(context -> {
+                        // Get setting value
+                        Setting<?> setting = SettingArgumentType.get(context, Config.get().settings);
+
+                        ChatUtils.infoPrefix("Config", "Setting (highlight)%s(default) is (highlight)%s(default).", setting.title, setting.get());
+
+                        return SINGLE_SUCCESS;
+                    }).suggests((_, suggestionsBuilder) ->
+                        SettingArgumentType.listSuggestions(suggestionsBuilder, Config.get().settings)
+                    )
+                    .then(
+                        argument("value", SettingValueArgumentType.create())
+                            .executes(context -> {
+                                // Set setting value
+                                Setting<?> setting = SettingArgumentType.get(context, Config.get().settings);
+                                String value = SettingValueArgumentType.get(context);
+
+                                if (setting.parse(value)) {
+                                    ChatUtils.infoPrefix("Config", "Setting (highlight)%s(default) changed to (highlight)%s(default).", setting.title, value);
+                                }
+
+                                return SINGLE_SUCCESS;
+                            }).suggests((context, suggestionsBuilder) ->
+                                SettingValueArgumentType.listSuggestions(context, suggestionsBuilder, Config.get().settings)
+                            )
+                    )
+            )
         );
 
         // Open module screen
@@ -52,11 +101,11 @@ public class SettingCommand extends Command {
                 })
         );
 
-        // View or change settings
+        // View or change module settings
         builder.then(
-                argument("module", ModuleArgumentType.create())
+            argument("module", ModuleArgumentType.create())
                 .then(
-                        argument("setting", SettingArgumentType.create())
+                    argument("setting", SettingArgumentType.create())
                         .executes(context -> {
                             // Get setting value
                             Setting<?> setting = SettingArgumentType.get(context);
@@ -66,7 +115,7 @@ public class SettingCommand extends Command {
                             return SINGLE_SUCCESS;
                         })
                         .then(
-                                argument("value", SettingValueArgumentType.create())
+                            argument("value", SettingValueArgumentType.create())
                                 .executes(context -> {
                                     // Set setting value
                                     Setting<?> setting = SettingArgumentType.get(context);

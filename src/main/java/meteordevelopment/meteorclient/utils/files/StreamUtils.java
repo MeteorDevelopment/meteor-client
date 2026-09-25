@@ -26,7 +26,7 @@ public class StreamUtils {
     public static void copy(InputStream in, File to) {
         try (OutputStream out = new FileOutputStream(to)) {
             in.transferTo(out);
-        } catch (IOException e) {
+        } catch (IOException _) {
             MeteorClient.LOG.error("Error writing to file '{}'.", to.getName());
         } finally {
             IOUtils.closeQuietly(in);

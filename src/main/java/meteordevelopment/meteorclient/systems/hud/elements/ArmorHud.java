@@ -11,10 +11,11 @@ import meteordevelopment.meteorclient.systems.hud.Hud;
 import meteordevelopment.meteorclient.systems.hud.HudElement;
 import meteordevelopment.meteorclient.systems.hud.HudElementInfo;
 import meteordevelopment.meteorclient.systems.hud.HudRenderer;
+import meteordevelopment.meteorclient.utils.render.DisplayItemUtils;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
-import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
@@ -32,7 +33,7 @@ public class ArmorHud extends HudElement {
         .name("orientation")
         .description("How to display armor.")
         .defaultValue(Orientation.Horizontal)
-        .onChanged(val -> calculateSize())
+        .onChanged(_ -> calculateSize())
         .build()
     );
 
@@ -56,7 +57,7 @@ public class ArmorHud extends HudElement {
         .name("durability")
         .description("How to display armor durability.")
         .defaultValue(Durability.Bar)
-        .onChanged(durability1 -> calculateSize())
+        .onChanged(_ -> calculateSize())
         .build()
     );
 
@@ -82,7 +83,7 @@ public class ArmorHud extends HudElement {
         .name("custom-scale")
         .description("Applies a custom scale to this hud element.")
         .defaultValue(false)
-        .onChanged(aBoolean -> calculateSize())
+        .onChanged(_ -> calculateSize())
         .build()
     );
 
@@ -91,7 +92,7 @@ public class ArmorHud extends HudElement {
         .description("Custom scale.")
         .visible(customScale::get)
         .defaultValue(2)
-        .onChanged(aDouble -> calculateSize())
+        .onChanged(_ -> calculateSize())
         .min(0.5)
         .sliderRange(0.5, 3)
         .build()
@@ -162,12 +163,13 @@ public class ArmorHud extends HudElement {
                     armorY = y;
                 }
 
-                renderer.item(itemStack, (int) armorX, (int) armorY, getScale(), (itemStack.isDamageable() && durability.get() == Durability.Bar));
+                renderer.item(itemStack, (int) armorX, (int) armorY, getScale(), (itemStack.isDamageableItem() && durability.get() == Durability.Bar));
 
-                if (itemStack.isDamageable() && durability.get() != Durability.Bar && durability.get() != Durability.None) {
+                if (itemStack.isDamageableItem() && durability.get() != Durability.Bar && durability.get() != Durability.None) {
                     String message = switch (durability.get()) {
-                        case Total -> Integer.toString(itemStack.getMaxDamage() - itemStack.getDamage());
-                        case Percentage -> Integer.toString(Math.round(((itemStack.getMaxDamage() - itemStack.getDamage()) * 100f) / (float) itemStack.getMaxDamage()));
+                        case Total -> Integer.toString(itemStack.getMaxDamage() - itemStack.getDamageValue());
+                        case Percentage ->
+                            Integer.toString(Math.round(((itemStack.getMaxDamage() - itemStack.getDamageValue()) * 100f) / (float) itemStack.getMaxDamage()));
                         default -> "err";
                     };
 
@@ -189,16 +191,16 @@ public class ArmorHud extends HudElement {
 
     private ItemStack getItem(EquipmentSlot slot) {
         if (isInEditor()) {
-            return switch (slot.getEntitySlotId()) {
-                case 3 -> Items.NETHERITE_HELMET.getDefaultStack();
-                case 2 -> Items.NETHERITE_CHESTPLATE.getDefaultStack();
-                case 1 -> Items.NETHERITE_LEGGINGS.getDefaultStack();
-                default -> Items.NETHERITE_BOOTS.getDefaultStack();
+            return switch (slot.getIndex()) {
+                case 3 -> DisplayItemUtils.toStack(Items.NETHERITE_HELMET);
+                case 2 -> DisplayItemUtils.toStack(Items.NETHERITE_CHESTPLATE);
+                case 1 -> DisplayItemUtils.toStack(Items.NETHERITE_LEGGINGS);
+                default -> DisplayItemUtils.toStack(Items.NETHERITE_BOOTS);
             };
         }
 
-        ItemStack stack = mc.player.getEquippedStack(slot);
-        return stack.isEmpty() && showEmpty.get() ? Items.BARRIER.getDefaultStack() : stack;
+        ItemStack stack = mc.player.getItemBySlot(slot);
+        return stack.isEmpty() && showEmpty.get() ? DisplayItemUtils.toStack(Items.BARRIER) : stack;
     }
 
     private float getScale() {

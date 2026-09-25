@@ -14,8 +14,8 @@ public final class Pool<T> {
     private final Queue<T> items = new ArrayDeque<>();
     private final Supplier<T> producer;
 
-    public Pool(Producer<T> producer) {
-        this.producer = producer::create;
+    public Pool(Supplier<T> producer) {
+        this.producer = producer;
     }
 
     public synchronized T get() {

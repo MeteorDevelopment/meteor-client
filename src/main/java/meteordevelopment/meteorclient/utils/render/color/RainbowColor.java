@@ -59,9 +59,7 @@ public class RainbowColor extends Color {
     @Override
     public int hashCode() {
         int result = super.hashCode();
-        long temp;
-        temp = Double.doubleToLongBits(speed);
-        result = 31 * result + (int) (temp ^ (temp >>> 32));
+        result = 31 * result + Double.hashCode(speed);
         return result;
     }
 }

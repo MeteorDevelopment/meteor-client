@@ -7,22 +7,21 @@ package meteordevelopment.meteorclient.utils.tooltip;
 
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.BetterTooltips;
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gl.RenderPipelines;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.tooltip.TooltipComponent;
-import net.minecraft.client.render.MapRenderState;
-import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.component.type.MapIdComponent;
-import net.minecraft.item.FilledMapItem;
-import net.minecraft.item.map.MapState;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.renderer.state.MapRenderState;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.item.MapItem;
+import net.minecraft.world.level.saveddata.maps.MapId;
+import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
+import org.jspecify.annotations.NonNull;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
-public class MapTooltipComponent implements TooltipComponent, MeteorTooltipData {
-    private static final Identifier TEXTURE_MAP_BACKGROUND = Identifier.of("textures/map/map_background.png");
+public class MapTooltipComponent implements ClientTooltipComponent, MeteorTooltipData {
+    private static final Identifier TEXTURE_MAP_BACKGROUND = Identifier.parse("textures/map/map_background.png");
     private final int mapId;
     private final MapRenderState mapRenderState = new MapRenderState();
 
@@ -31,44 +30,42 @@ public class MapTooltipComponent implements TooltipComponent, MeteorTooltipData 
     }
 
     @Override
-    public int getHeight(TextRenderer textRenderer) {
+    public int getHeight(@NonNull Font textRenderer) {
         double scale = Modules.get().get(BetterTooltips.class).mapsScale.get();
         return (int) ((128 + 16) * scale) + 2;
     }
 
     @Override
-    public int getWidth(TextRenderer textRenderer) {
+    public int getWidth(@NonNull Font textRenderer) {
         double scale = Modules.get().get(BetterTooltips.class).mapsScale.get();
         return (int) ((128 + 16) * scale);
     }
 
     @Override
-    public TooltipComponent getComponent() {
+    public ClientTooltipComponent getComponent() {
         return this;
     }
 
     @Override
-    public void drawItems(TextRenderer textRenderer, int x, int y, int width, int height, DrawContext context) {
-        double scale = Modules.get().get(BetterTooltips.class).mapsScale.get();
+    public void extractImage(@NonNull Font font, int x, int y, int width, int height, GuiGraphicsExtractor graphics) {
+        var scale = Modules.get().get(BetterTooltips.class).mapsScale.get().floatValue();
 
         // Background
         int size = (int) ((128 + 16) * scale);
-        context.drawTexture(RenderPipelines.GUI_TEXTURED, TEXTURE_MAP_BACKGROUND, x, y, 0,0, size, size, size, size);
+        graphics.blit(RenderPipelines.GUI_TEXTURED, TEXTURE_MAP_BACKGROUND, x, y, 0, 0, size, size, size, size);
 
         // Contents
-        MapState mapState = FilledMapItem.getMapState(new MapIdComponent(mapId), mc.world);
+        MapItemSavedData mapState = MapItem.getSavedData(new MapId(mapId), mc.level);
         if (mapState == null) return;
 
-        MatrixStack matrices2 = new MatrixStack();
-        VertexConsumerProvider.Immediate consumer = mc.getBufferBuilders().getEntityVertexConsumers();
+        graphics.pose().pushMatrix();
+        graphics.pose().translate(x, y);
+        graphics.pose().scale(scale, scale);
+        graphics.pose().translate(8, 8);
 
-        matrices2.push();
-        matrices2.translate(x, y, 0);
-        matrices2.scale((float) scale, (float) scale, 0);
-        matrices2.translate(8, 8, 0);
-        mc.getMapRenderer().update(new MapIdComponent(mapId), mapState, mapRenderState);
-        mc.getMapRenderer().draw(mapRenderState, matrices2, consumer, false, 0xF000F0);
-        consumer.draw();
-        matrices2.pop();
+        mc.getMapRenderer().extractRenderState(new MapId(mapId), mapState, mapRenderState);
+        graphics.map(mapRenderState);
+
+        graphics.pose().popMatrix();
     }
 }
