@@ -716,6 +716,9 @@ public abstract class WTextBox extends WWidget {
 
         this.focused = focused;
 
+        // SDL only delivers typed characters while text input is enabled
+        mc.textInputManager().onTextInputFocusChange(this, focused);
+
         resetSelection();
 
         if (wasJustFocused) onCursorChanged();

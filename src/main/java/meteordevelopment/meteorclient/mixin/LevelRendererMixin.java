@@ -9,8 +9,10 @@ import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.resource.GraphicsResourceAllocator;
 import com.mojang.blaze3d.resource.ResourceHandle;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.renderpearl.api.buffers.GpuBufferSlice;
+import com.mojang.renderpearl.api.commands.RenderPass;
 import it.unimi.dsi.fastutil.Stack;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import meteordevelopment.meteorclient.mixininterface.IEntityRenderState;
@@ -33,12 +35,15 @@ import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.client.renderer.state.level.LevelRenderState;
 import net.minecraft.world.entity.Entity;
 import org.joml.Vector4f;
+import org.joml.Vector4fc;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import java.util.Optional;
+import java.util.OptionalDouble;
 import java.util.function.Function;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
@@ -124,11 +129,22 @@ public abstract class LevelRendererMixin implements ILevelRenderer {
         meteor$pushEntityOutlineFramebuffer(shader.framebuffer);
         try {
             try (var frame = renderDispatcher.prepareFrame(outlineRenderCommandQueue)) {
-                executeOutline(frame);
+                meteor$executeOutline(frame);
             }
         } finally {
             outlineRenderCommandQueue.submitsPerOrder.clear();
             meteor$popEntityOutlineFramebuffer();
+        }
+    }
+
+    // Same as executeOutline(), but without going through it, since other mods inject into it expecting to be inside the main pass
+    @Unique
+    private void meteor$executeOutline(FeatureRenderDispatcher.PreparedFrame frame) {
+        if (!currentFrameRendersEntityOutline) return;
+
+        try (RenderPass pass = RenderSystem.getDevice().createCommandEncoder().createRenderPass(() -> "Meteor entity outline", entityOutlineTarget.getColorTextureView(), Optional.of(ZERO_CLEAR_COLOR), null, OptionalDouble.empty())) {
+            RenderSystem.bindDefaultUniforms(pass);
+            frame.executeOutline(pass);
         }
     }
 
@@ -161,7 +177,11 @@ public abstract class LevelRendererMixin implements ILevelRenderer {
     private RenderBuffers renderBuffers;
 
     @Shadow
-    protected abstract void executeOutline(FeatureRenderDispatcher.PreparedFrame featureFrame);
+    private boolean currentFrameRendersEntityOutline;
+
+    @Shadow
+    @Final
+    private static Vector4fc ZERO_CLEAR_COLOR;
 
     @Unique
     private Stack<RenderTarget> framebufferStack;
