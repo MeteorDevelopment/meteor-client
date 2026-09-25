@@ -1,9 +1,9 @@
 [versions]
 # Fabric (https://fabricmc.net/develop)
 jdk = "25"
-minecraft = "26.3-pre-1"
-fabric-loader = "0.19.3"
-fabric-api = "0.159.1+26.3"
+minecraft = "26.3"
+fabric-loader = "0.19.5"
+fabric-api = "0.161.0+26.3"
 
 # Plugins
 # Loom (https://github.com/FabricMC/fabric-loom)
@@ -13,13 +13,13 @@ loom = "1.17-SNAPSHOT"
 # Baritone (https://github.com/MeteorDevelopment/baritone)
 baritone = "26.1-SNAPSHOT"
 # Sodium (https://github.com/CaffeineMC/sodium-fabric)
-sodium = "mc26.2-0.9.1-fabric"
+sodium = "mc26.3-0.9.2-fabric"
 # Lithium (https://github.com/CaffeineMC/lithium-fabric)
-lithium = "mc26.2-0.25.2-fabric"
+lithium = "mc26.3-0.26.1-fabric"
 # Iris (https://github.com/IrisShaders/Iris)
-iris = "1.11.2+26.2-fabric"
+iris = "1.11.6+26.3-fabric"
 # ModMenu (https://github.com/TerraformersMC/ModMenu)
-modmenu = "20.0.1"
+modmenu = "21.0.0"
 # Orbit (https://github.com/MeteorDevelopment/orbit)
 orbit = "0.2.4"
 # Starscript (https://github.com/MeteorDevelopment/starscript)
