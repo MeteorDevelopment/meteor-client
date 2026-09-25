@@ -61,7 +61,8 @@ public abstract class ScreenMixin {
 
     @Inject(method = "keyPressed", at = @At("HEAD"), cancellable = true)
     private void onKeyPressed(KeyEvent event, CallbackInfoReturnable<Boolean> cir) {
-        if ((Object) (this) instanceof ChatScreen) return;
+        // Input events are pumped while the game is still starting, before Meteor has initialized
+        if ((Object) (this) instanceof ChatScreen || Modules.get() == null) return;
         GUIMove guiMove = Modules.get().get(GUIMove.class);
         if ((guiMove.disableArrows() && meteor$isArray(event.key())) || (guiMove.disableSpace() && event.key() == KEY_SPACE)) {
             cir.setReturnValue(true);
