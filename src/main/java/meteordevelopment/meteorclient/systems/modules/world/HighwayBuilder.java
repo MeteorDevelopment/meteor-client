@@ -13,34 +13,36 @@ import baritone.api.process.PathingCommandType;
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import meteordevelopment.meteorclient.events.game.GameLeftEvent;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
-import meteordevelopment.meteorclient.events.render.Render2DEvent;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.mixin.MinecraftMixin;
 import meteordevelopment.meteorclient.mixin.ShulkerBoxMenuAccessor;
 import meteordevelopment.meteorclient.mixininterface.IVec3;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
-import meteordevelopment.meteorclient.renderer.text.TextRenderer;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.combat.KillAura;
-import meteordevelopment.meteorclient.systems.modules.player.*;
+import meteordevelopment.meteorclient.systems.modules.player.AutoEat;
+import meteordevelopment.meteorclient.systems.modules.player.AutoGap;
+import meteordevelopment.meteorclient.systems.modules.player.AutoTool;
+import meteordevelopment.meteorclient.systems.modules.player.InstantRebreak;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.entity.SortPriority;
 import meteordevelopment.meteorclient.utils.entity.TargetUtils;
 import meteordevelopment.meteorclient.utils.misc.HorizontalDirection;
 import meteordevelopment.meteorclient.utils.misc.MBlockPos;
-import meteordevelopment.meteorclient.utils.player.*;
-import meteordevelopment.meteorclient.utils.render.NametagUtils;
+import meteordevelopment.meteorclient.utils.player.EChestMemory;
+import meteordevelopment.meteorclient.utils.player.InvUtils;
+import meteordevelopment.meteorclient.utils.player.PlayerUtils;
+import meteordevelopment.meteorclient.utils.player.Rotations;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.meteorclient.utils.world.TickRate;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.ContainerScreen;
 import net.minecraft.client.gui.screens.inventory.ShulkerBoxScreen;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;
@@ -68,32 +70,14 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Range;
-import org.joml.Vector3d;
-import org.jspecify.annotations.NonNull;
 
 import java.util.ArrayDeque;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
 
 @SuppressWarnings("ConstantConditions")
 public class HighwayBuilder extends Module {
-    public enum Rotation {
-        None(false, false),
-        Mine(true, false),
-        Place(false, true),
-        Both(true, true);
-
-        public final boolean mine, place;
-
-        Rotation(boolean mine, boolean place) {
-            this.mine = mine;
-            this.place = place;
-        }
-    }
-
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgDigging = settings.createGroup("Digging");
     private final SettingGroup sgPaving = settings.createGroup("Paving");
@@ -145,10 +129,10 @@ public class HighwayBuilder extends Module {
         .build()
     );
 
-    private final Setting<Rotation> rotation = sgGeneral.add(new EnumSetting.Builder<Rotation>()
+    private final Setting<Boolean> rotation = sgGeneral.add(new BoolSetting.Builder()
         .name("rotation")
         .description("Mode of rotation.")
-        .defaultValue(Rotation.Both)
+        .defaultValue(true)
         .build()
     );
 
@@ -179,14 +163,6 @@ public class HighwayBuilder extends Module {
         .name("double-mine")
         .description("Whether to double mine blocks when applicable (normal mine and packet mine simultaneously).")
         .defaultValue(true)
-        .build()
-    );
-
-    private final Setting<Boolean> fastBreak = sgDigging.add(new BoolSetting.Builder()
-        .name("fast-break")
-        .description("Whether to finish breaking blocks faster than normal while double mining.")
-        .defaultValue(true)
-        .visible(doubleMine::get)
         .build()
     );
 
@@ -423,6 +399,8 @@ public class HighwayBuilder extends Module {
     private final MBlockPos currentPos = new MBlockPos();
     private final MBlockPos movePos = new MBlockPos();
     private final MBlockPos lastBreakingPos = new MBlockPos();
+    private final MBlockPos normalMining = new MBlockPos();
+    private final MBlockPos packetMining = new MBlockPos();
 
     public boolean drawingBow;
 
@@ -433,8 +411,6 @@ public class HighwayBuilder extends Module {
     private int count;
 
     private final RestockTask restockTask = new RestockTask(this);
-    public DoubleMineBlock normalMining;
-    public DoubleMineBlock packetMining;
 
     private boolean suspended = true, inventory = true;
     private int containerId;
@@ -447,10 +423,10 @@ public class HighwayBuilder extends Module {
 
     private State state;
 
-    private final LinkedHashSet<MBlockPos> breakQueue = new LinkedHashSet<>();
-    private final LinkedHashSet<MBlockPos> placeQueue = new LinkedHashSet<>();
-    private final LinkedHashSet<MBlockPos> breakQueueCurrent = new LinkedHashSet<>();
-    private final LinkedHashSet<MBlockPos> placeQueueCurrent = new LinkedHashSet<>();
+    private final ArrayDeque<MBlockPos> breakQueue = new ArrayDeque<>();
+    private final ArrayDeque<MBlockPos> placeQueue = new ArrayDeque<>();
+    private final ArrayDeque<MBlockPos> breakQueueCurrent = new ArrayDeque<>();
+    private final ArrayDeque<MBlockPos> placeQueueCurrent = new ArrayDeque<>();
 
     public HighwayBuilder() {
         super(Categories.World, "highway-builder", "Automatically builds highways.");
@@ -478,6 +454,8 @@ public class HighwayBuilder extends Module {
         currentPos.set(start);
         movePos.set(start);
         lastBreakingPos.set(0, 0, 0);
+        normalMining.set(0, 0, 0);
+        packetMining.set(0, 0, 0);
 
         blocksBroken = 0;
         blocksPlaced = 0;
@@ -502,6 +480,8 @@ public class HighwayBuilder extends Module {
 
         breakQueue.clear();
         placeQueue.clear();
+        breakQueueCurrent.clear();
+        placeQueueCurrent.clear();
     }
 
     @Override
@@ -571,8 +551,9 @@ public class HighwayBuilder extends Module {
         if (mc.player.getY() < start.y - 0.5)
             setState(State.ReLevel); // don't let the current state keep ticking, switch to re-levelling straight away
 
-        tickDoubleMine();
         refreshTasks();
+        if (destroyCrystalTraps.get() && isCrystalTrap())
+            setState(State.DefuseCrystalTraps);
         state.tick(this);
 
         if (breakTimer > 0) breakTimer--;
@@ -585,33 +566,46 @@ public class HighwayBuilder extends Module {
         if (breakQueue.iterator().hasNext()) {
             if (breakTimer > 0)
                 return;
+            breakTimer = breakDelay.get();
+            boolean packetMined = false;
             while (count < blocksPerTick.get() && breakQueue.iterator().hasNext()) {
-                count++;
                 MBlockPos pos = findClosest(breakQueue);
+                breakQueueCurrent.add(pos);
+                if (packetMining.equals(pos)) {
+                    packetMined = true;
+                    continue;
+                }
+                count++;
                 BlockPos mcPos = pos.getBlockPos();
                 int slot = state.findAndMoveBestToolToHotbar(this, mc.level.getBlockState(mcPos), false);
                 if (slot == -1) return;
                 InvUtils.swap(slot, false);
                 if (!BlockUtils.canInstaBreak(mcPos))
                     count = blocksPerTick.get();
-                if (rotation.get().mine && count == blocksPerTick.get())
-                    Rotations.rotate(Rotations.getYaw(mcPos), Rotations.getPitch(mcPos), () -> BlockUtils.breakBlock(mcPos, true));
-                else
-                    BlockUtils.breakBlock(mcPos, true);
-                breakQueueCurrent.add(pos);
-                breakTimer = breakDelay.get();
+                if (!BlockUtils.canInstaBreak(mcPos) && doubleMine.get() && !normalMining.equals(pos) && !packetMined) {
+                    packetMining.set(pos);
+                    mc.gameMode.startPrediction(mc.level, sequence -> new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK, mcPos, BlockUtils.getDirection(mcPos), sequence));
+                    mc.gameMode.startPrediction(mc.level, sequence -> new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.STOP_DESTROY_BLOCK, mcPos, BlockUtils.getDirection(mcPos), sequence));
+                    break;
+                } else {
+                    normalMining.set(pos);
+                    if (rotation.get() && count == blocksPerTick.get())
+                        Rotations.rotate(Rotations.getYaw(mcPos), Rotations.getPitch(mcPos), () -> BlockUtils.breakBlock(mcPos, true));
+                    else
+                        BlockUtils.breakBlock(mcPos, true);
+                }
             }
         } else if (placeQueue.iterator().hasNext()) {
             if (placeTimer > 0)
                 return;
+            placeTimer = placeDelay.get();
             while (count < placementsPerTick.get() && placeQueue.iterator().hasNext()) {
                 count++;
                 MBlockPos pos = findClosest(placeQueue);
+                placeQueueCurrent.add(pos);
                 int slot = state.findBlocksToPlace(this);
                 if (slot == -1) return;
-                BlockUtils.place(pos.getBlockPos(), InteractionHand.MAIN_HAND, slot, rotation.get().place && count == placementsPerTick.get(), 0, true, true, false);
-                placeQueueCurrent.add(pos);
-                placeTimer = placeDelay.get();
+                BlockUtils.place(pos.getBlockPos(), InteractionHand.MAIN_HAND, slot, rotation.get() && count == placementsPerTick.get(), 0, true, true, false);
             }
         }
     }
@@ -629,14 +623,6 @@ public class HighwayBuilder extends Module {
     @EventHandler
     private void onGameLeave(GameLeftEvent event) {
         updateVariables();
-    }
-
-    @EventHandler
-    private void onRender2d(Render2DEvent event) {
-        if (!Utils.canUpdate() || !renderMine.get()) return;
-
-        if (normalMining != null) normalMining.renderLetter(event.graphics);
-        if (packetMining != null) packetMining.renderLetter(event.graphics);
     }
 
     @EventHandler
@@ -663,41 +649,11 @@ public class HighwayBuilder extends Module {
     private void updateVariables() {
         placeTimer = breakTimer = count = containerId = 0;
         ignoreCrystals.clear();
-
-        normalMining = null;
-        packetMining = null;
     }
 
     private void setState(State state) {
         this.state = state;
         state.start(this);
-    }
-
-    private int getWidthLeft() {
-        return switch (width.get()) {
-            case 5, 4 -> 2;
-            case 3, 2 -> 1;
-            default -> 0;
-        };
-    }
-
-    private int getWidthRight() {
-        return switch (width.get()) {
-            case 5 -> 2;
-            case 4, 3 -> 1;
-            default -> 0;
-        };
-    }
-
-    private boolean canMine(MBlockPos pos, boolean mineBlocksToPlace) {
-        BlockState state = pos.getState();
-        return BlockUtils.canBreak(pos.getBlockPos(), state) && (mineBlocksToPlace || !blocksToPlace.get().contains(state.getBlock()));
-    }
-
-    private boolean canPlace(MBlockPos pos, boolean liquids) {
-        if (pos.getBlockPos().distToCenterSqr(mc.player.getEyePosition()) > placeRange.get() * placeRange.get())
-            return false;
-        return liquids ? !pos.getState().getFluidState().isEmpty() : BlockUtils.canPlace(pos.getBlockPos());
     }
 
     private void disconnect(String message, Object... args) {
@@ -708,42 +664,11 @@ public class HighwayBuilder extends Module {
     }
 
     public MutableComponent getStatsText() {
-        MutableComponent text = Component.literal(String.format("%sDistance: %s%.0f\n", ChatFormatting.GRAY, ChatFormatting.WHITE, mc.player == null ? 0.0f : PlayerUtils.distanceTo(start.getBlockPos())));
+        MutableComponent text = Component.literal(String.format("%sDistance: %s%.0f\n", ChatFormatting.GRAY, ChatFormatting.WHITE, distance(start, currentPos)));
         text.append(String.format("%sBlocks broken: %s%d\n", ChatFormatting.GRAY, ChatFormatting.WHITE, blocksBroken));
         text.append(String.format("%sBlocks placed: %s%d", ChatFormatting.GRAY, ChatFormatting.WHITE, blocksPlaced));
 
         return text;
-    }
-
-    private void tickDoubleMine() {
-        // could add clientside block breaking to speed the system up, but it would probably make it too vulnerable to desyncs
-        if (normalMining != null) {
-            if (normalMining.shouldRemove()) {
-                mc.getConnection().send(new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.ABORT_DESTROY_BLOCK, normalMining.blockPos, normalMining.direction));
-                normalMining = null;
-                DoubleMineBlock.rateLimited = true;
-            } else if (mc.level.getBlockState(normalMining.blockPos).getBlock() != normalMining.block) {
-                normalMining = null;
-                blocksBroken++;
-                count++;
-                DoubleMineBlock.rateLimited = false;
-            } else if (normalMining.isReady()) {
-                normalMining.stopDestroying();
-            }
-
-            mc.player.swing(InteractionHand.MAIN_HAND);
-        }
-
-        if (packetMining != null) {
-            if (packetMining.shouldRemove()) {
-                // should we add rate limiting for packet mined blocks? More testing required to see if appropriate
-                packetMining = null;
-            } else if (mc.level.getBlockState(packetMining.blockPos).getBlock() != packetMining.block) {
-                packetMining = null;
-                blocksBroken++;
-                count++;
-            }
-        }
     }
 
     private MBlockPos playerPos() {
@@ -761,7 +686,7 @@ public class HighwayBuilder extends Module {
     }
 
     private void updatePosition() {
-        MBlockPos next = new MBlockPos().set(currentPos).add(dir.offsetX, 0, dir.offsetZ);
+        MBlockPos next = new MBlockPos().set(currentPos).offset(dir);
 
         if (distance(next, playerPos()) < 3) {
             currentPos.set(next);
@@ -805,23 +730,23 @@ public class HighwayBuilder extends Module {
     }
 
     private int checkBlock(MBlockPos block, boolean place) {
-        if (!PlayerUtils.isWithin(block.getBlockPos(), placeRange.get()))
+        if (Math.sqrt(block.getBlockPos().distToCenterSqr(mc.player.getEyePosition())) > placeRange.get())
             return 0;
 
         if (place) {
             if (BlockUtils.canBreak(block.getBlockPos())) {
                 if (onlyPlaceMissing.get()) {
                     if (!block.getState().isCollisionShapeFullBlock(mc.level, block.getBlockPos()))
-                        breakQueue.add(block);
+                        breakQueue.add(new MBlockPos().set(block));
                 } else if (!blocksToPlace.get().contains(block.getState().getBlock())) {
-                    breakQueue.add(block);
+                    breakQueue.add(new MBlockPos().set(block));
                 }
             } else if (block.getState().isAir()) {
-                placeQueue.add(block);
+                placeQueue.add(new MBlockPos().set(block));
             }
         } else {
             if (BlockUtils.canBreak(block.getBlockPos()))
-                breakQueue.add(block);
+                breakQueue.add(new MBlockPos().set(block));
         }
 
         return 1;
@@ -839,6 +764,12 @@ public class HighwayBuilder extends Module {
                 blocksPlaced++;
         placeQueueCurrent.clear();
 
+        if (packetMining.getState().isAir())
+            packetMining.set(0, 0, 0);
+
+        if (normalMining.getState().isAir())
+            normalMining.set(0, 0, 0);
+
         MBlockPos origin = new MBlockPos().set(currentPos).add(0, -1, 0).offset(dir);
         int addedBlocks = 1;
         int direction = 0;
@@ -855,7 +786,7 @@ public class HighwayBuilder extends Module {
                 if (heightCounter == 0) {
                     while (widthCounter > 0) {
                         addedBlocks += checkBlock(pos, true);
-                        pos = new MBlockPos().set(pos).offset(rightDir);
+                        pos.offset(rightDir);
                         widthCounter--;
                     }
 
@@ -867,11 +798,11 @@ public class HighwayBuilder extends Module {
                     addedBlocks += checkBlock(pos, true);
                     widthCounter--;
                     while (widthCounter > 1) {
-                        pos = new MBlockPos().set(pos).offset(rightDir);
+                        pos.offset(rightDir);
                         addedBlocks += checkBlock(pos, false);
                         widthCounter--;
                     }
-                    pos = new MBlockPos().set(pos).offset(rightDir);
+                    pos.offset(rightDir);
                     addedBlocks += checkBlock(pos, true);
                     heightCounter++;
                     continue;
@@ -881,7 +812,7 @@ public class HighwayBuilder extends Module {
                 widthCounter--;
 
                 while (widthCounter > 0) {
-                    pos = new MBlockPos().set(pos).offset(rightDir);
+                    pos.offset(rightDir);
                     addedBlocks += checkBlock(pos, false);
                     widthCounter--;
                 }
@@ -892,7 +823,7 @@ public class HighwayBuilder extends Module {
             if (addedBlocks == 0 && direction == 0) {
                 direction = 1;
                 addedBlocks = 1;
-                origin.set(currentPos).add(0, -1, 0).offset(dir);
+                origin.set(currentPos).add(0, -1, 0).offset(dir, 2);
                 if (!breakQueue.iterator().hasNext() && !placeQueue.iterator().hasNext())
                     updatePosition();
                 continue;
@@ -905,7 +836,7 @@ public class HighwayBuilder extends Module {
         }
     }
 
-    private MBlockPos findClosest(LinkedHashSet<MBlockPos> set) {
+    private MBlockPos findClosest(ArrayDeque<MBlockPos> set) {
         MBlockPos pos = set.getFirst();
         double distance = pos.getBlockPos().distToCenterSqr(mc.player.getEyePosition());
         for (MBlockPos current : set) {
@@ -918,6 +849,24 @@ public class HighwayBuilder extends Module {
 
         set.remove(pos);
         return pos;
+    }
+
+    private boolean isCrystalTrap() {
+        for (Entity entity : mc.level.entitiesForRendering()) {
+            if (!(entity instanceof EndCrystal endCrystal)) continue;
+            if (PlayerUtils.isWithin(endCrystal, 12) || !PlayerUtils.isWithin(endCrystal, 24)) continue;
+            if (ignoreCrystals.contains(endCrystal)) continue;
+
+            Vec3 vec1 = new Vec3(0, 0, 0);
+            Vec3 vec2 = new Vec3(0, 0, 0);
+
+            // todo add a better raytrace check
+            ((IVec3) vec1).meteor$set(mc.player.getX(), mc.player.getY() + mc.player.getEyeHeight(), mc.player.getZ());
+            ((IVec3) vec2).meteor$set(entity.getX(), entity.getY() + 0.5, entity.getZ());
+            return mc.level.clip(new ClipContext(vec1, vec2, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, mc.player)).getType() == HitResult.Type.MISS;
+        }
+
+        return false;
     }
 
     private enum State {
@@ -947,7 +896,7 @@ public class HighwayBuilder extends Module {
                 if (slot == -1)
                     return;
 
-                BlockUtils.place(bp2, InteractionHand.MAIN_HAND, slot, b.rotation.get().place, 100, true, true, false);
+                BlockUtils.place(bp2, InteractionHand.MAIN_HAND, slot, b.rotation.get(), 100, true, true, false);
             }
         },
 
@@ -1078,7 +1027,7 @@ public class HighwayBuilder extends Module {
 
                     // if we don't know what's in your echest, open it quickly while we have one available to check
                     if (!EChestMemory.isKnown()) {
-                        if (b.rotation.get().place) Rotations.rotate(Rotations.getYaw(bp), Rotations.getPitch(bp), () ->
+                        if (b.rotation.get()) Rotations.rotate(Rotations.getYaw(bp), Rotations.getPitch(bp), () ->
                             b.mc.gameMode.useItemOn(b.mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atCenterOf(bp), Direction.UP, bp, false)));
                         else
                             b.mc.gameMode.useItemOn(b.mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atCenterOf(bp), Direction.UP, bp, false));
@@ -1111,7 +1060,7 @@ public class HighwayBuilder extends Module {
 
                         rebreakTimer = b.rebreakTimer.get();
 
-                        if (b.rotation.get().mine) {
+                        if (b.rotation.get()) {
                             Rotations.rotate(Rotations.getYaw(bp), Rotations.getPitch(bp), () ->
                                 b.mc.gameMode.startPrediction(b.mc.level, sequence ->
                                     new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.STOP_DESTROY_BLOCK, bp, BlockUtils.getDirection(bp), sequence)
@@ -1121,7 +1070,7 @@ public class HighwayBuilder extends Module {
                             new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.STOP_DESTROY_BLOCK, bp, BlockUtils.getDirection(bp), sequence)
                         );
                     } else {
-                        if (b.rotation.get().mine)
+                        if (b.rotation.get())
                             Rotations.rotate(Rotations.getYaw(bp), Rotations.getPitch(bp), () -> BlockUtils.breakBlock(bp, true));
                         else BlockUtils.breakBlock(bp, true);
                     }
@@ -1145,7 +1094,7 @@ public class HighwayBuilder extends Module {
                     else
                         first = false;
 
-                    BlockUtils.place(bp, InteractionHand.MAIN_HAND, slot, b.rotation.get().place, 0, true, true, false);
+                    BlockUtils.place(bp, InteractionHand.MAIN_HAND, slot, b.rotation.get(), 0, true, true, false);
                     timeout = 0;
                 }
             }
@@ -1381,7 +1330,7 @@ public class HighwayBuilder extends Module {
                             return;
                         }
 
-                        BlockUtils.place(blockPos, InteractionHand.MAIN_HAND, slot, b.rotation.get().place, 0, true, true, false);
+                        BlockUtils.place(blockPos, InteractionHand.MAIN_HAND, slot, b.rotation.get(), 0, true, true, false);
                     }
 
                     // the only valid blocks should be air, a shulker box, or an ender chest
@@ -1449,11 +1398,11 @@ public class HighwayBuilder extends Module {
                     int toolSlot = findAndMoveBestToolToHotbar(b, state, false);
                     InvUtils.swap(toolSlot, false);
 
-                    if (b.rotation.get().mine)
+                    if (b.rotation.get())
                         Rotations.rotate(Rotations.getYaw(bp), Rotations.getPitch(bp), () -> BlockUtils.breakBlock(bp, true));
                     else BlockUtils.breakBlock(bp, true);
                 } else {
-                    if (b.rotation.get().place) {
+                    if (b.rotation.get()) {
                         Rotations.rotate(Rotations.getYaw(bp), Rotations.getPitch(bp), () ->
                             b.mc.gameMode.useItemOn(b.mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atCenterOf(bp), Direction.UP, bp, false))
                         );
@@ -1604,148 +1553,6 @@ public class HighwayBuilder extends Module {
 
         protected abstract void tick(HighwayBuilder b);
 
-        protected void mine(HighwayBuilder b, MBPIterator it, boolean mineBlocksToPlace) {
-            boolean breaking = false;
-            boolean finishedBreaking = false; // if you can multi break this lets you mine blocks between tasks in a single tick
-
-            // extract all candidates for double mining and enqueue them to be mined. After those we can break the remaining
-            // blocks normally
-            if (b.doubleMine.get()) {
-                // todo hold the best mining tool before performing the double mining checks so we dont double mine blocks unnecessarily
-                ArrayDeque<BlockPos> toDoubleMine = new ArrayDeque<>();
-
-                it.save();
-                it.forEach(pos -> {
-                    // only want to double mine blocks that we can mine, that are not instamined, and we are not already mining
-                    if (
-                        BlockUtils.canBreak(pos.getBlockPos(), pos.getState())
-                            && (mineBlocksToPlace || !b.blocksToPlace.get().contains(pos.getState().getBlock()))
-                            && !BlockUtils.canInstaBreak(pos.getBlockPos()) && (!Modules.get().get(SpeedMine.class).instamine() || pos.getState().getDestroyProgress(b.mc.player, b.mc.level, pos.getBlockPos()) <= 0.5)
-                            && (b.normalMining == null || !pos.getBlockPos().equals(b.normalMining.blockPos))
-                            && (b.packetMining == null || !pos.getBlockPos().equals(b.packetMining.blockPos))
-                    ) {
-                        toDoubleMine.add(pos.getBlockPos().mutable());
-                    }
-                });
-
-                // have to save and restore the iterator from the beginning to make sure the subsequent loop can use it properly
-                it.restore();
-
-                // repeating the code for swapping to a tool, since we don't want to start mining a block if we don't
-                // have a tool to mine it with, but also we want to lock the slot to the tool while we are mining even
-                // the ArrayDequeue is empty
-                if (!toDoubleMine.isEmpty()) {
-                    int slot = findAndMoveBestToolToHotbar(b, b.mc.level.getBlockState(toDoubleMine.peek()), false);
-                    if (slot == -1) return;
-
-                    InvUtils.swap(slot, false);
-                    doubleMine(b, toDoubleMine);
-                }
-
-                if (b.normalMining != null || b.packetMining != null) {
-                    int slot = findAndMoveBestToolToHotbar(b, b.normalMining != null ? b.normalMining.blockState : b.packetMining.blockState, false);
-                    if (slot == -1) return;
-
-                    InvUtils.swap(slot, false);
-                    return;
-                }
-            }
-
-            for (MBlockPos pos : it) {
-                if (b.count >= b.blocksPerTick.get()) return;
-                if (b.breakTimer > 0) return;
-
-                BlockState state = pos.getState();
-                if (state.isAir() || (!mineBlocksToPlace && b.blocksToPlace.get().contains(state.getBlock()))) continue;
-
-                int slot = findAndMoveBestToolToHotbar(b, state, false);
-                if (slot == -1) return;
-
-                InvUtils.swap(slot, false);
-
-                BlockPos mcPos = pos.getBlockPos();
-                boolean multiBreak = b.blocksPerTick.get() > 1 && BlockUtils.canInstaBreak(mcPos) && !b.rotation.get().mine;
-                if (BlockUtils.canBreak(mcPos)) {
-                    if (b.rotation.get().mine)
-                        Rotations.rotate(Rotations.getYaw(mcPos), Rotations.getPitch(mcPos), () -> BlockUtils.breakBlock(mcPos, true));
-                    else BlockUtils.breakBlock(mcPos, true);
-                    breaking = true;
-
-                    b.breakTimer = b.breakDelay.get();
-
-                    if (!b.lastBreakingPos.equals(pos)) {
-                        b.lastBreakingPos.set(pos);
-                        b.blocksBroken++;
-                    }
-
-                    b.count++;
-
-                    // can only multi break if we aren't rotating and the block can be insta-mined
-                    if (!multiBreak) break;
-                }
-
-                if (!it.hasNext() && BlockUtils.canInstaBreak(mcPos)) finishedBreaking = true;
-            }
-
-            // we quickly jump to the next state, to remove micro delays in the process and allow us to break blocks
-            // between tasks if we can multi break
-            if (finishedBreaking || !breaking) {
-                b.setState(State.Wait);
-            }
-        }
-
-        private void doubleMine(HighwayBuilder b, ArrayDeque<BlockPos> blocks) {
-            if (b.breakTimer > 0) return;
-
-            if (b.normalMining == null) {
-                DoubleMineBlock block = new DoubleMineBlock(b, blocks.pop());
-                b.normalMining = block.startDestroying();
-
-                b.breakTimer = b.breakDelay.get();
-                if (b.breakTimer > 0) return;
-            }
-
-            if (DoubleMineBlock.rateLimited) return;
-
-            if (b.packetMining == null && !blocks.isEmpty()) {
-                DoubleMineBlock block = new DoubleMineBlock(b, blocks.pop());
-
-                if (block != null) {
-                    b.packetMining = b.normalMining.packetMine();
-                    b.normalMining = block.startDestroying();
-
-                    b.breakTimer = b.breakDelay.get();
-                }
-            }
-        }
-
-        protected void place(HighwayBuilder b, MBPIterator it, int slot) {
-            boolean placed = false;
-            boolean finishedPlacing = false;
-
-            for (MBlockPos pos : it) {
-                if (b.count >= it.placementsPerTick(b)) return;
-                if (b.placeTimer > 0) return;
-
-                if (pos.getBlockPos().distToCenterSqr(b.mc.player.getEyePosition()) > b.placeRange.get() * b.placeRange.get())
-                    continue;
-
-                if (BlockUtils.place(pos.getBlockPos(), InteractionHand.MAIN_HAND, slot, b.rotation.get().place, 0, true, true, true)) {
-                    placed = true;
-                    b.blocksPlaced++;
-                    b.placeTimer = b.placeDelay.get();
-
-                    b.count++;
-                    if (b.placementsPerTick.get() == 1) break;
-                }
-
-                if (!it.hasNext()) finishedPlacing = true;
-            }
-
-            if (finishedPlacing || !placed)
-                b.setState(State.Wait);
-        }
-
         private int findSlot(HighwayBuilder b, Predicate<ItemStack> predicate, boolean hotbar) {
             for (int i = hotbar ? 0 : 9; i < (hotbar ? 9 : b.mc.player.getInventory().getNonEquipmentItems().size()); i++) {
                 if (predicate.test(b.mc.player.getInventory().getItem(i))) return i;
@@ -1836,9 +1643,6 @@ public class HighwayBuilder extends Module {
         }
 
         protected int findAndMoveBestToolToHotbar(HighwayBuilder b, BlockState blockState, boolean noSilkTouch) {
-            // Check for creative
-            if (b.mc.player.isCreative()) return b.mc.player.getInventory().getSelectedSlot();
-
             // Find best tool
             double bestScore = -1;
             int bestSlot = -1;
@@ -1916,96 +1720,6 @@ public class HighwayBuilder extends Module {
             });
 
             return slot != -1 ? slot : findBlocksToPlace(b);
-        }
-    }
-
-    private interface MBPIterator extends Iterator<MBlockPos>, Iterable<MBlockPos> {
-        void save();
-
-        void restore();
-
-        @NonNull
-        @Override
-        default Iterator<MBlockPos> iterator() {
-            return this;
-        }
-
-        default int placementsPerTick(HighwayBuilder b) {
-            return b.placementsPerTick.get();
-        }
-    }
-
-    public static class DoubleMineBlock {
-        public static boolean rateLimited = false;
-        public final BlockPos blockPos;
-        public final BlockState blockState;
-
-        private final Block block;
-        private final Direction direction;
-        private final HighwayBuilder b;
-        private final Vector3d vec3 = new Vector3d(0);
-
-        private int normalStartTime, packetStartTime;
-        private boolean packet;
-
-        public DoubleMineBlock(HighwayBuilder b, BlockPos pos) {
-            this.b = b;
-            this.blockPos = pos;
-            this.blockState = b.mc.level.getBlockState(this.blockPos);
-            this.block = this.blockState.getBlock();
-            this.direction = BlockUtils.getDirection(pos);
-            this.packet = false;
-        }
-
-        public DoubleMineBlock startDestroying() {
-            b.mc.gameMode.startPrediction(b.mc.level, sequence -> new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK, this.blockPos, this.direction, sequence));
-            normalStartTime = b.mc.player.tickCount;
-            return this;
-        }
-
-        public DoubleMineBlock stopDestroying() {
-            b.mc.gameMode.startPrediction(b.mc.level, sequence -> new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.STOP_DESTROY_BLOCK, this.blockPos, this.direction, sequence));
-            return this;
-        }
-
-        public DoubleMineBlock packetMine() {
-            packetStartTime = b.mc.player.tickCount;
-            packet = true;
-            return stopDestroying();
-        }
-
-        public boolean isReady() {
-            return progress() >= (b.fastBreak.get() ? 0.7 : 1.0);
-        }
-
-        public boolean shouldRemove() {
-            boolean distance = !packet && Utils.distance(b.mc.player.getEyePosition().x, b.mc.player.getEyePosition().y, b.mc.player.getEyePosition().z, blockPos.getX() + direction.getStepX(), blockPos.getY() + direction.getStepY(), blockPos.getZ() + direction.getStepZ()) > b.mc.player.blockInteractionRange();
-
-            // a minimum amount of time needs to have elapsed for the timeout check to occur, otherwise it may trigger
-            // when it isn't supposed to due to latency
-            boolean timeout = progress() > 2 && (b.mc.player.tickCount - (packet ? packetStartTime : normalStartTime) > 60);
-
-            return distance || timeout;
-        }
-
-        public double progress() {
-            int slot = b.mc.player.getInventory().getSelectedSlot();
-            return BlockUtils.getBreakDelta(slot, blockState) * ((b.mc.player.tickCount - (packet ? packetStartTime : normalStartTime)) + 1);
-        }
-
-        public void renderLetter(GuiGraphicsExtractor graphics) {
-            vec3.set(blockPos.getX() + 0.5, blockPos.getY() + 0.5, blockPos.getZ() + 0.5);
-            if (!NametagUtils.to2D(vec3, 2)) return;
-
-            NametagUtils.begin(vec3, graphics);
-            TextRenderer.get().begin(graphics, 1.0, false, true);
-
-            String letter = packet ? "P" : "N";
-            double w = TextRenderer.get().getWidth(letter) / 2.0;
-            TextRenderer.get().render(letter, -w, 0.0, Color.WHITE, true);
-
-            TextRenderer.get().end();
-            NametagUtils.end(graphics);
         }
     }
 
