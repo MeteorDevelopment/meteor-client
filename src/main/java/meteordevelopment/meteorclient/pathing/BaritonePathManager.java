@@ -49,9 +49,13 @@ public class BaritonePathManager implements IPathManager {
         return "Baritone";
     }
 
+    // Pause Fix
     @Override
     public boolean isPathing() {
-        return BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing();
+    var baritone = BaritoneAPI.getProvider().getPrimaryBaritone();
+
+    return baritone.getPathingBehavior().isPathing()
+        || baritone.getBuilderProcess().isActive();
     }
 
     @Override
