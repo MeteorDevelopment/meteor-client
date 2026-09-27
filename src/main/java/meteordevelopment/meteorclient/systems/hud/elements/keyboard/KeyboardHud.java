@@ -910,6 +910,7 @@ public class KeyboardHud extends HudElement {
         @Override
         public void initWidgets() {
             Settings settings = new Settings();
+            settings.assignOwner("keyboard");
             SettingGroup sgGeneral = settings.getDefaultGroup();
 
             sgGeneral.add(new KeybindSetting.Builder()

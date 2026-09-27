@@ -131,17 +131,35 @@ def main():
         for m in re.finditer(r"(\w+)\s*=\s*settings\.createGroup\(\"([^\"]*)\"", t):
             groupvars[m.group(1)] = m.group(2)
 
+        # explicit `settings.assignOwner("x")` calls, used by screens and nested settings
+        # collections; each settings block is scoped to the nearest preceding call.
+        explicit = [(m.start(), m.group(1)) for m in re.finditer(r'assignOwner\("([^"]+)"\)', t)]
+
+        def owner_at(pos):
+            owner = None
+            for p, o in explicit:
+                if p < pos:
+                    owner = o
+                else:
+                    break
+            return owner if owner is not None else owner
+
         # each `<group>.add(new <X>Setting.Builder()...build())` block
         for m in re.finditer(r"(\w+)\.add\(\s*new\s+\w*Setting\.Builder", t):
             var = m.group(1)
             gname = groupvars.get(var, "General")
-            span = t[m.end():m.end() + 2000]
+            span = t[m.end():m.end() + 3000]
             b = span.find(".build()")
-            block = span[: b + 7] if b >= 0 else span
+            nxt = span.find(".add(")
+            end = b + 7 if b >= 0 else len(span)
+            if nxt >= 0:
+                end = min(end, nxt)
+            block = span[:end]
             nm = re.search(r'\.name\("([^"]*)"\)', block)
             dm = re.search(r'\.description\("([^"]*)"\)', block)
             if not nm:
                 continue
+            scope = slug(owner_at(m.start()) or scope)
             gslug = slug(gname)
             add(f"{METEOR}.setting.{scope}.{gslug}.{slug(nm.group(1))}.name", name_to_title(nm.group(1)))
             if dm:
