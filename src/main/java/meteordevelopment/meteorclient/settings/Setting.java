@@ -24,7 +24,18 @@ import java.util.function.Consumer;
 public abstract class Setting<T> implements IGetter<T>, ISerializable<T> {
     private static final List<String> NO_SUGGESTIONS = List.of();
 
-    public final String name, description;
+    public final String name;
+
+    /**
+     * Legacy untranslated title, kept for source compatibility with addons that read the
+     * field directly. Use {@link #title()} for the translated title.
+     *
+     * @deprecated use {@link #title()}
+     */
+    @Deprecated
+    public final String title;
+
+    public final String description;
     private final IVisible visible;
 
     private TranslationKey nameKey;
@@ -45,6 +56,7 @@ public abstract class Setting<T> implements IGetter<T>, ISerializable<T> {
 
     public Setting(String name, String description, T defaultValue, Consumer<T> onChanged, Consumer<Setting<T>> onModuleActivated, IVisible visible) {
         this.name = name;
+        this.title = Utils.nameToTitle(name);
         this.description = description;
         this.defaultValue = defaultValue;
         this.onChanged = onChanged;

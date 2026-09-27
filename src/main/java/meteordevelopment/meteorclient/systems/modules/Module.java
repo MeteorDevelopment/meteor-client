@@ -34,6 +34,25 @@ public abstract class Module implements ISerializable<Module>, Comparable<Module
 
     public final Category category;
     public final String name;
+
+    /**
+     * Legacy untranslated title, kept for source compatibility with addons that read the
+     * field directly. Use {@link #title()} for the translated title.
+     *
+     * @deprecated use {@link #title()}
+     */
+    @Deprecated
+    public final String title;
+
+    /**
+     * Legacy untranslated description, kept for source compatibility with addons that read
+     * the field directly. Use {@link #description()} for the translated description.
+     *
+     * @deprecated use {@link #description()}
+     */
+    @Deprecated
+    public final String description;
+
     public final String[] aliases;
     public final Color color;
 
@@ -61,6 +80,8 @@ public abstract class Module implements ISerializable<Module>, Comparable<Module
         this.mc = Minecraft.getInstance();
         this.category = category;
         this.name = name;
+        this.title = Utils.nameToTitle(name);
+        this.description = description;
         String ns = AddonManager.namespaceOf(getClass());
         this.nameKey = TranslationKey.of(TranslationManager.moduleNameKey(ns, name));
         this.descriptionKey = TranslationKey.of(TranslationManager.moduleDescriptionKey(ns, name));

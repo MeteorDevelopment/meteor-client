@@ -244,12 +244,20 @@ public final class TranslationManager {
         return METEOR_MOD_ID + "." + TYPE_HUD + "." + slug(hudId) + ".description";
     }
 
+    public static String commandNameKey(String namespace, String commandId) {
+        return namespace + "." + TYPE_COMMAND + "." + slug(commandId) + ".name";
+    }
+
+    public static String commandDescriptionKey(String namespace, String commandId) {
+        return namespace + "." + TYPE_COMMAND + "." + slug(commandId) + ".description";
+    }
+
     public static String commandNameKey(String commandId) {
-        return METEOR_MOD_ID + "." + TYPE_COMMAND + "." + slug(commandId) + ".name";
+        return commandNameKey(METEOR_MOD_ID, commandId);
     }
 
     public static String commandDescriptionKey(String commandId) {
-        return METEOR_MOD_ID + "." + TYPE_COMMAND + "." + slug(commandId) + ".description";
+        return commandDescriptionKey(METEOR_MOD_ID, commandId);
     }
 
     /**

@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.gui;
 
+import meteordevelopment.meteorclient.addons.AddonManager;
 import meteordevelopment.meteorclient.gui.renderer.packer.GuiTexture;
 import meteordevelopment.meteorclient.gui.screens.ModuleScreen;
 import meteordevelopment.meteorclient.gui.screens.ModulesScreen;
@@ -49,7 +50,7 @@ public abstract class GuiTheme implements ISerializable<GuiTheme> {
     protected final Map<String, WindowConfig> windowConfigs = new HashMap<>();
 
     public GuiTheme(String name) {
-        settings.assignOwner("gui-theme");
+        settings.assignOwner(AddonManager.namespaceOf(getClass()), "gui-theme");
         this.name = name;
     }
 

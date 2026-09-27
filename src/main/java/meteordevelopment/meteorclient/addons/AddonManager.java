@@ -31,7 +31,7 @@ public class AddonManager {
 
     /** Run an addon's initializer with its namespace set as the ambient namespace. */
     public static void initialize(MeteorAddon addon) {
-        initializingNamespace = addon.name;
+        initializingNamespace = addon.modId != null ? addon.modId : MeteorClient.MOD_ID;
         try {
             addon.onInitialize();
         } finally {
@@ -48,7 +48,9 @@ public class AddonManager {
         if (clazz != null) {
             String classname = clazz.getName();
             for (MeteorAddon addon : ADDONS) {
-                if (classname.startsWith(addon.getPackage())) return addon.name;
+                if (classname.startsWith(addon.getPackage())) {
+                    return addon.modId != null ? addon.modId : MeteorClient.MOD_ID;
+                }
             }
         }
         return MeteorClient.MOD_ID;
@@ -86,6 +88,7 @@ public class AddonManager {
             ModMetadata metadata = FabricLoader.getInstance().getModContainer(MeteorClient.MOD_ID).get().getMetadata();
 
             MeteorClient.ADDON.name = metadata.getName();
+            MeteorClient.ADDON.modId = MeteorClient.MOD_ID;
             MeteorClient.ADDON.authors = new String[metadata.getAuthors().size()];
             if (metadata.containsCustomValue(MeteorClient.MOD_ID + ":color")) {
                 MeteorClient.ADDON.color.parse(metadata.getCustomValue(MeteorClient.MOD_ID + ":color").getAsString());
@@ -110,7 +113,8 @@ public class AddonManager {
             }
 
             addon.name = metadata.getName();
-            TranslationManager.registerNamespace(addon.name);
+            addon.modId = metadata.getId();
+            TranslationManager.registerNamespace(addon.modId);
 
             if (metadata.getAuthors().isEmpty()) throw new RuntimeException("Addon \"%s\" requires at least 1 author to be defined in it's fabric.mod.json. See https://fabricmc.net/wiki/documentation:fabric_mod_json_spec".formatted(addon.name));
             addon.authors = new String[metadata.getAuthors().size()];

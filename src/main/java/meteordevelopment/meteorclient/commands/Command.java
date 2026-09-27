@@ -10,6 +10,7 @@ import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import meteordevelopment.meteorclient.MeteorClient;
+import meteordevelopment.meteorclient.addons.AddonManager;
 import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.translation.TranslationKey;
 import meteordevelopment.meteorclient.translation.TranslationManager;
@@ -36,8 +37,9 @@ public abstract class Command {
 
     public Command(String name, String description, String... aliases) {
         this.name = name;
-        this.nameKey = TranslationKey.of(TranslationManager.commandNameKey(name));
-        this.descriptionKey = TranslationKey.of(TranslationManager.commandDescriptionKey(name));
+        String ns = AddonManager.namespaceOf(getClass());
+        this.nameKey = TranslationKey.of(TranslationManager.commandNameKey(ns, name));
+        this.descriptionKey = TranslationKey.of(TranslationManager.commandDescriptionKey(ns, name));
         this.aliases = List.of(aliases);
     }
 
