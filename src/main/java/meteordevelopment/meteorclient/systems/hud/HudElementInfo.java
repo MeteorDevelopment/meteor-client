@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.systems.hud;
 
+import meteordevelopment.meteorclient.addons.AddonManager;
 import meteordevelopment.meteorclient.translation.TranslationKey;
 import meteordevelopment.meteorclient.translation.TranslationManager;
 import meteordevelopment.meteorclient.utils.Utils;
@@ -19,8 +20,8 @@ public class HudElementInfo<T extends HudElement> {
     public final HudGroup group;
     public final String name;
 
-    private final TranslationKey nameKey;
-    private final TranslationKey descriptionKey;
+    private TranslationKey nameKey;
+    private TranslationKey descriptionKey;
 
     public final Supplier<T> factory;
     public final List<Preset> presets;
@@ -37,6 +38,17 @@ public class HudElementInfo<T extends HudElement> {
 
     public HudElementInfo(HudGroup group, String name, String description, Supplier<T> factory) {
         this(group, name, Utils.nameToTitle(name), description, factory);
+    }
+
+    /**
+     * Re-scope this element's translation keys to an addon namespace. Called by
+     * {@link Hud#register(HudElementInfo)} for elements owned by an addon, because the
+     * owning class is not known when the info object is constructed.
+     */
+    public void assignNamespace(String namespace) {
+        if (namespace == null || namespace.equals(TranslationManager.METEOR_MOD_ID)) return;
+        this.nameKey = TranslationKey.of(TranslationManager.hudNameKey(namespace, name));
+        this.descriptionKey = TranslationKey.of(TranslationManager.hudDescriptionKey(namespace, name));
     }
 
     /** The HUD element title in the current language, resolved lazily. */

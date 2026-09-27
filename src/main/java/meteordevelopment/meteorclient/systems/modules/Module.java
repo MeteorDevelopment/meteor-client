@@ -12,6 +12,7 @@ import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.settings.Settings;
 import meteordevelopment.meteorclient.systems.config.Config;
+import meteordevelopment.meteorclient.addons.AddonManager;
 import meteordevelopment.meteorclient.translation.TranslationKey;
 import meteordevelopment.meteorclient.translation.TranslationManager;
 import meteordevelopment.meteorclient.utils.Utils;
@@ -60,12 +61,13 @@ public abstract class Module implements ISerializable<Module>, Comparable<Module
         this.mc = Minecraft.getInstance();
         this.category = category;
         this.name = name;
-        this.nameKey = TranslationKey.of(TranslationManager.moduleNameKey(name));
-        this.descriptionKey = TranslationKey.of(TranslationManager.moduleDescriptionKey(name));
+        String ns = AddonManager.namespaceOf(getClass());
+        this.nameKey = TranslationKey.of(TranslationManager.moduleNameKey(ns, name));
+        this.descriptionKey = TranslationKey.of(TranslationManager.moduleDescriptionKey(ns, name));
         this.aliases = aliases;
         this.color = Color.fromHsv(Utils.random(0.0, 360.0), 0.35, 1);
 
-        settings.assignOwner(name);
+        settings.assignOwner(ns, name);
 
         String classname = this.getClass().getName();
         for (MeteorAddon addon : AddonManager.ADDONS) {

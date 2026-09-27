@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.settings;
 
+import meteordevelopment.meteorclient.addons.AddonManager;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.translation.TranslationKey;
 import meteordevelopment.meteorclient.translation.TranslationManager;
@@ -28,6 +29,7 @@ public abstract class Setting<T> implements IGetter<T>, ISerializable<T> {
 
     private TranslationKey nameKey;
     private TranslationKey descriptionKey;
+    private String namespaceScope;
     private String ownerScope;
     private String groupScope = "General";
     private String cachedKeyOwner;
@@ -53,18 +55,33 @@ public abstract class Setting<T> implements IGetter<T>, ISerializable<T> {
     }
 
     /**
-     * Assign the translation owner id for this setting. Called by {@link Settings#assignOwner(String)}
-     * when the owning module or HUD element is created, and by {@link Settings#registerColorSettings(Module)}
-     * for module settings. Until assigned, keys are scoped to the global namespace.
+     * Assign the translation namespace (mod id) and owner id for this setting. Called by
+     * {@link Settings#assignOwner(String, String)} when the owning module or HUD element is
+     * created, and by {@link Settings#registerColorSettings(Module)} for module settings.
+     * Until assigned, keys are scoped to the meteor-client global namespace.
      */
-    public void assignOwner(String ownerId) {
+    public void assignOwner(String namespace, String ownerId) {
+        this.namespaceScope = namespace;
         this.ownerScope = ownerId;
         this.module = null;
+    }
+
+    /** Assign the owner id, keeping the meteor-client namespace. */
+    public void assignOwner(String ownerId) {
+        assignOwner(TranslationManager.METEOR_MOD_ID, ownerId);
     }
 
     /** Assign the setting-group id used to scope translation keys. */
     public void assignGroup(String groupId) {
         this.groupScope = groupId;
+    }
+
+    /** The translation namespace (mod id) used to scope translation keys. */
+    private String namespaceId() {
+        if (namespaceScope != null) return namespaceScope;
+        if (module != null) return AddonManager.namespaceOf(module.getClass());
+        String ambient = AddonManager.initializingNamespace();
+        return ambient != null ? ambient : TranslationManager.METEOR_MOD_ID;
     }
 
     /** The owner id used to scope translation keys — explicit scope, module name, or "global". */
@@ -74,11 +91,11 @@ public abstract class Setting<T> implements IGetter<T>, ISerializable<T> {
     }
 
     private void ensureKeys() {
-        String cacheId = ownerId() + "/" + groupScope;
+        String cacheId = namespaceId() + "/" + ownerId() + "/" + groupScope;
         if (nameKey == null || !cacheId.equals(cachedKeyOwner)) {
             cachedKeyOwner = cacheId;
-            nameKey = TranslationKey.of(TranslationManager.settingNameKey(ownerId(), groupScope, name));
-            descriptionKey = TranslationKey.of(TranslationManager.settingDescriptionKey(ownerId(), groupScope, name));
+            nameKey = TranslationKey.of(TranslationManager.settingNameKey(namespaceId(), ownerId(), groupScope, name));
+            descriptionKey = TranslationKey.of(TranslationManager.settingDescriptionKey(namespaceId(), ownerId(), groupScope, name));
         }
     }
 

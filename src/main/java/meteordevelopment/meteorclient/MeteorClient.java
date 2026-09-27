@@ -129,7 +129,7 @@ public class MeteorClient implements ClientModInitializer {
         EVENT_BUS.subscribe(this);
 
         // Initialise addons
-        AddonManager.ADDONS.forEach(MeteorAddon::onInitialize);
+        AddonManager.ADDONS.forEach(AddonManager::initialize);
 
         // Sort modules after addons have added their own
         Modules.get().sortModules();

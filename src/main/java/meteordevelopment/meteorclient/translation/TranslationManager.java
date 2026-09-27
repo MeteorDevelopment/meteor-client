@@ -212,12 +212,28 @@ public final class TranslationManager {
         return METEOR_MOD_ID + "." + TYPE_CATEGORY + "." + slug(categoryName) + ".name";
     }
 
+    public static String moduleNameKey(String namespace, String moduleId) {
+        return namespace + "." + TYPE_MODULE + "." + slug(moduleId) + ".name";
+    }
+
+    public static String moduleDescriptionKey(String namespace, String moduleId) {
+        return namespace + "." + TYPE_MODULE + "." + slug(moduleId) + ".description";
+    }
+
     public static String moduleNameKey(String moduleId) {
-        return METEOR_MOD_ID + "." + TYPE_MODULE + "." + slug(moduleId) + ".name";
+        return moduleNameKey(METEOR_MOD_ID, moduleId);
     }
 
     public static String moduleDescriptionKey(String moduleId) {
-        return METEOR_MOD_ID + "." + TYPE_MODULE + "." + slug(moduleId) + ".description";
+        return moduleDescriptionKey(METEOR_MOD_ID, moduleId);
+    }
+
+    public static String hudNameKey(String namespace, String hudId) {
+        return namespace + "." + TYPE_HUD + "." + slug(hudId) + ".name";
+    }
+
+    public static String hudDescriptionKey(String namespace, String hudId) {
+        return namespace + "." + TYPE_HUD + "." + slug(hudId) + ".description";
     }
 
     public static String hudNameKey(String hudId) {
@@ -237,19 +253,28 @@ public final class TranslationManager {
     }
 
     /**
-     * Setting key, scoped by owner and group so that two owners — or two groups within one
-     * owner — may reuse a setting name (e.g. "mode") with different display text.
+     * Setting key, scoped by namespace, owner and group so that two owners — or two groups
+     * within one owner — may reuse a setting name (e.g. "mode") with different display text.
      *
-     * @param ownerId owner id — module name, HUD element name, or {@link #GLOBAL_SCOPE}
-     * @param groupId the setting group's raw name, e.g. "Anti Kick"
-     * @param name    the setting's raw name (already kebab-case)
+     * @param namespace translation namespace, i.e. the mod id (e.g. "meteor-client", "gui-plus")
+     * @param ownerId   owner id — module name, HUD element name, or {@link #GLOBAL_SCOPE}
+     * @param groupId   the setting group's raw name, e.g. "Anti Kick"
+     * @param name      the setting's raw name (already kebab-case)
      */
+    public static String settingNameKey(String namespace, String ownerId, String groupId, String name) {
+        return namespace + "." + TYPE_SETTING + "." + slug(ownerId) + "." + slug(groupId) + "." + slug(name) + ".name";
+    }
+
+    public static String settingDescriptionKey(String namespace, String ownerId, String groupId, String name) {
+        return namespace + "." + TYPE_SETTING + "." + slug(ownerId) + "." + slug(groupId) + "." + slug(name) + ".description";
+    }
+
     public static String settingNameKey(String ownerId, String groupId, String name) {
-        return METEOR_MOD_ID + "." + TYPE_SETTING + "." + slug(ownerId) + "." + slug(groupId) + "." + slug(name) + ".name";
+        return settingNameKey(METEOR_MOD_ID, ownerId, groupId, name);
     }
 
     public static String settingDescriptionKey(String ownerId, String groupId, String name) {
-        return METEOR_MOD_ID + "." + TYPE_SETTING + "." + slug(ownerId) + "." + slug(groupId) + "." + slug(name) + ".description";
+        return settingDescriptionKey(METEOR_MOD_ID, ownerId, groupId, name);
     }
 
     private static void invalidateAndNotify() {

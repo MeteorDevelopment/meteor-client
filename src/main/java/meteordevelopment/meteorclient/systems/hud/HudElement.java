@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.systems.hud;
 
+import meteordevelopment.meteorclient.addons.AddonManager;
 import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.settings.Settings;
@@ -27,7 +28,7 @@ public abstract class HudElement implements Snapper.Element, ISerializable<HudEl
     public HudElement(HudElementInfo<?> info) {
         this.info = info;
         this.active = true;
-        settings.assignOwner(info.name);
+        settings.assignOwner(AddonManager.namespaceOf(getClass()), info.name);
     }
 
     public boolean isActive() {
