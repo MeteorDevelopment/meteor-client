@@ -138,7 +138,7 @@ public class ChestSwap extends Module {
     @Override
     public void sendToggledMsg() {
         if (stayOn.get()) super.sendToggledMsg();
-        else if (Config.get().chatFeedback.get() && chatFeedback) info("Triggered (highlight)%s(default).", title);
+        else if (Config.get().chatFeedback.get() && chatFeedback) info("Triggered (highlight)%s(default).", title());
     }
 
     public enum Chestplate {

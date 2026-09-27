@@ -64,7 +64,7 @@ public class ModulesScreen extends TabScreen {
     // Category
 
     protected WWindow createCategory(WContainer c, Category category, List<Module> moduleList) {
-        WWindow w = theme.window(category.name);
+        WWindow w = theme.window(category.displayTitle());
         w.id = category.name;
         w.padding = 0;
         w.spacing = 0;

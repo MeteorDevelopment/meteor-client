@@ -12,6 +12,8 @@ import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.System;
 import meteordevelopment.meteorclient.systems.Systems;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.meteorclient.translation.TranslationManager;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -45,6 +47,18 @@ public class Config extends System<Config> {
         .description("Custom font to use.")
         .visible(customFont::get)
         .onChanged(Fonts::load)
+        .build()
+    );
+
+    public final Setting<String> language = sgVisual.add(new ProvidedStringSetting.Builder()
+        .name("language")
+        .description("The language Meteor displays its modules, settings and commands in.")
+        .defaultValue(TranslationManager.FALLBACK_LANG)
+        .supplier(() -> TranslationManager.getAvailableLanguages().toArray(new String[0]))
+        .onChanged(lang -> {
+            TranslationManager.setLanguage(lang);
+            Modules.get().sortModules();
+        })
         .build()
     );
 
@@ -198,7 +212,9 @@ public class Config extends System<Config> {
 
     public Config() {
         super("config");
+        settings.assignOwner("config");
     }
+
 
     public static Config get() {
         return Systems.get(Config.class);

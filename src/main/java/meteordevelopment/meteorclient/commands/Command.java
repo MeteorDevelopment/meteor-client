@@ -11,6 +11,8 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.systems.config.Config;
+import meteordevelopment.meteorclient.translation.TranslationKey;
+import meteordevelopment.meteorclient.translation.TranslationManager;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import net.minecraft.client.Minecraft;
@@ -28,14 +30,14 @@ public abstract class Command {
     protected static final Minecraft mc = MeteorClient.mc;
 
     private final String name;
-    private final String title;
-    private final String description;
+    private final TranslationKey nameKey;
+    private final TranslationKey descriptionKey;
     private final List<String> aliases;
 
     public Command(String name, String description, String... aliases) {
         this.name = name;
-        this.title = Utils.nameToTitle(name);
-        this.description = description;
+        this.nameKey = TranslationKey.of(TranslationManager.commandNameKey(name));
+        this.descriptionKey = TranslationKey.of(TranslationManager.commandDescriptionKey(name));
         this.aliases = List.of(aliases);
     }
 
@@ -66,7 +68,20 @@ public abstract class Command {
     }
 
     public String getDescription() {
-        return description;
+        return descriptionKey.get();
+    }
+
+    /** The command title in the current language, resolved lazily. */
+    public String getTitle() {
+        return nameKey.get();
+    }
+
+    public TranslationKey nameKey() {
+        return nameKey;
+    }
+
+    public TranslationKey descriptionKey() {
+        return descriptionKey;
     }
 
     public List<String> getAliases() {
@@ -85,21 +100,21 @@ public abstract class Command {
 
     public void info(Component message) {
         ChatUtils.forceNextPrefixClass(getClass());
-        ChatUtils.sendMsg(title, message);
+        ChatUtils.sendMsg(getTitle(), message);
     }
 
     public void info(String message, Object... args) {
         ChatUtils.forceNextPrefixClass(getClass());
-        ChatUtils.infoPrefix(title, message, args);
+        ChatUtils.infoPrefix(getTitle(), message, args);
     }
 
     public void warning(String message, Object... args) {
         ChatUtils.forceNextPrefixClass(getClass());
-        ChatUtils.warningPrefix(title, message, args);
+        ChatUtils.warningPrefix(getTitle(), message, args);
     }
 
     public void error(String message, Object... args) {
         ChatUtils.forceNextPrefixClass(getClass());
-        ChatUtils.errorPrefix(title, message, args);
+        ChatUtils.errorPrefix(getTitle(), message, args);
     }
 }

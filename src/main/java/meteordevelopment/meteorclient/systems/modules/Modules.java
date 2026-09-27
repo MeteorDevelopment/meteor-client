@@ -96,7 +96,7 @@ public class Modules extends System<Modules> {
 
     public void sortModules() {
         for (List<Module> modules : groups.values()) {
-            modules.sort(Comparator.comparing(o -> o.title));
+            modules.sort(Comparator.comparing(o -> o.title()));
         }
     }
 
@@ -157,14 +157,14 @@ public class Modules extends System<Modules> {
         Object2IntMap<Pair<Module, String>> modules = new Object2IntOpenHashMap<>();
 
         for (Module module : this.moduleInstances.values()) {
-            String title = module.title;
+            String title = module.title();
             int score = Utils.searchLevenshteinDefault(title, text, false);
 
             if (Config.get().moduleAliases.get()) {
                 for (String alias : module.aliases) {
                     int aliasScore = Utils.searchLevenshteinDefault(alias, text, false);
                     if (aliasScore < score) {
-                        title = module.title + " (" + alias + ")";
+                        title = module.title() + " (" + alias + ")";
                         score = aliasScore;
                     }
                 }
@@ -186,7 +186,7 @@ public class Modules extends System<Modules> {
             int lowest = Integer.MAX_VALUE;
             for (SettingGroup sg : module.settings) {
                 for (Setting<?> setting : sg) {
-                    int score = Utils.searchLevenshteinDefault(setting.title, text, false);
+                    int score = Utils.searchLevenshteinDefault(setting.title(), text, false);
                     if (score < lowest) lowest = score;
                 }
             }

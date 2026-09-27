@@ -268,12 +268,12 @@ public class StashFinder extends Module {
                 switch (notificationMode.get()) {
                     case Chat -> sendChatNotification(chunk);
                     case Toast -> {
-                        MeteorToast toast = new MeteorToast.Builder(title).icon(Items.CHEST).text("Found Stash!").build();
+                        MeteorToast toast = new MeteorToast.Builder(title()).icon(Items.CHEST).text("Found Stash!").build();
                         mc.gui.toastManager().addToast(toast);
                     }
                     case Both -> {
                         sendChatNotification(chunk);
-                        MeteorToast toast = new MeteorToast.Builder(title).icon(Items.CHEST).text("Found Stash!").build();
+                        MeteorToast toast = new MeteorToast.Builder(title()).icon(Items.CHEST).text("Found Stash!").build();
                         mc.gui.toastManager().addToast(toast);
                     }
                 }

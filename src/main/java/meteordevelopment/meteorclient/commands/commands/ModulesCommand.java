@@ -40,11 +40,11 @@ public class ModulesCommand extends Command {
         // Hover tooltip
         MutableComponent tooltip = Component.literal("");
 
-        tooltip.append(Component.literal(module.title).withStyle(ChatFormatting.BLUE, ChatFormatting.BOLD)).append("\n");
+        tooltip.append(Component.literal(module.title()).withStyle(ChatFormatting.BLUE, ChatFormatting.BOLD)).append("\n");
         tooltip.append(Component.literal(module.name).withStyle(ChatFormatting.GRAY)).append("\n\n");
-        tooltip.append(Component.literal(module.description).withStyle(ChatFormatting.WHITE));
+        tooltip.append(Component.literal(module.description()).withStyle(ChatFormatting.WHITE));
 
-        MutableComponent finalModule = Component.literal(module.title);
+        MutableComponent finalModule = Component.literal(module.title());
         if (!module.isActive()) finalModule.withStyle(ChatFormatting.GRAY);
         if (!module.equals(Modules.get().getGroup(module.category).getLast()))
             finalModule.append(Component.literal(", ").withStyle(ChatFormatting.GRAY));

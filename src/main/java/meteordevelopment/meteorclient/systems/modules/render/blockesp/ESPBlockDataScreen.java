@@ -37,6 +37,7 @@ public class ESPBlockDataScreen extends WindowScreen {
     @Override
     public void initWidgets() {
         Settings settings = new Settings();
+        settings.assignOwner("esp-block-data");
         SettingGroup sgGeneral = settings.getDefaultGroup();
         SettingGroup sgTracer = settings.createGroup("Tracer");
 

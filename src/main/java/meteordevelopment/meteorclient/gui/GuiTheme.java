@@ -49,6 +49,7 @@ public abstract class GuiTheme implements ISerializable<GuiTheme> {
     protected final Map<String, WindowConfig> windowConfigs = new HashMap<>();
 
     public GuiTheme(String name) {
+        settings.assignOwner("gui-theme");
         this.name = name;
     }
 
@@ -178,7 +179,7 @@ public abstract class GuiTheme implements ISerializable<GuiTheme> {
     public abstract WAccount account(WidgetScreen screen, Account<?> account);
 
     public WWidget module(Module module) {
-        return module(module, module.title);
+        return module(module, module.title());
     }
 
     public abstract WWidget module(Module module, String title);

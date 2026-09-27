@@ -6,6 +6,8 @@
 package meteordevelopment.meteorclient.settings;
 
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.translation.TranslationKey;
+import meteordevelopment.meteorclient.translation.TranslationManager;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.IGetter;
 import meteordevelopment.meteorclient.utils.misc.ISerializable;
@@ -21,8 +23,14 @@ import java.util.function.Consumer;
 public abstract class Setting<T> implements IGetter<T>, ISerializable<T> {
     private static final List<String> NO_SUGGESTIONS = List.of();
 
-    public final String name, title, description;
+    public final String name, description;
     private final IVisible visible;
+
+    private TranslationKey nameKey;
+    private TranslationKey descriptionKey;
+    private String ownerScope;
+    private String groupScope = "General";
+    private String cachedKeyOwner;
 
     protected final T defaultValue;
     protected T value;
@@ -35,7 +43,6 @@ public abstract class Setting<T> implements IGetter<T>, ISerializable<T> {
 
     public Setting(String name, String description, T defaultValue, Consumer<T> onChanged, Consumer<Setting<T>> onModuleActivated, IVisible visible) {
         this.name = name;
-        this.title = Utils.nameToTitle(name);
         this.description = description;
         this.defaultValue = defaultValue;
         this.onChanged = onChanged;
@@ -43,6 +50,60 @@ public abstract class Setting<T> implements IGetter<T>, ISerializable<T> {
         this.visible = visible;
 
         resetImpl();
+    }
+
+    /**
+     * Assign the translation owner id for this setting. Called by {@link Settings#assignOwner(String)}
+     * when the owning module or HUD element is created, and by {@link Settings#registerColorSettings(Module)}
+     * for module settings. Until assigned, keys are scoped to the global namespace.
+     */
+    public void assignOwner(String ownerId) {
+        this.ownerScope = ownerId;
+        this.module = null;
+    }
+
+    /** Assign the setting-group id used to scope translation keys. */
+    public void assignGroup(String groupId) {
+        this.groupScope = groupId;
+    }
+
+    /** The owner id used to scope translation keys — explicit scope, module name, or "global". */
+    private String ownerId() {
+        if (ownerScope != null) return ownerScope;
+        return module != null ? module.name : TranslationManager.GLOBAL_SCOPE;
+    }
+
+    private void ensureKeys() {
+        String cacheId = ownerId() + "/" + groupScope;
+        if (nameKey == null || !cacheId.equals(cachedKeyOwner)) {
+            cachedKeyOwner = cacheId;
+            nameKey = TranslationKey.of(TranslationManager.settingNameKey(ownerId(), groupScope, name));
+            descriptionKey = TranslationKey.of(TranslationManager.settingDescriptionKey(ownerId(), groupScope, name));
+        }
+    }
+
+    /** Display title in the current language, resolved lazily on every call. */
+    public String title() {
+        ensureKeys();
+        return nameKey.get();
+    }
+
+    /** Description in the current language, resolved lazily on every call. */
+    public String description() {
+        ensureKeys();
+        return descriptionKey.get();
+    }
+
+    /** The raw translation key backing {@link #title()}. */
+    public TranslationKey nameKey() {
+        ensureKeys();
+        return nameKey;
+    }
+
+    /** The raw translation key backing {@link #description()}. */
+    public TranslationKey descriptionKey() {
+        ensureKeys();
+        return descriptionKey;
     }
 
     @Override

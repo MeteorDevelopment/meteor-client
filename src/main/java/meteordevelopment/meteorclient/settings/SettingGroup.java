@@ -36,6 +36,7 @@ public class SettingGroup implements ISerializable<SettingGroup>, Iterable<Setti
 
     public <T extends Setting<?>> T add(T setting) {
         settings.add(setting);
+        setting.assignGroup(name);
 
         return setting;
     }

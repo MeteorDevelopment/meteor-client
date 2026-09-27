@@ -27,6 +27,7 @@ public abstract class HudElement implements Snapper.Element, ISerializable<HudEl
     public HudElement(HudElementInfo<?> info) {
         this.info = info;
         this.active = true;
+        settings.assignOwner(info.name);
     }
 
     public boolean isActive() {

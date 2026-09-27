@@ -27,6 +27,7 @@ public class BaritoneSettings implements IPathManager.ISettings {
     private static final Map<String, Double> SETTING_MAX_VALUES = new HashMap<>();
 
     public BaritoneSettings() {
+        settings.assignOwner("baritone");
         createWrappers();
     }
 

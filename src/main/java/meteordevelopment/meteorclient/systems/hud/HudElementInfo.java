@@ -5,6 +5,8 @@
 
 package meteordevelopment.meteorclient.systems.hud;
 
+import meteordevelopment.meteorclient.translation.TranslationKey;
+import meteordevelopment.meteorclient.translation.TranslationManager;
 import meteordevelopment.meteorclient.utils.Utils;
 
 import java.util.ArrayList;
@@ -16,8 +18,9 @@ import java.util.function.Supplier;
 public class HudElementInfo<T extends HudElement> {
     public final HudGroup group;
     public final String name;
-    public final String title;
-    public final String description;
+
+    private final TranslationKey nameKey;
+    private final TranslationKey descriptionKey;
 
     public final Supplier<T> factory;
     public final List<Preset> presets;
@@ -25,8 +28,8 @@ public class HudElementInfo<T extends HudElement> {
     public HudElementInfo(HudGroup group, String name, String title, String description, Supplier<T> factory) {
         this.group = group;
         this.name = name;
-        this.title = title;
-        this.description = description;
+        this.nameKey = TranslationKey.of(TranslationManager.hudNameKey(name));
+        this.descriptionKey = TranslationKey.of(TranslationManager.hudDescriptionKey(name));
 
         this.factory = factory;
         this.presets = new ArrayList<>();
@@ -34,6 +37,24 @@ public class HudElementInfo<T extends HudElement> {
 
     public HudElementInfo(HudGroup group, String name, String description, Supplier<T> factory) {
         this(group, name, Utils.nameToTitle(name), description, factory);
+    }
+
+    /** The HUD element title in the current language, resolved lazily. */
+    public String title() {
+        return nameKey.get();
+    }
+
+    /** The HUD element description in the current language, resolved lazily. */
+    public String description() {
+        return descriptionKey.get();
+    }
+
+    public TranslationKey nameKey() {
+        return nameKey;
+    }
+
+    public TranslationKey descriptionKey() {
+        return descriptionKey;
     }
 
     public Preset addPreset(String title, Consumer<T> callback) {

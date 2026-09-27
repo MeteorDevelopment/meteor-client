@@ -67,6 +67,15 @@ public class Settings implements ISerializable<Settings>, Iterable<SettingGroup>
         invalidate();
     }
 
+    /** Assign the translation owner id to every setting in this collection. */
+    public void assignOwner(String ownerId) {
+        for (SettingGroup group : groups) {
+            for (Setting<?> setting : group) {
+                setting.assignOwner(ownerId);
+            }
+        }
+    }
+
     public void invalidate() {
         invalidate = true;
     }
@@ -103,7 +112,6 @@ public class Settings implements ISerializable<Settings>, Iterable<SettingGroup>
         for (SettingGroup group : this) {
             for (Setting<?> setting : group) {
                 setting.module = module;
-
                 if (setting instanceof ColorSetting) {
                     RainbowColors.addSetting((Setting<SettingColor>) setting);
                 } else if (setting instanceof ColorListSetting) {

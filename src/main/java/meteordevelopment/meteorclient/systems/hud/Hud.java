@@ -107,6 +107,7 @@ public class Hud extends System<Hud> implements Iterable<HudElement> {
 
     public Hud() {
         super("hud");
+        settings.assignOwner("hud");
     }
 
     public static Hud get() {
