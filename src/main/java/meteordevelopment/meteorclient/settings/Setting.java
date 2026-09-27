@@ -5,7 +5,10 @@
 
 package meteordevelopment.meteorclient.settings;
 
+import meteordevelopment.meteorclient.addons.AddonManager;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.translation.TranslationKey;
+import meteordevelopment.meteorclient.translation.TranslationManager;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.IGetter;
 import meteordevelopment.meteorclient.utils.misc.ISerializable;
@@ -21,8 +24,26 @@ import java.util.function.Consumer;
 public abstract class Setting<T> implements IGetter<T>, ISerializable<T> {
     private static final List<String> NO_SUGGESTIONS = List.of();
 
-    public final String name, title, description;
+    public final String name;
+
+    /**
+     * Legacy untranslated title, kept for source compatibility with addons that read the
+     * field directly. Use {@link #title()} for the translated title.
+     *
+     * @deprecated use {@link #title()}
+     */
+    @Deprecated
+    public final String title;
+
+    public final String description;
     private final IVisible visible;
+
+    private TranslationKey nameKey;
+    private TranslationKey descriptionKey;
+    private String namespaceScope;
+    private String ownerScope;
+    private String groupScope = "General";
+    private String cachedKeyOwner;
 
     protected final T defaultValue;
     protected T value;
@@ -43,6 +64,75 @@ public abstract class Setting<T> implements IGetter<T>, ISerializable<T> {
         this.visible = visible;
 
         resetImpl();
+    }
+
+    /**
+     * Assign the translation namespace (mod id) and owner id for this setting. Called by
+     * {@link Settings#assignOwner(String, String)} when the owning module or HUD element is
+     * created, and by {@link Settings#registerColorSettings(Module)} for module settings.
+     * Until assigned, keys are scoped to the meteor-client global namespace.
+     */
+    public void assignOwner(String namespace, String ownerId) {
+        this.namespaceScope = namespace;
+        this.ownerScope = ownerId;
+        this.module = null;
+    }
+
+    /** Assign the owner id, keeping the meteor-client namespace. */
+    public void assignOwner(String ownerId) {
+        assignOwner(TranslationManager.METEOR_MOD_ID, ownerId);
+    }
+
+    /** Assign the setting-group id used to scope translation keys. */
+    public void assignGroup(String groupId) {
+        this.groupScope = groupId;
+    }
+
+    /** The translation namespace (mod id) used to scope translation keys. */
+    private String namespaceId() {
+        if (namespaceScope != null) return namespaceScope;
+        if (module != null) return AddonManager.namespaceOf(module.getClass());
+        String ambient = AddonManager.initializingNamespace();
+        return ambient != null ? ambient : TranslationManager.METEOR_MOD_ID;
+    }
+
+    /** The owner id used to scope translation keys — explicit scope, module name, or "global". */
+    private String ownerId() {
+        if (ownerScope != null) return ownerScope;
+        return module != null ? module.name : TranslationManager.GLOBAL_SCOPE;
+    }
+
+    private void ensureKeys() {
+        String cacheId = namespaceId() + "/" + ownerId() + "/" + groupScope;
+        if (nameKey == null || !cacheId.equals(cachedKeyOwner)) {
+            cachedKeyOwner = cacheId;
+            nameKey = TranslationKey.of(TranslationManager.settingNameKey(namespaceId(), ownerId(), groupScope, name));
+            descriptionKey = TranslationKey.of(TranslationManager.settingDescriptionKey(namespaceId(), ownerId(), groupScope, name));
+        }
+    }
+
+    /** Display title in the current language, resolved lazily on every call. */
+    public String title() {
+        ensureKeys();
+        return nameKey.get();
+    }
+
+    /** Description in the current language, resolved lazily on every call. */
+    public String description() {
+        ensureKeys();
+        return descriptionKey.get();
+    }
+
+    /** The raw translation key backing {@link #title()}. */
+    public TranslationKey nameKey() {
+        ensureKeys();
+        return nameKey;
+    }
+
+    /** The raw translation key backing {@link #description()}. */
+    public TranslationKey descriptionKey() {
+        ensureKeys();
+        return descriptionKey;
     }
 
     @Override

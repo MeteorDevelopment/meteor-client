@@ -121,6 +121,7 @@ public class Waypoint implements ISerializable<Waypoint> {
     final int waypointActionCooldown = 1000;
 
     private Waypoint() {
+        settings.assignOwner("waypoint");
         uuid = UUID.randomUUID();
         createdAt = System.currentTimeMillis();
     }

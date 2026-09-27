@@ -248,6 +248,103 @@ tasks {
     }
 }
 
+// ============================================================
+// Translation tooling
+// ============================================================
+
+val langDir = layout.projectDirectory.dir("src/main/resources/assets/meteor-client/lang")
+
+val validateTranslations by tasks.registering {
+    group = "translation"
+    description = "Validates all lang files against en_us.json. Fails on any error."
+
+    val langDirProvider = langDir
+    doLast {
+        val slurper = groovy.json.JsonSlurper()
+        val dir = langDirProvider.asFile
+        val enUsFile = dir.resolve("en_us.json")
+
+        if (!enUsFile.exists()) throw GradleException("en_us.json not found at ${enUsFile}")
+
+        @Suppress("UNCHECKED_CAST")
+        val canonical = slurper.parse(enUsFile) as Map<String, String>
+        // Vanilla-format keys (KeyMapping / key categories) are consumed by Minecraft itself
+        // and are exempt from the Meteor key schema and from per-language completeness.
+        val vanillaKeys = canonical.keys.filter { it.startsWith("key.") }.toSet()
+        val canonicalKeys = canonical.keys - vanillaKeys
+        val failures = mutableListOf<String>()
+
+        // Key format validation on en_us
+        val keyPattern = Regex("^[a-z0-9][a-z0-9-]*(\\.[a-z0-9][a-z0-9-]*){1,}$")
+        canonicalKeys.forEach { key ->
+            if (!keyPattern.matches(key)) failures += "[en_us] INVALID KEY FORMAT: $key"
+        }
+
+        // Duplicate value detection in en_us (advisory only)
+        val valueToKeys = mutableMapOf<String, MutableList<String>>()
+        canonical.forEach { (k, v) -> valueToKeys.getOrPut(v) { mutableListOf() }.add(k) }
+        valueToKeys.filter { it.value.size > 1 }.forEach { (v, ks) ->
+            println("  [en_us] INFO - same value for multiple keys (review if intentional): \"$v\"")
+            ks.forEach { println("    -> $it") }
+        }
+
+        // Per-language validation
+        dir.listFiles()?.forEach { langFile ->
+            if (langFile.name == "en_us.json" || !langFile.name.endsWith(".json")) return@forEach
+            val code = langFile.name.removeSuffix(".json")
+            @Suppress("UNCHECKED_CAST")
+            val entries = slurper.parse(langFile) as Map<String, String>
+            val langKeys = entries.keys - vanillaKeys
+
+            // Missing entries are advisory: the runtime falls back to en_us, so a partial
+            // community locale is a supported state rather than an error.
+            val missing = canonicalKeys - langKeys
+            if (missing.isNotEmpty()) {
+                println("  [$code] INFO - ${missing.size} key(s) missing, will fall back to en_us")
+            }
+            (langKeys - canonicalKeys).forEach { failures += "[$code] UNKNOWN KEY: $it" }
+
+            entries.forEach { (key, value) ->
+                val en = canonical[key] ?: return@forEach
+                val count = { s: String -> Regex("%[sdf]").findAll(s).count() }
+                if (count(en) != count(value)) {
+                    failures += "[$code] PLACEHOLDER MISMATCH on '$key': en has ${count(en)} arg(s), $code has ${count(value)}"
+                }
+            }
+        }
+
+        if (failures.isEmpty()) {
+            println("\u2713 validateTranslations passed - all language files are valid.")
+        } else {
+            failures.forEach { println("  \u2717 $it") }
+            throw GradleException("${failures.size} translation validation failure(s). See above.")
+        }
+    }
+}
+
+val extractTranslations by tasks.registering {
+    group = "translation"
+    description = "Scans source for remaining hardcoded user-facing strings."
+
+    doLast {
+        val results = mutableListOf<String>()
+        val pattern = Regex("\\.(name|description)\\(\"([^\"]{2,})\"\\)")
+        fileTree("src/main/java/meteordevelopment") {
+            include("**/*.java")
+        }.forEach { f ->
+            pattern.findAll(f.readText()).forEach { m ->
+                results += "${f.name}:${m.groupValues[1]}(\"${m.groupValues[2]}\")"
+            }
+        }
+        if (results.isEmpty()) {
+            println("\u2713 extractTranslations - no unmigrated hardcoded strings detected.")
+        } else {
+            println("Found ${results.size} possibly unmigrated strings:")
+            results.forEach { println("  $it") }
+        }
+    }
+}
+
 publishing {
     publications {
         create<MavenPublication>("mavenJava") {

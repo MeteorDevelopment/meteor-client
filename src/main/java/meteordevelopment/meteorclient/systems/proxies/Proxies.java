@@ -92,6 +92,7 @@ public class Proxies extends System<Proxies> implements Iterable<Proxy> {
 
     public Proxies() {
         super("proxies");
+        settings.assignOwner("proxies");
     }
 
     public static Proxies get() {

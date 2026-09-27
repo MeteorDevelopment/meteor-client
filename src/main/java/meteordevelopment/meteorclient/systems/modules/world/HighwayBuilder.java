@@ -732,7 +732,7 @@ public class HighwayBuilder extends Module {
     }
 
     private void disconnect(String message, Object... args) {
-        MutableComponent text = Component.literal(String.format("%s[%s%s%s] %s", ChatFormatting.GRAY, ChatFormatting.BLUE, title, ChatFormatting.GRAY, ChatFormatting.RED) + String.format(message, args)).append("\n");
+        MutableComponent text = Component.literal(String.format("%s[%s%s%s] %s", ChatFormatting.GRAY, ChatFormatting.BLUE, title(), ChatFormatting.GRAY, ChatFormatting.RED) + String.format(message, args)).append("\n");
         text.append(getStatsText());
 
         mc.getConnection().getConnection().disconnect(text);
