@@ -14,23 +14,23 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.component.type.AttributeModifierSlot;
-import net.minecraft.enchantment.Enchantments;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.attribute.EntityAttributes;
-import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.AxeItem;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.MaceItem;
-import net.minecraft.item.TridentItem;
-import net.minecraft.registry.tag.EntityTypeTags;
-import net.minecraft.registry.tag.ItemTags;
-import net.minecraft.util.hit.HitResult;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.tags.EntityTypeTags;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.EquipmentSlotGroup;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.AxeItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.MaceItem;
+import net.minecraft.world.item.TridentItem;
+import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
 
 public class AttributeSwap extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -321,13 +321,13 @@ public class AttributeSwap extends Module {
 
     @EventHandler
     private void onAttack(DoAttackEvent event) {
-        if (mc.crosshairTarget.getType() == HitResult.Type.BLOCK || !canSwapByWeapon()) return;
+        if (mc.hitResult.getType() == HitResult.Type.BLOCK || !canSwapByWeapon()) return;
 
         if (mode.get() == Mode.Smart && spearSwapping.get()) {
             if (spearHitbox.get()) {
                 Entity target = getTargetEntity();
                 if (target != null) {
-                    if (mc.player.distanceTo(target) <= mc.player.getEntityInteractionRange() + 0.5) return;
+                    if (mc.player.distanceTo(target) <= mc.player.entityInteractionRange() + 0.5) return;
                     int spearSlot = getSmartSpearSlot(false);
                     if (spearSlot != -1) {
                         doSwap(spearSlot);
@@ -389,18 +389,18 @@ public class AttributeSwap extends Module {
     private boolean canSwapByWeapon() {
         if (!onlyOnWeapon.get()) return true;
         return InvUtils.testInMainHand(item ->
-            (sword.get() && item.isIn(ItemTags.SWORDS)) ||
-                (axe.get() && item.isIn(ItemTags.AXES)) ||
-                (pickaxe.get() && item.isIn(ItemTags.PICKAXES)) ||
-                (shovel.get() && item.isIn(ItemTags.SHOVELS)) ||
-                (hoe.get() && item.isIn(ItemTags.HOES)) ||
+            (sword.get() && item.is(ItemTags.SWORDS)) ||
+                (axe.get() && item.is(ItemTags.AXES)) ||
+                (pickaxe.get() && item.is(ItemTags.PICKAXES)) ||
+                (shovel.get() && item.is(ItemTags.SHOVELS)) ||
+                (hoe.get() && item.is(ItemTags.HOES)) ||
                 (mace.get() && item.getItem() instanceof MaceItem) ||
                 (trident.get() && item.getItem() instanceof TridentItem)
         );
     }
 
     private int getSmartSlot(Entity target) {
-        ItemStack currentStack = mc.player.getMainHandStack();
+        ItemStack currentStack = mc.player.getMainHandItem();
 
         if (target != null && smartShieldBreak.get() && target instanceof LivingEntity living && living.isBlocking()) {
             if (currentStack.getItem() instanceof AxeItem) return -1;
@@ -412,13 +412,13 @@ public class AttributeSwap extends Module {
         boolean durability = smartDurability.get();
 
         boolean isLiving = target instanceof LivingEntity;
-        boolean isPlayer = target instanceof PlayerEntity;
+        boolean isPlayer = target instanceof Player;
         boolean isOnFire = target != null && target.isOnFire();
-        boolean isUndead = target != null && target.getType().isIn(EntityTypeTags.SENSITIVE_TO_SMITE);
-        boolean isArthropod = target != null && target.getType().isIn(EntityTypeTags.SENSITIVE_TO_BANE_OF_ARTHROPODS);
-        boolean isAquatic = target != null && target.getType().isIn(EntityTypeTags.SENSITIVE_TO_IMPALING);
-        boolean hasFireResistance = isLiving && (((LivingEntity) target).hasStatusEffect(StatusEffects.FIRE_RESISTANCE) || hasFireProtectionArmor((LivingEntity) target));
-        double armor = isLiving ? ((LivingEntity) target).getAttributeValue(EntityAttributes.ARMOR) : 0;
+        boolean isUndead = target != null && target.typeHolder().is(EntityTypeTags.SENSITIVE_TO_SMITE);
+        boolean isArthropod = target != null && target.typeHolder().is(EntityTypeTags.SENSITIVE_TO_BANE_OF_ARTHROPODS);
+        boolean isAquatic = target != null && target.typeHolder().is(EntityTypeTags.SENSITIVE_TO_IMPALING);
+        boolean hasFireResistance = isLiving && (((LivingEntity) target).hasEffect(MobEffects.FIRE_RESISTANCE) || hasFireProtectionArmor((LivingEntity) target));
+        double armor = isLiving ? ((LivingEntity) target).getAttributeValue(Attributes.ARMOR) : 0;
         float health = isLiving ? ((LivingEntity) target).getHealth() : 0;
 
         int bestSlot = -1;
@@ -427,7 +427,7 @@ public class AttributeSwap extends Module {
         for (int i = 0; i < 9; i++) {
             if (i == mc.player.getInventory().getSelectedSlot()) continue;
 
-            ItemStack stack = mc.player.getInventory().getStack(i);
+            ItemStack stack = mc.player.getInventory().getItem(i);
             if (stack.isEmpty() && !durability) continue;
 
             double score = getItemScore(stack, isFalling, durability, isLiving, isPlayer, isOnFire, hasFireResistance, isUndead, isArthropod, isAquatic, armor, health);
@@ -443,8 +443,8 @@ public class AttributeSwap extends Module {
     private int getSmartSpearSlot(boolean requireLunge) {
         for (int i = 0; i < 9; i++) {
             if (i == mc.player.getInventory().getSelectedSlot()) continue;
-            ItemStack stack = mc.player.getInventory().getStack(i);
-            if (!stack.isIn(ItemTags.SPEARS)) continue;
+            ItemStack stack = mc.player.getInventory().getItem(i);
+            if (!stack.is(ItemTags.SPEARS)) continue;
 
             boolean hasLunge = Utils.getEnchantmentLevel(stack, Enchantments.LUNGE) > 0;
             if (requireLunge && !hasLunge) continue;
@@ -458,21 +458,21 @@ public class AttributeSwap extends Module {
 
     private Entity getTargetEntity() {
         double maxDistance = 7;
-        Vec3d start = mc.player.getCameraPosVec(1.0f);
-        Vec3d look = mc.player.getRotationVec(1.0f);
-        Vec3d end = start.add(look.multiply(maxDistance));
+        Vec3 start = mc.player.getEyePosition(1.0f);
+        Vec3 look = mc.player.getViewVector(1.0f);
+        Vec3 end = start.add(look.scale(maxDistance));
 
-        Box box = mc.player.getBoundingBox().stretch(look.multiply(maxDistance)).expand(1.0);
+        AABB box = mc.player.getBoundingBox().expandTowards(look.scale(maxDistance)).inflate(1.0);
 
         Entity target = null;
         double closestDistance = maxDistance * maxDistance;
 
-        for (Entity entity : mc.world.getOtherEntities(mc.player, box, e -> !e.isSpectator() && e.canHit())) {
+        for (Entity entity : mc.level.getEntities(mc.player, box, e -> !e.isSpectator() && e.isPickable())) {
             // expanding entity's hitbox by 0.15 to simulate spear's actual hitbox margin
-            Box expandedBox = entity.getBoundingBox().expand(0.150);
+            AABB expandedBox = entity.getBoundingBox().inflate(0.150);
 
-            if (expandedBox.raycast(start, end).isPresent()) {
-                double distSq = start.squaredDistanceTo(entity.getX(), entity.getY(), entity.getZ());
+            if (expandedBox.clip(start, end).isPresent()) {
+                double distSq = start.distanceToSqr(entity.getX(), entity.getY(), entity.getZ());
                 if (distSq < closestDistance) {
                     closestDistance = distSq;
                     target = entity;
@@ -498,7 +498,7 @@ public class AttributeSwap extends Module {
     }
 
     private double getDurabilityScore(ItemStack stack) {
-        if (!stack.isDamageable()) return 4;
+        if (!stack.isDamageableItem()) return 4;
 
         int unbreaking = Utils.getEnchantmentLevel(stack, Enchantments.UNBREAKING);
         if (unbreaking > 0) return unbreaking * 0.05;
@@ -625,8 +625,8 @@ public class AttributeSwap extends Module {
     }
 
     private boolean hasFireProtectionArmor(LivingEntity entity) {
-        for (EquipmentSlot slot : AttributeModifierSlot.ARMOR) {
-            ItemStack stack = entity.getEquippedStack(slot);
+        for (EquipmentSlot slot : EquipmentSlotGroup.ARMOR) {
+            ItemStack stack = entity.getItemBySlot(slot);
             if (stack.isEmpty()) continue;
 
             int fireProtection = Utils.getEnchantmentLevel(stack, Enchantments.FIRE_PROTECTION);

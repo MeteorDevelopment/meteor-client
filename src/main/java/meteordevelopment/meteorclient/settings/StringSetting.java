@@ -7,7 +7,7 @@ package meteordevelopment.meteorclient.settings;
 
 import meteordevelopment.meteorclient.gui.utils.CharFilter;
 import meteordevelopment.meteorclient.gui.widgets.input.WTextBox;
-import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.CompoundTag;
 
 import java.util.function.Consumer;
 
@@ -33,19 +33,23 @@ public class StringSetting extends Setting<String> {
 
     @Override
     protected boolean isValueValid(String value) {
+        if (filter == null) return true;
+        for (int i = 0; i < value.length(); i++) {
+            if (!filter.filter(value, value.charAt(i))) return false;
+        }
         return true;
     }
 
     @Override
-    public NbtCompound save(NbtCompound tag) {
+    public CompoundTag save(CompoundTag tag) {
         tag.putString("value", get());
 
         return tag;
     }
 
     @Override
-    public String load(NbtCompound tag) {
-        set(tag.getString("value", ""));
+    public String load(CompoundTag tag) {
+        set(tag.getStringOr("value", ""));
 
         return get();
     }

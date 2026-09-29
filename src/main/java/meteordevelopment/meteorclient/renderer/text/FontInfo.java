@@ -5,9 +5,11 @@
 
 package meteordevelopment.meteorclient.renderer.text;
 
+import org.jspecify.annotations.NonNull;
+
 public record FontInfo(String family, Type type) {
     @Override
-    public String toString() {
+    public @NonNull String toString() {
         return family + " " + type;
     }
 

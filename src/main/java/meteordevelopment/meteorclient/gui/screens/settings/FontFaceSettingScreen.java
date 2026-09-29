@@ -83,7 +83,7 @@ public class FontFaceSettingScreen extends WindowScreen {
             WButton select = table.add(theme.button("Select")).expandCellX().right().widget();
             select.action = () -> {
                 setting.set(fontFamily.get(dropdown.get()));
-                close();
+                onClose();
             };
 
             table.row();

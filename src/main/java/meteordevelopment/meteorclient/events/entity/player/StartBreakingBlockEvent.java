@@ -6,8 +6,8 @@
 package meteordevelopment.meteorclient.events.entity.player;
 
 import meteordevelopment.meteorclient.events.Cancellable;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 
 public class StartBreakingBlockEvent extends Cancellable {
     private static final StartBreakingBlockEvent INSTANCE = new StartBreakingBlockEvent();

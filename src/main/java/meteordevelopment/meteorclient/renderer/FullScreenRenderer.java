@@ -5,8 +5,8 @@
 
 package meteordevelopment.meteorclient.renderer;
 
+import com.mojang.blaze3d.PrimitiveTopology;
 import com.mojang.blaze3d.buffers.GpuBuffer;
-import com.mojang.blaze3d.vertex.VertexFormat;
 import meteordevelopment.meteorclient.utils.PreInit;
 
 public class FullScreenRenderer {
@@ -20,11 +20,12 @@ public class FullScreenRenderer {
     @Deprecated(forRemoval = true)
     public static MeshBuilder mesh;
 
-    private FullScreenRenderer() {}
+    private FullScreenRenderer() {
+    }
 
     @PreInit
     public static void init() {
-        mesh = new MeshBuilder(MeteorVertexFormats.POS2, VertexFormat.DrawMode.TRIANGLES, 4, 6);
+        mesh = new MeshBuilder(MeteorVertexFormats.POS2, PrimitiveTopology.TRIANGLES, 4, 6);
 
         mesh.begin();
 

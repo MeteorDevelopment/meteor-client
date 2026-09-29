@@ -7,7 +7,7 @@ package meteordevelopment.meteorclient.systems.hud.elements.keyboard;
 
 import meteordevelopment.meteorclient.systems.hud.elements.keyboard.KeyboardHud.Key;
 import meteordevelopment.meteorclient.utils.misc.Keybind;
-import net.minecraft.client.option.KeyBinding;
+import net.minecraft.client.KeyMapping;
 
 final class LayoutContext {
     final double keyUnit;
@@ -96,21 +96,21 @@ final class LayoutContext {
     /**
      * Creates a standard 1u*1u key at the given position.
      */
-    Key key(KeyBinding kb, double x, double y) {
+    Key key(KeyMapping kb, double x, double y) {
         return new Key(kb, null, x, y, px(KeyDimensions.STANDARD), px(KeyDimensions.STANDARD));
     }
 
     /**
      * Creates a key with the given width and standard height.
      */
-    Key key(KeyBinding kb, double x, double y, KeyDimensions w) {
+    Key key(KeyMapping kb, double x, double y, KeyDimensions w) {
         return new Key(kb, null, x, y, px(w), px(KeyDimensions.STANDARD));
     }
 
     /**
      * Creates a named key with the given width and standard height.
      */
-    Key key(KeyBinding kb, String name, double x, double y) {
+    Key key(KeyMapping kb, String name, double x, double y) {
         return new Key(kb, name, x, y, px(KeyDimensions.STANDARD), px(KeyDimensions.STANDARD));
     }
 }

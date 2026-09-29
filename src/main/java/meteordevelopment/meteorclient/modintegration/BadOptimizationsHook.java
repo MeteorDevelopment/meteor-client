@@ -15,6 +15,7 @@ import java.util.function.BooleanSupplier;
  * Hook for BadOptimizations mod compatibility.
  * Signals when the lightmap needs to be updated due to Fullbright or Xray state changes.
  */
+@SuppressWarnings("unused") // Used in fabric.mod.json
 public class BadOptimizationsHook implements BooleanSupplier {
     private int lastState;
 

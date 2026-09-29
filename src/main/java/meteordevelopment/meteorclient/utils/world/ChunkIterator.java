@@ -5,20 +5,20 @@
 
 package meteordevelopment.meteorclient.utils.world;
 
-import meteordevelopment.meteorclient.mixin.ClientChunkManagerAccessor;
+import meteordevelopment.meteorclient.mixin.ClientChunkCacheAccessor;
 import meteordevelopment.meteorclient.mixin.ClientChunkMapAccessor;
-import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.level.chunk.ChunkAccess;
 
 import java.util.Iterator;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
-public class ChunkIterator implements Iterator<Chunk> {
-    private final ClientChunkMapAccessor map = (ClientChunkMapAccessor) (Object) ((ClientChunkManagerAccessor) mc.world.getChunkManager()).meteor$getChunks();
+public class ChunkIterator implements Iterator<ChunkAccess> {
+    private final ClientChunkMapAccessor map = (ClientChunkMapAccessor) (Object) ((ClientChunkCacheAccessor) mc.level.getChunkSource()).meteor$getStorage();
     private final boolean onlyWithLoadedNeighbours;
 
     private int i = 0;
-    private Chunk chunk;
+    private ChunkAccess chunk;
 
     public ChunkIterator(boolean onlyWithLoadedNeighbours) {
         this.onlyWithLoadedNeighbours = onlyWithLoadedNeighbours;
@@ -26,8 +26,8 @@ public class ChunkIterator implements Iterator<Chunk> {
         getNext();
     }
 
-    private Chunk getNext() {
-        Chunk prev = chunk;
+    private ChunkAccess getNext() {
+        ChunkAccess prev = chunk;
         chunk = null;
 
         while (i < map.meteor$getChunks().length()) {
@@ -38,11 +38,11 @@ public class ChunkIterator implements Iterator<Chunk> {
         return prev;
     }
 
-    private boolean isInRadius(Chunk chunk) {
-        int x = chunk.getPos().x;
-        int z = chunk.getPos().z;
+    private boolean isInRadius(ChunkAccess chunk) {
+        int x = chunk.getPos().x();
+        int z = chunk.getPos().z();
 
-        return mc.world.getChunkManager().isChunkLoaded(x + 1, z) && mc.world.getChunkManager().isChunkLoaded(x - 1, z) && mc.world.getChunkManager().isChunkLoaded(x, z + 1) && mc.world.getChunkManager().isChunkLoaded(x, z - 1);
+        return mc.level.getChunkSource().hasChunk(x + 1, z) && mc.level.getChunkSource().hasChunk(x - 1, z) && mc.level.getChunkSource().hasChunk(x, z + 1) && mc.level.getChunkSource().hasChunk(x, z - 1);
     }
 
     @Override
@@ -51,7 +51,7 @@ public class ChunkIterator implements Iterator<Chunk> {
     }
 
     @Override
-    public Chunk next() {
+    public ChunkAccess next() {
         return getNext();
     }
 }

@@ -12,8 +12,8 @@ import meteordevelopment.meteorclient.systems.Systems;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.NbtUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.nbt.NbtCompound;
-import org.jetbrains.annotations.NotNull;
+import net.minecraft.nbt.CompoundTag;
+import org.jspecify.annotations.NonNull;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -77,19 +77,19 @@ public class Profiles extends System<Profiles> implements Iterable<Profile> {
     }
 
     @Override
-    public @NotNull Iterator<Profile> iterator() {
+    public @NonNull Iterator<Profile> iterator() {
         return profiles.iterator();
     }
 
     @Override
-    public NbtCompound toTag() {
-        NbtCompound tag = new NbtCompound();
+    public CompoundTag toTag() {
+        CompoundTag tag = new CompoundTag();
         tag.put("profiles", NbtUtils.listToTag(profiles));
         return tag;
     }
 
     @Override
-    public Profiles fromTag(NbtCompound tag) {
+    public Profiles fromTag(CompoundTag tag) {
         profiles = NbtUtils.listFromTag(tag.getListOrEmpty("profiles"), Profile::new);
 
         for (File file : FOLDER.listFiles()) {

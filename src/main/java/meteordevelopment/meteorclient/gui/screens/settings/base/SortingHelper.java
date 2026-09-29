@@ -7,9 +7,9 @@ package meteordevelopment.meteorclient.gui.screens.settings.base;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import meteordevelopment.meteorclient.utils.Utils;
-import net.minecraft.util.collection.IndexedIterable;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import net.minecraft.core.IdMap;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.Comparator;
@@ -22,7 +22,8 @@ import java.util.function.Predicate;
 public final class SortingHelper {
     private static final Comparator<Entry<?>> FILTER_COMPARATOR = Comparator.comparingInt(Entry::distance);
 
-    private SortingHelper() {}
+    private SortingHelper() {
+    }
 
     public static <T> Iterable<T> sort(Iterable<T> registry, Predicate<T> filter, Function<T, String[]> nameFunction, String filterText) {
         return sortInternal(registry, filter, nameFunction, filterText, null);
@@ -85,13 +86,11 @@ public final class SortingHelper {
     }
 
     private static <T> List<T> createList(Iterable<?> iterable) {
-        if (iterable instanceof IndexedIterable<?> indexed) {
-            return new ObjectArrayList<>(indexed.size());
-        } else if (iterable instanceof Collection<?> collection) {
-            return new ObjectArrayList<>(collection.size());
-        } else {
-            return new ObjectArrayList<>();
-        }
+        return switch (iterable) {
+            case IdMap<?> indexed -> new ObjectArrayList<>(indexed.size());
+            case Collection<?> collection -> new ObjectArrayList<>(collection.size());
+            default -> new ObjectArrayList<>();
+        };
     }
 
     @SuppressWarnings("unchecked")
@@ -101,7 +100,7 @@ public final class SortingHelper {
 
     private static <T> Iterable<T> iterate(List<Entry<T>> sortedList) {
         return new Iterable<>() {
-            @NotNull
+            @NonNull
             @Override
             public Iterator<T> iterator() {
                 return new Iterator<>() {
@@ -123,7 +122,7 @@ public final class SortingHelper {
 
     private static <T> Iterable<T> filtering(Iterable<T> iterable, Predicate<T> filter) {
         return new Iterable<>() {
-            @NotNull
+            @NonNull
             @Override
             public Iterator<T> iterator() {
                 throw new UnsupportedOperationException("iterator() not supported by this Iterable, use forEach() instead.");
@@ -140,5 +139,6 @@ public final class SortingHelper {
         };
     }
 
-    public record Entry<T>(T value, int distance) {}
+    public record Entry<T>(T value, int distance) {
+    }
 }

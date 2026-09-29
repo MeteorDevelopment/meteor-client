@@ -9,12 +9,14 @@ import meteordevelopment.meteorclient.renderer.Fonts;
 import meteordevelopment.meteorclient.renderer.text.FontFace;
 import meteordevelopment.meteorclient.renderer.text.FontFamily;
 import meteordevelopment.meteorclient.renderer.text.FontInfo;
-import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.CompoundTag;
 
 import java.util.List;
 import java.util.function.Consumer;
 
 public class FontFaceSetting extends Setting<FontFace> {
+    private static final List<String> SUGGESTIONS = List.of("JetBrainsMono-Regular", "Arial-Bold");
+
     public FontFaceSetting(String name, String description, FontFace defaultValue, Consumer<FontFace> onChanged, Consumer<Setting<FontFace>> onModuleActivated, IVisible visible) {
         super(name, description, defaultValue, onChanged, onModuleActivated, visible);
     }
@@ -28,8 +30,7 @@ public class FontFaceSetting extends Setting<FontFace> {
             if (family.getName().replace(" ", "").equals(split[0])) {
                 try {
                     return family.get(FontInfo.Type.valueOf(split[1]));
-                }
-                catch (IllegalArgumentException ignored) {
+                } catch (IllegalArgumentException _) {
                     return null;
                 }
             }
@@ -39,8 +40,8 @@ public class FontFaceSetting extends Setting<FontFace> {
     }
 
     @Override
-    public List<String> getSuggestions() {
-        return List.of("JetBrainsMono-Regular", "Arial-Bold");
+    public Iterable<String> getSuggestions() {
+        return SUGGESTIONS;
     }
 
     @Override
@@ -56,21 +57,20 @@ public class FontFaceSetting extends Setting<FontFace> {
     }
 
     @Override
-    protected NbtCompound save(NbtCompound tag) {
+    protected CompoundTag save(CompoundTag tag) {
         tag.putString("family", get().info.family());
         tag.putString("type", get().info.type().toString());
         return tag;
     }
 
     @Override
-    protected FontFace load(NbtCompound tag) {
-        String family = tag.getString("family", "");
+    protected FontFace load(CompoundTag tag) {
+        String family = tag.getStringOr("family", "");
         FontInfo.Type type;
 
         try {
-            type = FontInfo.Type.valueOf(tag.getString("type", ""));
-        }
-        catch (IllegalArgumentException ignored) {
+            type = FontInfo.Type.valueOf(tag.getStringOr("type", ""));
+        } catch (IllegalArgumentException _) {
             set(Fonts.DEFAULT_FONT);
             return get();
         }

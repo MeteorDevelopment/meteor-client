@@ -42,7 +42,7 @@ public class TextHud extends HudElement {
         .name("text")
         .description("Text to display with Starscript.")
         .defaultValue(MeteorClient.NAME)
-        .onChanged(s -> recompile())
+        .onChanged(_ -> recompile())
         .wide()
         .renderer(StarscriptTextBoxRenderer.class)
         .build()
@@ -63,7 +63,7 @@ public class TextHud extends HudElement {
         .name("shadow")
         .description("Renders shadow behind text.")
         .defaultValue(true)
-        .onChanged(aBoolean -> recalculateSize = true)
+        .onChanged(_ -> recalculateSize = true)
         .build()
     );
 
@@ -81,7 +81,7 @@ public class TextHud extends HudElement {
         .name("shown")
         .description("When this text element is shown.")
         .defaultValue(Shown.Always)
-        .onChanged(s -> recompile())
+        .onChanged(_ -> recompile())
         .build()
     );
 
@@ -89,7 +89,7 @@ public class TextHud extends HudElement {
         .name("condition")
         .description("Condition to check when shown is not Always.")
         .visible(() -> shown.get() != Shown.Always)
-        .onChanged(s -> recompile())
+        .onChanged(_ -> recompile())
         .renderer(StarscriptTextBoxRenderer.class)
         .build()
     );
@@ -100,7 +100,7 @@ public class TextHud extends HudElement {
         .name("custom-scale")
         .description("Applies a custom scale to this hud element.")
         .defaultValue(false)
-        .onChanged(aBoolean -> recalculateSize = true)
+        .onChanged(_ -> recalculateSize = true)
         .build()
     );
 
@@ -109,7 +109,7 @@ public class TextHud extends HudElement {
         .description("Custom scale.")
         .visible(customScale::get)
         .defaultValue(1)
-        .onChanged(aDouble -> recalculateSize = true)
+        .onChanged(_ -> recalculateSize = true)
         .min(0.5)
         .sliderRange(0.5, 3)
         .build()
@@ -168,8 +168,7 @@ public class TextHud extends HudElement {
         if (width != 0) {
             setSize(width, renderer.textHeight(shadow.get(), getScale()));
             empty = false;
-        }
-        else {
+        } else {
             setSize(100, renderer.textHeight(shadow.get(), getScale()));
             empty = true;
         }
@@ -185,8 +184,7 @@ public class TextHud extends HudElement {
         if (timer <= 0) {
             runTick(renderer);
             timer = updateDelay.get();
-        }
-        else timer--;
+        } else timer--;
     }
 
     private void runTick(HudRenderer renderer) {
@@ -197,8 +195,7 @@ public class TextHud extends HudElement {
                 script = null;
                 section = new Section(0, result.errors.getFirst().toString());
                 calculateSize(renderer);
-            }
-            else script = Compiler.compile(result);
+            } else script = Compiler.compile(result);
 
             if (shown.get() != Shown.Always) {
                 conditionScript = Compiler.compile(Parser.parse(condition.get()));
@@ -212,8 +209,7 @@ public class TextHud extends HudElement {
                 section = MeteorStarscript.ss.run(script);
                 calculateSize(renderer);
             }
-        }
-        catch (StarscriptError error) {
+        } catch (StarscriptError error) {
             section = new Section(0, error.getMessage());
             calculateSize(renderer);
         }
@@ -221,7 +217,8 @@ public class TextHud extends HudElement {
         if (shown.get() != Shown.Always && conditionScript != null) {
             String text = MeteorStarscript.run(conditionScript);
             if (text == null) visible = false;
-            else visible = shown.get() == Shown.WhenTrue ? text.equalsIgnoreCase("true") : text.equalsIgnoreCase("false");
+            else
+                visible = shown.get() == Shown.WhenTrue ? text.equalsIgnoreCase("true") : text.equalsIgnoreCase("false");
         }
 
         firstTick = false;

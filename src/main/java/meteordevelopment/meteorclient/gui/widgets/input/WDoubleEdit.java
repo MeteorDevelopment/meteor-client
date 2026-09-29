@@ -34,7 +34,7 @@ public class WDoubleEdit extends WHorizontalList {
         this.sliderMax = sliderMax;
 
         if (noSlider || (sliderMin == 0 && sliderMax == 0)) this.noSlider = true;
-     }
+    }
 
     @Override
     public void init() {
@@ -43,20 +43,22 @@ public class WDoubleEdit extends WHorizontalList {
         if (noSlider) {
             add(theme.button("+")).widget().action = () -> setButton(get() + 1);
             add(theme.button("-")).widget().action = () -> setButton(get() - 1);
+        } else {
+            slider = add(theme.slider(value, sliderMin, sliderMax)).minWidth(small ? 200 - 75 - spacing : 200).centerY().expandX().widget();
         }
-        else slider = add(theme.slider(value, sliderMin, sliderMax)).minWidth(small ? 200 - 75 - spacing : 200).centerY().expandX().widget();
 
         textBox.actionOnUnfocused = () -> {
             double lastValue = value;
 
-            if (textBox.get().isEmpty()) value = 0;
-            else if (textBox.get().equals("-")) value = -0;
-            else if (textBox.get().equals(".")) value = 0;
-            else if (textBox.get().equals("-.")) value = 0;
-            else {
-                try {
-                    value = Double.parseDouble(textBox.get());
-                } catch (NumberFormatException ignored) {}
+            switch (textBox.get()) {
+                case "", ".", "-." -> value = 0;
+                case "-" -> value = -0;
+                default -> {
+                    try {
+                        value = Double.parseDouble(textBox.get());
+                    } catch (NumberFormatException _) {
+                    }
+                }
             }
 
             double preValidationValue = value;
@@ -96,17 +98,15 @@ public class WDoubleEdit extends WHorizontalList {
         if (c == '-' && !text.contains("-") && textBox.cursor == 0) {
             good = true;
             validate = false;
-        }
-        else if (c == '.' && !text.contains(".")) {
+        } else if (c == '.' && !text.contains(".")) {
             good = true;
             if (text.isEmpty()) validate = false;
-        }
-        else good = Character.isDigit(c);
+        } else good = Character.isDigit(c);
 
         if (good && validate) {
             try {
                 Double.parseDouble(text + c);
-            } catch (NumberFormatException ignored) {
+            } catch (NumberFormatException _) {
                 good = false;
             }
         }
@@ -134,7 +134,7 @@ public class WDoubleEdit extends WHorizontalList {
     }
 
     public void set(double value) {
-		this.value = value;
+        this.value = value;
 
         textBox.set(valueString());
         if (slider != null) slider.set(value);

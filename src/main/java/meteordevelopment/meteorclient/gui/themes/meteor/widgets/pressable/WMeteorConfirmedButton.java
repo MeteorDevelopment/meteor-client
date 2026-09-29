@@ -9,7 +9,6 @@ import meteordevelopment.meteorclient.gui.renderer.GuiRenderer;
 import meteordevelopment.meteorclient.gui.renderer.packer.GuiTexture;
 import meteordevelopment.meteorclient.gui.themes.meteor.MeteorGuiTheme;
 import meteordevelopment.meteorclient.gui.themes.meteor.MeteorWidget;
-import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WConfirmedButton;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 
@@ -33,8 +32,7 @@ public class WMeteorConfirmedButton extends WConfirmedButton implements MeteorWi
 
         if (text != null) {
             renderer.text(text, x + width / 2 - textWidth / 2, y + pad, fg, false);
-        }
-        else {
+        } else {
             double ts = theme.textHeight();
             renderer.quad(x + width / 2 - ts / 2, y + pad, ts, ts, texture, fg);
         }

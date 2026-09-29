@@ -6,12 +6,12 @@
 package meteordevelopment.meteorclient.systems.accounts;
 
 import com.mojang.util.UndashedUuid;
-import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
 import meteordevelopment.meteorclient.utils.misc.ISerializable;
 import meteordevelopment.meteorclient.utils.misc.NbtException;
+import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
 import meteordevelopment.meteorclient.utils.render.PlayerHeadTexture;
 import meteordevelopment.meteorclient.utils.render.PlayerHeadUtils;
-import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.CompoundTag;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
@@ -51,8 +51,8 @@ public class AccountCache implements ISerializable<AccountCache> {
     }
 
     @Override
-    public NbtCompound toTag() {
-        NbtCompound tag = new NbtCompound();
+    public CompoundTag toTag() {
+        CompoundTag tag = new CompoundTag();
 
         tag.putString("username", username);
         tag.putString("uuid", uuid);
@@ -61,7 +61,7 @@ public class AccountCache implements ISerializable<AccountCache> {
     }
 
     @Override
-    public AccountCache fromTag(NbtCompound tag) {
+    public AccountCache fromTag(CompoundTag tag) {
         if (tag.getString("username").isEmpty() || tag.getString("uuid").isEmpty()) throw new NbtException();
 
         username = tag.getString("username").get();

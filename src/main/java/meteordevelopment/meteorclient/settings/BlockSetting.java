@@ -5,10 +5,10 @@
 
 package meteordevelopment.meteorclient.settings;
 
-import net.minecraft.block.Block;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.registry.Registries;
-import net.minecraft.util.Identifier;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.level.block.Block;
 
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -24,7 +24,7 @@ public class BlockSetting extends Setting<Block> {
 
     @Override
     protected Block parseImpl(String str) {
-        return parseId(Registries.BLOCK, str);
+        return parseId(BuiltInRegistries.BLOCK, str);
     }
 
     @Override
@@ -34,22 +34,22 @@ public class BlockSetting extends Setting<Block> {
 
     @Override
     public Iterable<Identifier> getIdentifierSuggestions() {
-        return Registries.BLOCK.getIds();
+        return BuiltInRegistries.BLOCK.keySet();
     }
 
     @Override
-    protected NbtCompound save(NbtCompound tag) {
-        tag.putString("value", Registries.BLOCK.getId(get()).toString());
+    protected CompoundTag save(CompoundTag tag) {
+        tag.putString("value", BuiltInRegistries.BLOCK.getKey(get()).toString());
 
         return tag;
     }
 
     @Override
-    protected Block load(NbtCompound tag) {
-        value = Registries.BLOCK.get(Identifier.of(tag.getString("value", "")));
+    protected Block load(CompoundTag tag) {
+        value = BuiltInRegistries.BLOCK.getValue(Identifier.parse(tag.getStringOr("value", "")));
 
         if (filter != null && !filter.test(value)) {
-            for (Block block : Registries.BLOCK) {
+            for (Block block : BuiltInRegistries.BLOCK) {
                 if (filter.test(block)) {
                     value = block;
                     break;

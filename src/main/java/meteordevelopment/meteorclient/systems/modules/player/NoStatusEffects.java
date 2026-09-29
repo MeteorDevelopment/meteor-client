@@ -5,19 +5,21 @@
 
 package meteordevelopment.meteorclient.systems.modules.player;
 
-import meteordevelopment.meteorclient.settings.*;
+import meteordevelopment.meteorclient.settings.Setting;
+import meteordevelopment.meteorclient.settings.SettingGroup;
+import meteordevelopment.meteorclient.settings.StatusEffectListSetting;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
-import net.minecraft.entity.effect.StatusEffect;
+import net.minecraft.world.effect.MobEffect;
 
 import java.util.List;
 
-import static net.minecraft.entity.effect.StatusEffects.*;
+import static net.minecraft.world.effect.MobEffects.*;
 
 public class NoStatusEffects extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-    private final Setting<List<StatusEffect>> blockedEffects = sgGeneral.add(new StatusEffectListSetting.Builder()
+    private final Setting<List<MobEffect>> blockedEffects = sgGeneral.add(new StatusEffectListSetting.Builder()
         .name("blocked-effects")
         .description("Effects to block.")
         .defaultValue(
@@ -33,7 +35,7 @@ public class NoStatusEffects extends Module {
         super(Categories.Player, "no-status-effects", "Blocks specified status effects.");
     }
 
-    public boolean shouldBlock(StatusEffect effect) {
+    public boolean shouldBlock(MobEffect effect) {
         return isActive() && blockedEffects.get().contains(effect);
     }
 }

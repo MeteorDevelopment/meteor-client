@@ -18,7 +18,7 @@ import meteordevelopment.meteorclient.settings.Settings;
 import meteordevelopment.meteorclient.systems.macros.Macro;
 import meteordevelopment.meteorclient.systems.macros.Macros;
 import meteordevelopment.meteorclient.utils.misc.NbtUtils;
-import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.screens.Screen;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
@@ -50,7 +50,7 @@ public class MacrosTab extends Tab {
             add(theme.horizontalSeparator()).expandX();
 
             WButton create = add(theme.button("Create")).expandX().widget();
-            create.action = () -> mc.setScreen(new EditMacroScreen(theme, null, this::reload));
+            create.action = () -> mc.gui.setScreen(new EditMacroScreen(theme, null, this::reload));
         }
 
         private void initTable(WTable table) {
@@ -61,7 +61,7 @@ public class MacrosTab extends Tab {
                 table.add(theme.label(macro.name.get() + " (" + macro.keybind.get() + ")"));
 
                 WButton edit = table.add(theme.button(GuiRenderer.EDIT)).expandCellX().right().widget();
-                edit.action = () -> mc.setScreen(new EditMacroScreen(theme, macro, this::reload));
+                edit.action = () -> mc.gui.setScreen(new EditMacroScreen(theme, macro, this::reload));
 
                 WConfirmedMinus remove = table.add(theme.confirmedMinus()).widget();
                 remove.action = () -> {

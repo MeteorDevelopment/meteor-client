@@ -9,16 +9,16 @@ import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.utils.render.color.Color;
-import net.minecraft.block.BlockState;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.shape.VoxelShape;
-import net.minecraft.util.shape.VoxelShapes;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class ESPBlock {
-    private static final BlockPos.Mutable blockPos = new BlockPos.Mutable();
+    private static final BlockPos.MutableBlockPos blockPos = new BlockPos.MutableBlockPos();
 
     private static final BlockESP blockEsp = Modules.get().get(BlockESP.class);
 
@@ -42,7 +42,7 @@ public class ESPBlock {
     public static final int BO_RI = 1 << 17;
     public static final int BO_LE = 1 << 18;
 
-    public static final int[] SIDES = { FO, BA, LE, RI, TO, BO };
+    public static final int[] SIDES = {FO, BA, LE, RI, TO, BO};
 
     public final int x, y, z;
     private BlockState state;
@@ -81,8 +81,7 @@ public class ESPBlock {
 
             if (firstGroup == null) {
                 firstGroup = neighbour.group;
-            }
-            else {
+            } else {
                 if (firstGroup != neighbour.group) firstGroup.merge(neighbour.group);
             }
         }
@@ -95,7 +94,7 @@ public class ESPBlock {
     }
 
     public void update() {
-        state = mc.world.getBlockState(blockPos.set(x, y, z));
+        state = mc.level.getBlockState(blockPos.set(x, y, z));
         neighbours = 0;
 
         if (isNeighbour(Direction.SOUTH)) neighbours |= FO;
@@ -122,41 +121,41 @@ public class ESPBlock {
     }
 
     private boolean isNeighbour(Direction dir) {
-        blockPos.set(x + dir.getOffsetX(), y + dir.getOffsetY(), z + dir.getOffsetZ());
-        BlockState neighbourState = mc.world.getBlockState(blockPos);
+        blockPos.set(x + dir.getStepX(), y + dir.getStepY(), z + dir.getStepZ());
+        BlockState neighbourState = mc.level.getBlockState(blockPos);
 
         if (neighbourState.getBlock() != state.getBlock()) return false;
 
-        VoxelShape cube = VoxelShapes.fullCube();
-        VoxelShape shape = state.getOutlineShape(mc.world, blockPos);
-        VoxelShape neighbourShape = neighbourState.getOutlineShape(mc.world, blockPos);
+        VoxelShape cube = Shapes.block();
+        VoxelShape shape = state.getShape(mc.level, blockPos);
+        VoxelShape neighbourShape = neighbourState.getShape(mc.level, blockPos);
 
         if (shape.isEmpty()) shape = cube;
         if (neighbourShape.isEmpty()) neighbourShape = cube;
 
         switch (dir) {
             case SOUTH:
-                if (shape.getMax(Direction.Axis.Z) == 1 && neighbourShape.getMin(Direction.Axis.Z) == 0) return true;
+                if (shape.max(Direction.Axis.Z) == 1 && neighbourShape.min(Direction.Axis.Z) == 0) return true;
                 break;
 
             case NORTH:
-                if (shape.getMin(Direction.Axis.Z) == 0 && neighbourShape.getMax(Direction.Axis.Z) == 1) return true;
+                if (shape.min(Direction.Axis.Z) == 0 && neighbourShape.max(Direction.Axis.Z) == 1) return true;
                 break;
 
             case EAST:
-                if (shape.getMax(Direction.Axis.X) == 1 && neighbourShape.getMin(Direction.Axis.X) == 0) return true;
+                if (shape.max(Direction.Axis.X) == 1 && neighbourShape.min(Direction.Axis.X) == 0) return true;
                 break;
 
             case WEST:
-                if (shape.getMin(Direction.Axis.X) == 0 && neighbourShape.getMax(Direction.Axis.X) == 1) return true;
+                if (shape.min(Direction.Axis.X) == 0 && neighbourShape.max(Direction.Axis.X) == 1) return true;
                 break;
 
             case UP:
-                if (shape.getMax(Direction.Axis.Y) == 1 && neighbourShape.getMin(Direction.Axis.Y) == 0) return true;
+                if (shape.max(Direction.Axis.Y) == 1 && neighbourShape.min(Direction.Axis.Y) == 0) return true;
                 break;
 
             case DOWN:
-                if (shape.getMin(Direction.Axis.Y) == 0 && neighbourShape.getMax(Direction.Axis.Y) == 1) return true;
+                if (shape.min(Direction.Axis.Y) == 0 && neighbourShape.max(Direction.Axis.Y) == 1) return true;
                 break;
         }
 
@@ -165,7 +164,7 @@ public class ESPBlock {
 
     private boolean isNeighbourDiagonal(double x, double y, double z) {
         blockPos.set(this.x + x, this.y + y, this.z + z);
-        return state.getBlock() == mc.world.getBlockState(blockPos).getBlock();
+        return state.getBlock() == mc.level.getBlockState(blockPos).getBlock();
     }
 
     public void render(Render3DEvent event) {
@@ -176,15 +175,15 @@ public class ESPBlock {
         double y2 = y + 1;
         double z2 = z + 1;
 
-        VoxelShape shape = state.getOutlineShape(mc.world, blockPos);
+        VoxelShape shape = state.getShape(mc.level, blockPos);
 
         if (!shape.isEmpty()) {
-            x1 = x + shape.getMin(Direction.Axis.X);
-            y1 = y + shape.getMin(Direction.Axis.Y);
-            z1 = z + shape.getMin(Direction.Axis.Z);
-            x2 = x + shape.getMax(Direction.Axis.X);
-            y2 = y + shape.getMax(Direction.Axis.Y);
-            z2 = z + shape.getMax(Direction.Axis.Z);
+            x1 = x + shape.min(Direction.Axis.X);
+            y1 = y + shape.min(Direction.Axis.Y);
+            z1 = z + shape.min(Direction.Axis.Z);
+            x2 = x + shape.max(Direction.Axis.X);
+            y2 = y + shape.max(Direction.Axis.Y);
+            z2 = z + shape.max(Direction.Axis.Z);
         }
 
         ESPBlockData blockData = blockEsp.getBlockData(state.getBlock());
@@ -195,8 +194,7 @@ public class ESPBlock {
 
         if (neighbours == 0) {
             event.renderer.box(x1, y1, z1, x2, y2, z2, sideColor, lineColor, shapeMode, 0);
-        }
-        else {
+        } else {
             // Lines
             if (shapeMode.lines()) {
                 // Vertical, BA_LE

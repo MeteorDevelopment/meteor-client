@@ -9,8 +9,8 @@ import baritone.api.BaritoneAPI;
 import baritone.api.utils.SettingsUtil;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
-import net.minecraft.block.Block;
-import net.minecraft.item.Item;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.item.Item;
 
 import java.awt.*;
 import java.lang.reflect.*;
@@ -103,8 +103,7 @@ public class BaritoneSettings implements IPathManager.ISettings {
                         case "assumeWalkOnLava" -> walkOnLava = wrapper;
                         case "assumeStep" -> step = wrapper;
                     }
-                }
-                else if (value instanceof Double) {
+                } else if (value instanceof Double) {
                     sgDouble.add(new DoubleSetting.Builder()
                         .name(setting.getName())
                         .description(getDescription(setting.getName()))
@@ -115,8 +114,7 @@ public class BaritoneSettings implements IPathManager.ISettings {
                         .onModuleActivated(doubleSetting -> doubleSetting.set((Double) setting.value))
                         .build()
                     );
-                }
-                else if (value instanceof Float) {
+                } else if (value instanceof Float) {
                     sgDouble.add(new DoubleSetting.Builder()
                         .name(setting.getName())
                         .description(getDescription(setting.getName()))
@@ -127,8 +125,7 @@ public class BaritoneSettings implements IPathManager.ISettings {
                         .onModuleActivated(doubleSetting -> doubleSetting.set(((Float) setting.value).doubleValue()))
                         .build()
                     );
-                }
-                else if (value instanceof Integer) {
+                } else if (value instanceof Integer) {
                     Setting<Integer> wrapper = sgInt.add(new IntSetting.Builder()
                         .name(setting.getName())
                         .description(getDescription(setting.getName()))
@@ -147,8 +144,7 @@ public class BaritoneSettings implements IPathManager.ISettings {
                             .onModuleActivated(booleanSetting -> booleanSetting.set(wrapper.get() >= 255))
                             .build();
                     }
-                }
-                else if (value instanceof Long) {
+                } else if (value instanceof Long) {
                     sgInt.add(new IntSetting.Builder()
                         .name(setting.getName())
                         .description(getDescription(setting.getName()))
@@ -157,8 +153,7 @@ public class BaritoneSettings implements IPathManager.ISettings {
                         .onModuleActivated(integerSetting -> integerSetting.set(((Long) setting.value).intValue()))
                         .build()
                     );
-                }
-                else if (value instanceof String) {
+                } else if (value instanceof String) {
                     sgString.add(new StringSetting.Builder()
                         .name(setting.getName())
                         .description(getDescription(setting.getName()))
@@ -167,8 +162,7 @@ public class BaritoneSettings implements IPathManager.ISettings {
                         .onModuleActivated(stringSetting -> stringSetting.set((String) setting.value))
                         .build()
                     );
-                }
-                else if (value instanceof Color) {
+                } else if (value instanceof Color) {
                     Color c = (Color) setting.value;
 
                     sgColor.add(new ColorSetting.Builder()
@@ -179,8 +173,7 @@ public class BaritoneSettings implements IPathManager.ISettings {
                         .onModuleActivated(colorSetting -> colorSetting.set(new SettingColor(c.getRed(), c.getGreen(), c.getBlue(), c.getAlpha())))
                         .build()
                     );
-                }
-                else if (value instanceof List) {
+                } else if (value instanceof List) {
                     Type listType = ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
                     Type type = ((ParameterizedType) listType).getActualTypeArguments()[0];
 
@@ -193,8 +186,7 @@ public class BaritoneSettings implements IPathManager.ISettings {
                             .onModuleActivated(blockListSetting -> blockListSetting.set((List<Block>) setting.value))
                             .build()
                         );
-                    }
-                    else if (type == Item.class) {
+                    } else if (type == Item.class) {
                         sgItemLists.add(new ItemListSetting.Builder()
                             .name(setting.getName())
                             .description(getDescription(setting.getName()))
@@ -206,8 +198,7 @@ public class BaritoneSettings implements IPathManager.ISettings {
                     }
                 }
             }
-        }
-        catch (IllegalAccessException e) {
+        } catch (IllegalAccessException e) {
             throw new RuntimeException(e);
         }
     }
@@ -231,14 +222,14 @@ public class BaritoneSettings implements IPathManager.ISettings {
         addDescription("acceptableThrowawayItems", "Blocks that Baritone is allowed to place (as throwaway, for sneak bridging, pillaring, etc.)");
         addDescription("allowBreak", "Allow Baritone to break blocks");
         addDescription("allowBreakAnyway", "Blocks that baritone will be allowed to break even with allowBreak set to false");
-        addDescription("allowDiagonalAscend","Allow diagonal ascending");
+        addDescription("allowDiagonalAscend", "Allow diagonal ascending");
         addDescription("allowDiagonalDescend", "Allow descending diagonally");
         addDescription("allowDownward", "Allow mining the block directly beneath its feet");
         addDescription("allowInventory", "Allow Baritone to move items in your inventory to your hotbar");
         addDescription("allowJumpAt256", "If true, parkour is allowed to make jumps when standing on blocks at the maximum height, so player feet is y=256");
         addDescription("allowOnlyExposedOres", "This will only allow baritone to mine exposed ores, can be used to stop ore obfuscators on servers that use them.");
         addDescription("allowOnlyExposedOresDistance", "When allowOnlyExposedOres is enabled this is the distance around to search.");
-        addDescription("allowOvershootDiagonalDescend","Is it okay to sprint through a descend followed by a diagonal? The player overshoots the landing, but not enough to fall off.");
+        addDescription("allowOvershootDiagonalDescend", "Is it okay to sprint through a descend followed by a diagonal? The player overshoots the landing, but not enough to fall off.");
         addDescription("allowParkour", "You know what it is");
         addDescription("allowParkourAscend", "This should be monetized it's so good");
         addDescription("allowParkourPlace", "Actually pretty reliable.");

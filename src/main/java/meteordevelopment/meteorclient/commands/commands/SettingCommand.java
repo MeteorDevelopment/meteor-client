@@ -21,7 +21,7 @@ import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
-import net.minecraft.command.CommandSource;
+import net.minecraft.client.multiplayer.ClientSuggestionProvider;
 
 public class SettingCommand extends Command {
     public SettingCommand() {
@@ -29,11 +29,11 @@ public class SettingCommand extends Command {
     }
 
     @Override
-    public void build(LiteralArgumentBuilder<CommandSource> builder) {
+    public void build(LiteralArgumentBuilder<ClientSuggestionProvider> builder) {
         // Open hud screen
         builder.then(
             literal("hud")
-                .executes(context -> {
+                .executes(_ -> {
                     TabScreen screen = Tabs.get(HudTab.class).createScreen(GuiThemes.get());
                     screen.parent = null;
 
@@ -45,7 +45,7 @@ public class SettingCommand extends Command {
         // Open config screen
         builder.then(
             literal("config")
-                .executes(context -> {
+                .executes(_ -> {
                     TabScreen screen = Tabs.get(ConfigTab.class).createScreen(GuiThemes.get());
                     screen.parent = null;
 
@@ -65,7 +65,7 @@ public class SettingCommand extends Command {
                         ChatUtils.infoPrefix("Config", "Setting (highlight)%s(default) is (highlight)%s(default).", setting.title, setting.get());
 
                         return SINGLE_SUCCESS;
-                    }).suggests((ctx, suggestionsBuilder) ->
+                    }).suggests((_, suggestionsBuilder) ->
                         SettingArgumentType.listSuggestions(suggestionsBuilder, Config.get().settings)
                     )
                     .then(
@@ -106,28 +106,28 @@ public class SettingCommand extends Command {
             argument("module", ModuleArgumentType.create())
                 .then(
                     argument("setting", SettingArgumentType.create())
-                    .executes(context -> {
-                        // Get setting value
-                        Setting<?> setting = SettingArgumentType.get(context);
+                        .executes(context -> {
+                            // Get setting value
+                            Setting<?> setting = SettingArgumentType.get(context);
 
-                        ModuleArgumentType.get(context).info("Setting (highlight)%s(default) is (highlight)%s(default).", setting.title, setting.get());
+                            ModuleArgumentType.get(context).info("Setting (highlight)%s(default) is (highlight)%s(default).", setting.title, setting.get());
 
-                        return SINGLE_SUCCESS;
-                    })
-                    .then(
-                        argument("value", SettingValueArgumentType.create())
-                            .executes(context -> {
-                                // Set setting value
-                                Setting<?> setting = SettingArgumentType.get(context);
-                                String value = SettingValueArgumentType.get(context);
+                            return SINGLE_SUCCESS;
+                        })
+                        .then(
+                            argument("value", SettingValueArgumentType.create())
+                                .executes(context -> {
+                                    // Set setting value
+                                    Setting<?> setting = SettingArgumentType.get(context);
+                                    String value = SettingValueArgumentType.get(context);
 
-                                if (setting.parse(value)) {
-                                    ModuleArgumentType.get(context).info("Setting (highlight)%s(default) changed to (highlight)%s(default).", setting.title, value);
-                                }
+                                    if (setting.parse(value)) {
+                                        ModuleArgumentType.get(context).info("Setting (highlight)%s(default) changed to (highlight)%s(default).", setting.title, value);
+                                    }
 
-                                return SINGLE_SUCCESS;
-                            })
-                    )
+                                    return SINGLE_SUCCESS;
+                                })
+                        )
                 )
         );
     }

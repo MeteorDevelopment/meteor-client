@@ -27,7 +27,8 @@ import java.util.Set;
 
 @NullMarked
 public final class FontUtils {
-    private FontUtils() {}
+    private FontUtils() {
+    }
 
     public static @Nullable FontInfo getSysFontInfo(File file) {
         return getFontInfo(file);
@@ -111,15 +112,17 @@ public final class FontUtils {
     }
 
     public static List<File> getUFontDirs() {
-        return switch (Util.getOperatingSystem()) {
-            case WINDOWS -> List.of(new File(System.getProperty("user.home") + "\\AppData\\Local\\Microsoft\\Windows\\Fonts"));
+        return switch (Util.getPlatform()) {
+            case WINDOWS ->
+                List.of(new File(System.getProperty("user.home") + "\\AppData\\Local\\Microsoft\\Windows\\Fonts"));
             case OSX -> List.of(new File(System.getProperty("user.home") + "/Library/Fonts/"));
-            default -> List.of(new File(System.getProperty("user.home") + "/.local/share/fonts"), new File(System.getProperty("user.home") + "/.fonts"));
+            default ->
+                List.of(new File(System.getProperty("user.home") + "/.local/share/fonts"), new File(System.getProperty("user.home") + "/.fonts"));
         };
     }
 
     public static List<File> getSFontDirs() {
-        return switch (Util.getOperatingSystem()) {
+        return switch (Util.getPlatform()) {
             case WINDOWS -> List.of(new File(System.getenv("SystemRoot") + "\\Fonts"));
             case OSX -> List.of(new File("/System/Library/Fonts/"));
             default -> List.of(new File("/usr/share/fonts/"));
@@ -139,7 +142,7 @@ public final class FontUtils {
     public static void loadSystem(List<FontFamily> fontList, File dir) {
         if (!dir.exists() || !dir.isDirectory()) return;
 
-        File[] files = dir.listFiles((file) -> (file.isFile() && file.getName().endsWith(".ttf") || file.isDirectory()));
+        File[] files = dir.listFiles(file -> (file.isFile() && file.getName().endsWith(".ttf") || file.isDirectory()));
         if (files == null) return;
 
         for (File file : files) {

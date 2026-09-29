@@ -10,14 +10,14 @@ import meteordevelopment.meteorclient.gui.utils.Cell;
 import meteordevelopment.meteorclient.gui.utils.WindowConfig;
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WTriangle;
-import net.minecraft.client.gui.Click;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.util.Mth;
 
 import java.util.function.Consumer;
 
 import static meteordevelopment.meteorclient.utils.Utils.getWindowHeight;
 import static meteordevelopment.meteorclient.utils.Utils.getWindowWidth;
-import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_RIGHT;
+import static com.mojang.blaze3d.platform.InputConstants.MOUSE_BUTTON_RIGHT;
 
 public abstract class WWindow extends WVerticalList {
     public double padding = 8;
@@ -189,9 +189,9 @@ public abstract class WWindow extends WVerticalList {
         }
 
         @Override
-        public boolean onMouseClicked(Click click, boolean doubled) {
+        public boolean onMouseClicked(MouseButtonEvent click, boolean doubled) {
             if (mouseOver && !doubled) {
-                if (click.button() == GLFW_MOUSE_BUTTON_RIGHT) setExpanded(!expanded);
+                if (click.button() == MOUSE_BUTTON_RIGHT) setExpanded(!expanded);
                 else {
                     dragging = true;
                     dragged = false;
@@ -204,7 +204,7 @@ public abstract class WWindow extends WVerticalList {
         }
 
         @Override
-        public boolean onMouseReleased(Click click) {
+        public boolean onMouseReleased(MouseButtonEvent click) {
             if (dragging) {
                 dragging = false;
 
@@ -237,7 +237,7 @@ public abstract class WWindow extends WVerticalList {
         @Override
         public boolean render(GuiRenderer renderer, double mouseX, double mouseY, double delta) {
             animProgress += (expanded ? 1 : -1) * delta * 14;
-            animProgress = MathHelper.clamp(animProgress, 0, 1);
+            animProgress = Mth.clamp(animProgress, 0, 1);
 
             triangle.rotation = (1 - animProgress) * -90;
 

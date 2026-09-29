@@ -25,10 +25,10 @@ import meteordevelopment.meteorclient.systems.profiles.Profiles;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.NbtUtils;
 import meteordevelopment.meteorclient.utils.render.prompts.OkPrompt;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtIo;
+import org.apache.commons.io.FilenameUtils;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.system.MemoryUtil;
@@ -42,7 +42,7 @@ import java.nio.ByteBuffer;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
@@ -89,7 +89,7 @@ public class ProfilesTab extends Tab {
             // Create
             WButton create = l.add(theme.button("Create")).expandX().widget();
             create.tooltip = "Create new profile";
-            create.action = () -> mc.setScreen(new EditProfileScreen(theme, null, this::reload));
+            create.action = () -> mc.gui.setScreen(new EditProfileScreen(theme, null, this::reload));
 
             // Import
             WButton importBtn = l.add(theme.button("Import")).expandX().widget();
@@ -97,14 +97,15 @@ public class ProfilesTab extends Tab {
             importBtn.action = () -> {
                 try {
                     Profile imported = importProfile();
-                    if (imported != null) MeteorClient.LOG.info("Successfully imported profile '{}'.", imported.name.get());
+                    if (imported != null)
+                        MeteorClient.LOG.info("Successfully imported profile '{}'.", imported.name.get());
                     reload();
-                } catch (IOException e) {
+                } catch (Exception e) {
                     MeteorClient.LOG.error("Error importing profile", e);
                     OkPrompt.create()
                         .title("Failure importing profile")
                         .message("There was an error importing the profile.")
-                        .message("Error: %d", e.getMessage())
+                        .message("Error: %s", e.getMessage())
                         .dontShowAgainCheckboxVisible(false)
                         .show();
                 }
@@ -126,10 +127,10 @@ public class ProfilesTab extends Tab {
                 load.action = profile::load;
 
                 WButton export = table.add(theme.button("Export")).widget();
-                export.action = () -> mc.setScreen(new ExportProfileScreen(theme, profile));
+                export.action = () -> mc.gui.setScreen(new ExportProfileScreen(theme, profile));
 
                 WButton edit = table.add(theme.button(GuiRenderer.EDIT)).widget();
-                edit.action = () -> mc.setScreen(new EditProfileScreen(theme, profile, this::reload));
+                edit.action = () -> mc.gui.setScreen(new EditProfileScreen(theme, profile, this::reload));
 
                 WConfirmedMinus remove = table.add(theme.confirmedMinus()).widget();
                 remove.action = () -> {
@@ -146,16 +147,30 @@ public class ProfilesTab extends Tab {
             if (file == null) return null;
             File profileFile = new File(file);
 
-            NbtCompound nbt = NbtIo.read(profileFile.toPath());
+            CompoundTag nbt = NbtIo.read(profileFile.toPath());
+            if (nbt == null) return null;
 
             Profile p = new Profile();
-            p.name.set(nbt.getString("name", profileFile.getName()));
-            //noinspection ResultOfMethodCallIgnored
-            p.getFile().mkdirs();
+            Optional<String> parsedName = nbt.getString("name").filter(n -> !n.isEmpty());
 
+            if (parsedName.filter(p.name::set).isEmpty() && !p.name.set(FilenameUtils.removeExtension(profileFile.getName()))) {
+                throw new IllegalStateException("Imported profile does not have a valid name.");
+            }
+
+            File profileFolder = p.getFile().getCanonicalFile();
+            if (!profileFolder.getParentFile().equals(Profiles.FOLDER.getCanonicalFile())) {
+                throw new IllegalStateException("Imported profile does not have a valid location.");
+            }
+
+            //noinspection ResultOfMethodCallIgnored
+            profileFolder.mkdirs();
             nbt.remove("name");
-            for (Map.Entry<String, NbtElement> entry : nbt.entrySet()) {
+
+            boolean valid = false;
+            for (var entry : nbt.entrySet()) {
                 String filename = entry.getKey();
+                if (!filename.endsWith(".nbt")) continue;
+                if (filename.contains("/") || filename.contains("\\") || new File(filename).isAbsolute()) continue;
 
                 switch (filename) {
                     case "hud.nbt" -> p.hud.set(true);
@@ -166,8 +181,15 @@ public class ProfilesTab extends Tab {
                     }
                 }
 
-                File f = new File(p.getFile(), filename);
-                NbtIo.write(entry.getValue(), new DataOutputStream(new FileOutputStream(f)));
+                File f = new File(profileFolder, filename).getCanonicalFile();
+                if (!f.toPath().startsWith(profileFolder.toPath())) continue;
+
+                valid = true;
+                NbtIo.writeUnnamedTagWithFallback(entry.getValue(), new DataOutputStream(new FileOutputStream(f)));
+            }
+
+            if (!valid) {
+                throw new IllegalStateException("Imported file is not a profile.");
             }
 
             Profiles.get().getAll().add(p);
@@ -228,7 +250,7 @@ public class ProfilesTab extends Tab {
                 if (isNew) Profiles.get().add(profile);
                 else Profiles.get().save();
 
-                close();
+                onClose();
             };
 
             enterAction = save.action;
@@ -273,7 +295,7 @@ public class ProfilesTab extends Tab {
             WButton export = add(theme.button("Export profile")).expandX().widget();
             export.action = () -> {
                 exportProfile(profile, hud.checked, macros.checked, modules.checked, waypoints.checked);
-                close();
+                onClose();
             };
         }
 
@@ -292,7 +314,7 @@ public class ProfilesTab extends Tab {
             if (path == null) return;
             Path p = Path.of(path.endsWith(".nbt") ? path : path + ".nbt");
 
-            NbtCompound nbt = new NbtCompound();
+            CompoundTag nbt = new CompoundTag();
             nbt.putString("name", profile.name.get());
 
             try {
@@ -302,8 +324,7 @@ public class ProfilesTab extends Tab {
                         f.getName().equals("modules.nbt") && modules
                     ) {
                         nbt.put(f.getName(), NbtIo.read(f.toPath()));
-                    }
-                    else if (f.getName().endsWith(".nbt") && waypoints)
+                    } else if (f.getName().endsWith(".nbt") && waypoints)
                         nbt.put(f.getName(), NbtIo.read(f.toPath()));
                 }
 

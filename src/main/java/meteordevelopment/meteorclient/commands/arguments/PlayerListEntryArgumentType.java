@@ -12,9 +12,9 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import net.minecraft.client.network.PlayerListEntry;
-import net.minecraft.command.CommandSource;
-import net.minecraft.text.Text;
+import net.minecraft.client.multiplayer.PlayerInfo;
+import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.network.chat.Component;
 
 import java.util.Collection;
 import java.util.List;
@@ -22,9 +22,9 @@ import java.util.concurrent.CompletableFuture;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
-public class PlayerListEntryArgumentType implements ArgumentType<PlayerListEntry> {
+public class PlayerListEntryArgumentType implements ArgumentType<PlayerInfo> {
     private static final PlayerListEntryArgumentType INSTANCE = new PlayerListEntryArgumentType();
-    private static final DynamicCommandExceptionType NO_SUCH_PLAYER = new DynamicCommandExceptionType(name -> Text.literal("Player list entry with name " + name + " doesn't exist."));
+    private static final DynamicCommandExceptionType NO_SUCH_PLAYER = new DynamicCommandExceptionType(name -> Component.literal("Player list entry with name " + name + " doesn't exist."));
 
     private static final Collection<String> EXAMPLES = List.of("seasnail8169", "MineGame159");
 
@@ -32,18 +32,19 @@ public class PlayerListEntryArgumentType implements ArgumentType<PlayerListEntry
         return INSTANCE;
     }
 
-    public static PlayerListEntry get(CommandContext<?> context) {
-        return context.getArgument("player", PlayerListEntry.class);
+    public static PlayerInfo get(CommandContext<?> context) {
+        return context.getArgument("player", PlayerInfo.class);
     }
 
-    private PlayerListEntryArgumentType() {}
+    private PlayerListEntryArgumentType() {
+    }
 
     @Override
-    public PlayerListEntry parse(StringReader reader) throws CommandSyntaxException {
+    public PlayerInfo parse(StringReader reader) throws CommandSyntaxException {
         String argument = reader.readString();
-        PlayerListEntry playerListEntry = null;
+        PlayerInfo playerListEntry = null;
 
-        for (PlayerListEntry p : mc.getNetworkHandler().getPlayerList()) {
+        for (PlayerInfo p : mc.getConnection().getOnlinePlayers()) {
             if (p.getProfile().name().equalsIgnoreCase(argument)) {
                 playerListEntry = p;
                 break;
@@ -56,7 +57,7 @@ public class PlayerListEntryArgumentType implements ArgumentType<PlayerListEntry
 
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-        return CommandSource.suggestMatching(mc.getNetworkHandler().getPlayerList().stream().map(playerListEntry -> playerListEntry.getProfile().name()), builder);
+        return SharedSuggestionProvider.suggest(mc.getConnection().getOnlinePlayers().stream().map(playerListEntry -> playerListEntry.getProfile().name()), builder);
     }
 
     @Override

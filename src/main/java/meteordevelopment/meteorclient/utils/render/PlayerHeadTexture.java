@@ -1,8 +1,8 @@
 package meteordevelopment.meteorclient.utils.render;
 
+import com.mojang.blaze3d.GpuFormat;
 import com.mojang.blaze3d.platform.TextureUtil;
 import com.mojang.blaze3d.textures.FilterMode;
-import com.mojang.blaze3d.textures.TextureFormat;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.renderer.Texture;
 import meteordevelopment.meteorclient.utils.network.Http;
@@ -24,16 +24,16 @@ public class PlayerHeadTexture extends Texture {
     private boolean needsRotate;
 
     public PlayerHeadTexture(byte[] head, boolean needsRotate) {
-        super(8, 8, TextureFormat.RGBA8, FilterMode.NEAREST, FilterMode.NEAREST);
+        super(8, 8, GpuFormat.RGBA8_UNORM, FilterMode.NEAREST, FilterMode.NEAREST);
 
         upload(BufferUtils.createByteBuffer(head.length).put(head));
         this.needsRotate = needsRotate;
     }
 
     public PlayerHeadTexture() {
-        super(8, 8, TextureFormat.RGBA8, FilterMode.NEAREST, FilterMode.NEAREST);
+        super(8, 8, GpuFormat.RGBA8_UNORM, FilterMode.NEAREST, FilterMode.NEAREST);
 
-        try (InputStream inputStream = mc.getResourceManager().getResource(MeteorClient.identifier("textures/steve.png")).get().getInputStream()) {
+        try (InputStream inputStream = mc.getResourceManager().getResource(MeteorClient.identifier("textures/steve.png")).get().open()) {
             ByteBuffer data = TextureUtil.readResource(inputStream);
             data.rewind();
 
@@ -47,8 +47,7 @@ public class PlayerHeadTexture extends Texture {
                 STBImage.stbi_image_free(image);
             }
             MemoryUtil.memFree(data);
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
@@ -88,8 +87,7 @@ public class PlayerHeadTexture extends Texture {
                     for (int j = 0; j < 4; j++) {
                         head[i++] = (byte) pixel[j];
                     }
-                }
-                else i += 4;
+                } else i += 4;
             }
         }
 

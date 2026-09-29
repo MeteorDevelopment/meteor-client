@@ -10,9 +10,9 @@ import meteordevelopment.meteorclient.systems.modules.misc.Notebot;
 import meteordevelopment.meteorclient.utils.notebot.NotebotUtils;
 import meteordevelopment.meteorclient.utils.notebot.song.Note;
 import meteordevelopment.meteorclient.utils.notebot.song.Song;
-import net.minecraft.block.enums.NoteBlockInstrument;
+import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
 import org.apache.commons.io.FilenameUtils;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -50,7 +50,7 @@ public class SongDecoders {
      * @param file A song file
      * @return A {@link Song} object
      */
-    @NotNull
+    @NonNull
     public static Song parse(File file) throws Exception {
         if (!hasDecoder(file)) throw new IllegalStateException("Decoder for this file does not exists!");
         SongDecoder decoder = getDecoder(file);
@@ -79,8 +79,14 @@ public class SongDecoders {
 
             int n = note.getNoteLevel();
             if (n < 0 || n > 24) {
-                if (notebot.roundOutOfRange.get()) {
-                    note.setNoteLevel(n < 0 ? 0 : 24);
+                if (notebot.transposeOutOfRange.get()) {
+                    while (n < 0) {
+                        n += 12;
+                    }
+                    while (n > 24) {
+                        n -= 12;
+                    }
+                    note.setNoteLevel(n);
                 } else {
                     notebot.warning("Note at tick %d out of range.", tick);
                     iterator.remove();

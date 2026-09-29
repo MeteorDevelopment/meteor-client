@@ -6,16 +6,16 @@
 package meteordevelopment.meteorclient.events.render;
 
 
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.Hand;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.world.InteractionHand;
 
 public class ArmRenderEvent {
     public static ArmRenderEvent INSTANCE = new ArmRenderEvent();
 
-    public MatrixStack matrix;
-    public Hand hand;
+    public PoseStack matrix;
+    public InteractionHand hand;
 
-    public static ArmRenderEvent get(Hand hand, MatrixStack matrices) {
+    public static ArmRenderEvent get(InteractionHand hand, PoseStack matrices) {
         INSTANCE.matrix = matrices;
         INSTANCE.hand = hand;
 

@@ -15,7 +15,7 @@ import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.item.Items;
+import net.minecraft.world.item.Items;
 
 public class SelfWeb extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -75,10 +75,10 @@ public class SelfWeb extends Module {
     private void placeWeb() {
         FindItemResult web = InvUtils.findInHotbar(Items.COBWEB);
 
-        BlockUtils.place(mc.player.getBlockPos(), web, rotate.get(), 0, false);
+        BlockUtils.place(mc.player.blockPosition(), web, rotate.get(), 0, false);
 
         if (doubles.get()) {
-            BlockUtils.place(mc.player.getBlockPos().add(0, 1, 0), web, rotate.get(), 0, false);
+            BlockUtils.place(mc.player.blockPosition().offset(0, 1, 0), web, rotate.get(), 0, false);
         }
 
         if (turnOff.get()) toggle();

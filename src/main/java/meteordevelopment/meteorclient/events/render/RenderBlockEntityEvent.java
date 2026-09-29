@@ -6,7 +6,7 @@
 package meteordevelopment.meteorclient.events.render;
 
 import meteordevelopment.meteorclient.events.Cancellable;
-import net.minecraft.client.render.block.entity.state.BlockEntityRenderState;
+import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
 
 public class RenderBlockEntityEvent extends Cancellable {
     private static final RenderBlockEntityEvent INSTANCE = new RenderBlockEntityEvent();

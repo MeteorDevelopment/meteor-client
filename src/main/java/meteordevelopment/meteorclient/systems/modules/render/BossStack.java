@@ -13,8 +13,8 @@ import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.client.gui.hud.ClientBossBar;
-import net.minecraft.text.Text;
+import net.minecraft.client.gui.components.LerpingBossEvent;
+import net.minecraft.network.chat.Component;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -45,7 +45,7 @@ public class BossStack extends Module {
         .build()
     );
 
-    public static final Map<ClientBossBar, Integer> barMap = new WeakHashMap<>();
+    public static final Map<LerpingBossEvent, Integer> barMap = new WeakHashMap<>();
 
     public BossStack() {
         super(Categories.Render, "boss-stack", "Stacks boss bars to make your HUD less cluttered.");
@@ -54,10 +54,10 @@ public class BossStack extends Module {
     @EventHandler
     private void onFetchText(RenderBossBarEvent.BossText event) {
         if (hideName.get()) {
-            event.name = Text.empty();
+            event.name = Component.empty();
             return;
         } else if (barMap.isEmpty() || !stack.get()) return;
-        ClientBossBar bar = event.bossBar;
+        LerpingBossEvent bar = event.bossBar;
         Integer integer = barMap.get(bar);
         barMap.remove(bar);
         if (integer != null && !hideName.get()) event.name = event.name.copy().append(" x" + integer);
@@ -71,7 +71,7 @@ public class BossStack extends Module {
     @EventHandler
     private void onGetBars(RenderBossBarEvent.BossIterator event) {
         if (stack.get()) {
-            HashMap<String, ClientBossBar> chosenBarMap = new HashMap<>();
+            HashMap<String, LerpingBossEvent> chosenBarMap = new HashMap<>();
             event.iterator.forEachRemaining(bar -> {
                 String name = bar.getName().getString();
                 if (chosenBarMap.containsKey(name)) {

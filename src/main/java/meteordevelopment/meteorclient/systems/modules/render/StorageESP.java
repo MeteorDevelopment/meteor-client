@@ -25,17 +25,16 @@ import meteordevelopment.meteorclient.utils.render.RenderUtils;
 import meteordevelopment.meteorclient.utils.render.SimpleBlockRenderer;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
-import meteordevelopment.meteorclient.utils.render.postprocess.PostProcessShader;
 import meteordevelopment.meteorclient.utils.render.postprocess.PostProcessShaders;
 import meteordevelopment.meteorclient.utils.world.Dir;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.ChestBlock;
-import net.minecraft.block.entity.*;
-import net.minecraft.block.enums.ChestType;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.ChestBlock;
+import net.minecraft.world.level.block.entity.*;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.ChestType;
 
 import java.util.HashSet;
 import java.util.List;
@@ -191,12 +190,14 @@ public class StorageESP extends Module {
 
         if (!storageBlocks.get().contains(blockEntity.getType())) return;
 
-        if (blockEntity instanceof TrappedChestBlockEntity) lineColor.set(trappedChest.get()); // Must come before ChestBlockEntity as it is the superclass of TrappedChestBlockEntity
+        if (blockEntity instanceof TrappedChestBlockEntity)
+            lineColor.set(trappedChest.get()); // Must come before ChestBlockEntity as it is the superclass of TrappedChestBlockEntity
         else if (blockEntity instanceof ChestBlockEntity) lineColor.set(chest.get());
         else if (blockEntity instanceof BarrelBlockEntity) lineColor.set(barrel.get());
         else if (blockEntity instanceof ShulkerBoxBlockEntity) lineColor.set(shulker.get());
         else if (blockEntity instanceof EnderChestBlockEntity) lineColor.set(enderChest.get());
-        else if (blockEntity instanceof AbstractFurnaceBlockEntity || blockEntity instanceof BrewingStandBlockEntity || blockEntity instanceof ChiseledBookshelfBlockEntity || blockEntity instanceof CrafterBlockEntity || blockEntity instanceof DispenserBlockEntity || blockEntity instanceof DecoratedPotBlockEntity || blockEntity instanceof HopperBlockEntity) lineColor.set(other.get());
+        else if (blockEntity instanceof AbstractFurnaceBlockEntity || blockEntity instanceof BrewingStandBlockEntity || blockEntity instanceof ChiseledBookShelfBlockEntity || blockEntity instanceof CrafterBlockEntity || blockEntity instanceof DispenserBlockEntity || blockEntity instanceof DecoratedPotBlockEntity || blockEntity instanceof HopperBlockEntity)
+            lineColor.set(other.get());
         else return;
 
         render = true;
@@ -222,19 +223,19 @@ public class StorageESP extends Module {
     @EventHandler
     private void onBlockInteract(InteractBlockEvent event) {
         BlockPos pos = event.result.getBlockPos();
-        BlockEntity blockEntity = mc.world.getBlockEntity(pos);
+        BlockEntity blockEntity = mc.level.getBlockEntity(pos);
 
         if (blockEntity == null) return;
 
         interactedBlocks.add(pos);
         if (blockEntity instanceof ChestBlockEntity chestBlockEntity) {
-            BlockState state = chestBlockEntity.getCachedState();
-            ChestType chestType = state.get(ChestBlock.CHEST_TYPE);
+            BlockState state = chestBlockEntity.getBlockState();
+            ChestType chestType = state.getValue(ChestBlock.TYPE);
 
             if (chestType == ChestType.LEFT || chestType == ChestType.RIGHT) {
                 // It's part of a double chest
-                Direction facing = state.get(ChestBlock.FACING);
-                BlockPos otherPartPos = pos.offset(chestType == ChestType.LEFT ? facing.rotateYClockwise() : facing.rotateYCounterclockwise());
+                Direction facing = state.getValue(ChestBlock.FACING);
+                BlockPos otherPartPos = pos.relative(chestType == ChestType.LEFT ? facing.getClockWise() : facing.getCounterClockWise());
 
                 interactedBlocks.add(otherPartPos);
             }
@@ -247,7 +248,7 @@ public class StorageESP extends Module {
 
         for (BlockEntity blockEntity : Utils.blockEntities()) {
             // Check if the block has been interacted with (opened)
-            boolean interacted = interactedBlocks.contains(blockEntity.getPos());
+            boolean interacted = interactedBlocks.contains(blockEntity.getBlockPos());
             if (interacted && hideOpened.get()) continue;  // Skip rendering if "hideOpened" is true
 
             getBlockEntityColor(blockEntity);
@@ -261,9 +262,10 @@ public class StorageESP extends Module {
             }
 
             if (render) {
-                double dist = PlayerUtils.squaredDistanceTo(blockEntity.getPos().getX() + 0.5, blockEntity.getPos().getY() + 0.5, blockEntity.getPos().getZ() + 0.5);
+                double dist = PlayerUtils.squaredDistanceTo(blockEntity.getBlockPos().getX() + 0.5, blockEntity.getBlockPos().getY() + 0.5, blockEntity.getBlockPos().getZ() + 0.5);
                 double a = 1;
-                if (dist <= fadeDistance.get() * fadeDistance.get()) a = dist / (fadeDistance.get() * fadeDistance.get());
+                if (dist <= fadeDistance.get() * fadeDistance.get())
+                    a = dist / (fadeDistance.get() * fadeDistance.get());
 
                 if (a < 0.075) continue;
 
@@ -279,7 +281,7 @@ public class StorageESP extends Module {
                 sideColor.a *= a;
 
                 if (tracers.get()) {
-                    event.renderer.line(RenderUtils.center.x, RenderUtils.center.y, RenderUtils.center.z, blockEntity.getPos().getX() + 0.5, blockEntity.getPos().getY() + 0.5, blockEntity.getPos().getZ() + 0.5, lineColor);
+                    event.renderer.line(RenderUtils.center.x, RenderUtils.center.y, RenderUtils.center.z, blockEntity.getBlockPos().getX() + 0.5, blockEntity.getBlockPos().getY() + 0.5, blockEntity.getBlockPos().getZ() + 0.5, lineColor);
                 }
 
                 if (mode.get() == Mode.Box) {
@@ -311,19 +313,19 @@ public class StorageESP extends Module {
 
 
     private void renderBox(Render3DEvent event, BlockEntity blockEntity) {
-        double x1 = blockEntity.getPos().getX();
-        double y1 = blockEntity.getPos().getY();
-        double z1 = blockEntity.getPos().getZ();
+        double x1 = blockEntity.getBlockPos().getX();
+        double y1 = blockEntity.getBlockPos().getY();
+        double z1 = blockEntity.getBlockPos().getZ();
 
-        double x2 = blockEntity.getPos().getX() + 1;
-        double y2 = blockEntity.getPos().getY() + 1;
-        double z2 = blockEntity.getPos().getZ() + 1;
+        double x2 = blockEntity.getBlockPos().getX() + 1;
+        double y2 = blockEntity.getBlockPos().getY() + 1;
+        double z2 = blockEntity.getBlockPos().getZ() + 1;
 
         int excludeDir = 0;
         if (blockEntity instanceof ChestBlockEntity) {
-            BlockState state = mc.world.getBlockState(blockEntity.getPos());
-            if ((state.getBlock() == Blocks.CHEST || state.getBlock() == Blocks.TRAPPED_CHEST) && state.get(ChestBlock.CHEST_TYPE) != ChestType.SINGLE) {
-                excludeDir = Dir.get(ChestBlock.getFacing(state));
+            BlockState state = mc.level.getBlockState(blockEntity.getBlockPos());
+            if ((state.getBlock() == Blocks.CHEST || state.getBlock() == Blocks.TRAPPED_CHEST) && state.getValue(ChestBlock.TYPE) != ChestType.SINGLE) {
+                excludeDir = Dir.get(ChestBlock.getConnectedDirection(state));
             }
         }
 

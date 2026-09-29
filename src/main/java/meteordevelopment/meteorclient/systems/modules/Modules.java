@@ -5,13 +5,17 @@
 
 package meteordevelopment.meteorclient.systems.modules;
 
+import com.mojang.datafixers.util.Pair;
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.game.GameJoinedEvent;
 import meteordevelopment.meteorclient.events.game.GameLeftEvent;
 import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
 import meteordevelopment.meteorclient.events.meteor.ActiveModulesChangedEvent;
-import meteordevelopment.meteorclient.events.meteor.KeyEvent;
+import meteordevelopment.meteorclient.events.meteor.KeyInputEvent;
 import meteordevelopment.meteorclient.events.meteor.ModuleBindChangedEvent;
 import meteordevelopment.meteorclient.events.meteor.MouseClickEvent;
 import meteordevelopment.meteorclient.pathing.BaritoneUtils;
@@ -39,12 +43,11 @@ import meteordevelopment.meteorclient.utils.misc.input.Input;
 import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.util.Pair;
-import org.jetbrains.annotations.Nullable;
-import org.lwjgl.glfw.GLFW;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
+import org.jspecify.annotations.Nullable;
+import com.mojang.blaze3d.platform.InputConstants;
 
 import java.io.File;
 import java.util.*;
@@ -58,8 +61,8 @@ public class Modules extends System<Modules> {
     private final Map<Class<? extends Module>, Module> moduleInstances = new Reference2ReferenceOpenHashMap<>();
     private final Map<Category, List<Module>> groups = new Reference2ReferenceOpenHashMap<>();
 
-    private final List<Module> active = new ArrayList<>();
-    private Module moduleToBind;
+    private final Set<Module> active = new ReferenceOpenHashSet<>();
+    private @Nullable Module moduleToBind;
     private boolean awaitingKeyRelease = false;
 
     public Modules() {
@@ -98,7 +101,8 @@ public class Modules extends System<Modules> {
     }
 
     public static void registerCategory(Category category) {
-        if (!Categories.REGISTERING) throw new RuntimeException("Modules.registerCategory - Cannot register category outside of onRegisterCategories callback.");
+        if (!Categories.REGISTERING)
+            throw new RuntimeException("Modules.registerCategory - Cannot register category outside of onRegisterCategories callback.");
 
         CATEGORIES.add(category);
     }
@@ -133,7 +137,7 @@ public class Modules extends System<Modules> {
     }
 
     public List<Module> getGroup(Category category) {
-        return groups.computeIfAbsent(category, category1 -> new ArrayList<>());
+        return groups.computeIfAbsent(category, _ -> new ArrayList<>());
     }
 
     public Collection<Module> getAll() {
@@ -145,12 +149,12 @@ public class Modules extends System<Modules> {
         return moduleInstances.size();
     }
 
-    public List<Module> getActive() {
+    public Collection<Module> getActive() {
         return active;
     }
 
     public List<Pair<Module, String>> searchTitles(String text) {
-        Map<Pair<Module, String>, Integer> modules = new HashMap<>();
+        Object2IntMap<Pair<Module, String>> modules = new Object2IntOpenHashMap<>();
 
         for (Module module : this.moduleInstances.values()) {
             String title = module.title;
@@ -166,11 +170,11 @@ public class Modules extends System<Modules> {
                 }
             }
 
-            modules.put(new Pair<>(module, title), score);
+            modules.put(Pair.of(module, title), score);
         }
 
         List<Pair<Module, String>> l = new ArrayList<>(modules.keySet());
-        l.sort(Comparator.comparingInt(modules::get));
+        l.sort(Comparator.comparingInt(modules::getInt));
 
         return l;
     }
@@ -194,8 +198,7 @@ public class Modules extends System<Modules> {
 
     void addActive(Module module) {
         synchronized (active) {
-            if (!active.contains(module)) {
-                active.add(module);
+            if (active.add(module)) {
                 MeteorClient.EVENT_BUS.post(ActiveModulesChangedEvent.get());
             }
         }
@@ -211,7 +214,7 @@ public class Modules extends System<Modules> {
 
     // Binding
 
-    public void setModuleToBind(Module moduleToBind) {
+    public void setModuleToBind(@Nullable Module moduleToBind) {
         this.moduleToBind = moduleToBind;
     }
 
@@ -228,7 +231,7 @@ public class Modules extends System<Modules> {
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
-    private void onKeyBinding(KeyEvent event) {
+    private void onKeyBinding(KeyInputEvent event) {
         if (event.action == KeyAction.Release && onBinding(true, event.key(), event.modifiers())) event.cancel();
     }
 
@@ -241,7 +244,7 @@ public class Modules extends System<Modules> {
         if (!isBinding()) return false;
 
         if (awaitingKeyRelease) {
-            if (!isKey || (value != GLFW.GLFW_KEY_ENTER && value != GLFW.GLFW_KEY_KP_ENTER)) return false;
+            if (!isKey || (value != InputConstants.KEY_RETURN && value != InputConstants.KEY_NUMPADENTER)) return false;
 
             awaitingKeyRelease = false;
             return false;
@@ -250,12 +253,10 @@ public class Modules extends System<Modules> {
         if (moduleToBind.keybind.canBindTo(isKey, value, modifiers)) {
             moduleToBind.keybind.set(isKey, value, modifiers);
             moduleToBind.info("Bound to (highlight)%s(default).", moduleToBind.keybind);
-        }
-        else if (value == GLFW.GLFW_KEY_ESCAPE) {
+        } else if (value == InputConstants.KEY_ESCAPE) {
             moduleToBind.keybind.set(Keybind.none());
             moduleToBind.info("Removed bind.");
-        }
-        else return false;
+        } else return false;
 
         MeteorClient.EVENT_BUS.post(ModuleBindChangedEvent.get(moduleToBind));
         moduleToBind = null;
@@ -264,7 +265,7 @@ public class Modules extends System<Modules> {
     }
 
     @EventHandler(priority = EventPriority.HIGH)
-    private void onKey(KeyEvent event) {
+    private void onKey(KeyInputEvent event) {
         if (event.action == KeyAction.Repeat) return;
         onAction(true, event.key(), event.modifiers(), event.action == KeyAction.Press);
     }
@@ -276,9 +277,22 @@ public class Modules extends System<Modules> {
     }
 
     private void onAction(boolean isKey, int value, int modifiers, boolean isPress) {
-        if (mc.currentScreen != null || Input.isKeyPressed(GLFW.GLFW_KEY_F3)) return;
+        if (mc.gui.screen() != null || Input.isKeyPressed(InputConstants.KEY_F3)) return;
+
+        // A bind with modifiers takes precedence over one without, so pressing Ctrl + G does not
+        // also toggle a module bound to plain G.
+        boolean modifierBindMatched = false;
 
         for (Module module : moduleInstances.values()) {
+            if (module.keybind.hasMods() && module.keybind.matches(isKey, value, modifiers)) {
+                modifierBindMatched = true;
+                break;
+            }
+        }
+
+        for (Module module : moduleInstances.values()) {
+            if (modifierBindMatched && !module.keybind.hasMods()) continue;
+
             if (module.keybind.matches(isKey, value, modifiers) && (isPress || (module.toggleOnBindRelease && module.isActive()))) {
                 module.toggle();
                 module.sendToggledMsg();
@@ -333,12 +347,12 @@ public class Modules extends System<Modules> {
     }
 
     @Override
-    public NbtCompound toTag() {
-        NbtCompound tag = new NbtCompound();
+    public CompoundTag toTag() {
+        CompoundTag tag = new CompoundTag();
 
-        NbtList modulesTag = new NbtList();
+        ListTag modulesTag = new ListTag();
         for (Module module : getAll()) {
-            NbtCompound moduleTag = module.toTag();
+            CompoundTag moduleTag = module.toTag();
             if (moduleTag != null) modulesTag.add(moduleTag);
         }
         tag.put("modules", modulesTag);
@@ -347,13 +361,13 @@ public class Modules extends System<Modules> {
     }
 
     @Override
-    public Modules fromTag(NbtCompound tag) {
+    public Modules fromTag(CompoundTag tag) {
         disableAll();
 
-        NbtList modulesTag = tag.getListOrEmpty("modules");
-        for (NbtElement moduleTagI : modulesTag) {
-            NbtCompound moduleTag = (NbtCompound) moduleTagI;
-            Module module = get(moduleTag.getString("name", ""));
+        ListTag modulesTag = tag.getListOrEmpty("modules");
+        for (Tag moduleTagI : modulesTag) {
+            CompoundTag moduleTag = (CompoundTag) moduleTagI;
+            Module module = get(moduleTag.getStringOr("name", ""));
             if (module != null) module.fromTag(moduleTag);
         }
 
@@ -450,7 +464,6 @@ public class Modules extends System<Modules> {
         add(new NoMiningTrace());
         add(new NoRotate());
         add(new NoStatusEffects());
-        add(new OffhandCrash());
         add(new Portals());
         add(new PotionSaver());
         add(new Reach());
@@ -529,6 +542,7 @@ public class Modules extends System<Modules> {
         add(new VoidESP());
         add(new WallHack());
         add(new WaypointsModule());
+        add(new WeatherChanger());
         add(new Xray());
         add(new Zoom());
     }
@@ -549,7 +563,6 @@ public class Modules extends System<Modules> {
         add(new Flamethrower());
         add(new HighwayBuilder());
         add(new LiquidFiller());
-        add(new MountBypass());
         add(new NoGhostBlocks());
         add(new Nuker());
         add(new PacketMine());

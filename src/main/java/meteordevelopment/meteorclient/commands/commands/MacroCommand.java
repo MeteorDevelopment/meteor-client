@@ -13,8 +13,8 @@ import meteordevelopment.meteorclient.commands.arguments.MacroArgumentType;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.systems.macros.Macro;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.argument.TimeArgumentType;
+import net.minecraft.client.multiplayer.ClientSuggestionProvider;
+import net.minecraft.commands.arguments.TimeArgument;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,10 +30,10 @@ public class MacroCommand extends Command {
     List<ScheduledMacro> scheduledMacros = new ArrayList<>();
 
     @Override
-    public void build(LiteralArgumentBuilder<CommandSource> builder) {
+    public void build(LiteralArgumentBuilder<ClientSuggestionProvider> builder) {
         builder
             .then(literal("clear")
-                .executes(context -> {
+                .executes(_ -> {
                     if (scheduleQueue.isEmpty() && scheduledMacros.isEmpty()) {
                         error("No macros are currently scheduled.");
                         return SINGLE_SUCCESS;
@@ -66,7 +66,7 @@ public class MacroCommand extends Command {
 
                     return SINGLE_SUCCESS;
                 })
-                .then(argument("delay", TimeArgumentType.time())
+                .then(argument("delay", TimeArgument.time())
                     .executes(context -> {
                         Macro macro = MacroArgumentType.get(context);
                         scheduleQueue.add(new ScheduledMacro(IntegerArgumentType.getInteger(context, "delay"), macro));
@@ -122,7 +122,7 @@ class ScheduledMacro {
     }
 
     public void tick() {
-       delay--;
+        delay--;
     }
 
     public boolean run() {
