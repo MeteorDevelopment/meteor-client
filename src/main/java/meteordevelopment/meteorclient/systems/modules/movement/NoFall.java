@@ -71,7 +71,7 @@ public class NoFall extends Module {
         .name("anchor")
         .description("Centers the player and reduces movement when using bucket or air place mode.")
         .defaultValue(true)
-        .visible(() -> mode.get() != Mode.Packet)
+        .visible(() -> mode.get() == Mode.AirPlace || mode.get() == Mode.Place)
         .build()
     );
 
@@ -82,10 +82,12 @@ public class NoFall extends Module {
         .build()
     );
 
+    // NoGround never zeroes the server's fall distance, so it doesn't rob the mace of its smash damage.
     private final Setting<Boolean> pauseOnMace = sgGeneral.add(new BoolSetting.Builder()
         .name("pause-on-mace")
         .description("Pauses NoFall when using a mace.")
         .defaultValue(true)
+        .visible(() -> mode.get() != Mode.NoGround)
         .build()
     );
 
@@ -101,25 +103,36 @@ public class NoFall extends Module {
     @Override
     public void onActivate() {
         prePathManagerNoFall = PathManagers.get().getSettings().getNoFall().get();
-        if (mode.get() == Mode.Packet) PathManagers.get().getSettings().getNoFall().set(true);
+        if (mode.get() == Mode.Packet || mode.get() == Mode.NoGround) PathManagers.get().getSettings().getNoFall().set(true);
 
         placedWater = false;
     }
 
     @Override
     public void onDeactivate() {
+        //Theoretically unneeded but it stops the player from getting damage, when he disables the module
+        //If onGround isnt checked by the anticheat, then this will also work. (Tested on Grimv2 and NCP)
+        if (mode.get() == Mode.NoGround) {
+            sendPacket(0.0000008);
+            sendPacket(0);
+        }
         PathManagers.get().getSettings().getNoFall().set(prePathManagerNoFall);
     }
 
     @EventHandler
     private void onSendPacket(PacketEvent.Send event) {
         if (mc.player == null) return;
-        if (pauseOnMace.get() && mc.player.getMainHandItem().getItem() instanceof MaceItem) return;
+        if (mode.get() != Mode.NoGround && pauseOnMace.get() && mc.player.getMainHandItem().getItem() instanceof MaceItem) return;
         if (mc.player.getAbilities().instabuild
             || !(event.packet instanceof ServerboundMovePlayerPacket)
-            || mode.get() != Mode.Packet
+            || (mode.get() != Mode.Packet && mode.get() != Mode.NoGround)
             || ((IServerboundMovePlayerPacket) event.packet).meteor$getTag() == 1337) return;
 
+        // Never report a landing, so the server never applies the accumulated fall distance.
+        if (mode.get() == Mode.NoGround) {
+            ((ServerboundMovePlayerPacketAccessor) event.packet).meteor$setOnGround(false);
+            return;
+        }
 
         if (!Modules.get().isActive(Flight.class)) {
             if (mc.player.isFallFlying()) return;
@@ -227,9 +240,19 @@ public class NoFall extends Module {
     public String getInfoString() {
         return mode.get().toString();
     }
+    private void sendPacket(double height) {
+        double x = mc.player.getX();
+        double y = mc.player.getY();
+        double z = mc.player.getZ();
+
+        ServerboundMovePlayerPacket packet = new ServerboundMovePlayerPacket.Pos(x, y + height, z, false, false);
+        ((IServerboundMovePlayerPacket) packet).meteor$setTag(1337);
+        mc.player.connection.send(packet);
+    }
 
     public enum Mode {
         Packet,
+        NoGround,
         AirPlace,
         Place
     }
