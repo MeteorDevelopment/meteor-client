@@ -42,7 +42,7 @@ public class LongSetting extends Setting<Long> {
 
     @Override
     public Long load(CompoundTag tag) {
-        set(tag.getLongOr("value", 0));
+        set(tag.getLongOr("value", defaultValue));
 
         return get();
     }
