@@ -89,25 +89,6 @@ public class BreakIndicators extends Module {
         if (packetMine.get() && !Modules.get().get(PacketMine.class).blocks.isEmpty()) {
             renderPacket(event, Modules.get().get(PacketMine.class).blocks);
         }
-
-        HighwayBuilder b = Modules.get().get(HighwayBuilder.class);
-        if (!b.isActive()) return;
-
-        if (b.normalMining != null) {
-            VoxelShape voxelShape = b.normalMining.blockState.getShape(mc.level, b.normalMining.blockPos);
-            if (voxelShape.isEmpty()) return;
-
-            double normalised = Math.min(1, b.normalMining.progress());
-            renderBlock(event, voxelShape.bounds(), b.normalMining.blockPos, 1 - normalised, normalised);
-        }
-
-        if (b.packetMining != null) {
-            VoxelShape voxelShape = b.packetMining.blockState.getShape(mc.level, b.packetMining.blockPos);
-            if (voxelShape.isEmpty()) return;
-
-            double normalised = Math.min(1, b.packetMining.progress());
-            renderBlock(event, voxelShape.bounds(), b.packetMining.blockPos, 1 - normalised, normalised);
-        }
     }
 
     private void renderNormal(Render3DEvent event) {
