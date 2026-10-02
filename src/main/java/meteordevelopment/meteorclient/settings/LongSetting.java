@@ -10,8 +10,13 @@ import net.minecraft.nbt.CompoundTag;
 import java.util.function.Consumer;
 
 public class LongSetting extends Setting<Long> {
-    private LongSetting(String name, String description, long defaultValue, Consumer<Long> onChanged, Consumer<Setting<Long>> onModuleActivated, IVisible visible) {
+    public final long min, max;
+
+    private LongSetting(String name, String description, long defaultValue, Consumer<Long> onChanged, Consumer<Setting<Long>> onModuleActivated, IVisible visible, long min, long max) {
         super(name, description, defaultValue, onChanged, onModuleActivated, visible);
+
+        this.min = min;
+        this.max = max;
     }
 
     @Override
@@ -25,7 +30,7 @@ public class LongSetting extends Setting<Long> {
 
     @Override
     protected boolean isValueValid(Long value) {
-        return true;
+        return value >= min && value <= max;
     }
 
     @Override
@@ -43,13 +48,31 @@ public class LongSetting extends Setting<Long> {
     }
 
     public static class Builder extends SettingBuilder<Builder, Long, LongSetting> {
+        private long min = Long.MIN_VALUE, max = Long.MAX_VALUE;
+
         public Builder() {
             super(0L);
         }
 
+        public Builder min(long min) {
+            this.min = min;
+            return this;
+        }
+
+        public Builder max(long max) {
+            this.max = max;
+            return this;
+        }
+
+        public Builder range(long min, long max) {
+            this.min = Math.min(min, max);
+            this.max = Math.max(min, max);
+            return this;
+        }
+
         @Override
         public LongSetting build() {
-            return new LongSetting(name, description, defaultValue, onChanged, onModuleActivated, visible);
+            return new LongSetting(name, description, defaultValue, onChanged, onModuleActivated, visible, min, max);
         }
     }
 }

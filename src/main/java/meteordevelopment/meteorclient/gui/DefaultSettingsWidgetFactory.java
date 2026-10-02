@@ -182,7 +182,8 @@ public class DefaultSettingsWidgetFactory extends SettingsWidgetFactory {
     private void longW(WTable table, LongSetting setting) {
         WTextBox textBox = table.add(theme.textBox(setting.get().toString(), (text, c) -> Character.isDigit(c) || c == '-' && !text.contains("-"))).expandX().widget();
         textBox.actionOnUnfocused = () -> {
-            if (!setting.parse(textBox.get())) textBox.set(setting.get().toString());
+            setting.parse(textBox.get());
+            textBox.set(setting.get().toString());
         };
 
         reset(table, setting, () -> textBox.set(setting.get().toString()));
