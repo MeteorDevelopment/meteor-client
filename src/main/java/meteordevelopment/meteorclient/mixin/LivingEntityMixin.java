@@ -92,6 +92,8 @@ public abstract class LivingEntityMixin extends Entity {
 
     @Inject(method = "isFallFlying", at = @At("TAIL"), cancellable = true)
     public void recastOnLand(CallbackInfoReturnable<Boolean> cir) {
+        if ((Object) this != mc.player) return;
+
         boolean elytra = cir.getReturnValue();
         ElytraFly elytraFly = Modules.get().get(ElytraFly.class);
         if (previousElytra && !elytra && elytraFly.isActive() && elytraFly.flightMode.get() == ElytraFlightModes.Bounce) {
