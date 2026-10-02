@@ -80,12 +80,12 @@ public class Proxies extends System<Proxies> implements Iterable<Proxy> {
         .build()
     );
 
-    // https://regex101.com/r/gRHjnd/latest
-    public static final Pattern PROXY_PATTERN = Pattern.compile("^(?:([\\w\\s]+)=)?((?:0*(?:\\d|[1-9]\\d|1\\d\\d|2[0-4]\\d|25[0-5])(?:\\.(?!:)|)){4}):(?!0)(\\d{1,4}|[1-5]\\d{4}|6[0-4]\\d{3}|65[0-4]\\d{2}|655[0-2]\\d|6553[0-5])(?i:@(socks[45]))?$", Pattern.MULTILINE);
-    // https://regex101.com/r/QXATIS/1
-    public static final Pattern PROXY_PATTERN_WEBSHARE = Pattern.compile("^((?:0*(?:\\d|[1-9]\\d|1\\d\\d|2[0-4]\\d|25[0-5])(?:\\.(?!:)|)){4}):(?!0)(\\d{1,4}|[1-5]\\d{4}|6[0-4]\\d{3}|65[0-4]\\d{2}|655[0-2]\\d|6553[0-5]):([^:]+)(?::(.+))?$", Pattern.MULTILINE);
-    // https://regex101.com/r/7M2LFx/1
-    public static final Pattern PROXY_PATTERN_URI = Pattern.compile("^(?:(socks|socks4|socks5)://)?(?:(?<user>[\\w~-]+)(:(?<pass>[\\w~-]+))?@)?(?<addr>(?:0*(?:\\d|[1-9]\\d|1\\d\\d|2[0-4]\\d|25[0-5])(?:\\.(?!:)|)){4}):(?!0)(?<port>\\d{1,4}|[1-5]\\d{4}|6[0-4]\\d{3}|65[0-4]\\d{2}|655[0-2]\\d|6553[0-5])$", Pattern.MULTILINE);
+    // https://regex101.com/r/swN1Ya/1
+    public static final Pattern PROXY_PATTERN = Pattern.compile("^(?:(?<name>[\\w\\s]+)=)?(?<address>(?:0*(?:\\d|[1-9]\\d|1\\d\\d|2[0-4]\\d|25[0-5])(?:\\.(?!\\:)|)){4})\\:(?!0)(?<port>\\d{1,4}|[1-5]\\d{4}|6[0-4]\\d{3}|65[0-4]\\d{2}|655[0-2]\\d|6553[0-5])(@(?<type>http|socks[45])(?<secure>s)?)?$", Pattern.CASE_INSENSITIVE);
+    // https://regex101.com/r/rPqeik/1
+    public static final Pattern PROXY_PATTERN_WEBSHARE = Pattern.compile("^(?<address>(?:0*(?:\\d|[1-9]\\d|1\\d\\d|2[0-4]\\d|25[0-5])(?:\\.(?!\\:)|)){4})\\:(?!0)(?<port>\\d{1,4}|[1-5]\\d{4}|6[0-4]\\d{3}|65[0-4]\\d{2}|655[0-2]\\d|6553[0-5])(?:\\:(?<username>[^:]+)(?:\\:(?<password>.+))?)$", Pattern.CASE_INSENSITIVE);
+    // https://regex101.com/r/bGQd0X/1
+    public static final Pattern PROXY_PATTERN_URI = Pattern.compile("^(?:(?<type>http|socks[45])(?<secure>s)?\\:\\/\\/)?(?:(?<username>[^:]+)(\\:(?<password>[^:]+))?\\@)?(?<address>(?:0*(?:\\d|[1-9]\\d|1\\d\\d|2[0-4]\\d|25[0-5])(?:\\.(?!\\:)|)){4})\\:(?!0)(?<port>\\d{1,4}|[1-5]\\d{4}|6[0-4]\\d{3}|65[0-4]\\d{2}|655[0-2]\\d|6553[0-5])$", Pattern.CASE_INSENSITIVE);
 
     private List<Proxy> proxies = new ArrayList<>();
     public boolean refreshing;
@@ -100,7 +100,7 @@ public class Proxies extends System<Proxies> implements Iterable<Proxy> {
 
     public boolean add(Proxy proxy) {
         for (Proxy p : proxies) {
-            if (p.type.get().equals(proxy.type.get()) && p.address.get().equals(proxy.address.get()) && Objects.equals(p.port.get(), proxy.port.get()))
+            if (p.type.get().equals(proxy.type.get()) && p.secure.get().equals(proxy.secure.get()) && p.address.get().equals(proxy.address.get()) && Objects.equals(p.port.get(), proxy.port.get()))
                 return false;
         }
 
