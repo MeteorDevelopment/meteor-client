@@ -73,6 +73,13 @@ public class AutoEat extends Module {
         .build()
     );
 
+    private final Setting<Boolean> pauseAutoFish = sgGeneral.add(new BoolSetting.Builder()
+        .name("pause-autofish")
+        .description("Pause AutoFish when eating.")
+        .defaultValue(true)
+        .build()
+    );
+
     private final Setting<Boolean> searchInventory = sgGeneral.add(new BoolSetting.Builder()
         .name("search-inventory")
         .description("Search the full inventory for food, not only the hotbar.")
@@ -121,6 +128,7 @@ public class AutoEat extends Module {
 
     private final List<Class<? extends Module>> wasAura = new ReferenceArrayList<>();
     private boolean wasBaritone = false;
+    private boolean wasAutoFish = false;
 
     public AutoEat() {
         super(Categories.Player, "auto-eat", "Automatically eats food.");
@@ -200,6 +208,15 @@ public class AutoEat extends Module {
             wasBaritone = true;
             PathManagers.get().pause();
         }
+
+        // Pause autofish
+        if (pauseAutoFish.get()) {
+            Module autoFish = Modules.get().get(AutoFish.class);
+            if (autoFish != null && autoFish.isActive()) {
+                wasAutoFish = true;
+                autoFish.toggle();
+            }
+        }
     }
 
     private void eat() {
@@ -229,6 +246,15 @@ public class AutoEat extends Module {
         if (pauseBaritone.get() && wasBaritone) {
             wasBaritone = false;
             PathManagers.get().resume();
+        }
+
+        // Resume autofish
+        if (pauseAutoFish.get() && wasAutoFish) {
+            wasAutoFish = false;
+            Module autoFish = Modules.get().get(AutoFish.class);
+            if (autoFish != null) {
+                autoFish.enable();
+            }
         }
     }
 
