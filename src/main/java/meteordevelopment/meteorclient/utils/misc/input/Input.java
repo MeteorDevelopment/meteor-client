@@ -5,19 +5,20 @@
 
 package meteordevelopment.meteorclient.utils.misc.input;
 
+import com.mojang.blaze3d.platform.InputConstants;
+import com.mojang.blaze3d.platform.cursor.CursorType;
+import com.mojang.blaze3d.platform.cursor.CursorTypes;
 import meteordevelopment.meteorclient.gui.GuiKeyEvents;
 import meteordevelopment.meteorclient.mixin.KeyMappingAccessor;
-import meteordevelopment.meteorclient.utils.misc.CursorStyle;
 import net.minecraft.client.KeyMapping;
-import com.mojang.blaze3d.platform.InputConstants;
-
-import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class Input {
     private static final boolean[] keys = new boolean[512];
     private static final boolean[] buttons = new boolean[16];
 
-    private static CursorStyle lastCursorStyle = CursorStyle.Default;
+    private static CursorType lastCursorStyle = CursorTypes.ARROW;
+
+    private static final int[] MODIFIER_GROUPS = {InputConstants.MOD_SHIFT, InputConstants.MOD_CONTROL, InputConstants.MOD_ALT, InputConstants.MOD_SUPER};
 
     private Input() {
     }
@@ -54,11 +55,27 @@ public class Input {
         return button < buttons.length && buttons[button];
     }
 
-    public static void setCursorStyle(CursorStyle style) {
+    public static void setCursorStyle(CursorType style) {
         if (lastCursorStyle != style) {
-            style.getCursor().select(mc.getWindow());
+            style.select();
             lastCursorStyle = style;
         }
+    }
+
+    /**
+     * Whether exactly the modifiers in {@code mask} are held. SDL reports the left and right
+     * key of each modifier as separate bits and carries the Num Lock and Caps Lock state in
+     * every event, so comparing {@code modifiers} directly against a {@code MOD_*} constant
+     * never matches.
+     */
+    public static boolean modifiersMatch(int modifiers, int mask) {
+        modifiers &= ~(InputConstants.MOD_CAPS_LOCK | InputConstants.MOD_NUM_LOCK);
+
+        for (int group : MODIFIER_GROUPS) {
+            if ((mask & group) != 0 && (modifiers & group) == 0) return false;
+        }
+
+        return (modifiers & ~mask) == 0;
     }
 
     public static int getModifier(int key) {
@@ -66,7 +83,7 @@ public class Input {
             case InputConstants.KEY_LSHIFT, InputConstants.KEY_RSHIFT -> InputConstants.MOD_SHIFT;
             case InputConstants.KEY_LCONTROL, InputConstants.KEY_RCONTROL -> InputConstants.MOD_CONTROL;
             case InputConstants.KEY_LALT, InputConstants.KEY_RALT -> InputConstants.MOD_ALT;
-            case InputConstants.KEY_LSUPER, InputConstants.KEY_RSUPER -> InputConstants.MOD_SUPER;
+            case InputConstants.KEY_LGUI, InputConstants.KEY_RGUI -> InputConstants.MOD_SUPER;
             default -> 0;
         };
     }

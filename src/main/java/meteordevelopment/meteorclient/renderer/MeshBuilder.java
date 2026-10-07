@@ -5,14 +5,14 @@
 
 package meteordevelopment.meteorclient.renderer;
 
-import com.mojang.blaze3d.IndexType;
-import com.mojang.blaze3d.buffers.GpuBuffer;
-import com.mojang.blaze3d.PrimitiveTopology;
-import com.mojang.blaze3d.buffers.GpuBufferSlice;
-import com.mojang.blaze3d.pipeline.RenderPipeline;
-import com.mojang.blaze3d.systems.CommandEncoder;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.renderpearl.api.buffers.GpuBuffer;
+import com.mojang.renderpearl.api.buffers.GpuBufferSlice;
+import com.mojang.renderpearl.api.commands.CommandEncoder;
+import com.mojang.renderpearl.api.pipeline.IndexType;
+import com.mojang.renderpearl.api.pipeline.PrimitiveTopology;
+import com.mojang.renderpearl.api.pipeline.RenderPipeline;
+import com.mojang.renderpearl.api.vertex.VertexFormat;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import net.fabricmc.loader.api.FabricLoader;
@@ -30,7 +30,6 @@ public class MeshBuilder {
 
     public double alpha = 1;
 
-    private final VertexFormat format;
     private final int primitiveVerticesSize;
     private final int primitiveIndicesCount;
 
@@ -57,7 +56,6 @@ public class MeshBuilder {
     }
 
     public MeshBuilder(VertexFormat format, PrimitiveTopology drawMode) {
-        this.format = format;
         primitiveVerticesSize = format.getVertexSize();
         primitiveIndicesCount = drawMode.primitiveLength;
     }

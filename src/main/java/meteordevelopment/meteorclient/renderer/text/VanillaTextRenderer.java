@@ -15,8 +15,6 @@ public class VanillaTextRenderer implements TextRenderer {
     public static final VanillaTextRenderer INSTANCE = new VanillaTextRenderer();
 
     public double scale = 2;
-    //todo remove in 26.3 update
-    public boolean scaleIndividually;
 
     private GuiGraphicsExtractor graphics;
     private boolean building;

@@ -5,8 +5,8 @@
 
 package meteordevelopment.meteorclient.renderer;
 
-import com.mojang.blaze3d.PrimitiveTopology;
-import com.mojang.blaze3d.buffers.GpuBuffer;
+import com.mojang.renderpearl.api.buffers.GpuBuffer;
+import com.mojang.renderpearl.api.pipeline.PrimitiveTopology;
 import meteordevelopment.meteorclient.utils.PreInit;
 
 public class FullScreenRenderer {

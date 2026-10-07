@@ -18,7 +18,7 @@ import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.network.protocol.game.ServerboundAttackPacket;
 import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
-import net.minecraft.network.protocol.game.ServerboundSwingPacket;
+import net.minecraft.network.protocol.game.ServerboundPunchPacket;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.MaceItem;
@@ -61,7 +61,7 @@ public class Criticals extends Module {
     );
 
     private ServerboundAttackPacket attackPacket;
-    private ServerboundSwingPacket swingPacket;
+    private ServerboundPunchPacket swingPacket;
     private boolean sendPackets;
     private int sendTimer;
     private double lastY;
@@ -130,11 +130,11 @@ public class Criticals extends Module {
                     }
                 }
             }
-        } else if (event.packet instanceof ServerboundSwingPacket serverboundSwingPacket && mode.get() != Mode.Packet) {
+        } else if (event.packet instanceof ServerboundPunchPacket serverboundPunchPacket && mode.get() != Mode.Packet) {
             if (skipCrit()) return;
 
             if (sendPackets && swingPacket == null) {
-                swingPacket = serverboundSwingPacket;
+                swingPacket = serverboundPunchPacket;
                 event.cancel();
             }
         }

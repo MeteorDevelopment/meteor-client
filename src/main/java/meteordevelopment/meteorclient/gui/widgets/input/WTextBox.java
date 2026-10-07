@@ -14,6 +14,7 @@ import meteordevelopment.meteorclient.gui.utils.Cell;
 import meteordevelopment.meteorclient.gui.utils.CharFilter;
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.gui.widgets.containers.WContainer;
+import meteordevelopment.meteorclient.utils.misc.input.Input;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
@@ -24,8 +25,8 @@ import org.apache.commons.lang3.SystemUtils;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
-import static meteordevelopment.meteorclient.MeteorClient.mc;
 import static com.mojang.blaze3d.platform.InputConstants.*;
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public abstract class WTextBox extends WWidget {
     private static final Renderer DEFAULT_RENDERER = (renderer, x, y, text, color) -> renderer.text(text, x, y, color, false);
@@ -240,7 +241,7 @@ public abstract class WTextBox extends WWidget {
     public boolean onKeyPressed(KeyEvent input) {
         if (!focused) return false;
 
-        boolean control = MacosUtil.IS_MACOS ? input.modifiers() == MOD_SUPER : input.modifiers() == MOD_CONTROL;
+        boolean control = MacosUtil.IS_MACOS ? Input.modifiersMatch(input.modifiers(), MOD_SUPER) : Input.modifiersMatch(input.modifiers(), MOD_CONTROL);
 
         if (control && input.key() == KEY_C) {
             if (cursor != selectionStart || cursor != selectionEnd) {
@@ -258,7 +259,7 @@ public abstract class WTextBox extends WWidget {
             cursor = text.length();
             selectionStart = 0;
             selectionEnd = cursor;
-        } else if (input.modifiers() == ((MacosUtil.IS_MACOS ? MOD_SUPER : MOD_CONTROL) | MOD_SHIFT) && input.key() == KEY_A) {
+        } else if (Input.modifiersMatch(input.modifiers(), (MacosUtil.IS_MACOS ? MOD_SUPER : MOD_CONTROL) | MOD_SHIFT) && input.key() == KEY_A) {
             resetSelection();
         } else if (input.key() == KEY_RETURN || input.key() == KEY_NUMPADENTER) {
             setFocused(false);
@@ -299,10 +300,10 @@ public abstract class WTextBox extends WWidget {
     public boolean onKeyRepeated(KeyEvent input) {
         if (!focused) return false;
 
-        boolean control = MacosUtil.IS_MACOS ? input.modifiers() == MOD_SUPER : input.modifiers() == MOD_CONTROL;
-        boolean shift = input.modifiers() == MOD_SHIFT;
-        boolean controlShift = input.modifiers() == ((SystemUtils.IS_OS_WINDOWS ? MOD_ALT : MacosUtil.IS_MACOS ? MOD_SUPER : MOD_CONTROL) | MOD_SHIFT);
-        boolean altShift = input.modifiers() == ((SystemUtils.IS_OS_WINDOWS ? MOD_CONTROL : MOD_ALT) | MOD_SHIFT);
+        boolean control = MacosUtil.IS_MACOS ? Input.modifiersMatch(input.modifiers(), MOD_SUPER) : Input.modifiersMatch(input.modifiers(), MOD_CONTROL);
+        boolean shift = Input.modifiersMatch(input.modifiers(), MOD_SHIFT);
+        boolean controlShift = Input.modifiersMatch(input.modifiers(), (SystemUtils.IS_OS_WINDOWS ? MOD_ALT : MacosUtil.IS_MACOS ? MOD_SUPER : MOD_CONTROL) | MOD_SHIFT);
+        boolean altShift = Input.modifiersMatch(input.modifiers(), (SystemUtils.IS_OS_WINDOWS ? MOD_CONTROL : MOD_ALT) | MOD_SHIFT);
 
         if (control && input.key() == KEY_V) {
             clearSelection();
@@ -332,9 +333,9 @@ public abstract class WTextBox extends WWidget {
             if (cursor > 0 && cursor == selectionStart && cursor == selectionEnd) {
                 String preText = text;
 
-                int count = (input.modifiers() == (SystemUtils.IS_OS_WINDOWS ? MOD_ALT : MacosUtil.IS_MACOS ? MOD_SUPER : MOD_CONTROL))
+                int count = (Input.modifiersMatch(input.modifiers(), SystemUtils.IS_OS_WINDOWS ? MOD_ALT : MacosUtil.IS_MACOS ? MOD_SUPER : MOD_CONTROL))
                     ? cursor
-                    : (input.modifiers() == (SystemUtils.IS_OS_WINDOWS ? MOD_CONTROL : MOD_ALT))
+                    : (Input.modifiersMatch(input.modifiers(), SystemUtils.IS_OS_WINDOWS ? MOD_CONTROL : MOD_ALT))
                       ? countToNextSpace(true)
                       : 1;
 
@@ -353,9 +354,9 @@ public abstract class WTextBox extends WWidget {
                 if (cursor < text.length()) {
                     String preText = text;
 
-                    int count = input.modifiers() == (SystemUtils.IS_OS_WINDOWS ? MOD_ALT : MacosUtil.IS_MACOS ? MOD_SUPER : MOD_CONTROL)
+                    int count = Input.modifiersMatch(input.modifiers(), SystemUtils.IS_OS_WINDOWS ? MOD_ALT : MacosUtil.IS_MACOS ? MOD_SUPER : MOD_CONTROL)
                         ? text.length() - cursor
-                        : (input.modifiers() == (SystemUtils.IS_OS_WINDOWS ? MOD_CONTROL : MOD_ALT))
+                        : (Input.modifiersMatch(input.modifiers(), SystemUtils.IS_OS_WINDOWS ? MOD_CONTROL : MOD_ALT))
                           ? countToNextSpace(false)
                           : 1;
 
@@ -370,12 +371,12 @@ public abstract class WTextBox extends WWidget {
         } else if (input.key() == KEY_LEFT) {
             if (cursor > 0) {
                 // sets the cursor to just after the next leftmost space
-                if (input.modifiers() == (SystemUtils.IS_OS_WINDOWS ? MOD_CONTROL : MOD_ALT)) {
+                if (Input.modifiersMatch(input.modifiers(), SystemUtils.IS_OS_WINDOWS ? MOD_CONTROL : MOD_ALT)) {
                     cursor -= countToNextSpace(true);
                     resetSelection();
                 }
                 // sets the cursor to the beginning of the text box
-                else if (input.modifiers() == (SystemUtils.IS_OS_WINDOWS ? MOD_ALT : MacosUtil.IS_MACOS ? MOD_SUPER : MOD_CONTROL)) {
+                else if (Input.modifiersMatch(input.modifiers(), SystemUtils.IS_OS_WINDOWS ? MOD_ALT : MacosUtil.IS_MACOS ? MOD_SUPER : MOD_CONTROL)) {
                     cursor = 0;
                     resetSelection();
                 }
@@ -424,7 +425,7 @@ public abstract class WTextBox extends WWidget {
                 }
 
                 cursorChanged();
-            } else if (selectionStart != selectionEnd && selectionStart == 0 && input.modifiers() == 0) {
+            } else if (selectionStart != selectionEnd && selectionStart == 0 && Input.modifiersMatch(input.modifiers(), 0)) {
                 cursor = 0;
                 resetSelection();
                 cursorChanged();
@@ -434,12 +435,12 @@ public abstract class WTextBox extends WWidget {
         } else if (input.key() == KEY_RIGHT) {
             if (cursor < text.length()) {
                 // sets the cursor to just before the next rightmost space
-                if (input.modifiers() == (SystemUtils.IS_OS_WINDOWS ? MOD_CONTROL : MOD_ALT)) {
+                if (Input.modifiersMatch(input.modifiers(), SystemUtils.IS_OS_WINDOWS ? MOD_CONTROL : MOD_ALT)) {
                     cursor += countToNextSpace(false);
                     resetSelection();
                 }
                 // sets the cursor to the end of the text box
-                else if (input.modifiers() == (SystemUtils.IS_OS_WINDOWS ? MOD_ALT : MacosUtil.IS_MACOS ? MOD_SUPER : MOD_CONTROL)) {
+                else if (Input.modifiersMatch(input.modifiers(), SystemUtils.IS_OS_WINDOWS ? MOD_ALT : MacosUtil.IS_MACOS ? MOD_SUPER : MOD_CONTROL)) {
                     cursor = text.length();
                     resetSelection();
                 }
@@ -487,7 +488,7 @@ public abstract class WTextBox extends WWidget {
                 }
 
                 cursorChanged();
-            } else if (selectionStart != selectionEnd && selectionEnd == text.length() && input.modifiers() == 0) {
+            } else if (selectionStart != selectionEnd && selectionEnd == text.length() && Input.modifiersMatch(input.modifiers(), 0)) {
                 cursor = text.length();
                 resetSelection();
                 cursorChanged();

@@ -34,7 +34,6 @@ import net.minecraft.client.gui.screens.worldselection.CreateWorldScreen;
 import net.minecraft.client.gui.screens.worldselection.EditWorldScreen;
 import net.minecraft.client.gui.screens.worldselection.SelectWorldScreen;
 import net.minecraft.realms.RealmsScreen;
-import net.minecraft.util.Util;
 import org.meteordev.starscript.Script;
 
 import java.util.ArrayList;
@@ -288,7 +287,7 @@ public class DiscordPresence extends Module {
     @Override
     public WWidget getWidget(GuiTheme theme) {
         WButton help = theme.button("Open documentation.");
-        help.action = () -> Util.getPlatform().openUri("https://github.com/MeteorDevelopment/meteor-client/wiki/Starscript");
+        help.action = () -> Utils.openUri("https://github.com/MeteorDevelopment/meteor-client/wiki/Starscript");
 
         return help;
     }

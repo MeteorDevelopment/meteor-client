@@ -14,7 +14,6 @@ import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.item.AxeItem;
 import net.minecraft.world.item.ItemStack;
 
 public class AutoWeapon extends Module {
@@ -68,7 +67,7 @@ public class AutoWeapon extends Module {
                     damageS = currentDamageS;
                     slotS = i;
                 }
-            } else if (stack.getItem() instanceof AxeItem
+            } else if (stack.is(ItemTags.AXES)
                 && (!antiBreak.get() || (stack.getMaxDamage() - stack.getDamageValue()) > 10)) {
                 currentDamageA = DamageUtils.getAttackDamage(mc.player, target, stack);
                 if (currentDamageA > damageA) {

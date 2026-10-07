@@ -6,8 +6,8 @@
 package meteordevelopment.meteorclient.systems.accounts;
 
 import meteordevelopment.meteorclient.MeteorClient;
+import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
-import net.minecraft.util.Util;
 import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.java.JavaAuthManager;
 import net.raphimc.minecraftauth.java.model.MinecraftProfile;
@@ -54,7 +54,7 @@ public class MicrosoftLogin {
                     .login(DeviceCodeMsaAuthService::new, (Consumer<MsaDeviceCode>) deviceCode -> {
                         String urlString = deviceCode.getDirectVerificationUri();
                         urlFuture.complete(urlString);
-                        Util.getPlatform().openUri(urlString);
+                        Utils.openUri(urlString);
                     });
 
                 MsaToken msaToken = authManager.getMsaToken().getUpToDate();

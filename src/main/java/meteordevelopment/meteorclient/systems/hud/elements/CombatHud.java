@@ -33,7 +33,6 @@ import net.minecraft.tags.ItemTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.BedItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantment;
@@ -327,7 +326,7 @@ public class CombatHud extends HudElement {
                         if (itemStack.is(ItemTags.SWORDS)
                             || itemStack.getItem() == Items.END_CRYSTAL
                             || itemStack.getItem() == Items.RESPAWN_ANCHOR
-                            || itemStack.getItem() instanceof BedItem) threat = true;
+                            || itemStack.is(ItemTags.BEDS)) threat = true;
                     }
 
                     if (threat) {

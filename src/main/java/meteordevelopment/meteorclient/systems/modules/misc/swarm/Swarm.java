@@ -16,8 +16,8 @@ import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.util.Util;
 
 public class Swarm extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -72,7 +72,7 @@ public class Swarm extends Module {
         stop.action = this::close;
 
         WButton guide = list.add(theme.button("Guide")).expandX().widget();
-        guide.action = () -> Util.getPlatform().openUri("https://github.com/MeteorDevelopment/meteor-client/wiki/Swarm-Guide");
+        guide.action = () -> Utils.openUri("https://github.com/MeteorDevelopment/meteor-client/wiki/Swarm-Guide");
 
         return list;
     }

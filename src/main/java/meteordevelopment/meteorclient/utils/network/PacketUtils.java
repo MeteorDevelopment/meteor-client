@@ -191,7 +191,7 @@ public class PacketUtils {
         builder.put("ServerboundSignUpdatePacket", GamePacketTypes.SERVERBOUND_SIGN_UPDATE);
         builder.put("ServerboundSpectatorActionPacket", GamePacketTypes.SERVERBOUND_SPECTATOR_ACTION);
         builder.put("ServerboundStatusRequestPacket", StatusPacketTypes.SERVERBOUND_STATUS_REQUEST);
-        builder.put("ServerboundSwingPacket", GamePacketTypes.SERVERBOUND_SWING);
+        builder.put("ServerboundSwingPacket", GamePacketTypes.SERVERBOUND_PUNCH);
         builder.put("ServerboundTeleportToEntityPacket", GamePacketTypes.SERVERBOUND_TELEPORT_TO_ENTITY);
         builder.put("ServerboundTestInstanceBlockActionPacket", GamePacketTypes.SERVERBOUND_TEST_INSTANCE_BLOCK_ACTION);
         builder.put("ServerboundUseItemOnPacket", GamePacketTypes.SERVERBOUND_USE_ITEM_ON);

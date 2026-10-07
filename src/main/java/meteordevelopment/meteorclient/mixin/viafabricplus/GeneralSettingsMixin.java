@@ -6,16 +6,17 @@
 package meteordevelopment.meteorclient.mixin.viafabricplus;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
-import com.viaversion.viafabricplus.settings.impl.GeneralSettings;
+import com.viaversion.viafabricplus.api.settings.impl.Orientation;
+import com.viaversion.viafabricplus.settings.impl.GeneralSettingsImpl;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
-@Mixin(GeneralSettings.class)
+@Mixin(GeneralSettingsImpl.class)
 public abstract class GeneralSettingsMixin {
-    // specifies the '2' value on this line:
-    // public final ModeSetting multiplayerScreenButtonOrientation = new ModeSetting(this, Text.translatable("general_settings.viafabricplus.multiplayer_screen_button_orientation"), 2, ORIENTATION_OPTIONS);
-    @ModifyExpressionValue(method = "<init>", at = @At(value = "CONSTANT", args = "intValue=2", ordinal = 1), remap = false)
-    private int modifyDefaultPosition(int original) {
-        return 4;
+    // specifies the default of the first orientation setting on this line:
+    // this.multiplayerScreenButtonOrientation = new EnumSettingImpl<>(this, "multiplayer_screen_button_orientation", Orientation.RIGHT_TOP, ...);
+    @ModifyExpressionValue(method = "<init>", at = @At(value = "FIELD", target = "Lcom/viaversion/viafabricplus/api/settings/impl/Orientation;RIGHT_TOP:Lcom/viaversion/viafabricplus/api/settings/impl/Orientation;", ordinal = 0), remap = false)
+    private Orientation modifyDefaultPosition(Orientation original) {
+        return Orientation.RIGHT_BOTTOM;
     }
 }

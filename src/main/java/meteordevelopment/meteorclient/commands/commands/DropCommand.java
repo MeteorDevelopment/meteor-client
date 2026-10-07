@@ -32,7 +32,7 @@ public class DropCommand extends Command {
     @Override
     public void build(LiteralArgumentBuilder<ClientSuggestionProvider> builder) {
         // Main Hand
-        builder.then(literal("hand").executes(_ -> drop(player -> player.drop(true))));
+        builder.then(literal("hand").executes(_ -> drop(player -> mc.gameMode.dropItem(player, true))));
 
         // Offhand
         builder.then(literal("offhand").executes(_ -> drop(_ -> InvUtils.drop().slotOffhand())));
@@ -70,9 +70,7 @@ public class DropCommand extends Command {
 
         // Specific item
         builder.then(argument("item", ItemArgument.item(REGISTRY_ACCESS))
-            .executes(context -> drop(player -> {
-                dropItem(player, context, Integer.MAX_VALUE);
-            }))
+            .executes(context -> drop(player -> dropItem(player, context, Integer.MAX_VALUE)))
             .then(argument("amount", IntegerArgumentType.integer(1))
                 .executes(context -> drop(player -> {
                     int amount = IntegerArgumentType.getInteger(context, "amount");
@@ -83,7 +81,7 @@ public class DropCommand extends Command {
 
     private void dropItem(LocalPlayer player, CommandContext<ClientSuggestionProvider> context, int amount) throws CommandSyntaxException {
         ItemStack stack = ItemArgument.getItem(context, "item").createItemStack(1);
-        if (stack == null || stack.getItem() == Items.AIR) throw NO_SUCH_ITEM.create();
+        if (stack.getItem() == Items.AIR) throw NO_SUCH_ITEM.create();
 
         for (int i = 0; i < player.getInventory().getContainerSize() && amount > 0; i++) {
             ItemStack invStack = player.getInventory().getItem(i);
