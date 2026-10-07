@@ -718,6 +718,9 @@ public abstract class WTextBox extends WWidget {
 
         this.focused = focused;
 
+        // SDL only delivers text input while it is started for the window; vanilla does this from EditBox focus
+        mc.textInputManager().onTextInputFocusChange(this, focused);
+
         resetSelection();
 
         if (wasJustFocused) onCursorChanged();

@@ -15,7 +15,6 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.player.Rotations;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.world.InteractionHand;
-import org.joml.Matrix4f;
 import org.joml.Vector3d;
 
 public class HandView extends Module {
@@ -179,8 +178,6 @@ public class HandView extends Module {
         .build()
     );
 
-    private final Matrix4f matrix4f = new Matrix4f();
-
     public HandView() {
         super(Categories.Render, "hand-view", "Alters the way items are rendered in your hands.");
     }
@@ -210,9 +207,9 @@ public class HandView extends Module {
     }
 
     private void rotate(PoseStack matrix, Vector3d rotation) {
-        matrix.mulPose(Axis.XP.rotateDegrees(this.matrix4f, (float) rotation.x));
-        matrix.mulPose(Axis.YP.rotateDegrees(this.matrix4f, (float) rotation.y));
-        matrix.mulPose(Axis.ZP.rotateDegrees(this.matrix4f, (float) rotation.z));
+        matrix.rotateDegrees(Axis.XP, (float) rotation.x);
+        matrix.rotateDegrees(Axis.YP, (float) rotation.y);
+        matrix.rotateDegrees(Axis.ZP, (float) rotation.z);
     }
 
     private void scale(PoseStack matrix, Vector3d scale) {
@@ -224,8 +221,8 @@ public class HandView extends Module {
     }
 
     private void applyServerRotations(PoseStack matrix) {
-        matrix.mulPose(Axis.XP.rotateDegrees(this.matrix4f, mc.player.getXRot() - Rotations.serverPitch));
-        matrix.mulPose(Axis.YP.rotateDegrees(this.matrix4f, mc.player.getYRot() - Rotations.serverYaw));
+        matrix.rotateDegrees(Axis.XP, mc.player.getXRot() - Rotations.serverPitch);
+        matrix.rotateDegrees(Axis.YP, mc.player.getYRot() - Rotations.serverYaw);
     }
 
     public boolean oldAnimations() {
