@@ -9,8 +9,10 @@ import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.resource.GraphicsResourceAllocator;
 import com.mojang.blaze3d.resource.ResourceHandle;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.renderpearl.api.buffers.GpuBufferSlice;
+import com.mojang.renderpearl.api.commands.RenderPass;
 import it.unimi.dsi.fastutil.Stack;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import meteordevelopment.meteorclient.mixininterface.IEntityRenderState;
@@ -39,6 +41,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import java.util.Optional;
+import java.util.OptionalDouble;
 import java.util.function.Function;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
@@ -123,8 +127,14 @@ public abstract class LevelRendererMixin implements ILevelRenderer {
 
         meteor$pushEntityOutlineFramebuffer(shader.framebuffer);
         try {
-            try (var frame = renderDispatcher.prepareFrame(outlineRenderCommandQueue)) {
-                executeOutline(frame);
+            // Mirrors LevelRenderer#executeOutline, but on our own pass: the vanilla method is gated on
+            // currentFrameRendersEntityOutline and other mods inject into it expecting the main pass
+            // targets to be live, which they are not during submitEntities.
+            try (var frame = renderDispatcher.prepareFrame(outlineRenderCommandQueue);
+                 RenderPass pass = RenderSystem.getDevice().createCommandEncoder().createRenderPass(
+                     () -> "Meteor entity shader", shader.framebuffer.getColorTextureView(), Optional.of(new Vector4f(0, 0, 0, 0)), null, OptionalDouble.empty())) {
+                RenderSystem.bindDefaultUniforms(pass);
+                frame.executeOutline(pass);
             }
         } finally {
             outlineRenderCommandQueue.submitsPerOrder.clear();
@@ -159,9 +169,6 @@ public abstract class LevelRendererMixin implements ILevelRenderer {
     @Shadow
     @Final
     private RenderBuffers renderBuffers;
-
-    @Shadow
-    protected abstract void executeOutline(FeatureRenderDispatcher.PreparedFrame featureFrame);
 
     @Unique
     private Stack<RenderTarget> framebufferStack;
