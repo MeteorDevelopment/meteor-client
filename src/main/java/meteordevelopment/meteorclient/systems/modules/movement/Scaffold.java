@@ -227,7 +227,7 @@ public class Scaffold extends Module {
                         if (!BlockUtils.canPlace(bp)) continue;
                         if (mc.player.getEyePosition().distanceToSqr(Vec3.atCenterOf(bp.relative(BlockUtils.getClosestPlaceSide(bp)))) > 36)
                             continue;
-                        blockPosArray.add(new BlockPos(bp));
+                        blockPosArray.add(bp.immutable());
                     }
                 }
             }

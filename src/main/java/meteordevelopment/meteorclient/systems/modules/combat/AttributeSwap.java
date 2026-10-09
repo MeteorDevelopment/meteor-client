@@ -23,7 +23,6 @@ import net.minecraft.world.entity.EquipmentSlotGroup;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.AxeItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.MaceItem;
 import net.minecraft.world.item.TridentItem;
@@ -403,8 +402,8 @@ public class AttributeSwap extends Module {
         ItemStack currentStack = mc.player.getMainHandItem();
 
         if (target != null && smartShieldBreak.get() && target instanceof LivingEntity living && living.isBlocking()) {
-            if (currentStack.getItem() instanceof AxeItem) return -1;
-            int axeSlot = InvUtils.findInHotbar(item -> item.getItem() instanceof AxeItem).slot();
+            if (currentStack.is(ItemTags.AXES)) return -1;
+            int axeSlot = InvUtils.findInHotbar(item -> item.is(ItemTags.AXES)).slot();
             if (axeSlot != -1) return axeSlot;
         }
 

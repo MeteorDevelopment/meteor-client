@@ -86,7 +86,7 @@ public abstract class LevelExtractorMixin {
         method = "isEntityVisible",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/client/renderer/LevelRenderer;isSectionCompiledAndVisible(Lnet/minecraft/core/BlockPos;)Z"
+            target = "Lnet/minecraft/client/renderer/LevelRenderer;isSectionCompiledAndVisible(Lnet/minecraft/core/BlockPos;J)Z"
         )
     )
     private boolean isEntityVisible$forceRender(boolean original) {

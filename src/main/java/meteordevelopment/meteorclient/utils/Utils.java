@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.utils;
 
+import com.mojang.blaze3d.Blaze3D;
 import com.mojang.blaze3d.ProjectionType;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.serialization.DataResult;
@@ -42,6 +43,7 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.Mth;
+import net.minecraft.util.Util;
 import net.minecraft.world.ItemStackWithSlot;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.Entity;
@@ -68,6 +70,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetSocketAddress;
+import java.net.URISyntaxException;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -276,10 +279,10 @@ public class Utils {
         DataComponentMap components = itemStack.getComponents();
 
         if (components.has(DataComponents.CONTAINER)) {
-            var stacks = components.get(DataComponents.CONTAINER).allItemsCopyStream().toList();
+            List<ItemStack> stacks = components.get(DataComponents.CONTAINER).itemCopies().toList();
 
             for (int i = 0; i < stacks.size(); i++) {
-                if (i >= 0 && i < items.length) items[i] = stacks.get(i);
+                if (i < items.length) items[i] = stacks.get(i);
             }
         } else if (components.has(DataComponents.BLOCK_ENTITY_DATA)) {
             TypedEntityData<BlockEntityType<?>> blockEntityData = components.get(DataComponents.BLOCK_ENTITY_DATA);
@@ -619,5 +622,13 @@ public class Utils {
     public static boolean ipFilter(String text, char character) {
         if (text.contains(":") && character == ':') return false;
         return (character >= 'a' && character <= 'z') || (character >= 'A' && character <= 'Z') || (character >= '0' && character <= '9') || character == '.' || character == '-' || character == ':';
+    }
+
+    public static void openUri(String uri) {
+        try {
+            Blaze3D.openUri(Util.parseAndValidateUntrustedUri(uri));
+        } catch (URISyntaxException e) {
+            MeteorClient.LOG.error("Couldn't open uri '{}'", uri, e);
+        }
     }
 }

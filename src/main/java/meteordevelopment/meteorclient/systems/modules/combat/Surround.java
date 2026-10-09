@@ -27,9 +27,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.protocol.game.ClientboundPlayerCombatKillPacket;
 import net.minecraft.network.protocol.game.ServerboundAttackPacket;
-import net.minecraft.network.protocol.game.ServerboundSwingPacket;
+import net.minecraft.network.protocol.game.ServerboundPunchPacket;
 import net.minecraft.server.level.BlockDestructionProgress;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.boss.enderdragon.EndCrystal;
 import net.minecraft.world.level.block.Block;
@@ -39,8 +38,8 @@ import net.minecraft.world.phys.AABB;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Predicate;
 import java.util.SortedSet;
+import java.util.function.Predicate;
 
 public class Surround extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -401,7 +400,7 @@ public class Surround extends Module {
                     mc.player.connection.send(new ServerboundAttackPacket(crystal.getId()));
                 }
 
-                mc.getConnection().send(new ServerboundSwingPacket(InteractionHand.MAIN_HAND));
+                mc.getConnection().send(new ServerboundPunchPacket());
             }
         }
 

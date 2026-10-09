@@ -21,6 +21,7 @@ import meteordevelopment.meteorclient.systems.modules.Category;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.utils.misc.NbtUtils;
+import meteordevelopment.meteorclient.utils.misc.input.Input;
 import meteordevelopment.meteorclient.utils.render.DisplayItemUtils;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.world.item.Items;
@@ -30,9 +31,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import static com.mojang.blaze3d.platform.InputConstants.*;
 import static meteordevelopment.meteorclient.utils.Utils.getWindowHeight;
 import static meteordevelopment.meteorclient.utils.Utils.getWindowWidth;
-import static com.mojang.blaze3d.platform.InputConstants.*;
 
 public class ModulesScreen extends TabScreen {
     private WCategoryController controller;
@@ -155,7 +156,7 @@ public class ModulesScreen extends TabScreen {
     public boolean keyPressed(@NonNull KeyEvent value) {
         if (locked) return false;
 
-        boolean cntrl = MacosUtil.IS_MACOS ? value.modifiers() == MOD_SUPER : value.modifiers() == MOD_CONTROL;
+        boolean cntrl = MacosUtil.IS_MACOS ? Input.modifiersMatch(value.modifiers(), MOD_SUPER) : Input.modifiersMatch(value.modifiers(), MOD_CONTROL);
 
         if (cntrl && value.key() == KEY_F) {
             if (searchWindow != null) searchWindow.setExpanded(true);

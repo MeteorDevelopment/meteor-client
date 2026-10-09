@@ -11,9 +11,9 @@ import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.WindowScreen;
 import meteordevelopment.meteorclient.gui.widgets.containers.WHorizontalList;
 import meteordevelopment.meteorclient.gui.widgets.containers.WTable;
+import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.network.Http;
 import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
-import net.minecraft.util.Util;
 
 import java.net.http.HttpResponse;
 import java.time.format.DateTimeFormatter;
@@ -66,11 +66,11 @@ public class CommitsScreen extends WindowScreen {
         l.add(theme.label(headerMessage)).expandX();
 
         String website = addon.getWebsite();
-        if (website != null) l.add(theme.button("Website")).widget().action = () -> Util.getPlatform().openUri(website);
+        if (website != null) l.add(theme.button("Website")).widget().action = () -> Utils.openUri(website);
 
         l.add(theme.button("GitHub")).widget().action = () -> {
             GithubRepo repo = addon.getRepo();
-            Util.getPlatform().openUri(String.format("https://github.com/%s/tree/%s", repo.getOwnerName(), repo.branch()));
+            Utils.openUri(String.format("https://github.com/%s/tree/%s", repo.getOwnerName(), repo.branch()));
         };
     }
 
@@ -91,7 +91,7 @@ public class CommitsScreen extends WindowScreen {
 
             l.add(theme.label("Consider using an authentication token: ")).expandX();
             l.add(theme.button("Authorization Guide")).widget().action = () -> {
-                Util.getPlatform().openUri("https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens");
+                Utils.openUri("https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens");
             };
         }
 
@@ -115,7 +115,7 @@ public class CommitsScreen extends WindowScreen {
                 String date = DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(commit.commit.committer.date));
                 t.add(theme.label(date)).top().right().widget().color = theme.textSecondaryColor();
 
-                t.add(theme.label(getMessage(commit))).widget().action = () -> Util.getPlatform().openUri(String.format("https://github.com/%s/commit/%s", addon.getRepo().getOwnerName(), commit.sha));
+                t.add(theme.label(getMessage(commit))).widget().action = () -> Utils.openUri(String.format("https://github.com/%s/commit/%s", addon.getRepo().getOwnerName(), commit.sha));
                 t.row();
             }
         }

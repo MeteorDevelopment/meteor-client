@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.systems.hud.screens;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.WidgetScreen;
 import meteordevelopment.meteorclient.gui.tabs.builtin.HudTab;
@@ -21,7 +22,6 @@ import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.util.Mth;
 import org.jspecify.annotations.NonNull;
-import com.mojang.blaze3d.platform.InputConstants;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -336,6 +336,8 @@ public class HudEditorScreen extends WidgetScreen implements Snapper.Container {
     }
 
     public static boolean isOpen() {
+        if (!Utils.canUpdate()) return false;
+
         Screen s = mc.gui.screen();
         return s instanceof HudEditorScreen || s instanceof AddHudElementScreen || s instanceof HudElementPresetsScreen || s instanceof HudElementScreen || s instanceof HudTab.HudScreen;
     }

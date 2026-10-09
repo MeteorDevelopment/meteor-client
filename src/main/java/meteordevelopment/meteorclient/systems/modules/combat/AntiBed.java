@@ -19,8 +19,7 @@ import meteordevelopment.orbit.EventHandler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
-import net.minecraft.network.protocol.game.ServerboundSwingPacket;
-import net.minecraft.world.InteractionHand;
+import net.minecraft.network.protocol.game.ServerboundPunchPacket;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.BedBlock;
 
@@ -95,6 +94,6 @@ public class AntiBed extends Module {
 
     private void sendStopPackets(BlockPos blockPos) {
         mc.getConnection().send(new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.ABORT_DESTROY_BLOCK, blockPos, Direction.UP));
-        mc.getConnection().send(new ServerboundSwingPacket(InteractionHand.MAIN_HAND));
+        mc.getConnection().send(new ServerboundPunchPacket());
     }
 }

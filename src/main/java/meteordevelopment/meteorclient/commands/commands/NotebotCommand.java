@@ -18,13 +18,13 @@ import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.misc.Notebot;
+import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.notebot.song.Note;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.multiplayer.ClientSuggestionProvider;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundSoundPacket;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraft.util.Util;
 import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
 
 import java.io.FileWriter;
@@ -48,7 +48,7 @@ public class NotebotCommand extends Command {
     @Override
     public void build(LiteralArgumentBuilder<ClientSuggestionProvider> builder) {
         builder.then(literal("help").executes(_ -> {
-            Util.getPlatform().openUri("https://github.com/MeteorDevelopment/meteor-client/wiki/Notebot-Guide");
+            Utils.openUri("https://github.com/MeteorDevelopment/meteor-client/wiki/Notebot-Guide");
             return SINGLE_SUCCESS;
         }));
 

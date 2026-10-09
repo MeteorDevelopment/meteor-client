@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.mixin;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.meteor.CharTypedEvent;
 import meteordevelopment.meteorclient.events.meteor.KeyInputEvent;
@@ -17,7 +18,6 @@ import net.minecraft.client.KeyboardHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
-import com.mojang.blaze3d.platform.InputConstants;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -44,12 +44,12 @@ public abstract class KeyboardHandlerMixin {
             }
 
             if (minecraft.gui.screen() instanceof WidgetScreen widgetScreen && action == InputConstants.REPEAT) {
-                widgetScreen.keyRepeated(new KeyEvent(event.key(), event.scancode(), modifiers));
+                widgetScreen.keyRepeated(new KeyEvent(event.key(), event.keycode(), modifiers));
             }
 
             if (GuiKeyEvents.canUseKeys) {
                 Input.setKeyState(event.key(), action != InputConstants.RELEASE);
-                if (MeteorClient.EVENT_BUS.post(KeyInputEvent.get(new KeyEvent(event.key(), event.scancode(), modifiers), KeyAction.get(action))).isCancelled())
+                if (MeteorClient.EVENT_BUS.post(KeyInputEvent.get(new KeyEvent(event.key(), event.keycode(), modifiers), KeyAction.get(action))).isCancelled())
                     ci.cancel();
             }
         }

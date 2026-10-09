@@ -1,6 +1,6 @@
 package meteordevelopment.meteorclient.utils.render.postprocess;
 
-import com.mojang.blaze3d.pipeline.RenderPipeline;
+import com.mojang.renderpearl.api.pipeline.RenderPipeline;
 import meteordevelopment.meteorclient.mixininterface.ILevelRenderer;
 import net.minecraft.world.entity.Entity;
 

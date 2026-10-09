@@ -60,7 +60,7 @@ public class ItemPhysics extends Module {
 
         for (int i = 0; i < ((ItemStackRenderStateAccessor) event.renderState.item).meteor$getActiveLayerCount(); i++) {
             ItemStackRenderState.LayerRenderState layer = ((ItemStackRenderStateAccessor) event.renderState.item).meteor$getLayers()[i];
-            ModelInfo info = getInfo(layer.prepareQuadList());
+            ModelInfo info = getInfo(layer.quads.all());
 
             matrices.pushPose();
             applyTransformation(matrices, ((LayerRenderStateAccessor) layer).meteor$getTransform());
@@ -68,7 +68,7 @@ public class ItemPhysics extends Module {
             offsetInWater(matrices, event.itemEntity);
 
             if (info.flat) {
-                matrices.mulPose(Axis.XP.rotationDegrees(90));
+                matrices.rotateDegrees(Axis.XP, 90);
                 matrices.translate(0, 0, info.offsetZ);
             }
 
@@ -87,7 +87,7 @@ public class ItemPhysics extends Module {
                 float degrees = (random.nextFloat() * 2 - 1) * 90;
 
                 matrices.translate(x, y, z);
-                matrices.mulPose(axis.rotationDegrees(degrees));
+                matrices.rotateDegrees(axis, degrees);
                 matrices.translate(-x, -y, -z);
             }
 

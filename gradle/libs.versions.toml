@@ -1,9 +1,9 @@
 [versions]
 # Fabric (https://fabricmc.net/develop)
 jdk = "25"
-minecraft = "26.2"
-fabric-loader = "0.19.3"
-fabric-api = "0.154.2+26.2"
+minecraft = "26.3"
+fabric-loader = "0.19.5"
+fabric-api = "0.162.0+26.3"
 
 # Plugins
 # Loom (https://github.com/FabricMC/fabric-loom)
@@ -13,15 +13,15 @@ errorprone-plugin = "5.1.1"
 
 # Mods
 # Baritone (https://github.com/MeteorDevelopment/baritone)
-baritone = "26.1-SNAPSHOT"
+baritone = "26.3-SNAPSHOT"
 # Sodium (https://github.com/CaffeineMC/sodium-fabric)
-sodium = "mc26.2-0.9.1-fabric"
+sodium = "mc26.3-0.9.2-fabric"
 # Lithium (https://github.com/CaffeineMC/lithium-fabric)
-lithium = "mc26.2-0.25.2-fabric"
+lithium = "mc26.3-0.26.2-fabric"
 # Iris (https://github.com/IrisShaders/Iris)
-iris = "1.11.2+26.2-fabric"
+iris = "1.11.7+26.3-fabric"
 # ModMenu (https://github.com/TerraformersMC/ModMenu)
-modmenu = "20.0.1"
+modmenu = "21.0.0"
 # Orbit (https://github.com/MeteorDevelopment/orbit)
 orbit = "0.2.4"
 # Starscript (https://github.com/MeteorDevelopment/starscript)
@@ -33,7 +33,7 @@ reflections = "0.10.2"
 # Netty (https://github.com/netty/netty)
 netty = "4.2.15.Final"
 # ViaFabricPlus (https://github.com/ViaVersion/ViaFabricPlus)
-viafabricplus = "4.6.1"
+viafabricplus = "5.1.1"
 # WaybackAuthLib (https://github.com/florianreuth/WaybackAuthLib)
 waybackauthlib = "1.1.0"
 # MinecraftAuth (https://github.com/RaphiMC/MinecraftAuth)

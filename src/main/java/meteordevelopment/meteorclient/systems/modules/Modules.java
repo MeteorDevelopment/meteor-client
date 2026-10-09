@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.systems.modules;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.datafixers.util.Pair;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
@@ -47,7 +48,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import org.jspecify.annotations.Nullable;
-import com.mojang.blaze3d.platform.InputConstants;
 
 import java.io.File;
 import java.util.*;

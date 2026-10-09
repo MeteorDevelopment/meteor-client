@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.gui.screens;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.BetterTooltips;
 import meteordevelopment.meteorclient.utils.Utils;
@@ -21,7 +22,6 @@ import net.minecraft.world.item.BundleItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.BundleContents;
 import org.jspecify.annotations.NonNull;
-import com.mojang.blaze3d.platform.InputConstants;
 
 import java.util.ArrayList;
 import java.util.Collections;

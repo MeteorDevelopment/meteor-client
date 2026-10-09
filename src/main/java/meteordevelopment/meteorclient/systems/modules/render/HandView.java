@@ -67,7 +67,7 @@ public class HandView extends Module {
         .build()
     );
 
-    public final Setting<Integer> swingSpeed = sgGeneral.add(new IntSetting.Builder()
+    public final Setting<Double> swingSpeed = sgGeneral.add(new DoubleSetting.Builder()
         .name("swing-speed")
         .description("The swing speed of your hands.")
         .defaultValue(6)
@@ -207,9 +207,9 @@ public class HandView extends Module {
     }
 
     private void rotate(PoseStack matrix, Vector3d rotation) {
-        matrix.mulPose(Axis.XP.rotationDegrees((float) rotation.x));
-        matrix.mulPose(Axis.YP.rotationDegrees((float) rotation.y));
-        matrix.mulPose(Axis.ZP.rotationDegrees((float) rotation.z));
+        matrix.rotateDegrees(Axis.XP, (float) rotation.x);
+        matrix.rotateDegrees(Axis.YP, (float) rotation.y);
+        matrix.rotateDegrees(Axis.ZP, (float) rotation.z);
     }
 
     private void scale(PoseStack matrix, Vector3d scale) {
@@ -221,8 +221,8 @@ public class HandView extends Module {
     }
 
     private void applyServerRotations(PoseStack matrix) {
-        matrix.mulPose(Axis.XP.rotationDegrees(mc.player.getXRot() - Rotations.serverPitch));
-        matrix.mulPose(Axis.YP.rotationDegrees(mc.player.getYRot() - Rotations.serverYaw));
+        matrix.rotateDegrees(Axis.XP, mc.player.getXRot() - Rotations.serverPitch);
+        matrix.rotateDegrees(Axis.YP, mc.player.getYRot() - Rotations.serverYaw);
     }
 
     public boolean oldAnimations() {

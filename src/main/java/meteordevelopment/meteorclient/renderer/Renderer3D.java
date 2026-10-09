@@ -5,8 +5,8 @@
 
 package meteordevelopment.meteorclient.renderer;
 
-import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.renderpearl.api.pipeline.RenderPipeline;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.world.Dir;
 import net.minecraft.client.Minecraft;
