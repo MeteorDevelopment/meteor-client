@@ -48,21 +48,26 @@ public abstract class System<T> implements ISerializable<T> {
         CompoundTag tag = toTag();
         if (tag == null) return;
 
+        if (folder != null) file = new File(folder, file.getName());
+
         try {
-            File tempFile = File.createTempFile(MeteorClient.MOD_ID, file.getName());
-            NbtIo.write(tag, tempFile.toPath());
-
-            if (folder != null) file = new File(folder, file.getName());
-
             file.getParentFile().mkdirs();
 
-            try {
-                Files.move(tempFile.toPath(), file.toPath(), StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
-            } catch (AtomicMoveNotSupportedException _) {
-                StreamUtils.copy(tempFile, file);
-            }
+            // The temp file has to live next to the target, otherwise the move crosses a filesystem
+            // boundary and falls back to a copy that truncates the old file before writing
+            File tempFile = File.createTempFile(MeteorClient.MOD_ID, file.getName(), file.getParentFile());
 
-            tempFile.delete();
+            try {
+                NbtIo.write(tag, tempFile.toPath());
+
+                try {
+                    Files.move(tempFile.toPath(), file.toPath(), StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
+                } catch (AtomicMoveNotSupportedException _) {
+                    StreamUtils.copy(tempFile, file);
+                }
+            } finally {
+                tempFile.delete();
+            }
         } catch (IOException e) {
             MeteorClient.LOG.error("Error saving {}. Possibly corrupted?", this.name, e);
         }
