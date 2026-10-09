@@ -28,7 +28,7 @@ body:
     id: meteor-version
     attributes:
       label: Meteor Version
-      placeholder: Meteor X.Y.Z (or X.Y.Z-build_number)
+      placeholder: Meteor X.Y.Z _build_number_
     validations:
       required: true
   - type: input
@@ -57,5 +57,5 @@ body:
             This bug wasn't already reported (I have searched bug reports on GitHub).
           required: true
         - label: |
-            This is a valid bug (I am able to reproduce this on the latest dev build).
+            This is a valid bug (I am able to reproduce this on the latest build).
           required: true
