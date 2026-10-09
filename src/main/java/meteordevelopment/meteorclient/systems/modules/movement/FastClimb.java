@@ -49,7 +49,7 @@ public class FastClimb extends Module {
         .build()
     );
 
-    private boolean resetTimer;
+    private boolean hasTimerOverride;
 
     public FastClimb() {
         super(Categories.Movement, "fast-climb", "Allows you to climb faster.");
@@ -57,20 +57,29 @@ public class FastClimb extends Module {
 
     @Override
     public void onActivate() {
-        resetTimer = false;
+        hasTimerOverride = false;
+    }
+
+    @Override
+    public void onDeactivate() {
+        resetTimer();
     }
 
     @EventHandler
     private void onPreTick(TickEvent.Pre event) {
-        if (timerMode.get()) {
-            if (climbing()) {
-                resetTimer = false;
-                Modules.get().get(Timer.class).setOverride(timer.get());
-            } else if (!resetTimer) {
-                Modules.get().get(Timer.class).setOverride(Timer.OFF);
-                resetTimer = true;
-            }
+        if (timerMode.get() && climbing()) {
+            hasTimerOverride = true;
+            Modules.get().get(Timer.class).setOverride(timer.get());
+        } else {
+            resetTimer();
         }
+    }
+
+    private void resetTimer() {
+        if (!hasTimerOverride) return;
+
+        Modules.get().get(Timer.class).setOverride(Timer.OFF);
+        hasTimerOverride = false;
     }
 
     @EventHandler
