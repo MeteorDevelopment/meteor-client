@@ -560,7 +560,6 @@ public class Modules extends System<Modules> {
         add(new EChestFarmer());
         add(new EndermanLook());
         add(new Flamethrower());
-        add(new HighwayBuilder());
         add(new LiquidFiller());
         add(new NoGhostBlocks());
         add(new Nuker());
@@ -572,6 +571,7 @@ public class Modules extends System<Modules> {
 
         if (BaritoneUtils.IS_AVAILABLE) {
             add(new Excavator());
+            add(new HighwayBuilder());
             add(new InfinityMiner());
         }
     }
