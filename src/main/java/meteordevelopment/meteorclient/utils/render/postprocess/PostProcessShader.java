@@ -12,9 +12,9 @@ import com.mojang.renderpearl.api.pipeline.RenderPipeline;
 import com.mojang.renderpearl.api.textures.FilterMode;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.renderer.MeshRenderer;
+import net.minecraft.client.gui.render.GuiRenderer;
 import net.minecraft.client.renderer.DynamicGpuDataStorage;
 import net.minecraft.client.renderer.DynamicGpuDataStorageMapped;
-import org.joml.Vector4f;
 import org.jspecify.annotations.NonNull;
 
 import java.nio.ByteBuffer;
