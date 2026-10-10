@@ -2871,7 +2871,7 @@ public class HighwayBuilder extends Module {
             vec3.set(blockPos.getX() + 0.5, blockPos.getY() + 0.5, blockPos.getZ() + 0.5);
             if (!NametagUtils.to2D(vec3, 2)) return;
 
-            NametagUtils.begin(vec3);
+            NametagUtils.begin(vec3, graphics);
             TextRenderer.get().begin(graphics, 1.0, false, true);
 
             String letter = packet ? "P" : "N";
@@ -2879,7 +2879,7 @@ public class HighwayBuilder extends Module {
             TextRenderer.get().render(letter, -w, 0.0, Color.WHITE, true);
 
             TextRenderer.get().end();
-            NametagUtils.end();
+            NametagUtils.end(graphics);
         }
     }
 

@@ -48,6 +48,7 @@ public class DefaultSettingsWidgetFactory extends SettingsWidgetFactory {
 
         factories.put(BoolSetting.class, (table, setting) -> boolW(table, (BoolSetting) setting));
         factories.put(IntSetting.class, (table, setting) -> intW(table, (IntSetting) setting));
+        factories.put(LongSetting.class, (table, setting) -> longW(table, (LongSetting) setting));
         factories.put(DoubleSetting.class, (table, setting) -> doubleW(table, (DoubleSetting) setting));
         factories.put(StringSetting.class, (table, setting) -> stringW(table, (StringSetting) setting));
         factories.put(EnumSetting.class, (table, setting) -> enumW(table, (EnumSetting<? extends Enum<?>>) setting));
@@ -171,6 +172,16 @@ public class DefaultSettingsWidgetFactory extends SettingsWidgetFactory {
 
     private void intW(WTable table, IntSetting setting) {
         WIntEdit edit = table.add(theme.intEdit(setting.get(), setting.min, setting.max, setting.sliderMin, setting.sliderMax, setting.noSlider)).expandX().widget();
+
+        edit.action = () -> {
+            if (!setting.set(edit.get())) edit.set(setting.get());
+        };
+
+        reset(table, setting, () -> edit.set(setting.get()));
+    }
+
+    private void longW(WTable table, LongSetting setting) {
+        WLongEdit edit = table.add(theme.longEdit(setting.get(), setting.min, setting.max)).expandX().widget();
 
         edit.action = () -> {
             if (!setting.set(edit.get())) edit.set(setting.get());

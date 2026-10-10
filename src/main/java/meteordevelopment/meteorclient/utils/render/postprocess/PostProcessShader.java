@@ -43,7 +43,8 @@ public abstract class PostProcessShader {
 
     public void clearTexture() {
         if (this.shouldDraw()) {
-            RenderSystem.getDevice().createCommandEncoder().clearColorTexture(framebuffer.getColorTexture(), new Vector4f(0));
+            RenderSystem.getDevice().createCommandEncoder().clearColorTexture(framebuffer.getColorTexture(),
+                GuiRenderer.CLEAR_COLOR);
         }
     }
 

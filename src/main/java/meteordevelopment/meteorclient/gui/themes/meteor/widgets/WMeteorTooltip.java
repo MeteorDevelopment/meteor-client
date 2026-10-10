@@ -8,6 +8,8 @@ package meteordevelopment.meteorclient.gui.themes.meteor.widgets;
 import meteordevelopment.meteorclient.gui.renderer.GuiRenderer;
 import meteordevelopment.meteorclient.gui.themes.meteor.MeteorWidget;
 import meteordevelopment.meteorclient.gui.widgets.WTooltip;
+import meteordevelopment.meteorclient.renderer.text.TextRenderer;
+import meteordevelopment.meteorclient.renderer.text.VanillaTextRenderer;
 
 public class WMeteorTooltip extends WTooltip implements MeteorWidget {
     public WMeteorTooltip(String text) {
@@ -16,6 +18,10 @@ public class WMeteorTooltip extends WTooltip implements MeteorWidget {
 
     @Override
     protected void onRender(GuiRenderer renderer, double mouseX, double mouseY, double delta) {
-        renderer.quad(this, theme().backgroundColor.get());
+        if (TextRenderer.get() == VanillaTextRenderer.INSTANCE) {
+            renderer.fill(this, theme().backgroundColor.get());
+        } else {
+            renderer.quad(this, theme().backgroundColor.get());
+        }
     }
 }

@@ -157,6 +157,7 @@
     "MouseHandlerMixin",
     "MultiPlayerGameModeAccessor",
     "MultiPlayerGameModeMixin",
+    "MusicManagerMixin",
     "MutableComponentMixin",
     "OptionInstanceMixin",
     "OptionsMixin",

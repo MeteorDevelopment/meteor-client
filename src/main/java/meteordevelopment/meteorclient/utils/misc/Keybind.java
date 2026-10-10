@@ -36,7 +36,7 @@ public class Keybind implements ISerializable<Keybind>, ICopyable<Keybind> {
         public boolean isKeyPressed() {
             return switch (this) {
                 case CONTROL -> Input.isKeyPressed(InputConstants.KEY_LCONTROL) || Input.isKeyPressed(InputConstants.KEY_RCONTROL);
-                case SUPER -> false; // Input.isKeyPressed(InputConstants.KEY_LSUPER) || Input.isKeyPressed(InputConstants.KEY_RSUPER); todo figure out which key is super - maybe RGUI/LGUI?
+                case SUPER -> Input.isKeyPressed(InputConstants.KEY_LSUPER) || Input.isKeyPressed(InputConstants.KEY_RSUPER);
                 case ALT -> Input.isKeyPressed(InputConstants.KEY_LALT) || Input.isKeyPressed(InputConstants.KEY_RALT);
                 case SHIFT -> Input.isKeyPressed(InputConstants.KEY_LSHIFT) || Input.isKeyPressed(InputConstants.KEY_RSHIFT);
                 case CAPS_LOCK -> Input.isKeyPressed(InputConstants.KEY_CAPSLOCK);
@@ -145,6 +145,9 @@ public class Keybind implements ISerializable<Keybind>, ICopyable<Keybind> {
 
     public boolean matches(InputConstants.Key key, Set<Modifier> modifiers) {
         if (!isSet() || !this.key.equals(key)) return false;
+        // Modifiers held for other reasons (sneaking, sprinting, or the bound key being a modifier
+        // itself, which sets its own bit on press) must not stop a bind without modifiers from
+        // matching. Binds that do have modifiers take precedence, see Modules#onAction.
         return !hasMods() || this.modifiers.equals(modifiers);
     }
 
@@ -177,7 +180,7 @@ public class Keybind implements ISerializable<Keybind>, ICopyable<Keybind> {
     }
 
     private boolean isKeyMod(InputConstants.Key key) {
-        return key.getValue() >= InputConstants.KEY_LCONTROL && key.getValue() <= InputConstants.KEY_RGUI;
+        return key.getValue() >= InputConstants.KEY_LSHIFT && key.getValue() <= InputConstants.KEY_RSUPER;
     }
 
     @Override
@@ -263,7 +266,7 @@ public class Keybind implements ISerializable<Keybind>, ICopyable<Keybind> {
     }
 
     private static InputConstants.Key keyboard(int key) {
-        return InputConstants.Type.KEYBOARD.getOrCreate(key);
+        return InputConstants.Type.KEYSYM.getOrCreate(key);
     }
 
     private static InputConstants.Key mouse(int button) {

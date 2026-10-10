@@ -242,7 +242,7 @@ public class LogoutSpots extends Module {
 
             if (!NametagUtils.to2D(pos, scale)) return;
 
-            NametagUtils.begin(pos);
+            NametagUtils.begin(pos, graphics);
 
             // Compute health things
             double healthPercentage = (double) health / maxHealth;
@@ -265,7 +265,7 @@ public class LogoutSpots extends Module {
             text.render(healthText, hX, 0, healthColor);
             text.end();
 
-            NametagUtils.end();
+            NametagUtils.end(graphics);
         }
     }
 }

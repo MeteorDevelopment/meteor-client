@@ -68,7 +68,7 @@ public abstract class BookEditScreenMixin extends Screen {
                 }
 
                 try {
-                    mc.keyboardHandler.setClipboard(Base64.getEncoder().encodeToString(bytes.array));
+                    mc.keyboardHandler.setClipboard(Base64.getEncoder().encodeToString(bytes.toByteArray()));
                 } catch (OutOfMemoryError exception) {
                     mc.keyboardHandler.setClipboard(exception.toString());
                 }
@@ -81,6 +81,7 @@ public abstract class BookEditScreenMixin extends Screen {
         addRenderableWidget(
             new Button.Builder(Component.literal("Paste"), _ -> {
                 String clipboard = mc.keyboardHandler.getClipboard();
+                if (clipboard.isEmpty()) return;
 
                 byte[] bytes;
                 try {

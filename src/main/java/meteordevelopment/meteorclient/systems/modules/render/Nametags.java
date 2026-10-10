@@ -598,7 +598,7 @@ public class Nametags extends Module {
         if (stack.isEmpty()) return;
 
         TextRenderer text = TextRenderer.get();
-        NametagUtils.begin(pos);
+        NametagUtils.begin(pos, graphics);
 
         String name = Names.get(stack);
         String count = " x" + stack.getCount();
@@ -621,12 +621,12 @@ public class Nametags extends Module {
         if (itemCount.get()) text.render(count, hX, hY, GOLD, shadow);
         text.end();
 
-        NametagUtils.end();
+        NametagUtils.end(graphics);
     }
 
     private void renderGenericLivingNametag(GuiGraphicsExtractor graphics, LivingEntity entity, boolean shadow) {
         TextRenderer text = TextRenderer.get();
-        NametagUtils.begin(pos);
+        NametagUtils.begin(pos, graphics);
 
         //Name
         String nameText = entity.getType().getDescription().getString();
@@ -661,12 +661,12 @@ public class Nametags extends Module {
         text.render(healthText, hX, hY, healthColor, shadow);
         text.end();
 
-        NametagUtils.end();
+        NametagUtils.end(graphics);
     }
 
     private void renderGenericNametag(GuiGraphicsExtractor graphics, Entity entity, boolean shadow) {
         TextRenderer text = TextRenderer.get();
-        NametagUtils.begin(pos);
+        NametagUtils.begin(pos, graphics);
 
         //Name
         String nameText = entity.getType().getDescription().getString();
@@ -684,12 +684,12 @@ public class Nametags extends Module {
         text.render(nameText, hX, hY, nameColor.get(), shadow);
         text.end();
 
-        NametagUtils.end();
+        NametagUtils.end(graphics);
     }
 
     private void renderTntNametag(GuiGraphicsExtractor graphics, String fuseText, boolean shadow) {
         TextRenderer text = TextRenderer.get();
-        NametagUtils.begin(pos);
+        NametagUtils.begin(pos, graphics);
 
         double width = text.getWidth(fuseText, shadow);
         double heightDown = text.getHeight(shadow);
@@ -705,7 +705,7 @@ public class Nametags extends Module {
         text.render(fuseText, hX, hY, nameColor.get(), shadow);
         text.end();
 
-        NametagUtils.end();
+        NametagUtils.end(graphics);
     }
 
     private ItemStack getItem(Player entity, int index) {
