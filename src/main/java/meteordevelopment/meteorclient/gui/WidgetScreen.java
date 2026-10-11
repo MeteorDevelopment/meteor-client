@@ -106,6 +106,8 @@ public abstract class WidgetScreen extends Screen {
             firstInit = false;
             initWidgets();
         }
+
+        mc.textInputManager().startTextInput(this);
     }
 
     public abstract void initWidgets();
@@ -357,6 +359,8 @@ public abstract class WidgetScreen extends Screen {
                     if (parent != null) {
                         SDLMouse.SDL_WarpMouseInWindow(mc.getWindow().handle(), (float) restoreX, (float) restoreY);
                     }
+
+                    mc.textInputManager().stopTextInput(this);
                 };
             }
         }
