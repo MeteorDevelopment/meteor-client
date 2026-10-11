@@ -251,7 +251,8 @@ public class Keybind implements ISerializable<Keybind>, ICopyable<Keybind> {
             for (int i = 0; i < modifiersTag.size(); i++) {
                 try {
                     modifiers.add(Modifier.valueOf(modifiersTag.getStringOr(i, "")));
-                } catch (IllegalArgumentException ignored) {}
+                } catch (IllegalArgumentException _) {
+                }
             }
         } else {
             // Legacy format: raw ints (GLFW)

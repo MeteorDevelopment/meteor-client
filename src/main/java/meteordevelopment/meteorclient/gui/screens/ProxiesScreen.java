@@ -71,8 +71,6 @@ public class ProxiesScreen extends WindowScreen {
             if (filePointer == 0) return;
 
             String selectedFile = MemoryUtil.memUTF8(filePointer);
-            System.out.println(selectedFile);
-
             if (!selectedFile.isEmpty()){
                 File file = new File(selectedFile);
                 mc.gui.setScreen(new ProxiesImportScreen(theme, file));

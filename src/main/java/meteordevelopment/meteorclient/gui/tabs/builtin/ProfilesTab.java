@@ -99,7 +99,6 @@ public class ProfilesTab extends Tab {
                     if (filePointer == 0) return;
 
                     String path = MemoryUtil.memUTF8(filePointer);
-                    System.out.println(path);
                     File profileFile = new File(path);
 
                     Profile profile = importProfile(profileFile);
@@ -303,8 +302,6 @@ public class ProfilesTab extends Tab {
                 if (filePointer == 0) return;
 
                 String path = MemoryUtil.memUTF8(filePointer);
-                System.out.println(path);
-
                 exportProfile(path, profile, hud.checked, macros.checked, modules.checked, waypoints.checked);
                 onClose();
             }, 0, 0, filters, "");

@@ -162,7 +162,7 @@ public class MeshBuilderVertexConsumerProvider implements IVertexConsumerProvide
         }
 
         @Override
-        public VertexConsumer setUv3(float u, float v) {
+        public @NonNull VertexConsumer setUv3(float u, float v) {
             return this;
         }
 

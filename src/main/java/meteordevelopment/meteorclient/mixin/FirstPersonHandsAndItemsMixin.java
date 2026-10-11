@@ -43,7 +43,7 @@ public abstract class FirstPersonHandsAndItemsMixin {
     }
 
     @ModifyArg(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Mth;clamp(FFF)F", ordinal = 2), index = 0)
-    private float modifyEquipProgressMainhand(float value, @Local(argsOnly = true) LocalPlayer player) {
+    private float modifyEquipProgressMainhand(float value, @Local(argsOnly = true, name = "player") LocalPlayer player) {
         HandView handView = Modules.get().get(HandView.class);
         if (handView.swordSlash() && mc.player.getMainHandItem().is(ItemTags.SWORDS)) return value;
 
@@ -54,7 +54,7 @@ public abstract class FirstPersonHandsAndItemsMixin {
     }
 
     @ModifyArg(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Mth;clamp(FFF)F", ordinal = 3), index = 0)
-    private float modifyEquipProgressOffhand(float value, @Local(argsOnly = true) LocalPlayer player) {
+    private float modifyEquipProgressOffhand(float value, @Local(argsOnly = true, name = "player") LocalPlayer player) {
         return (shouldInstantlyReplaceVisibleItem(offHandItem, player.getOffhandItem(), player) ? 1 : 0) - offHandHeight;
     }
 }

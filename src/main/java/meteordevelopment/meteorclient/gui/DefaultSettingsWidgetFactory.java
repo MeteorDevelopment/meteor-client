@@ -505,8 +505,6 @@ public class DefaultSettingsWidgetFactory extends SettingsWidgetFactory {
             if (filePointer == 0) return;
 
             String path = MemoryUtil.memUTF8(filePointer);
-            System.out.println(path);
-
             if (!path.isEmpty()) {
                 setting.set(new File(path));
                 fileName.set(setting.get().getName());

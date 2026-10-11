@@ -16,7 +16,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 @Mixin(LivingEntity.SwingState.class)
-public class LivingEntitySwingStateMixin {
+public abstract class LivingEntitySwingStateMixin {
     @ModifyExpressionValue(method = "getAnimation", at = @At(value = "FIELD", target = "Lnet/minecraft/world/entity/LivingEntity$SwingState;animation:F", opcode = Opcodes.GETFIELD))
     private float getHandSwingDuration(float original) {
         if ((Object) this != mc.player) return original;

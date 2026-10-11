@@ -17,6 +17,7 @@ import net.minecraft.client.renderer.ShaderManager;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 import org.apache.commons.io.IOUtils;
+import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 import java.io.IOException;
@@ -231,7 +232,7 @@ public abstract class MeteorRenderPipelines {
         final Map<Identifier, ShaderSource.CachedIncludeSource> includes = ShaderManager.listAllIncludes(resources);
         ShaderSource shaderSource = new ShaderSource() {
             @Override
-            public @Nullable String getShader(Identifier id, ShaderType type) {
+            public @Nullable String getShader(@NonNull Identifier id, @NonNull ShaderType type) {
                 var resource = resources.getResource(id).get();
 
                 try (var in = resource.open()) {
@@ -242,7 +243,7 @@ public abstract class MeteorRenderPipelines {
             }
 
             @Override
-            public @Nullable CachedIncludeSource getInclude(Identifier id) {
+            public @Nullable CachedIncludeSource getInclude(@NonNull Identifier id) {
                 return includes.get(id);
             }
 

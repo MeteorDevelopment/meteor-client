@@ -71,8 +71,6 @@ public class SaveMapCommand extends Command {
             if (filePointer == 0) return;
 
             String str = MemoryUtil.memUTF8(filePointer);
-            System.out.println(str);
-
             if (str.isBlank()) return;
             if (!str.endsWith(".png")) str += ".png";
             File path = new File(str);

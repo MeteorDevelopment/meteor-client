@@ -53,11 +53,11 @@ public class ChamsShader extends EntityShader {
             ByteBuffer data = null;
             for (String fileFormat : FILE_FORMATS) {
                 Optional<Resource> optional = mc.getResourceManager().getResource(MeteorClient.identifier("textures/chams." + fileFormat));
-                if (optional.isEmpty() || optional.get().open() == null) {
-                    continue;
-                }
+                if (optional.isEmpty()) continue;
 
-                data = TextureUtil.readResource(optional.get().open());
+                try (var input = optional.get().open()) {
+                    data = TextureUtil.readResource(input);
+                }
                 break;
             }
             if (data == null) return;
