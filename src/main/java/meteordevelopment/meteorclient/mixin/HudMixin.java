@@ -114,7 +114,7 @@ public abstract class HudMixin {
 
     @Unique
     private static boolean meteor$ShouldHideHud() {
-        if (GuiThemes.get() == null) return false;
-        return MeteorClient.shouldHideHud();
+        if (GuiThemes.get() == null || Modules.get() == null) return false;
+        return MeteorClient.shouldHideHud() || Modules.get().get(Zoom.class).shouldHideHud();
     }
 }

@@ -5,9 +5,7 @@
 
 package meteordevelopment.meteorclient.systems.modules.render;
 
-import com.mojang.blaze3d.platform.InputConstants;
 import meteordevelopment.meteorclient.MeteorClient;
-import meteordevelopment.meteorclient.events.meteor.KeyInputEvent;
 import meteordevelopment.meteorclient.events.meteor.MouseScrollEvent;
 import meteordevelopment.meteorclient.events.render.GetFovEvent;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
@@ -75,8 +73,6 @@ public class Zoom extends Module {
     private double value;
     private double time;
 
-    private boolean hudManualToggled;
-
     public Zoom() {
         super(Categories.Render, "zoom", "Zooms your view.");
         autoSubscribe = false;
@@ -84,33 +80,15 @@ public class Zoom extends Module {
 
     @Override
     public void onActivate() {
-        if (!enabled) {
-            preCinematic = mc.options.smoothCamera;
-            preMouseSensitivity = mc.options.sensitivity().get();
-            value = zoom.get();
-            time = 0.001;
+        if (enabled) return;
 
-            MeteorClient.EVENT_BUS.subscribe(this);
-            enabled = true;
-        }
+        preCinematic = mc.options.smoothCamera;
+        preMouseSensitivity = mc.options.sensitivity().get();
+        value = zoom.get();
+        time = 0.001;
 
-        if (hideHud.get() && !mc.gameRenderer.gameRenderState().guiRenderState.isHudHidden) {
-            hudManualToggled = false;
-            mc.gameRenderer.gameRenderState().guiRenderState.isHudHidden = true;
-        }
-    }
-
-    @Override
-    public void onDeactivate() {
-        if (hideHud.get() && !hudManualToggled) {
-            mc.gameRenderer.gameRenderState().guiRenderState.isHudHidden = false;
-        }
-    }
-
-    @EventHandler
-    public void onKeyPressed(KeyInputEvent event) {
-        if (event.key() != InputConstants.KEY_F1) return;
-        hudManualToggled = true;
+        MeteorClient.EVENT_BUS.subscribe(this);
+        enabled = true;
     }
 
     public void onStop() {
@@ -170,5 +148,9 @@ public class Zoom extends Module {
 
     public boolean renderHands() {
         return !isActive() || renderHands.get();
+    }
+
+    public boolean shouldHideHud() {
+        return isActive() && hideHud.get();
     }
 }
