@@ -84,8 +84,6 @@ dependencies {
     compileOnly(libs.sodium) { isTransitive = false }
     compileOnly(libs.lithium) { isTransitive = false }
     compileOnly(libs.iris) { isTransitive = false }
-    compileOnly(libs.viafabricplus) { isTransitive = false }
-    compileOnly(libs.viafabricplus.api) { isTransitive = false }
 
     compileOnly(libs.baritone)
     compileOnly(libs.modmenu)

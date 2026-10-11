@@ -31,9 +31,7 @@ discordipc = "1.1"
 # Reflections (https://github.com/ronmamo/reflections)
 reflections = "0.10.2"
 # Netty (https://github.com/netty/netty)
-netty = "4.2.15.Final"
-# ViaFabricPlus (https://github.com/ViaVersion/ViaFabricPlus)
-viafabricplus = "5.1.1"
+netty = "4.2.16.Final"
 # WaybackAuthLib (https://github.com/florianreuth/WaybackAuthLib)
 waybackauthlib = "1.1.0"
 # MinecraftAuth (https://github.com/RaphiMC/MinecraftAuth)
@@ -56,8 +54,6 @@ lithium = { module = "maven.modrinth:lithium", version.ref = "lithium" }
 iris = { module = "maven.modrinth:iris", version.ref = "iris" }
 baritone = { module = "meteordevelopment:baritone", version.ref = "baritone" }
 modmenu = { module = "maven.modrinth:modmenu", version.ref = "modmenu" }
-viafabricplus = { module = "com.viaversion:viafabricplus", version.ref = "viafabricplus" }
-viafabricplus-api = { module = "com.viaversion:viafabricplus-api", version.ref = "viafabricplus" }
 
 # Libraries
 orbit = { module = "meteordevelopment:orbit", version.ref = "orbit" }
