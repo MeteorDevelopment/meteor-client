@@ -86,7 +86,7 @@ public class EntityOwner extends Module {
     private void renderNametag(GuiGraphicsExtractor graphics, String name) {
         TextRenderer text = TextRenderer.get();
 
-        NametagUtils.begin(pos);
+        NametagUtils.begin(pos, graphics);
         text.beginBig(graphics);
 
         double w = text.getWidth(name);
@@ -101,7 +101,7 @@ public class EntityOwner extends Module {
         text.render(name, x, y, TEXT);
 
         text.end();
-        NametagUtils.end();
+        NametagUtils.end(graphics);
     }
 
     private String getOwnerName(EntityReference<LivingEntity> owner) {
