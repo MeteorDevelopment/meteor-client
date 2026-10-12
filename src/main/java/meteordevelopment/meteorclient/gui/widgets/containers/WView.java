@@ -193,4 +193,16 @@ public abstract class WView extends WVerticalList {
     public boolean isWidgetInView(WWidget widget) {
         return widget.y < y + height && widget.y + widget.height > y;
     }
+
+    public void scrollIntoView(WWidget widget) {
+        if (!canScroll) return;
+
+        double max = actualHeight - height;
+        double delta = 0;
+
+        if (widget.y < y) delta = widget.y - y;
+        else if (widget.y + widget.height > y + height) delta = widget.y + widget.height - (y + height);
+
+        if (delta != 0) targetScroll = Mth.clamp(targetScroll + delta, 0, max);
+    }
 }
