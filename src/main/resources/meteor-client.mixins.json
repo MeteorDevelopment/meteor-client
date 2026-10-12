@@ -110,7 +110,6 @@
     "GlCommandEncoderMixin",
     "GlDeviceMixin",
     "GuiGraphicsExtractorAccessor",
-    "GuiGraphicsExtractorMixin",
     "GuiMessageMixin",
     "GuiMessageVisibleMixin",
     "GuiMixin",
