@@ -16,6 +16,8 @@ import net.minecraft.nbt.CompoundTag;
 import org.jspecify.annotations.NonNull;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -92,21 +94,28 @@ public class Profiles extends System<Profiles> implements Iterable<Profile> {
     public Profiles fromTag(CompoundTag tag) {
         profiles = NbtUtils.listFromTag(tag.getListOrEmpty("profiles"), Profile::new);
 
-        for (File file : FOLDER.listFiles()) {
-            if (file.isDirectory() && get(file.getName()) == null) {
-                Profile p = new Profile();
-                p.name.set(file.getName());
+        try (var files = Files.list(FOLDER.toPath())) {
+            for (var path : files.toList()) {
+                if (Files.isDirectory(path) && get(path.getFileName().toString()) == null) {
+                    Profile p = new Profile();
+                    p.name.set(path.getFileName().toString());
 
-                boolean add = false;
-                for (File f : file.listFiles()) {
-                    if (f.getName().equals("hud.nbt")) p.hud.set(add = true);
-                    else if (f.getName().equals("macros.nbt")) p.macros.set(add = true);
-                    else if (f.getName().equals("modules.nbt")) p.modules.set(add = true);
-                    else if (f.getName().endsWith(".nbt")) p.waypoints.set(add = true);
+                    boolean add = false;
+                    try (var profileFiles = Files.list(path)) {
+                        for (var profilePath : profileFiles.toList()) {
+                            String filename = profilePath.getFileName().toString();
+                            if (filename.equals("hud.nbt")) p.hud.set(add = true);
+                            else if (filename.equals("macros.nbt")) p.macros.set(add = true);
+                            else if (filename.equals("modules.nbt")) p.modules.set(add = true);
+                            else if (filename.endsWith(".nbt")) p.waypoints.set(add = true);
+                        }
+                    }
+
+                    if (add) add(p);
                 }
-
-                if (add) add(p);
             }
+        } catch (IOException e) {
+            MeteorClient.LOG.error("Failed to scan profile files.", e);
         }
 
         return this;
