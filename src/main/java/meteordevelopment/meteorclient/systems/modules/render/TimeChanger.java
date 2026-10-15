@@ -37,23 +37,32 @@ public class TimeChanger extends Module {
 
     @Override
     public void onActivate() {
-        oldTime = mc.level.getDefaultClockTime();
+        if (mc.level != null) oldTime = mc.level.getDefaultClockTime();
     }
 
     @Override
     public void onDeactivate() {
-        mc.level.dimensionType().defaultClock().ifPresent(clock ->
-            mc.level.clockManager().handleUpdates(mc.level.getGameTime(), Map.of(clock, new ClockNetworkState(oldTime, 0f, 1f)))
-        );
+        if (mc.level == null) return;
+
+        mc.level.dimensionType().defaultClock().ifPresent(clock -> {
+            mc.level.clockManager().handleUpdates(mc.level.getGameTime(), Map.of(clock, new ClockNetworkState(oldTime, 0f, 1f)));
+            mc.level.environmentAttributes().invalidateTickCache();
+        });
     }
 
     @EventHandler
     private void onPacketReceive(PacketEvent.Receive event) {
         if (event.packet instanceof ClientboundSetTimePacket packet) {
-            mc.level.setTimeFromServer(packet.gameTime());
-            mc.level.dimensionType().defaultClock().ifPresent(clock -> {
-                ClockNetworkState state = packet.clockUpdates().get(clock);
-                if (state != null) oldTime = state.totalTicks();
+            if (mc.level == null) return;
+
+            mc.execute(() -> {
+                if (mc.level != null) {
+                    mc.level.setTimeFromServer(packet.gameTime());
+                    mc.level.dimensionType().defaultClock().ifPresent(clock -> {
+                        ClockNetworkState state = packet.clockUpdates().get(clock);
+                        if (state != null) oldTime = state.totalTicks();
+                    });
+                }
             });
             event.cancel();
         }
@@ -61,9 +70,12 @@ public class TimeChanger extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
+        if (mc.level == null) return;
+
         long customTime = time.get().longValue();
-        mc.level.dimensionType().defaultClock().ifPresent(clock ->
-            mc.level.clockManager().handleUpdates(mc.level.getGameTime(), Map.of(clock, new ClockNetworkState(customTime, 0f, 0f)))
-        );
+        mc.level.dimensionType().defaultClock().ifPresent(clock -> {
+            mc.level.clockManager().handleUpdates(mc.level.getGameTime(), Map.of(clock, new ClockNetworkState(customTime, 0f, 0f)));
+            mc.level.environmentAttributes().invalidateTickCache();
+        });
     }
 }
