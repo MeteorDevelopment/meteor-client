@@ -148,8 +148,8 @@ public class AutoEat extends Module {
                 return;
             }
 
-            // Check if the item in current slot is not food anymore
-            if (!Utils.isFood(mc.player.getInventory().getItem(slot))) {
+            // Check if the item in current slot is no longer edible food
+            if (!isEdible(mc.player.getInventory().getItem(slot))) {
                 int newSlot = findSlot();
 
                 // Stop if no food found
@@ -271,13 +271,7 @@ public class AutoEat extends Module {
         if (!thresholdMode.get().test(healthLow, hungerLow)) return false;
 
         slot = findSlot();
-        if (slot == -1) return false;
-
-        ItemStack item = mc.player.getInventory().getItem(slot);
-        FoodProperties prop = item.get(DataComponents.FOOD);
-        if (prop == null || !Utils.isFood(item)) return false;
-
-        return (mc.player.getFoodData().needsFood() || prop.canAlwaysEat());
+        return slot != -1;
     }
 
     /**
@@ -286,8 +280,7 @@ public class AutoEat extends Module {
      */
     private int findSlot() {
         // prefer offhand
-        Item offHandItem = mc.player.getOffhandItem().getItem();
-        if (Utils.isFood(offHandItem) && !blacklist.get().contains(offHandItem)) return SlotUtils.OFFHAND;
+        if (isEdible(mc.player.getOffhandItem())) return SlotUtils.OFFHAND;
 
         // if offhand empty, prefer best in hotbar
         int slot = findBestFood(SlotUtils.HOTBAR_START, SlotUtils.HOTBAR_END);
@@ -306,15 +299,10 @@ public class AutoEat extends Module {
         float bestHunger = -1;
 
         for (int i = start; i <= end; i++) {
-            // Skip if item isn't food
             ItemStack stack = mc.player.getInventory().getItem(i);
-            FoodProperties food = stack.get(DataComponents.FOOD);
-            if (!Utils.isFood(stack)) continue;
-            if (food == null) continue;
+            if (!isEdible(stack)) continue;
 
-            // Skip if item is in blacklist
-            Item item = stack.getItem();
-            if (blacklist.get().contains(item)) continue;
+            FoodProperties food = stack.get(DataComponents.FOOD);
 
             // Check if hunger value is better
             float hunger = prioritise.get().value(food);
@@ -325,6 +313,13 @@ public class AutoEat extends Module {
         }
 
         return best;
+    }
+
+    private boolean isEdible(ItemStack stack) {
+        if (!Utils.isFood(stack) || blacklist.get().contains(stack.getItem())) return false;
+
+        FoodProperties food = stack.get(DataComponents.FOOD);
+        return food != null && (mc.player.getFoodData().needsFood() || food.canAlwaysEat());
     }
 
     public enum ThresholdMode {
