@@ -11,7 +11,6 @@ import com.mojang.blaze3d.PrimitiveTopology;
 import com.mojang.blaze3d.pipeline.ColorTargetState;
 import com.mojang.blaze3d.pipeline.DepthStencilState;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
-import com.mojang.blaze3d.platform.CompareOp;
 import com.mojang.blaze3d.shaders.UniformType;
 import com.mojang.blaze3d.systems.GpuDevice;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -46,7 +45,6 @@ public abstract class MeteorRenderPipelines {
         .withVertexBinding(0, DefaultVertexFormat.POSITION_COLOR).withPrimitiveTopology(PrimitiveTopology.TRIANGLES)
         .withVertexShader(MeteorClient.identifier("shaders/pos_color.vert"))
         .withFragmentShader(MeteorClient.identifier("shaders/pos_color.frag"))
-        .withDepthStencilState(new DepthStencilState(CompareOp.ALWAYS_PASS, false))
         .withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT))
         .withCull(false)
         .build()
@@ -58,7 +56,6 @@ public abstract class MeteorRenderPipelines {
         .withVertexBinding(0, DefaultVertexFormat.POSITION_COLOR).withPrimitiveTopology(PrimitiveTopology.DEBUG_LINES)
         .withVertexShader(MeteorClient.identifier("shaders/pos_color.vert"))
         .withFragmentShader(MeteorClient.identifier("shaders/pos_color.frag"))
-        .withDepthStencilState(new DepthStencilState(CompareOp.ALWAYS_PASS, false))
         .withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT))
         .withCull(false)
         .build()
@@ -94,7 +91,6 @@ public abstract class MeteorRenderPipelines {
         .withVertexBinding(0, MeteorVertexFormats.POS2_COLOR).withPrimitiveTopology(PrimitiveTopology.TRIANGLES)
         .withVertexShader(MeteorClient.identifier("shaders/pos_color.vert"))
         .withFragmentShader(MeteorClient.identifier("shaders/pos_color.frag"))
-        .withDepthStencilState(new DepthStencilState(CompareOp.ALWAYS_PASS, false))
         .withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT))
         .withCull(true)
         .build()
@@ -105,7 +101,6 @@ public abstract class MeteorRenderPipelines {
         .withVertexBinding(0, MeteorVertexFormats.POS2_COLOR).withPrimitiveTopology(PrimitiveTopology.DEBUG_LINES)
         .withVertexShader(MeteorClient.identifier("shaders/pos_color.vert"))
         .withFragmentShader(MeteorClient.identifier("shaders/pos_color.frag"))
-        .withDepthStencilState(new DepthStencilState(CompareOp.ALWAYS_PASS, false))
         .withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT))
         .withCull(true)
         .build()
@@ -117,7 +112,6 @@ public abstract class MeteorRenderPipelines {
         .withVertexShader(MeteorClient.identifier("shaders/pos_tex_color.vert"))
         .withFragmentShader(MeteorClient.identifier("shaders/pos_tex_color.frag"))
         .withBindGroupLayout(BindGroupLayout.builder().withSampler("u_Texture").build())
-        .withDepthStencilState(new DepthStencilState(CompareOp.ALWAYS_PASS, false))
         .withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT))
         .withCull(true)
         .build()
@@ -129,7 +123,6 @@ public abstract class MeteorRenderPipelines {
         .withVertexShader(MeteorClient.identifier("shaders/text.vert"))
         .withFragmentShader(MeteorClient.identifier("shaders/text.frag"))
         .withBindGroupLayout(BindGroupLayout.builder().withSampler("u_Texture").build())
-        .withDepthStencilState(new DepthStencilState(CompareOp.ALWAYS_PASS, false))
         .withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT))
         .withCull(true)
         .build()
@@ -147,7 +140,6 @@ public abstract class MeteorRenderPipelines {
             .withUniform("PostData", UniformType.UNIFORM_BUFFER)
             .withUniform("OutlineData", UniformType.UNIFORM_BUFFER)
             .build())
-        .withDepthStencilState(new DepthStencilState(CompareOp.ALWAYS_PASS, false))
         .withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT))
         .withCull(false)
         .build()
@@ -164,7 +156,6 @@ public abstract class MeteorRenderPipelines {
             .withUniform("PostData", UniformType.UNIFORM_BUFFER)
             .withUniform("ImageData", UniformType.UNIFORM_BUFFER)
             .build())
-        .withDepthStencilState(new DepthStencilState(CompareOp.ALWAYS_PASS, false))
         .withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT))
         .withCull(false)
         .build()
@@ -181,7 +172,6 @@ public abstract class MeteorRenderPipelines {
             .withSampler("u_Texture")
             .withUniform("BlurData", UniformType.UNIFORM_BUFFER)
             .build())
-        .withDepthStencilState(new DepthStencilState(CompareOp.ALWAYS_PASS, false))
         .withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT))
         .withCull(false)
         .build()
@@ -196,19 +186,17 @@ public abstract class MeteorRenderPipelines {
             .withSampler("u_Texture")
             .withUniform("BlurData", UniformType.UNIFORM_BUFFER)
             .build())
-        .withDepthStencilState(new DepthStencilState(CompareOp.ALWAYS_PASS, false))
         .withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT))
         .withCull(false)
         .build()
     );
 
     public static final RenderPipeline BLUR_PASSTHROUGH = add(new ExtendedRenderPipelineBuilder(MESH_UNIFORMS)
-        .withLocation(MeteorClient.identifier("pipeline/blur/up"))
+        .withLocation(MeteorClient.identifier("pipeline/blur/passthrough"))
         .withVertexBinding(0, MeteorVertexFormats.POS2).withPrimitiveTopology(PrimitiveTopology.TRIANGLES)
         .withVertexShader(MeteorClient.identifier("shaders/passthrough.vert"))
         .withFragmentShader(MeteorClient.identifier("shaders/passthrough.frag"))
         .withBindGroupLayout(BindGroupLayout.builder().withSampler("u_Texture").build())
-        .withDepthStencilState(new DepthStencilState(CompareOp.ALWAYS_PASS, false))
         .withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT))
         .withCull(false)
         .build()
