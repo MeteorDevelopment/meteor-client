@@ -15,6 +15,7 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
+import meteordevelopment.meteorclient.utils.player.SlotUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -27,6 +28,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BowItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -115,6 +117,10 @@ public class Quiver extends Module {
 
     @Override
     public void onActivate() {
+        wasMainhand = true;
+        wasHotbar = false;
+        prevSlot = -1;
+
         bow = InvUtils.find(Items.BOW);
         if (!shouldQuiver()) return;
 
@@ -126,21 +132,22 @@ public class Quiver extends Module {
         timer = 0;
 
         if (!bow.isMainHand()) {
+            wasMainhand = false;
             if (wasHotbar) InvUtils.swap(bow.slot(), true);
             else InvUtils.move().from(mc.player.getInventory().getSelectedSlot()).to(prevSlot);
-        } else wasMainhand = true;
+        }
 
         arrowSlots.clear();
         Set<MobEffect> usedEffects = new HashSet<>();
 
-        for (int i = mc.player.getInventory().getContainerSize(); i > 0; i--) {
+        for (int i = SlotUtils.MAIN_END; i >= SlotUtils.HOTBAR_START; i--) {
             if (i == mc.player.getInventory().getSelectedSlot()) continue;
 
             ItemStack item = mc.player.getInventory().getItem(i);
 
             if (item.getItem() != Items.TIPPED_ARROW) continue;
 
-            Iterator<MobEffectInstance> effects = item.getItem().components().get(DataComponents.POTION_CONTENTS).getAllEffects().iterator();
+            Iterator<MobEffectInstance> effects = item.getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY).getAllEffects().iterator();
 
             if (!effects.hasNext()) continue;
 
@@ -157,9 +164,11 @@ public class Quiver extends Module {
 
     @Override
     public void onDeactivate() {
+        mc.options.keyUse.setDown(false);
+
         if (!wasMainhand) {
             if (wasHotbar) InvUtils.swapBack();
-            else InvUtils.move().from(mc.player.getInventory().getSelectedSlot()).to(prevSlot);
+            else if (prevSlot != -1) InvUtils.move().from(mc.player.getInventory().getSelectedSlot()).to(prevSlot);
         }
     }
 
@@ -235,7 +244,7 @@ public class Quiver extends Module {
         BlockState pos1 = mc.level.getBlockState(testPos);
         if (((BlockBehaviourAccessor) pos1.getBlock()).meteor$isHasCollision()) return false;
 
-        testPos.offset(0, 1, 0);
+        testPos.move(0, 1, 0);
         BlockState pos2 = mc.level.getBlockState(testPos);
         return !((BlockBehaviourAccessor) pos2.getBlock()).meteor$isHasCollision();
     }
