@@ -339,12 +339,14 @@ public class KillAura extends Module {
                 if (axeResult.found()) weaponResult = axeResult;
             }
 
-            if (!swapped) {
-                previousSlot = mc.player.getInventory().getSelectedSlot();
-                swapped = true;
-            }
+            if (weaponResult.found()) {
+                if (!swapped) {
+                    previousSlot = mc.player.getInventory().getSelectedSlot();
+                    swapped = true;
+                }
 
-            InvUtils.swap(weaponResult.slot(), false);
+                InvUtils.swap(weaponResult.slot(), false);
+            }
         }
 
         if (!acceptableWeapon(mc.player.getMainHandItem())) {
@@ -471,7 +473,7 @@ public class KillAura extends Module {
     }
 
     private boolean acceptableWeapon(ItemStack stack) {
-        if (shouldShieldBreak()) return stack.getItem() instanceof AxeItem;
+        if (shouldShieldBreak() && stack.getItem() instanceof AxeItem) return true;
         if (attackWhenHolding.get() == AttackItems.All) return true;
 
         if (weapons.get().contains(Items.DIAMOND_SWORD) && stack.is(ItemTags.SWORDS)) return true;
