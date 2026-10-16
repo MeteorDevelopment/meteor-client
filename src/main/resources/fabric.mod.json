@@ -1,19 +1,17 @@
 {
   "schemaVersion": 1,
-  "name": "Meteor Client",
+  "name": "Noxara Client",
   "id": "meteor-client",
   "version": "${version}",
-  "description": "Based utility mod.",
+  "description": "Noxara Client — a Meteor-based Fabric utility client targeting Minecraft 26.3.",
   "authors": [
-    "MineGame159",
-    "squidoodly",
-    "seasnail"
+    "Masterking0416",
+    "Meteor Development contributors"
   ],
   "contact": {
-    "homepage": "https://meteorclient.com",
-    "issues": "https://github.com/MeteorDevelopment/meteor-client/issues",
-    "sources": "https://github.com/MeteorDevelopment/meteor-client",
-    "discord": "https://meteorclient.com/discord"
+    "homepage": "https://github.com/Masterking0416/noxara-client",
+    "issues": "https://github.com/Masterking0416/noxara-client/issues",
+    "sources": "https://github.com/Masterking0416/noxara-client"
   },
   "license": "GPL-3.0",
   "icon": "assets/meteor-client/icon.png",
@@ -41,7 +39,7 @@
     "meteor-client:commit": "${commit}",
     "modmenu": {
       "links": {
-        "modmenu.discord": "https://meteorclient.com/discord"
+        "modmenu.github": "https://github.com/Masterking0416/noxara-client"
       }
     },
     "badoptimizations:cache_hooks": {
