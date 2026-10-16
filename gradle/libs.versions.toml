@@ -15,7 +15,7 @@ errorprone-plugin = "5.1.1"
 # Baritone (https://github.com/MeteorDevelopment/baritone)
 baritone = "26.1-SNAPSHOT"
 # Sodium (https://github.com/CaffeineMC/sodium-fabric)
-sodium = "mc26.3-0.9.2-fabric"
+sodium = "mc26.3-0.9.3-alpha.1-fabric"
 # Lithium (https://github.com/CaffeineMC/lithium-fabric)
 lithium = "mc26.3-0.26.2-fabric"
 # Iris (https://github.com/IrisShaders/Iris)
@@ -42,7 +42,7 @@ minecraftauth = "5.0.2"
 # Libraries
 # Error Prone (https://github.com/google/error-prone)
 errorprone = "2.50.0"
-# NullAway (https://github.com/uber/NullAway)
+# NullAway (https://github.com/uber/nullaway)
 nullaway = "0.14.0"
 
 [libraries]
