@@ -1,60 +1,40 @@
+# Noxara Client
 
-<p align="center">
-<img src="https://meteorclient.com/icon.png" alt="meteor-client-logo" width="15%"/>
-</p>
+Noxara Client is a custom Fabric client fork based on [Meteor Client](https://github.com/MeteorDevelopment/meteor-client). The current development target is **Minecraft Java Edition 26.3**.
 
-<h1 align="center">Meteor</h1>
-<p align="center">A Minecraft Fabric Utility Mod for anarchy servers.</p>
+> **Development status:** the Minecraft 26.3 compatibility port is in progress. The branch has not yet been confirmed to compile or launch; see the verification workflow before treating a build as usable.
 
-<div align="center">
-    <a href="https://discord.gg/bBGQZvd"><img src="https://img.shields.io/discord/689197705683140636?logo=discord" alt="Discord"/></a>
-    <br>
-    <img src="https://img.shields.io/github/last-commit/MeteorDevelopment/meteor-client" alt="GitHub last commit"/>
-    <img src="https://img.shields.io/github/commit-activity/w/MeteorDevelopment/meteor-client" alt="GitHub commit activity"/>
-    <img src="https://img.shields.io/github/contributors/MeteorDevelopment/meteor-client" alt="GitHub contributors"/>
-    <br>
-    <img src="https://img.shields.io/github/languages/code-size/MeteorDevelopment/meteor-client" alt="GitHub code size in bytes"/>
-    <img src="https://img.shields.io/endpoint?url=https://ghloc.vercel.app/api/MeteorDevelopment/meteor-client/badge?filter=.java$&label=lines%20of%20code&color=blue" alt="GitHub lines of code"/>
-</div>
+## Development target
 
-## Usage
+- Minecraft: 26.3
+- Mod loader: Fabric
+- Java toolchain: 25
+- Build system: Gradle / Fabric Loom
 
-### Building
-- Clone this repository
-- Run `./gradlew build`
+## Build locally
 
-### Installation
-Follow the [guide](https://meteorclient.com/faq/installation) on the wiki.
+1. Install a JDK 25 distribution.
+2. Clone this repository and check out the `noxara/mc-26.3-port` branch.
+3. Run the Gradle build:
 
-## Contributions
-We will review and help with all reasonable pull requests as long as the guidelines below are met.
+   - Windows: `gradlew.bat build`
+   - Linux/macOS: `./gradlew build`
 
-- The license header must be applied to all java source code files.
-- IDE or system-related files should be added to the `.gitignore`, never committed in pull requests.
-- In general, check existing code to make sure your code matches relatively close to the code already in the project.
-- Favour readability over compactness.
-- If you need help, check out the [Google Java Style Guide](https://google.github.io/styleguide/javaguide.html) for a reference.
+The output JAR is written under `build/libs`. A successful Gradle build confirms compilation and packaging, but the client should still be launched in a clean Minecraft 26.3 Fabric instance for a runtime smoke test.
 
-## Bugs and Suggestions
-Bug reports and suggestions should be made in this repo's [issue tracker](https://github.com/MeteorDevelopment/meteor-client/issues) using the templates provided.  
-Please provide as much information as you can to best help us understand your issue and give a better chance of it being resolved.
+## Project roadmap
 
-## Donations
-All of our work is completely free and non-profit (donations pay only for hosting costs), therefore we are very grateful for all donations made to support us in running our community.  
-Donations can be made via our [website](https://meteorclient.com/donate) and the minimum amount to get donor benefits is €5.  
-You will be rewarded with a role on our Discord server and a customisable in-game cape.  
-⚠️ _Make sure to create a Meteor account and link your Discord and Minecraft accounts to fully experience your rewards._ ⚠️
+1. Establish a clean Minecraft 26.3 Fabric build.
+2. Rebrand and redesign the ClickGUI and HUD while keeping the existing module framework intact.
+3. Port selected Wurst features individually, checking API compatibility and attribution.
+4. Review Trouser-Streak integration separately. Its repository currently has no declared GitHub license, so its code must not be copied or redistributed until the applicable permission is established.
 
-## Credits
-[Cabaletta](https://github.com/cabaletta) and [WagYourTail](https://github.com/wagyourtail) for [Baritone](https://github.com/cabaletta/baritone)  
-The [Fabric Team](https://github.com/FabricMC) for [Fabric](https://github.com/FabricMC/fabric-loader) and [Yarn](https://github.com/FabricMC/yarn)
+## Upstream projects and licensing
 
-## Licensing
-This project is licensed under the [GNU General Public License v3.0](https://www.gnu.org/licenses/gpl-3.0.en.html). 
+This repository contains code derived from Meteor Client, which is licensed under the **GNU General Public License v3.0 (GPL-3.0)**. The upstream license is retained in `LICENSE`. This derivative is also distributed under GPL-3.0; modified source must remain available under the license terms, and the origin of the upstream code must be clearly credited.
 
-If you use **ANY** code from the source:
-- You must disclose the source code of your modified work and the source code you took from this project. This means you are not allowed to use code from this project (even partially) in a closed-source and/or obfuscated application.
-- You must state clearly and obviously to all end users that you are using code from this project.
-- Your application must also be licensed under the same license.
+- [Meteor Client source](https://github.com/MeteorDevelopment/meteor-client)
+- [Wurst7 source](https://github.com/Wurst-Imperium/Wurst7) — selected features may be ported after compatibility and license review.
+- [Trouser-Streak source](https://github.com/etianl/Trouser-Streak) — listed as a planned integration only; no license was declared on the repository metadata at the time of this README update.
 
-*If you have any other questions, check our [FAQ](https://meteorclient.com/faq) or ask in our [Discord](https://meteorclient.com/discord) server.*
+This is an independent community fork and is not an official Meteor Development or Wurst project.
