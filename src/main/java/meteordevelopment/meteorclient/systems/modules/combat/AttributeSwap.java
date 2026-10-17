@@ -11,6 +11,7 @@ import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.orbit.EventHandler;
@@ -29,6 +30,7 @@ import net.minecraft.world.item.MaceItem;
 import net.minecraft.world.item.TridentItem;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
@@ -298,6 +300,14 @@ public class AttributeSwap extends Module {
         .build()
     );
 
+    private final Setting<Boolean> spear = sgWeapon.add(new BoolSetting.Builder()
+        .name("spear")
+        .description("Works while holding a spear.")
+        .defaultValue(true)
+        .visible(onlyOnWeapon::get)
+        .build()
+    );
+
     private final Setting<Boolean> trident = sgWeapon.add(new BoolSetting.Builder()
         .name("trident")
         .description("Works while holding a trident.")
@@ -321,18 +331,22 @@ public class AttributeSwap extends Module {
 
     @EventHandler
     private void onAttack(DoAttackEvent event) {
-        if (mc.hitResult.getType() == HitResult.Type.BLOCK || !canSwapByWeapon()) return;
+        if (mc.hitResult == null || mc.hitResult.getType() == HitResult.Type.BLOCK || !canSwapByWeapon()) return;
+
+        if (mc.hitResult instanceof EntityHitResult entityHitResult) {
+            if (mode.get() != Mode.Simple || !swapOnMiss.get()) {
+                performSwap(entityHitResult.getEntity());
+                return;
+            }
+        }
 
         if (mode.get() == Mode.Smart && spearSwapping.get()) {
             if (spearHitbox.get()) {
                 Entity target = getTargetEntity();
                 if (target != null) {
-                    if (mc.player.distanceTo(target) <= mc.player.entityInteractionRange() + 0.5) return;
                     int spearSlot = getSmartSpearSlot(false);
-                    if (spearSlot != -1) {
-                        doSwap(spearSlot);
-                        return;
-                    }
+                    if (spearSlot != -1) doSwap(spearSlot);
+                    return;
                 }
             }
 
@@ -395,6 +409,7 @@ public class AttributeSwap extends Module {
                 (shovel.get() && item.is(ItemTags.SHOVELS)) ||
                 (hoe.get() && item.is(ItemTags.HOES)) ||
                 (mace.get() && item.getItem() instanceof MaceItem) ||
+                (spear.get() && item.is(ItemTags.SPEARS)) ||
                 (trident.get() && item.getItem() instanceof TridentItem)
         );
     }
@@ -441,19 +456,27 @@ public class AttributeSwap extends Module {
     }
 
     private int getSmartSpearSlot(boolean requireLunge) {
+        int selectedSlot = mc.player.getInventory().getSelectedSlot();
+        if (isValidSpear(mc.player.getInventory().getItem(selectedSlot), requireLunge)) {
+            return selectedSlot;
+        }
+
         for (int i = 0; i < 9; i++) {
-            if (i == mc.player.getInventory().getSelectedSlot()) continue;
-            ItemStack stack = mc.player.getInventory().getItem(i);
-            if (!stack.is(ItemTags.SPEARS)) continue;
-
-            boolean hasLunge = Utils.getEnchantmentLevel(stack, Enchantments.LUNGE) > 0;
-            if (requireLunge && !hasLunge) continue;
-            if (!requireLunge && excludeLungeFromHitbox.get() && hasLunge) continue;
-
-            return i;
+            if (i == selectedSlot) continue;
+            if (isValidSpear(mc.player.getInventory().getItem(i), requireLunge)) {
+                return i;
+            }
         }
 
         return -1;
+    }
+
+    private boolean isValidSpear(ItemStack stack, boolean requireLunge) {
+        if (!stack.is(ItemTags.SPEARS)) return false;
+
+        boolean hasLunge = Utils.getEnchantmentLevel(stack, Enchantments.LUNGE) > 0;
+        if (requireLunge && !hasLunge) return false;
+        return requireLunge || !excludeLungeFromHitbox.get() || !hasLunge;
     }
 
     private Entity getTargetEntity() {
@@ -466,10 +489,11 @@ public class AttributeSwap extends Module {
 
         Entity target = null;
         double closestDistance = maxDistance * maxDistance;
+        Hitboxes hitboxes = Modules.get().get(Hitboxes.class);
 
         for (Entity entity : mc.level.getEntities(mc.player, box, e -> !e.isSpectator() && e.isPickable())) {
             // expanding entity's hitbox by 0.15 to simulate spear's actual hitbox margin
-            AABB expandedBox = entity.getBoundingBox().inflate(0.150);
+            AABB expandedBox = entity.getBoundingBox().inflate(0.150 + hitboxes.getEntityValue(entity));
 
             if (expandedBox.clip(start, end).isPresent()) {
                 double distSq = start.distanceToSqr(entity.getX(), entity.getY(), entity.getZ());
