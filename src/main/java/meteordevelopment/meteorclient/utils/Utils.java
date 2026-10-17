@@ -126,9 +126,7 @@ public class Utils {
     public static String getWorldTime() {
         if (mc.level == null) return "00:00";
 
-        int ticks = (int) (mc.level.getGameTime() % 24000);
-        ticks += 6000;
-        if (ticks > 24000) ticks -= 24000;
+        int ticks = (int) Math.floorMod(mc.level.getDefaultClockTime() + 6000L, 24000L);
 
         return String.format("%02d:%02d", ticks / 1000, (int) (ticks % 1000 / 1000.0 * 60));
     }
