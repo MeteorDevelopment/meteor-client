@@ -51,6 +51,7 @@ public class AutoLog extends Module {
         .name("predict-incoming-damage")
         .description("Disconnects when it detects you're about to take enough damage to set you under the 'health' setting.")
         .defaultValue(true)
+        .visible(() -> health.get() > 0)
         .build()
     );
 
@@ -80,6 +81,7 @@ public class AutoLog extends Module {
         .name("smart-toggle")
         .description("Disables Auto Log after a low-health logout. WILL re-enable once you heal.")
         .defaultValue(false)
+        .visible(() -> health.get() > 0)
         .build()
     );
 
@@ -179,19 +181,25 @@ public class AutoLog extends Module {
             this.toggle();
             return;
         }
-        if (playerHealth <= health.get()) {
-            disconnect("Health was lower than " + health.get() + ".");
-            if (smartToggle.get()) {
-                if (isActive()) this.toggle();
-                enableHealthListener();
-            } else if (toggleOff.get()) this.toggle();
-            return;
-        }
 
-        if (smart.get() && playerHealth + mc.player.getAbsorptionAmount() - PlayerUtils.possibleHealthReductions() < health.get()) {
-            disconnect("Health was going to be lower than " + health.get() + ".");
-            if (toggleOff.get()) this.toggle();
-            return;
+        if (health.get() > 0) {
+            if (playerHealth <= health.get()) {
+                disconnect("Health was lower than " + health.get() + ".");
+                if (smartToggle.get()) {
+                    if (isActive()) this.toggle();
+                    enableHealthListener();
+                } else if (toggleOff.get()) this.toggle();
+                return;
+            }
+
+            if (smart.get() && playerHealth + mc.player.getAbsorptionAmount() - PlayerUtils.possibleHealthReductions() < health.get()) {
+                disconnect("Health was going to be lower than " + health.get() + ".");
+                if (smartToggle.get()) {
+                    if (isActive()) this.toggle();
+                    enableHealthListener();
+                } else if (toggleOff.get()) this.toggle();
+                return;
+            }
         }
 
         if (!onlyTrusted.get() && !instantDeath.get() && entities.get().isEmpty())
