@@ -17,6 +17,7 @@ import meteordevelopment.meteorclient.systems.Systems;
 import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.systems.hud.screens.AddHudElementScreen;
 import meteordevelopment.meteorclient.systems.hud.screens.HudEditorScreen;
+import meteordevelopment.meteorclient.systems.hud.screens.HudElementPresetsScreen;
 import meteordevelopment.meteorclient.systems.hud.screens.HudElementScreen;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Modules;
@@ -183,7 +184,8 @@ public class MeteorClient implements ClientModInitializer {
 
         return !(screen instanceof HudEditorScreen)
             && !(screen instanceof AddHudElementScreen)
-            && !(screen instanceof HudElementScreen);
+            && !(screen instanceof HudElementScreen)
+            && !(screen instanceof HudElementPresetsScreen);
     }
 
     public static Identifier identifier(String path) {
