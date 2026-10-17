@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.systems.modules.render;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
@@ -13,7 +14,6 @@ import meteordevelopment.meteorclient.utils.misc.input.Input;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.CameraType;
 import net.minecraft.util.Mth;
-import com.mojang.blaze3d.platform.InputConstants;
 
 public class FreeLook extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();

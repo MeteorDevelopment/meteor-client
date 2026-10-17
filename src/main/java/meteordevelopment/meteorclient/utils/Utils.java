@@ -276,10 +276,10 @@ public class Utils {
         DataComponentMap components = itemStack.getComponents();
 
         if (components.has(DataComponents.CONTAINER)) {
-            var stacks = components.get(DataComponents.CONTAINER).allItemsCopyStream().toList();
+            List<ItemStack> stacks = components.get(DataComponents.CONTAINER).itemCopies().toList();
 
             for (int i = 0; i < stacks.size(); i++) {
-                if (i >= 0 && i < items.length) items[i] = stacks.get(i);
+                if (i < items.length) items[i] = stacks.get(i);
             }
         } else if (components.has(DataComponents.BLOCK_ENTITY_DATA)) {
             TypedEntityData<BlockEntityType<?>> blockEntityData = components.get(DataComponents.BLOCK_ENTITY_DATA);

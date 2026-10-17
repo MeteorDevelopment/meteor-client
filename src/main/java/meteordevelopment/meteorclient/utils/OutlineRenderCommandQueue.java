@@ -15,13 +15,13 @@ import net.minecraft.client.renderer.SubmitNodeStorage;
 import net.minecraft.client.renderer.block.MovingBlockRenderState;
 import net.minecraft.client.renderer.block.dispatch.BlockStateModelPart;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
-import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
+import net.minecraft.client.renderer.feature.phase.TranslucentFeatureRenderPhase;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.client.renderer.state.level.QuadParticleRenderState;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.model.geometry.BakedQuad;
+import net.minecraft.client.renderer.texture.UvMapping;
+import net.minecraft.client.resources.model.geometry.ItemQuads;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.item.ItemDisplayContext;
@@ -44,11 +44,15 @@ public class OutlineRenderCommandQueue extends SubmitNodeStorage {
 
     @Override
     public @NonNull SubmitNodeCollection order(int i) {
-        return submitsPerOrder.computeIfAbsent(i, _ -> new OutlineBatchingRenderCommandQueue());
+        return submitsPerOrder.computeIfAbsent(i, _ -> new OutlineBatchingRenderCommandQueue(true, new TranslucentFeatureRenderPhase()));
     }
 
     @NullMarked
     private class OutlineBatchingRenderCommandQueue extends SubmitNodeCollection {
+        public OutlineBatchingRenderCommandQueue(boolean useImprovedTransparency, TranslucentFeatureRenderPhase seeThrough) {
+            super(useImprovedTransparency, seeThrough);
+        }
+
         @Override
         public void submitShadow(PoseStack poseStack, float shadowRadius, List<EntityRenderState.ShadowPiece> shadowPieces) {
         }
@@ -70,13 +74,13 @@ public class OutlineRenderCommandQueue extends SubmitNodeStorage {
         }
 
         @Override
-        public <S> void submitModel(Model<? super S> model, S state, PoseStack poseStack, RenderType renderType, int lightCoords, int overlayCoords, int tintedColor, @Nullable TextureAtlasSprite sprite, int outlineColor, ModelFeatureRenderer.@Nullable CrumblingOverlay crumblingOverlay) {
-            super.submitModel(model, state, poseStack, renderType, lightCoords, overlayCoords, color, sprite, color, crumblingOverlay);
+        public <S> void submitModel(Model<? super S> model, S state, PoseStack poseStack, RenderType renderType, int lightCoords, int overlayCoords, int tintedColor, @Nullable UvMapping uvMapping, int outlineColor) {
+            super.submitModel(model, state, poseStack, renderType, lightCoords, overlayCoords, tintedColor, uvMapping, color);
         }
 
         @Override
-        public void submitModelPart(ModelPart part, PoseStack poseStack, RenderType renderType, int lightCoords, int overlayCoords, @Nullable TextureAtlasSprite sprite, int tintedColor, ModelFeatureRenderer.@Nullable CrumblingOverlay crumblingOverlay, int outlineColor) {
-            super.submitModelPart(part, poseStack, renderType, lightCoords, overlayCoords, sprite, color, crumblingOverlay, color);
+        public void submitModelPart(final ModelPart modelPart, final PoseStack poseStack, final RenderType renderType, final int lightCoords, final int overlayCoords, final @Nullable UvMapping uvMapping, final int tintedColor, final int outlineColor) {
+            super.submitModelPart(modelPart, poseStack, renderType, lightCoords, overlayCoords, uvMapping, tintedColor, color);
         }
 
         @Override
@@ -90,11 +94,11 @@ public class OutlineRenderCommandQueue extends SubmitNodeStorage {
         }
 
         @Override
-        public void submitBreakingBlockModel(PoseStack poseStack, List<BlockStateModelPart> modelParts, int progress) {
+        public void submitBreakingBlockModel(PoseStack poseStack, List<BlockStateModelPart> parts, int progress, final boolean isBlockTranslucent) {
         }
 
         @Override
-        public void submitItem(PoseStack poseStack, ItemDisplayContext displayContext, int lightCoords, int overlayCoords, int outlineColor, int[] tintLayers, List<BakedQuad> quads, ItemStackRenderState.FoilType foilType) {
+        public void submitItem(PoseStack poseStack, ItemDisplayContext displayContext, int lightCoords, int overlayCoords, int outlineColor, int[] tintLayers, ItemQuads quads, ItemStackRenderState.FoilType foilType) {
             if (tints == null || tints[0] != color) {
                 tints = new int[]{color, color, color, color};
             }
