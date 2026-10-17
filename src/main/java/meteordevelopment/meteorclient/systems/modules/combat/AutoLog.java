@@ -194,10 +194,7 @@ public class AutoLog extends Module {
 
             if (smart.get() && playerHealth + mc.player.getAbsorptionAmount() - PlayerUtils.possibleHealthReductions() < health.get()) {
                 disconnect("Health was going to be lower than " + health.get() + ".");
-                if (smartToggle.get()) {
-                    if (isActive()) this.toggle();
-                    enableHealthListener();
-                } else if (toggleOff.get()) this.toggle();
+                if (toggleOff.get()) this.toggle();
                 return;
             }
         }
@@ -274,7 +271,7 @@ public class AutoLog extends Module {
     private class StaticListener {
         @EventHandler
         private void healthListener(TickEvent.Post event) {
-            if (isActive()) disableHealthListener();
+            if (isActive() || health.get() <= 0) disableHealthListener();
 
             else if (Utils.canUpdate()
                 && !mc.player.isDeadOrDying()
