@@ -334,7 +334,12 @@ public class AttributeSwap extends Module {
         if (mc.hitResult == null || mc.hitResult.getType() == HitResult.Type.BLOCK || !canSwapByWeapon()) return;
 
         if (mc.hitResult instanceof EntityHitResult entityHitResult) {
-            if (mode.get() != Mode.Simple || !swapOnMiss.get()) {
+            if (mode.get() == Mode.Simple) {
+                if (!swapOnMiss.get()) {
+                    performSwap(entityHitResult.getEntity());
+                    return;
+                }
+            } else if (isWithinMeleeRange(entityHitResult)) {
                 performSwap(entityHitResult.getEntity());
                 return;
             }
@@ -342,7 +347,7 @@ public class AttributeSwap extends Module {
 
         if (mode.get() == Mode.Smart && spearSwapping.get()) {
             if (spearHitbox.get()) {
-                Entity target = getTargetEntity();
+                Entity target = mc.hitResult instanceof EntityHitResult entityHitResult ? entityHitResult.getEntity() : getTargetEntity();
                 if (target != null) {
                     int spearSlot = getSmartSpearSlot(false);
                     if (spearSlot != -1) doSwap(spearSlot);
@@ -423,7 +428,7 @@ public class AttributeSwap extends Module {
             if (axeSlot != -1) return axeSlot;
         }
 
-        boolean isFalling = mc.player.fallDistance > 1.5;
+        boolean isFalling = mc.player.fallDistance > 1.5 && !mc.player.isFallFlying();
         boolean durability = smartDurability.get();
 
         boolean isLiving = target instanceof LivingEntity;
@@ -453,6 +458,11 @@ public class AttributeSwap extends Module {
         }
 
         return bestSlot;
+    }
+
+    private boolean isWithinMeleeRange(EntityHitResult hitResult) {
+        double range = mc.player.entityInteractionRange();
+        return hitResult.getLocation().distanceToSqr(mc.player.getEyePosition(1.0f)) <= range * range;
     }
 
     private int getSmartSpearSlot(boolean requireLunge) {
@@ -489,11 +499,12 @@ public class AttributeSwap extends Module {
 
         Entity target = null;
         double closestDistance = maxDistance * maxDistance;
-        Hitboxes hitboxes = Modules.get().get(Hitboxes.class);
+        Hitboxes hitboxes = Modules.get() != null ? Modules.get().get(Hitboxes.class) : null;
 
         for (Entity entity : mc.level.getEntities(mc.player, box, e -> !e.isSpectator() && e.isPickable())) {
             // expanding entity's hitbox by 0.15 to simulate spear's actual hitbox margin
-            AABB expandedBox = entity.getBoundingBox().inflate(0.150 + hitboxes.getEntityValue(entity));
+            double extraMargin = hitboxes != null ? hitboxes.getEntityValue(entity) : 0;
+            AABB expandedBox = entity.getBoundingBox().inflate(0.150 + extraMargin);
 
             if (expandedBox.clip(start, end).isPresent()) {
                 double distSq = start.distanceToSqr(entity.getX(), entity.getY(), entity.getZ());
