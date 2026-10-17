@@ -27,15 +27,4 @@ public abstract class GlCommandEncoderMixin {
     private void createRenderPass$iGpuDevice(CallbackInfoReturnable<RenderPassBackend> cir) {
         ((IGpuDevice) device).meteor$onCreateRenderPass(cir.getReturnValue());
     }
-
-    // todo ?
-//    @Inject(method = "applyPipelineState", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/opengl/GlStateManager;_polygonMode(II)V"))
-//    private void setPipelineAndApplyState$lineSmooth(RenderPipeline pipeline, CallbackInfo ci) {
-//        if (((IRenderPipeline) pipeline).meteor$getLineSmooth()) {
-//            glEnable(GL_LINE_SMOOTH);
-//            glLineWidth(1);
-//        } else {
-//            glDisable(GL_LINE_SMOOTH);
-//        }
-//    }
 }
