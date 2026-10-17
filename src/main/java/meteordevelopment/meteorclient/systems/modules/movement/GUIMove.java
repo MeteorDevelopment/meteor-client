@@ -104,11 +104,11 @@ public class GUIMove extends Module {
     }
 
     public boolean disableSpace() {
-        return isActive() && jump.get() && mc.options.keyJump.isDefault();
+        return isActive() && jump.get() && mc.options.keyJump.isDefault() && !skip();
     }
 
     public boolean disableArrows() {
-        return isActive() && arrowsRotate.get();
+        return isActive() && arrowsRotate.get() && !skip();
     }
 
     @EventHandler
@@ -179,11 +179,12 @@ public class GUIMove extends Module {
         if (mc.gui.screen() == null ||
             (mc.gui.screen() instanceof CreativeModeInventoryScreen && CreativeModeInventoryScreenAccessor.meteor$getSelectedTab() == CreativeModeTabs.searchTab())
             || mc.gui.screen() instanceof ChatScreen
-            || mc.gui.screen() instanceof SignEditScreen
+            || mc.gui.screen() instanceof AbstractSignEditScreen
             || mc.gui.screen() instanceof AnvilScreen
             || mc.gui.screen() instanceof AbstractCommandBlockEditScreen
             || mc.gui.screen() instanceof StructureBlockEditScreen) return true;
-        if (screens.get() == Screens.GUI && !(mc.gui.screen() instanceof WidgetScreen)) return true;
-        return screens.get() == Screens.Inventory && mc.gui.screen() instanceof WidgetScreen;
+        if (screens.get() == Screens.GUI) return !(mc.gui.screen() instanceof WidgetScreen);
+        if (screens.get() == Screens.Inventory) return !(mc.gui.screen() instanceof AbstractContainerScreen<?>);
+        return !(mc.gui.screen() instanceof WidgetScreen || mc.gui.screen() instanceof AbstractContainerScreen<?>);
     }
 }
