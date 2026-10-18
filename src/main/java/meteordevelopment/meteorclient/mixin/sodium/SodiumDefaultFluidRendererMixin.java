@@ -6,7 +6,6 @@
 package meteordevelopment.meteorclient.mixin.sodium;
 
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
-import com.llamalad7.mixinextras.sugar.Local;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.Xray;
 import net.caffeinemc.mods.sodium.client.model.color.ColorProvider;
@@ -67,16 +66,23 @@ public abstract class SodiumDefaultFluidRendererMixin {
     }
 
     @ModifyReturnValue(method = "isFullBlockFluidSideVisible", at = @At("RETURN"))
-    private boolean onIsFullBlockFluidSideVisible(boolean original, BlockGetter view, BlockPos selfPos, Direction facing, FluidState fluid, @Local(name = "otherState") BlockState otherState) {
+    private boolean onIsFullBlockFluidSideVisible(boolean original, BlockGetter view, BlockPos selfPos, Direction facing, FluidState fluid) {
         if (original || !forceXrayFluidSides || facing.getAxis().isVertical()) return original;
+        // Sodium 0.9.2 for 26.3 no longer exposes the neighbor state as a local variable here,
+        // so we query it from the BlockGetter ourselves. Semantics are identical.
+        BlockState otherState = view.getBlockState(selfPos.relative(facing));
         if (!xray.isBlocked(otherState.getBlock(), null)) return false;
 
         return !otherState.getFluidState().getType().isSame(fluid.getType());
     }
 
-    @ModifyReturnValue(method = "isFluidSideExposed(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/core/Direction;F)Z", at = @At("RETURN"))
-    private boolean onIsFluidSideExposed(boolean original, BlockState ownBlockState, BlockState neighborBlockState, Direction facing, float height) {
+    // In Sodium 0.9.2 (MC 26.3) the old 4-param isFluidSideExposed(BlockState, BlockState, Direction, float)
+    // is inlined into its 5-param entrypoint, so we can no longer inject on it. Target the public entrypoint instead
+    // and re-derive the neighbor state from BlockAndTintGetter + pos.
+    @ModifyReturnValue(method = "isFluidSideExposed(Lnet/minecraft/client/renderer/block/BlockAndTintGetter;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/core/BlockPos;Lnet/minecraft/core/Direction;F)Z", at = @At("RETURN"))
+    private boolean onIsFluidSideExposed(boolean original, BlockAndTintGetter level, BlockState ownBlockState, BlockPos pos, Direction facing, float height) {
         if (original || !forceXrayFluidSides || facing.getAxis().isVertical()) return original;
+        BlockState neighborBlockState = level.getBlockState(pos.relative(facing));
         if (!xray.isBlocked(neighborBlockState.getBlock(), null)) return false;
 
         return !neighborBlockState.getFluidState().getType().isSame(ownBlockState.getFluidState().getType());

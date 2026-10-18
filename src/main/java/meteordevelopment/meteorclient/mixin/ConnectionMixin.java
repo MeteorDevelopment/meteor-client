@@ -30,9 +30,13 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBundlePacket;
+import net.minecraft.network.protocol.game.ServerboundClientTickEndPacket;
+import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
 import net.minecraft.server.network.EventLoopGroupHolder;
 import org.jspecify.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -81,6 +85,26 @@ public abstract class ConnectionMixin {
     private void onSendPacketTail(Packet<?> packet, @Nullable ChannelFutureListener listener, CallbackInfo ci) {
         MeteorClient.EVENT_BUS.post(new PacketEvent.Sent(packet, (Connection) (Object) this));
     }
+
+    @Unique
+    private boolean sentPositionThisTick;
+
+    @Inject(method = "doSendPacket(Lnet/minecraft/network/protocol/Packet;Lio/netty/channel/ChannelFutureListener;Z)V", at = @At("HEAD"))
+    private void onDoSendPacket(Packet<?> packet, @Nullable ChannelFutureListener listener, boolean flush, CallbackInfo ci) {
+        if (packet instanceof ServerboundClientTickEndPacket) {
+            sentPositionThisTick = false;
+            return;
+        }
+
+        if (!(packet instanceof ServerboundMovePlayerPacket move) || !move.hasPosition()) return;
+
+        if (sentPositionThisTick) sendPacket(ServerboundClientTickEndPacket.INSTANCE, null, false);
+
+        sentPositionThisTick = true;
+    }
+
+    @Shadow
+    private void sendPacket(Packet<?> packet, @Nullable ChannelFutureListener listener, boolean flush) {}
 
     @Inject(method = "exceptionCaught", at = @At("HEAD"), cancellable = true)
     private void exceptionCaught(ChannelHandlerContext ctx, Throwable cause, CallbackInfo ci) {

@@ -27,12 +27,12 @@ public abstract class TitleScreenMixin extends Screen {
 
     @Inject(method = "extractRenderState", at = @At("TAIL"))
     private void onExtractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a, CallbackInfo ci) {
-        if (Config.get().titleScreenCredits.get()) TitleScreenCredits.render(graphics);
+        if (Config.get() != null && Config.get().titleScreenCredits.get()) TitleScreenCredits.render(graphics);
     }
 
     @Inject(method = "mouseClicked", at = @At("HEAD"), cancellable = true)
     private void onMouseClicked(MouseButtonEvent event, boolean doubleClick, CallbackInfoReturnable<Boolean> cir) {
-        if (Config.get().titleScreenCredits.get() && event.button() == InputConstants.MOUSE_BUTTON_LEFT) {
+        if (Config.get() != null && Config.get().titleScreenCredits.get() && event.button() == InputConstants.MOUSE_BUTTON_LEFT) {
             if (TitleScreenCredits.onClicked(event.x(), event.y())) cir.setReturnValue(true);
         }
     }
