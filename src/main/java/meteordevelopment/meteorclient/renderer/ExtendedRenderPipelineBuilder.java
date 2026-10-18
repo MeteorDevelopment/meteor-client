@@ -5,7 +5,7 @@
 
 package meteordevelopment.meteorclient.renderer;
 
-import com.mojang.blaze3d.pipeline.RenderPipeline;
+import com.mojang.renderpearl.api.pipeline.RenderPipeline;
 import meteordevelopment.meteorclient.mixininterface.IRenderPipeline;
 import org.jspecify.annotations.NonNull;
 

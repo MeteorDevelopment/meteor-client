@@ -13,9 +13,9 @@ import meteordevelopment.meteorclient.gui.widgets.pressable.WPressable;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import net.minecraft.util.Mth;
 
-import static meteordevelopment.meteorclient.MeteorClient.mc;
 import static com.mojang.blaze3d.platform.InputConstants.MOUSE_BUTTON_LEFT;
 import static com.mojang.blaze3d.platform.InputConstants.MOUSE_BUTTON_RIGHT;
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class WMeteorModule extends WPressable implements MeteorWidget {
     private final Module module;

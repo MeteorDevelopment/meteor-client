@@ -5,11 +5,11 @@
 
 package meteordevelopment.meteorclient.renderer;
 
-import com.mojang.blaze3d.buffers.GpuBuffer;
-import com.mojang.blaze3d.buffers.GpuBufferSlice;
-import com.mojang.blaze3d.systems.GpuDevice;
 import com.mojang.blaze3d.systems.RenderSystem;
-import net.minecraft.client.renderer.DynamicUniformStorage;
+import com.mojang.renderpearl.api.buffers.GpuBuffer;
+import com.mojang.renderpearl.api.buffers.GpuBufferSlice;
+import com.mojang.renderpearl.api.device.GpuDevice;
+import net.minecraft.client.renderer.DynamicGpuDataStorage;
 import net.minecraft.client.renderer.MappableRingBuffer;
 import net.minecraft.util.Mth;
 
@@ -19,9 +19,9 @@ import java.nio.ByteBuffer;
  * UBO storage with a constant size. Exceeding this size causes an {@link IndexOutOfBoundsException} to be thrown.
  *
  * @author Crosby
- * @see DynamicUniformStorage
+ * @see DynamicGpuDataStorage
  */
-public class FixedUniformStorage<T extends DynamicUniformStorage.DynamicUniform> {
+public class FixedUniformStorage<T extends DynamicGpuDataStorage.DynamicGpuData> {
     private final MappableRingBuffer buffer;
     private final int blockSize;
     private final int capacity;

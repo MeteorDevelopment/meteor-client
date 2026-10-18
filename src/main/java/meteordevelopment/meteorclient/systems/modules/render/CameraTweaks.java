@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.systems.modules.render;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import meteordevelopment.meteorclient.events.game.ChangePerspectiveEvent;
 import meteordevelopment.meteorclient.events.meteor.MouseScrollEvent;
 import meteordevelopment.meteorclient.settings.*;
@@ -13,7 +14,6 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.misc.Keybind;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.CameraType;
-import com.mojang.blaze3d.platform.InputConstants;
 
 public class CameraTweaks extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();

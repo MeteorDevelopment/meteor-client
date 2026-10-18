@@ -56,6 +56,12 @@ public abstract class MultiPlayerGameModeMixin implements IMultiPlayerGameMode {
     @Shadow
     public abstract void startPrediction(ClientLevel level, PredictiveAction predictiveAction);
 
+    @Inject(method = "dropItem", at = @At("HEAD"), cancellable = true)
+    private void onDrop(LocalPlayer player, boolean all, CallbackInfo ci) {
+        if (MeteorClient.EVENT_BUS.post(DropItemsEvent.get(player.getMainHandItem())).isCancelled())
+            ci.cancel();
+    }
+
     @Inject(method = "handleContainerInput", at = @At("HEAD"), cancellable = true)
     private void onHandleInventoryMouseClick(int containerId, int slotNum, int buttonNum, ContainerInput containerInput, Player player, CallbackInfo ci) {
         if (containerInput == ContainerInput.THROW && slotNum >= 0 && slotNum < player.containerMenu.slots.size()) {

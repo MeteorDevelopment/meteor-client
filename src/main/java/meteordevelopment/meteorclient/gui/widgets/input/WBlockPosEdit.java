@@ -56,7 +56,7 @@ public class WBlockPosEdit extends WHorizontalList {
             WButton here = add(theme.confirmedButton("Set Here", "Confirm")).expandX().widget();
             here.action = () -> {
                 lastValue = value;
-                set(new BlockPos(mc.player.blockPosition()));
+                set(BlockPos.containing(mc.player.position()));
                 newValueCheck();
 
                 clear();

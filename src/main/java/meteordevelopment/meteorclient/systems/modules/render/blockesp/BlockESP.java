@@ -80,7 +80,11 @@ public class BlockESP extends Module {
 
     private final Long2ObjectMap<ESPChunk> chunks = new Long2ObjectOpenHashMap<>();
     private final Set<ESPGroup> groups = new ReferenceOpenHashSet<>();
-    private final ExecutorService workerThread = Executors.newSingleThreadExecutor();
+    private final ExecutorService workerThread = Executors.newSingleThreadExecutor(task -> {
+        Thread t = new Thread(task);
+        t.setDaemon(true);
+        return t;
+    });
 
     private DimensionType lastDimension;
 

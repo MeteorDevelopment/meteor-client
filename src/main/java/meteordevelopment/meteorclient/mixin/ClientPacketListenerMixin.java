@@ -58,7 +58,7 @@ public abstract class ClientPacketListenerMixin extends ClientCommonPacketListen
 
     @Inject(method = "handleAddEntity", at = @At("HEAD"), cancellable = true)
     private void onHandleAddEntity(ClientboundAddEntityPacket packet, CallbackInfo ci) {
-        if (packet != null && packet.getType() != null) {
+        if (packet != null) {
             if (Modules.get().get(NoRender.class).noEntity(packet.getType()) && Modules.get().get(NoRender.class).getDropSpawnPacket()) {
                 ci.cancel();
             }
@@ -92,7 +92,7 @@ public abstract class ClientPacketListenerMixin extends ClientCommonPacketListen
 
     @Inject(method = "handleLevelChunkWithLight", at = @At("TAIL"))
     private void onHandleLevelChunkWithLight(ClientboundLevelChunkWithLightPacket packet, CallbackInfo ci) {
-        LevelChunk chunk = minecraft.level.getChunk(packet.getX(), packet.getZ());
+        LevelChunk chunk = minecraft.level.getChunk(packet.x(), packet.z());
         MeteorClient.EVENT_BUS.post(new ChunkDataEvent(chunk));
     }
 
@@ -106,9 +106,9 @@ public abstract class ClientPacketListenerMixin extends ClientCommonPacketListen
         MeteorClient.EVENT_BUS.post(InventoryEvent.get(packet));
     }
 
-    @Inject(method = "handleRemoveEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/protocol/game/ClientboundRemoveEntitiesPacket;getEntityIds()Lit/unimi/dsi/fastutil/ints/IntList;"))
+    @Inject(method = "handleRemoveEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/protocol/game/ClientboundRemoveEntitiesPacket;entityIds()Lit/unimi/dsi/fastutil/ints/IntList;"))
     private void onHandleRemoveEntities(ClientboundRemoveEntitiesPacket packet, CallbackInfo ci) {
-        for (int id : packet.getEntityIds()) {
+        for (int id : packet.entityIds()) {
             MeteorClient.EVENT_BUS.post(EntityDestroyEvent.get(minecraft.level.getEntity(id)));
         }
     }
