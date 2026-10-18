@@ -20,6 +20,7 @@ import meteordevelopment.meteorclient.systems.modules.Category;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.utils.misc.NbtUtils;
+import meteordevelopment.meteorclient.utils.misc.input.Input;
 import meteordevelopment.meteorclient.utils.render.DisplayItemUtils;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.world.item.Items;
@@ -152,12 +153,14 @@ public class ModulesScreen extends TabScreen {
     }
 
     @Override
-    public boolean keyPressed(@NonNull KeyEvent value) {
+    public boolean keyPressed(@NonNull KeyEvent input) {
         if (locked) return false;
 
-        boolean cntrl = SystemUtils.IS_OS_MAC ? value.modifiers() == MOD_SUPER : value.modifiers() == MOD_CONTROL;
+        boolean ctrl = SystemUtils.IS_OS_MAC
+            ? Input.modsMatch(input.modifiers(), MOD_SUPER)
+            : Input.modsMatch(input.modifiers(), MOD_CONTROL);
 
-        if (cntrl && value.key() == KEY_F) {
+        if (ctrl && input.key() == KEY_F) {
             if (searchWindow != null) searchWindow.setExpanded(true);
             if (searchTextBox != null) {
                 searchTextBox.setFocused(true);
@@ -167,7 +170,7 @@ public class ModulesScreen extends TabScreen {
             return true;
         }
 
-        return super.keyPressed(value);
+        return super.keyPressed(input);
     }
 
     // Favorites
