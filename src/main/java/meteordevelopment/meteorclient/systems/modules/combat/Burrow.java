@@ -22,7 +22,6 @@ import meteordevelopment.orbit.EventHandler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
-import net.minecraft.network.protocol.game.ServerboundPunchPacket;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Items;
@@ -200,7 +199,6 @@ public class Burrow extends Module {
         InvUtils.swap(block.slot(), true);
 
         mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Utils.vec3(blockPos), Direction.UP, blockPos, false));
-        mc.player.connection.send(new ServerboundPunchPacket());
 
         InvUtils.swapBack();
 

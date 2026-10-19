@@ -19,6 +19,7 @@ import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.player.Rotations;
+import meteordevelopment.meteorclient.utils.player.SwingMode;
 import meteordevelopment.meteorclient.utils.world.TickRate;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.network.protocol.game.ServerboundSetCarriedItemPacket;
@@ -461,7 +462,7 @@ public class KillAura extends Module {
             Rotations.rotate(Rotations.getYaw(target), Rotations.getPitch(target, Target.Body));
 
         mc.gameMode.attack(mc.player, target);
-        mc.player.swing(InteractionHand.MAIN_HAND, mc.player.getMainHandItem().getAttackAnimation(), false);
+        SwingMode.Both.attackSwing(InteractionHand.MAIN_HAND);
 
         hitTimer = 0;
     }
