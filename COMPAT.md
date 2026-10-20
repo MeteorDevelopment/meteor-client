@@ -29,6 +29,8 @@ src/main/resources/meteor-compat.properties   template; the impl class is substi
 src/mc/26.2/              sources compiled only for Minecraft 26.2 (incl. compat/impl/Mc262Compat)
 src/mc/26.3/              sources compiled only for Minecraft 26.3 (incl. compat/impl/Mc263Compat)
 src/mc/26.4/              sources compiled only for Minecraft 26.4 (incl. compat/impl/Mc264Compat)
+                           a version tree is a java source root only; version specific
+                           resources live in src/mc/<version>/resources
 gradle/mc-versions/       one <version>.properties per supported version,
                           plus an optional <version>.classtweaker access widener
 scripts/build-all-versions.sh                builds every registered version

@@ -82,7 +82,12 @@ val launcher = sourceSets.create("launcher") {
 // supported version can use its own mappings for the version-fragile parts of the mod.
 sourceSets.named("main") {
     java.srcDir("src/mc/$mcVersion")
-    resources.srcDir("src/mc/$mcVersion")
+
+    // The version tree is a source root of the java sources only. Registering the same directory
+    // as a resources root as well would make every file of it appear twice in the source set, and
+    // a task that merges the sources would then fail with a duplicate entry. Resources that are
+    // specific to a version therefore live in src/mc/<version>/resources.
+    resources.srcDir("src/mc/$mcVersion/resources")
 }
 
 configurations {
