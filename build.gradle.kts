@@ -31,14 +31,6 @@ val mcProperties = Properties().apply { mcDescriptor.inputStream().use { load(it
 fun mc(key: String): String = mcProperties.getProperty(key)
     ?: error("Missing property '$key' in $mcDescriptor")
 
-// Optional comma separated list of "group:artifact:version" coordinates (property
-// 'extra-compile-deps') that a given Minecraft version needs on top of the vanilla classpath.
-// Newer Minecraft versions drop dependencies that older ones shipped (e.g. 26.3 no longer
-// depends on LWJGL's tinyfd, which the shared code uses for file dialogs).
-val mcExtraCompileDeps: List<String> = mcProperties.getProperty("extra-compile-deps")
-    ?.split(',')?.map { it.trim() }?.filter { it.isNotEmpty() }
-    .orEmpty()
-
 logger.lifecycle("Building Meteor Client for Minecraft $mcVersion")
 
 val archivesBaseName = providers.gradleProperty("archives_base_name").get()
@@ -122,29 +114,11 @@ dependencies {
 
     // Compat fixes
     compileOnly(fabricApi.module("fabric-renderer-indigo", fapiVersion))
-    compileOnly("maven.modrinth:sodium:${mc("sodium")}") { isTransitive = false }
-    compileOnly("maven.modrinth:lithium:${mc("lithium")}") { isTransitive = false }
-    compileOnly("maven.modrinth:iris:${mc("iris")}") { isTransitive = false }
-    compileOnly("com.viaversion:viafabricplus:${mc("viafabricplus")}") { isTransitive = false }
-    compileOnly("com.viaversion:viafabricplus-api:${mc("viafabricplus")}") { isTransitive = false }
 
-    compileOnly("meteordevelopment:baritone:${mc("baritone")}")
-    compileOnly("maven.modrinth:modmenu:${mc("modmenu")}")
-
-    // Dependencies the vanilla classpath of this Minecraft version no longer provides
-    mcExtraCompileDeps.forEach { compileOnly(it) }
 
     // Libraries (JAR-in-JAR)
     jij(libs.orbit)
     jij(libs.starscript)
-    jij(libs.reflections)
-    jij(libs.netty.handler.proxy) { isTransitive = false }
-    jij(libs.netty.codec.socks) { isTransitive = false }
-    jij(libs.waybackauthlib)
-    jij(libs.minecraft.auth) {
-        exclude("com.google.code.gson")
-        exclude("com.google.errorprone")
-    }
 }
 
 java {

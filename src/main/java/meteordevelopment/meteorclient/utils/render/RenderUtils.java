@@ -14,7 +14,6 @@ import meteordevelopment.meteorclient.utils.PostInit;
 import meteordevelopment.meteorclient.utils.misc.Pool;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.orbit.EventHandler;
-import net.irisshaders.iris.api.v0.IrisApi;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.ItemStack;
@@ -43,8 +42,9 @@ public class RenderUtils {
         MeteorClient.EVENT_BUS.subscribe(RenderUtils.class);
     }
 
+    /** Shader packs are not supported, so this is always false. */
     public static boolean isShaderPackInUse() {
-        return IrisApi.getInstance().isShaderPackInUse();
+        return false;
     }
 
     // Items

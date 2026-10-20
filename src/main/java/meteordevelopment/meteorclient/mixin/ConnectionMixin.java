@@ -9,8 +9,6 @@ import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPipeline;
-import io.netty.handler.proxy.Socks4ProxyHandler;
-import io.netty.handler.proxy.Socks5ProxyHandler;
 import io.netty.handler.timeout.TimeoutException;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
@@ -18,8 +16,6 @@ import meteordevelopment.meteorclient.events.world.ServerConnectEndEvent;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.misc.AntiPacketKick;
 import meteordevelopment.meteorclient.systems.modules.world.HighwayBuilder;
-import meteordevelopment.meteorclient.systems.proxies.Proxies;
-import meteordevelopment.meteorclient.systems.proxies.Proxy;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.BandwidthDebugMonitor;
 import net.minecraft.network.Connection;
@@ -91,18 +87,4 @@ public abstract class ConnectionMixin {
         }
     }
 
-    @Inject(method = "configureSerialization", at = @At("RETURN"))
-    private static void onAddHandlers(ChannelPipeline pipeline, PacketFlow inboundDirection, boolean local, BandwidthDebugMonitor monitor, CallbackInfo ci) {
-        if (inboundDirection != PacketFlow.CLIENTBOUND || local) return;
-
-        Proxy proxy = Proxies.get().getEnabled();
-        if (proxy == null) return;
-
-        switch (proxy.type.get()) {
-            case Socks4 ->
-                pipeline.addFirst(new Socks4ProxyHandler(new InetSocketAddress(proxy.address.get(), proxy.port.get()), proxy.username.get()));
-            case Socks5 ->
-                pipeline.addFirst(new Socks5ProxyHandler(new InetSocketAddress(proxy.address.get(), proxy.port.get()), proxy.username.get(), proxy.password.get()));
-        }
-    }
 }

@@ -59,9 +59,7 @@ Selecting an unknown version fails fast with the list of registered versions.
 | Key | Purpose |
 | --- | --- |
 | `minecraft`, `fabric-api` | Minecraft and Fabric API coordinates |
-| `sodium`, `lithium`, `iris`, `modmenu`, `baritone`, `viafabricplus` | compile-only mod integrations |
 | `compat-impl` | FQCN of the `ICompat` implementation substituted into `meteor-compat.properties` |
-| `extra-compile-deps` | optional, comma-separated `group:artifact:version` list for dependencies the vanilla classpath of that version no longer provides |
 
 Alongside the descriptor, `gradle/mc-versions/<version>.classtweaker` is used as the access widener
 if it exists, otherwise the shared `src/main/resources/meteor-client.classtweaker`. Wideners drift
@@ -140,6 +138,23 @@ Call sites already migrated: `MeteorClient`, `Utils`, `MeteorStarscript`.
    move the code that no longer needs a Minecraft type back into `src/main/java`.
 7. Audit the mixins (see *Auditing the mixins*): a stale target compiles but crashes the game.
 
+## Third party dependencies
+
+The mod ships with **no third party dependencies**. What is left in the build is:
+
+| Dependency | Kind | Why |
+| --- | --- | --- |
+| Minecraft, Fabric Loader, Fabric API | platform | the mod runs on it |
+| `fabric-renderer-indigo` | compile only, part of Fabric API | the indigo renderer mixin |
+| `meteordevelopment:orbit` | bundled (jar-in-jar) | Meteor's own event bus |
+| `org.meteordev:starscript` | bundled (jar-in-jar) | the scripting API for addons |
+
+Everything else was removed: the Sodium / Lithium / Iris / ModMenu / ViaFabricPlus / Baritone
+integrations, LWJGL's `tinyfd` (files are picked with the in-game `FileBrowserScreen` instead),
+`reflections` (addons use `AddonManager#onInitialize` instead of the reflective init), the Netty
+SOCKS proxy handlers (the proxy system is gone) and `MinecraftAuth` (the Microsoft account login
+is gone).
+
 ## Worked example: porting 26.2 to 26.3, and 26.3 to 26.4
 
 Both ports **compile and produce a jar** (`./gradlew build -PminecraftVersion=26.3` /
@@ -156,7 +171,7 @@ list of runtime risks that still need in-game verification.
 | after the render-submission / packet / input rework | 31 |
 | after the render-pipeline, GL-mixin and `ItemInHandRenderer` rework | 21 |
 | after the authlib 10 port | 9 |
-| after the per-version access widener + tinyfd dependency | **0** |
+| after the per-version access widener | **0** |
 
 ### 26.3 -> 26.4
 
@@ -218,8 +233,8 @@ modelled per version rather than by hand:
   non-extensible). The build prefers `gradle/mc-versions/<version>.classtweaker` and falls back to
   the shared one.
 * **The vanilla classpath is not a fixed dependency set.** 26.3 dropped LWJGL's `tinyfd`, which
-  Meteor's shared code uses for file dialogs. A version descriptor can declare
-  `extra-compile-deps=group:artifact:version`; 26.3 declares `org.lwjgl:lwjgl-tinyfd:3.4.1`.
+  Meteor used for file dialogs. Rather than pulling the library back in, the mod now picks files
+  with its own in-game `FileBrowserScreen`.
 
 
 ## Migrating existing code

@@ -65,9 +65,9 @@ public class AutoGap extends Module {
         .build()
     );
 
-    private final Setting<Boolean> pauseBaritone = sgGeneral.add(new BoolSetting.Builder()
-        .name("pause-baritone")
-        .description("Pause baritone when eating.")
+    private final Setting<Boolean> pausePathing = sgGeneral.add(new BoolSetting.Builder()
+        .name("pause-pathing")
+        .description("Pause pathing when eating.")
         .defaultValue(true)
         .build()
     );
@@ -137,7 +137,7 @@ public class AutoGap extends Module {
     private int slot, prevSlot;
 
     private final List<Class<? extends Module>> wasAura = new ReferenceArrayList<>();
-    private boolean wasBaritone;
+    private boolean wasPathing;
 
     public AutoGap() {
         super(Categories.Player, "auto-gap", "Automatically eats Gaps or E-Gaps.");
@@ -210,10 +210,10 @@ public class AutoGap extends Module {
             }
         }
 
-        // Pause baritone
-        wasBaritone = false;
-        if (pauseBaritone.get() && PathManagers.get().isPathing()) {
-            wasBaritone = true;
+        // Pause pathing
+        wasPathing = false;
+        if (pausePathing.get() && PathManagers.get().isPathing()) {
+            wasPathing = true;
             PathManagers.get().pause();
         }
     }
@@ -241,8 +241,8 @@ public class AutoGap extends Module {
             }
         }
 
-        // Resume baritone
-        if (pauseBaritone.get() && wasBaritone) {
+        // Resume pathing
+        if (pausePathing.get() && wasPathing) {
             PathManagers.get().resume();
         }
     }

@@ -20,10 +20,6 @@ public class MixinPlugin implements IMixinConfigPlugin {
 
     private static boolean isOriginsPresent;
     private static boolean isIndigoPresent;
-    public static boolean isSodiumPresent;
-    private static boolean isLithiumPresent;
-    public static boolean isIrisPresent;
-    private static boolean isVFPPresent;
 
     @Override
     public void onLoad(String mixinPackage) {
@@ -31,10 +27,6 @@ public class MixinPlugin implements IMixinConfigPlugin {
 
         isIndigoPresent = FabricLoader.getInstance().isModLoaded("fabric-renderer-indigo");
         isOriginsPresent = FabricLoader.getInstance().isModLoaded("origins");
-        isSodiumPresent = FabricLoader.getInstance().isModLoaded("sodium");
-        isLithiumPresent = FabricLoader.getInstance().isModLoaded("lithium");
-        isIrisPresent = FabricLoader.getInstance().isModLoaded("iris");
-        isVFPPresent = FabricLoader.getInstance().isModLoaded("viafabricplus");
 
         loaded = true;
     }
@@ -50,14 +42,8 @@ public class MixinPlugin implements IMixinConfigPlugin {
             throw new RuntimeException("Mixin " + mixinClassName + " is not in the mixin package");
         } else if (mixinClassName.endsWith("PlayerEntityRendererMixin")) {
             return !isOriginsPresent;
-        } else if (mixinClassName.startsWith(mixinPackage + ".sodium")) {
-            return isSodiumPresent;
         } else if (mixinClassName.startsWith(mixinPackage + ".indigo")) {
             return isIndigoPresent;
-        } else if (mixinClassName.startsWith(mixinPackage + ".lithium")) {
-            return isLithiumPresent;
-        } else if (mixinClassName.startsWith(mixinPackage + ".viafabricplus")) {
-            return isVFPPresent;
         }
 
 

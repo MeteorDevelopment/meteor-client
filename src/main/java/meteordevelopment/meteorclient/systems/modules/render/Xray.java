@@ -18,7 +18,6 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.irisshaders.iris.api.v0.IrisApi;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.tags.FluidTags;
@@ -99,14 +98,6 @@ public class Xray extends Module {
         mc.levelExtractor.allChanged();
     }
 
-    @Override
-    public WWidget getWidget(GuiTheme theme) {
-        if (MixinPlugin.isIrisPresent && IrisApi.getInstance().isShaderPackInUse())
-            return theme.label("Warning: Due to shaders in use, opacity is overridden to 0.");
-
-        return null;
-    }
-
     @EventHandler
     private void onRenderBlockEntity(RenderBlockEntityEvent event) {
         BlockState state = ((BlockEntityRenderStateAccessor) event.blockEntityState).meteor$getBlockState();
@@ -143,8 +134,6 @@ public class Xray extends Module {
         Block block = state.getBlock();
 
         if (wallHack.isActive() && wallHack.blocks.get().contains(block)) {
-            if (MixinPlugin.isIrisPresent && IrisApi.getInstance().isShaderPackInUse()) return 0;
-
             int alpha;
 
             if (xray.isActive()) alpha = xray.opacity.get();
@@ -152,7 +141,7 @@ public class Xray extends Module {
 
             return alpha;
         } else if (xray.isActive() && !wallHack.isActive() && xray.isBlocked(block, pos)) {
-            return (MixinPlugin.isIrisPresent && IrisApi.getInstance().isShaderPackInUse()) ? 0 : xray.opacity.get();
+            return xray.opacity.get();
         }
 
         return -1;
@@ -164,11 +153,9 @@ public class Xray extends Module {
         Block fluidBlock = state.createLegacyBlock().getBlock();
 
         if (wallHack.isActive() && wallHack.blocks.get().contains(fluidBlock)) {
-            if (MixinPlugin.isIrisPresent && IrisApi.getInstance().isShaderPackInUse()) return 0;
-
             return xray.isActive() ? xray.opacity.get() : wallHack.opacity.get();
         } else if (xray.isActive() && !wallHack.isActive() && xray.shouldApplyFluidOpacity(state) && xray.isBlocked(fluidBlock, pos)) {
-            return (MixinPlugin.isIrisPresent && IrisApi.getInstance().isShaderPackInUse()) ? 0 : xray.opacity.get();
+            return xray.opacity.get();
         }
 
         return -1;

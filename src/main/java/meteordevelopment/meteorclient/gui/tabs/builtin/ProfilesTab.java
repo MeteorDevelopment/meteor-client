@@ -9,6 +9,7 @@ import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.WindowScreen;
 import meteordevelopment.meteorclient.gui.renderer.GuiRenderer;
+import meteordevelopment.meteorclient.gui.screens.FileBrowserScreen;
 import meteordevelopment.meteorclient.gui.tabs.Tab;
 import meteordevelopment.meteorclient.gui.tabs.TabScreen;
 import meteordevelopment.meteorclient.gui.tabs.WindowTabScreen;
@@ -32,7 +33,6 @@ import org.apache.commons.io.FilenameUtils;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.system.MemoryUtil;
-import org.lwjgl.util.tinyfd.TinyFileDialogs;
 
 import java.io.DataOutputStream;
 import java.io.File;
@@ -47,16 +47,7 @@ import java.util.Optional;
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class ProfilesTab extends Tab {
-    private static final PointerBuffer filters;
-
-    static {
-        filters = BufferUtils.createPointerBuffer(1);
-
-        ByteBuffer pngFilter = MemoryUtil.memASCII("*.nbt");
-
-        filters.put(pngFilter);
-        filters.rewind();
-    }
+    private static final List<String> FILTERS = List.of("*.nbt");
 
     public ProfilesTab() {
         super("Profiles");
@@ -94,9 +85,9 @@ public class ProfilesTab extends Tab {
             // Import
             WButton importBtn = l.add(theme.button("Import")).expandX().widget();
             importBtn.tooltip = "Import profile";
-            importBtn.action = () -> {
+            importBtn.action = () -> mc.gui.setScreen(new FileBrowserScreen(theme, "Select profile to import", false, FILTERS, file -> {
                 try {
-                    Profile imported = importProfile();
+                    Profile imported = importProfile(file);
                     if (imported != null)
                         MeteorClient.LOG.info("Successfully imported profile '{}'.", imported.name.get());
                     reload();
@@ -109,7 +100,7 @@ public class ProfilesTab extends Tab {
                         .dontShowAgainCheckboxVisible(false)
                         .show();
                 }
-            };
+            }));
         }
 
         private void initTable(WTable table) {
@@ -142,11 +133,7 @@ public class ProfilesTab extends Tab {
             }
         }
 
-        private Profile importProfile() throws IOException {
-            String file = TinyFileDialogs.tinyfd_openFileDialog("Select profile to import", null, filters, null, false);
-            if (file == null) return null;
-            File profileFile = new File(file);
-
+        private Profile importProfile(File profileFile) throws IOException {
             CompoundTag nbt = NbtIo.read(profileFile.toPath());
             if (nbt == null) return null;
 
@@ -293,10 +280,8 @@ public class ProfilesTab extends Tab {
             add(theme.horizontalSeparator()).expandX().widget();
 
             WButton export = add(theme.button("Export profile")).expandX().widget();
-            export.action = () -> {
-                exportProfile(profile, hud.checked, macros.checked, modules.checked, waypoints.checked);
-                onClose();
-            };
+            export.action = () -> mc.gui.setScreen(new FileBrowserScreen(theme, "Save profile", true, FILTERS,
+                file -> exportProfile(file, profile, hud.checked, macros.checked, modules.checked, waypoints.checked)));
         }
 
         private WCheckbox addBool(WContainer container, Setting<Boolean> setting) {
@@ -309,9 +294,8 @@ public class ProfilesTab extends Tab {
             return c;
         }
 
-        private void exportProfile(Profile profile, boolean hud, boolean macros, boolean modules, boolean waypoints) {
-            String path = TinyFileDialogs.tinyfd_saveFileDialog("Save profile", profile.name.get(), filters, null);
-            if (path == null) return;
+        private void exportProfile(File file, Profile profile, boolean hud, boolean macros, boolean modules, boolean waypoints) {
+            String path = file.getPath();
             Path p = Path.of(path.endsWith(".nbt") ? path : path + ".nbt");
 
             CompoundTag nbt = new CompoundTag();

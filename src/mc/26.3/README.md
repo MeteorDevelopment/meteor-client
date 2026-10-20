@@ -22,7 +22,7 @@ Measured with `./gradlew compileJava -PminecraftVersion=26.3` (distinct error si
 | after the mechanical API batch (`drop`, chat, banner, `MaterialInfo`, ...) | 29 |
 | after the render-pipeline + GL-mixin + `ItemInHandRenderer` rework | 21 |
 | after the authlib 10 port | 9 |
-| after adding the per-version access widener + tinyfd dependency | **0** |
+| after adding the per-version access widener | **0** |
 
 ## Build-system changes needed for 26.3
 
@@ -32,10 +32,6 @@ Two things turned out to be version-specific that the shared build did not model
   extensible, so `src/main/resources/meteor-client.classtweaker` no longer validates. The build now
   prefers `gradle/mc-versions/<version>.classtweaker` and falls back to the shared one. The 26.3
   variant is `gradle/mc-versions/26.3.classtweaker`.
-* **Dependencies the vanilla classpath no longer provides.** Minecraft 26.3 dropped LWJGL's
-  `tinyfd`, which Meteor's shared code uses for file dialogs. The version descriptor can now
-  declare `extra-compile-deps=group:artifact:version`, and 26.3 declares
-  `org.lwjgl:lwjgl-tinyfd:3.4.1`. See *Runtime risks* — this only makes it compile.
 
 ## Done
 
@@ -88,7 +84,6 @@ behavioural changes below have been exercised. Do not ship a 26.3 jar before tes
 
 | Item | Risk | Notes |
 | --- | --- | --- |
-| `tinyfd` file dialogs | `NoClassDefFoundError` | 26.3 no longer ships `lwjgl-tinyfd`, and the build only adds it as `compileOnly`. The jar (and its natives) must be bundled for Save/Load dialogs to work. |
 | Item in hand rendering | High | `FirstPersonHandsAndItemsRenderer` was rewritten, not renamed. Injection points were re-derived from the bytecode but never executed. |
 | `HandView` equip animations | Feature lost | 26.3 removed `tick()` / `shouldInstantlyReplaceVisibleItem()` / the renderer's `mainHandHeight` fields, so HandView's "skip swapping" and "old animations" options have no hook point. Needs a new design. |
 | The Altening login | Medium | `authlib` 10 derives endpoints from a discovery URL instead of three host names; the port feeds it the old auth server host. |

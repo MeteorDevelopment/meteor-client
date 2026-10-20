@@ -73,7 +73,7 @@ public class BowAimbot extends Module {
 
     private final Setting<Boolean> pauseOnCombat = sgGeneral.add(new BoolSetting.Builder()
         .name("pause-on-combat")
-        .description("Freezes Baritone temporarily until you released the bow.")
+        .description("Freezes pathing temporarily until you released the bow.")
         .defaultValue(false)
         .build()
     );

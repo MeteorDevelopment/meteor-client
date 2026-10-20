@@ -124,7 +124,7 @@ public class Freecam extends Module {
         .build()
     );
 
-    private final Setting<Boolean> baritoneClick = sgPathing.add(new BoolSetting.Builder()
+    private final Setting<Boolean> clickToPath = sgPathing.add(new BoolSetting.Builder()
         .name("click-to-path")
         .description("Sets a pathfinding goal to any block/entity you click at.")
         .defaultValue(false)
@@ -373,7 +373,7 @@ public class Freecam extends Module {
     private void onMouseClick(MouseClickEvent event) {
         if (checkGuiMove()) return;
 
-        if (baritoneClick.get() && event.action == KeyAction.Press && mc.options.keyAttack.matchesMouse(event.click)) {
+        if (clickToPath.get() && event.action == KeyAction.Press && mc.options.keyAttack.matchesMouse(event.click)) {
             setGoal();
         }
 
