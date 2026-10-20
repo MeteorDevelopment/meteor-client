@@ -10,6 +10,7 @@ import meteordevelopment.meteorclient.settings.BoolSetting;
 import meteordevelopment.meteorclient.settings.EntityTypeListSetting;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
+import meteordevelopment.meteorclient.settings.Vector3dSetting;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
@@ -21,6 +22,7 @@ import net.minecraft.network.protocol.game.ServerboundAttackPacket;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
+import org.joml.Vector3d;
 
 import java.util.Set;
 
@@ -29,9 +31,17 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 /**
  * Controls what the mobs around you are allowed to do.
  *
- * <p>The server decides what a mob does, so most switches only change what the client does with
- * the information the server sends. The exception is <i>no attack</i>: the attack is never sent, so
- * the mob is not hurt and never fights back.
+ * <p>The AI of a mob runs on the server, so a client cannot switch it off. What a client can do is
+ * change what the server knows and what the server sees:
+ *
+ * <ul>
+ *     <li>Not attacking a mob, so it never has a reason to fight back.</li>
+ *     <li>Reporting a position that is not the real one, so the mob AI looks for the player in
+ *     the wrong place and loses the line of sight.</li>
+ *     <li>Freezing the mobs on the screen, by not applying what the server sends.</li>
+ * </ul>
+ *
+ * <p>Every switch says which of the two sides it affects.
  */
 public class MobControl extends Module {
     /** The action of {@link ClientboundAnimatePacket} that swings the main or the off hand. */
@@ -39,7 +49,8 @@ public class MobControl extends Module {
     private static final int SWING_OFF_HAND = 1;
 
     private final SettingGroup sgMobs = settings.createGroup("Mobs");
-    private final SettingGroup sgActions = settings.createGroup("Actions");
+    private final SettingGroup sgClient = settings.createGroup("Client Side");
+    private final SettingGroup sgServer = settings.createGroup("Server Side");
 
     private final Setting<Set<EntityType<?>>> entities = sgMobs.add(new EntityTypeListSetting.Builder()
         .name("entities")
@@ -48,24 +59,47 @@ public class MobControl extends Module {
         .build()
     );
 
-    private final Setting<Boolean> noMove = sgActions.add(new BoolSetting.Builder()
-        .name("no-move")
-        .description("The mobs do not move. The server still moves them, this only keeps them in place on your screen.")
+    private final Setting<Boolean> noAi = sgClient.add(new BoolSetting.Builder()
+        .name("no-ai")
+        .description("The mobs stop acting: their animation, their head movement and the interpolation of their movement stop. The server keeps controlling them.")
         .defaultValue(false)
         .build()
     );
 
-    private final Setting<Boolean> noSwing = sgActions.add(new BoolSetting.Builder()
+    private final Setting<Boolean> noMove = sgClient.add(new BoolSetting.Builder()
+        .name("no-move")
+        .description("The mobs do not move on your screen. The server still moves them, this only keeps them in place.")
+        .defaultValue(false)
+        .build()
+    );
+
+    private final Setting<Boolean> noSwing = sgClient.add(new BoolSetting.Builder()
         .name("no-swing")
         .description("The mobs do not show their attack animation.")
         .defaultValue(false)
         .build()
     );
 
-    private final Setting<Boolean> noAttack = sgActions.add(new BoolSetting.Builder()
+    private final Setting<Boolean> noAttack = sgServer.add(new BoolSetting.Builder()
         .name("no-attack")
-        .description("You do not attack the mobs, so they never fight back. The server never sees the attack.")
+        .description("You do not attack the mobs, so they are not hurt and never fight back. The server never sees the attack.")
         .defaultValue(false)
+        .build()
+    );
+
+    private final Setting<Boolean> fakePosition = sgServer.add(new BoolSetting.Builder()
+        .name("fake-position")
+        .description("Reports a position that is not the real one, so the mob AI looks for you in the wrong place. The server also believes you are there, so do not pick a spot inside a block.")
+        .defaultValue(false)
+        .build()
+    );
+
+    private final Setting<Vector3d> fakeOffset = sgServer.add(new Vector3dSetting.Builder()
+        .name("fake-offset")
+        .description("The offset the server sees you at.")
+        .defaultValue(0, 0, 0)
+        .range(-64, 64)
+        .sliderRange(-64, 64)
         .build()
     );
 
@@ -98,6 +132,21 @@ public class MobControl extends Module {
         if (!isActive() || entity == null || entity == mc.player) return false;
 
         return entities.get().contains(entity.getType());
+    }
+
+    /** Whether the mobs should stop acting on the client. */
+    public boolean noAi() {
+        return isActive() && noAi.get();
+    }
+
+    /** Whether the position that is reported to the server should be faked. */
+    public boolean fakePosition() {
+        return isActive() && fakePosition.get();
+    }
+
+    /** The offset the server should see the player at. */
+    public Vector3d fakeOffset() {
+        return fakeOffset.get();
     }
 
     private Entity entity(int id) {

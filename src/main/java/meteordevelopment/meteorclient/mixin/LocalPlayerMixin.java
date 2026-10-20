@@ -19,6 +19,7 @@ import meteordevelopment.meteorclient.systems.modules.movement.*;
 import meteordevelopment.meteorclient.systems.modules.player.LiquidInteract;
 import meteordevelopment.meteorclient.systems.modules.player.Collisions;
 import meteordevelopment.meteorclient.systems.modules.player.Portals;
+import meteordevelopment.meteorclient.systems.modules.world.MobControl;
 import meteordevelopment.meteorclient.utils.entity.fakeplayer.FakePlayerEntity;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -30,6 +31,8 @@ import net.minecraft.world.entity.PlayerRideableJumping;
 import net.minecraft.world.entity.player.Input;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
+import org.joml.Vector3d;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -164,6 +167,20 @@ public abstract class LocalPlayerMixin extends AbstractClientPlayer {
     @Inject(method = "sendPosition", at = @At("HEAD"))
     private void onSendPositionHead(CallbackInfo ci) {
         MeteorClient.EVENT_BUS.post(SendMovementPacketsEvent.Pre.get());
+    }
+
+    /**
+     * Reports a position that is not the real one, so the mob AI looks for the player in the
+     * wrong place. The offset stays constant, so the server sees the same movement as the client
+     * does and does not correct the player.
+     */
+    @ModifyExpressionValue(method = "sendPosition", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;position()Lnet/minecraft/world/phys/Vec3;"))
+    private Vec3 modifyPosition(Vec3 original) {
+        MobControl control = Modules.get().get(MobControl.class);
+        if (!control.fakePosition()) return original;
+
+        Vector3d offset = control.fakeOffset();
+        return original.add(offset.x(), offset.y(), offset.z());
     }
 
     @Inject(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientPacketListener;send(Lnet/minecraft/network/protocol/Packet;)V", ordinal = 1))
