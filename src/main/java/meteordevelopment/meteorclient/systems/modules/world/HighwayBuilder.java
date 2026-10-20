@@ -1300,10 +1300,10 @@ public class HighwayBuilder extends Module {
 
                     // if we don't know what's in your echest, open it quickly while we have one available to check
                     if (!EChestMemory.isKnown()) {
-                        if (b.rotation.get().place) Rotations.rotate(Rotations.getYaw(bp), Rotations.getPitch(bp), () ->
-                            b.mc.gameMode.useItemOn(b.mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atCenterOf(bp), Direction.UP, bp, false)));
-                        else
-                            b.mc.gameMode.useItemOn(b.mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atCenterOf(bp), Direction.UP, bp, false));
+                        BlockHitResult bhr = new BlockHitResult(Vec3.atCenterOf(bp), Direction.UP, bp, false);
+
+                        if (b.rotation.get().place) Rotations.rotate(Rotations.getYaw(bp), Rotations.getPitch(bp), () -> BlockUtils.interact(bhr, InteractionHand.MAIN_HAND, true));
+                        else BlockUtils.interact(bhr, InteractionHand.MAIN_HAND, true);
 
                         return;
                     }
@@ -1355,13 +1355,13 @@ public class HighwayBuilder extends Module {
                 } else {
                     // Place ender chest
                     int slot = findAndMoveToHotbar(b, itemStack -> itemStack.getItem() == Items.ENDER_CHEST);
-                    if (slot == -1 || countItem(b, stack -> stack.getItem().equals(Items.ENDER_CHEST)) <= b.saveEchests.get()) {
+                    if (slot == -1 || countItem(stack -> stack.getItem().equals(Items.ENDER_CHEST)) <= b.saveEchests.get()) {
                         stopTimerEnabled = true;
                         stopTimer = 12;
                         return;
                     }
 
-                    if (countItem(b, stack -> stack.is(ItemTags.PICKAXES)) <= b.savePickaxes.get()) {
+                    if (countItem(stack -> stack.is(ItemTags.PICKAXES)) <= b.savePickaxes.get()) {
                         if (b.searchEnderChest.get() || b.searchShulkers.get()) {
                             b.restockTask.setPickaxes();
                         }
@@ -1416,7 +1416,7 @@ public class HighwayBuilder extends Module {
                 }
 
                 // next search your ender chest for raw items and shulkers containing items
-                if (slot == -1 && b.searchEnderChest.get() && countItem(b, stack -> stack.getItem().equals(Items.ENDER_CHEST)) > 0) {
+                if (slot == -1 && b.searchEnderChest.get() && countItem(stack -> stack.getItem().equals(Items.ENDER_CHEST)) > 0) {
                     // todo handle pulling ecs from shulker boxes so we can search through them
 
                     boolean stop = EChestMemory.isKnown();
@@ -1450,9 +1450,9 @@ public class HighwayBuilder extends Module {
                 // by this point we have searched shulkers and your ender chest, and no more items could be found to pull from
                 if (slot == -1) {
                     boolean restockOccurred = (
-                        (b.restockTask.materials && (hasItem(b, stack -> stack.getItem() instanceof BlockItem bi && b.blocksToPlace.get().contains(bi.getBlock())) || b.blocksToPlace.get().contains(Blocks.OBSIDIAN) && countItem(b, itemStack -> itemStack.getItem() == Items.ENDER_CHEST) > b.saveEchests.get())) ||
-                            (b.restockTask.pickaxes && countItem(b, itemStack -> itemStack.is(ItemTags.PICKAXES)) > b.savePickaxes.get()) ||
-                            (b.restockTask.food && hasItem(b, itemStack -> Utils.isFood(itemStack) && !Modules.get().get(AutoEat.class).blacklist.get().contains(itemStack.getItem())))
+                        (b.restockTask.materials && (hasItem(stack -> stack.getItem() instanceof BlockItem bi && b.blocksToPlace.get().contains(bi.getBlock())) || b.blocksToPlace.get().contains(Blocks.OBSIDIAN) && countItem(itemStack -> itemStack.getItem() == Items.ENDER_CHEST) > b.saveEchests.get())) ||
+                            (b.restockTask.pickaxes && countItem(itemStack -> itemStack.is(ItemTags.PICKAXES)) > b.savePickaxes.get()) ||
+                            (b.restockTask.food && hasItem(itemStack -> Utils.isFood(itemStack) && !Modules.get().get(AutoEat.class).blacklist.get().contains(itemStack.getItem())))
                     );
 
                     if (restockOccurred) {
@@ -1499,7 +1499,7 @@ public class HighwayBuilder extends Module {
                 if (indicateStopping && !breakContainer) {
                     if (stopTimer > 0) stopTimer--;
                     else {
-                        if (b.lastState == PlaceShulkerBlockade) {// && !(b.blocksToPlace.get().contains(Blocks.OBSIDIAN) && countItem(b, stack -> stack.getItem() == Items.ENDER_CHEST) > b.saveEchests.get() && !hasItem(b, stack -> stack.getItem() == Items.OBSIDIAN))) {
+                        if (b.lastState == PlaceShulkerBlockade) {// && !(b.blocksToPlace.get().contains(Blocks.OBSIDIAN) && countItem(stack -> stack.getItem() == Items.ENDER_CHEST) > b.saveEchests.get() && !hasItem(stack -> stack.getItem() == Items.OBSIDIAN))) {
                             b.setState(MineShulkerBlockade);
                         } else {
                             b.setState(ThrowOutTrash, Forward);
@@ -1525,7 +1525,7 @@ public class HighwayBuilder extends Module {
                 if (b.restockTask.materials) {
                     slotsPulled += countSlots(b, itemStack -> itemStack.getItem() instanceof BlockItem bi && b.blocksToPlace.get().contains(bi.getBlock()));
                     if (b.blocksToPlace.get().contains(Blocks.OBSIDIAN))
-                        slotsPulled += ((countItem(b, itemStack -> itemStack.getItem() == Items.ENDER_CHEST) - b.saveEchests.get()) * 8) / 64;
+                        slotsPulled += ((countItem(itemStack -> itemStack.getItem() == Items.ENDER_CHEST) - b.saveEchests.get()) * 8) / 64;
                 }
                 if (b.restockTask.pickaxes)
                     slotsPulled += countSlots(b, itemStack -> itemStack.is(ItemTags.PICKAXES)) - b.savePickaxes.get();
@@ -1693,12 +1693,11 @@ public class HighwayBuilder extends Module {
                         Rotations.rotate(Rotations.getYaw(bp), Rotations.getPitch(bp), () -> BlockUtils.breakBlock(bp, true));
                     else BlockUtils.breakBlock(bp, true);
                 } else {
-                    if (b.rotation.get().place) {
-                        Rotations.rotate(Rotations.getYaw(bp), Rotations.getPitch(bp), () ->
-                            b.mc.gameMode.useItemOn(b.mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atCenterOf(bp), Direction.UP, bp, false))
-                        );
-                    } else
-                        b.mc.gameMode.useItemOn(b.mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atCenterOf(bp), Direction.UP, bp, false));
+                    BlockHitResult bhr = new BlockHitResult(Vec3.atCenterOf(bp), Direction.UP, bp, false);
+
+                    if (b.rotation.get().place)
+                        Rotations.rotate(Rotations.getYaw(bp), Rotations.getPitch(bp), () -> BlockUtils.interact(bhr, InteractionHand.MAIN_HAND, true));
+                    else BlockUtils.interact(bhr, InteractionHand.MAIN_HAND, true);
 
                     delayTimer = b.inventoryDelay.get();
                 }
@@ -2018,12 +2017,8 @@ public class HighwayBuilder extends Module {
             if (finishedPlacing || !placed) b.setState(nextState);
         }
 
-        private int findSlot(HighwayBuilder b, Predicate<ItemStack> predicate, boolean hotbar) {
-            for (int i = hotbar ? 0 : 9; i < (hotbar ? 9 : b.mc.player.getInventory().getNonEquipmentItems().size()); i++) {
-                if (predicate.test(b.mc.player.getInventory().getItem(i))) return i;
-            }
-
-            return -1;
+        private int findSlot(Predicate<ItemStack> predicate, boolean hotbar) {
+            return InvUtils.find(predicate, hotbar ? SlotUtils.HOTBAR_START : SlotUtils.MAIN_START, hotbar ? SlotUtils.HOTBAR_END : SlotUtils.MAIN_END).slot();
         }
 
         protected int findHotbarSlot(HighwayBuilder b, boolean replaceTools) {
@@ -2067,27 +2062,17 @@ public class HighwayBuilder extends Module {
             return -1;
         }
 
-        protected boolean hasItem(HighwayBuilder b, Predicate<ItemStack> predicate) {
-            for (int i = 0; i < b.mc.player.getInventory().getNonEquipmentItems().size(); i++) {
-                if (predicate.test(b.mc.player.getInventory().getItem(i))) return true;
-            }
-
-            return false;
+        protected boolean hasItem(Predicate<ItemStack> predicate) {
+            return InvUtils.find(predicate, SlotUtils.HOTBAR_START, SlotUtils.MAIN_END).found();
         }
 
-        protected int countItem(HighwayBuilder b, Predicate<ItemStack> predicate) {
-            int count = 0;
-            for (int i = 0; i < b.mc.player.getInventory().getNonEquipmentItems().size(); i++) {
-                ItemStack stack = b.mc.player.getInventory().getItem(i);
-                if (predicate.test(stack)) count += stack.getCount();
-            }
-
-            return count;
+        protected int countItem(Predicate<ItemStack> predicate) {
+            return InvUtils.find(predicate, SlotUtils.HOTBAR_START, SlotUtils.MAIN_END).count();
         }
 
         protected int findAndMoveToHotbar(HighwayBuilder b, Predicate<ItemStack> predicate) {
             // Check hotbar
-            int slot = findSlot(b, predicate, true);
+            int slot = findSlot(predicate, true);
             if (slot != -1) return slot;
 
             // Find hotbar slot to move to
@@ -2095,7 +2080,7 @@ public class HighwayBuilder extends Module {
             if (hotbarSlot == -1) return -1;
 
             // Check inventory
-            slot = findSlot(b, predicate, false);
+            slot = findSlot(predicate, false);
 
             // Return if no items were found
             if (slot == -1) return -1;
@@ -2131,7 +2116,7 @@ public class HighwayBuilder extends Module {
 
             ItemStack bestStack = b.mc.player.getInventory().getItem(bestSlot);
             if (bestStack.is(ItemTags.PICKAXES)) {
-                int count = countItem(b, stack -> stack.is(ItemTags.PICKAXES));
+                int count = countItem(stack -> stack.is(ItemTags.PICKAXES));
 
                 // If we are in the process of restocking pickaxes and happen to need one, we should allow using it
                 // as long as it has enough durability, since we will obtain more shortly thereafter
@@ -2165,7 +2150,7 @@ public class HighwayBuilder extends Module {
             int slot = findAndMoveToHotbar(b, itemStack -> itemStack.getItem() instanceof BlockItem blockItem && b.blocksToPlace.get().contains(blockItem.getBlock()));
 
             if (slot == -1) {
-                if (b.mineEnderChests.get() && b.blocksToPlace.get().contains(Blocks.OBSIDIAN) && countItem(b, stack -> stack.getItem().equals(Items.ENDER_CHEST)) > b.saveEchests.get()) {
+                if (b.mineEnderChests.get() && b.blocksToPlace.get().contains(Blocks.OBSIDIAN) && countItem(stack -> stack.getItem().equals(Items.ENDER_CHEST)) > b.saveEchests.get()) {
                     // can grind echests for obsidian
                     b.setState(MineEnderChests);
                 } else if (b.searchEnderChest.get() || b.searchShulkers.get()) {
@@ -2853,7 +2838,7 @@ public class HighwayBuilder extends Module {
         }
 
         public boolean shouldRemove() {
-            boolean distance = !packet && Utils.distance(b.mc.player.getEyePosition().x, b.mc.player.getEyePosition().y, b.mc.player.getEyePosition().z, blockPos.getX() + direction.getStepX(), blockPos.getY() + direction.getStepY(), blockPos.getZ() + direction.getStepZ()) > b.mc.player.blockInteractionRange();
+            boolean distance = !packet && !PlayerUtils.isWithinReach(blockPos.getX() + direction.getStepX(), blockPos.getY() + direction.getStepY(), blockPos.getZ() + direction.getStepZ());
 
             // a minimum amount of time needs to have elapsed for the timeout check to occur, otherwise it may trigger
             // when it isn't supposed to due to latency

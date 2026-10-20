@@ -18,6 +18,7 @@ import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.player.Rotations;
+import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -198,7 +199,7 @@ public class Burrow extends Module {
         if (!(mc.player.getInventory().getItem(block.slot()).getItem() instanceof BlockItem)) return;
         InvUtils.swap(block.slot(), true);
 
-        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Utils.vec3(blockPos), Direction.UP, blockPos, false));
+        BlockUtils.interact(new BlockHitResult(Utils.vec3(blockPos), Direction.UP, blockPos, false), InteractionHand.MAIN_HAND, false);
 
         InvUtils.swapBack();
 
