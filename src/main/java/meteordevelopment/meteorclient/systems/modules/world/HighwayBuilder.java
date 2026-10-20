@@ -11,6 +11,7 @@ import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.render.Render2DEvent;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
+import meteordevelopment.meteorclient.mc.Vanilla;
 import meteordevelopment.meteorclient.mixin.MinecraftMixin;
 import meteordevelopment.meteorclient.mixin.ShulkerBoxMenuAccessor;
 import meteordevelopment.meteorclient.mixininterface.IVec3;
@@ -762,7 +763,7 @@ public class HighwayBuilder extends Module {
                 normalMining.stopDestroying();
             }
 
-            mc.player.swing(InteractionHand.MAIN_HAND);
+            Vanilla.swing(mc.player, InteractionHand.MAIN_HAND);
         }
 
         if (packetMining != null) {

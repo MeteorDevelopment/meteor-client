@@ -7,6 +7,7 @@ package meteordevelopment.meteorclient.systems.modules.combat;
 
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
+import meteordevelopment.meteorclient.mc.Vanilla;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
@@ -24,7 +25,6 @@ import meteordevelopment.orbit.EventHandler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
-import net.minecraft.network.protocol.game.ServerboundSwingPacket;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Items;
@@ -216,8 +216,8 @@ public class AutoCity extends Module {
             mc.gameMode.startPrediction(mc.level, sequence -> new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK, targetPos, direction, sequence));
         mc.gameMode.startPrediction(mc.level, sequence -> new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.STOP_DESTROY_BLOCK, targetPos, direction, sequence));
 
-        if (swingHand.get()) mc.player.swing(InteractionHand.MAIN_HAND);
-        else mc.getConnection().send(new ServerboundSwingPacket(InteractionHand.MAIN_HAND));
+        if (swingHand.get()) Vanilla.swing(mc.player, InteractionHand.MAIN_HAND);
+        else Vanilla.swingPacket(mc.player, InteractionHand.MAIN_HAND);
 
         if (switchMode.get() == SwitchMode.Silent) InvUtils.swapBack();
     }

@@ -6,6 +6,7 @@
 package meteordevelopment.meteorclient.utils.misc;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import meteordevelopment.meteorclient.mc.Vanilla;
 import meteordevelopment.meteorclient.utils.misc.input.Input;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonInfo;
@@ -40,7 +41,7 @@ public class Keybind implements ISerializable<Keybind>, ICopyable<Keybind> {
         public boolean isKeyPressed() {
             return switch (this) {
                 case CONTROL -> Input.isKeyPressed(InputConstants.KEY_LCONTROL) || Input.isKeyPressed(InputConstants.KEY_RCONTROL);
-                case SUPER -> Input.isKeyPressed(InputConstants.KEY_LSUPER) || Input.isKeyPressed(InputConstants.KEY_RSUPER);
+                case SUPER -> Input.isKeyPressed(Vanilla.SUPER_KEY_LEFT) || Input.isKeyPressed(Vanilla.SUPER_KEY_RIGHT);
                 case ALT -> Input.isKeyPressed(InputConstants.KEY_LALT) || Input.isKeyPressed(InputConstants.KEY_RALT);
                 case SHIFT -> Input.isKeyPressed(InputConstants.KEY_LSHIFT) || Input.isKeyPressed(InputConstants.KEY_RSHIFT);
                 case CAPS_LOCK -> Input.isKeyPressed(InputConstants.KEY_CAPSLOCK);
@@ -182,7 +183,7 @@ public class Keybind implements ISerializable<Keybind>, ICopyable<Keybind> {
     }
 
     private boolean isKeyMod(InputConstants.Key key) {
-        return key.getValue() >= InputConstants.KEY_LSHIFT && key.getValue() <= InputConstants.KEY_RSUPER;
+        return key.getValue() >= InputConstants.KEY_LSHIFT && key.getValue() <= Vanilla.SUPER_KEY_RIGHT;
     }
 
     @Override
@@ -268,7 +269,7 @@ public class Keybind implements ISerializable<Keybind>, ICopyable<Keybind> {
     }
 
     private static InputConstants.Key keyboard(int key) {
-        return InputConstants.Type.KEYSYM.getOrCreate(key);
+        return Vanilla.KEY_TYPE.getOrCreate(key);
     }
 
     private static InputConstants.Key mouse(int button) {

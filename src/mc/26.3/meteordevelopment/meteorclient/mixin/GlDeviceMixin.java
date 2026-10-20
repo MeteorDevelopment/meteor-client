@@ -5,13 +5,12 @@
 
 package meteordevelopment.meteorclient.mixin;
 
-import com.mojang.blaze3d.opengl.GlDevice;
-import com.mojang.blaze3d.systems.RenderPassBackend;
+import com.mojang.renderpearl.backend.api.RenderPassBackend;
 import meteordevelopment.meteorclient.mixininterface.IGpuDevice;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 
-@Mixin(GlDevice.class)
+@Mixin(targets = "com.mojang.renderpearl.backend.opengl.GlDevice")
 public abstract class GlDeviceMixin implements IGpuDevice {
     @Unique
     private int x, y, width, height;
@@ -42,9 +41,9 @@ public abstract class GlDeviceMixin implements IGpuDevice {
 
     @Deprecated
     @Override
-    public void meteor$onCreateRenderPass(RenderPassBackend backend) {
+    public void meteor$onCreateRenderPass(Object backend) {
         if (set) {
-            backend.enableScissor(x, y, width, height);
+            ((RenderPassBackend) backend).enableScissor(x, y, width, height);
         }
     }
 }

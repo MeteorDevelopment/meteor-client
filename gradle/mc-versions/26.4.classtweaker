@@ -1,0 +1,52 @@
+classTweaker	v1	official
+
+# FileCacheAccessor, SkinManagerAccessor, Account#applyLoginEnvironment
+accessible   class   net/minecraft/client/resources/SkinManager$TextureCache
+# FireworksSparkParticleMixin, FireworksSparkParticleSubMixin
+accessible   class   net/minecraft/client/particle/FireworkParticles$SparkParticle
+# ClientChunkCacheAccessor, ClientChunkMapAccessor
+accessible   class   net/minecraft/client/multiplayer/ClientChunkCache$Storage
+
+# SaveMapCommand#saveMap
+# NOTE (26.4): MapTextureManager$MapInstance.texture is a GpuTexture now and cannot be read back,
+# so the 26.4 SaveMapCommand rebuilds the image from the saved data instead of the texture.
+
+# BeaconScreenMixin#changeButtons
+accessible   class   net/minecraft/client/gui/screens/inventory/BeaconScreen$BeaconPowerButton
+accessible   class   net/minecraft/client/gui/screens/inventory/BeaconScreen$BeaconConfirmButton
+accessible   class   net/minecraft/client/gui/screens/inventory/BeaconScreen$BeaconCancelButton
+
+# ResourceLoadStateTrackerAccessor, ReloadStateAccessor, Utils#isLoading
+accessible   class   net/minecraft/client/ResourceLoadStateTracker$ReloadState
+
+# NOTE (26.3): RenderPipeline.Builder is no longer extensible (private constructor), so
+# ExtendedRenderPipelineBuilder wraps it via the public RenderPipeline.builder(...) factory and
+# needs no access widening here.
+
+# OutlineRenderCommandQueue#order
+accessible   field   net/minecraft/client/renderer/SubmitNodeStorage submitsPerOrder Lit/unimi/dsi/fastutil/ints/Int2ObjectAVLTreeMap;
+
+# GlCommandEncoderMixin, GlDeviceMixin (26.3 moved these to com.mojang.renderpearl.backend.opengl)
+accessible   class   com/mojang/renderpearl/backend/opengl/GlDevice
+# GlCommandEncoderMixin
+accessible   class   com/mojang/renderpearl/backend/opengl/GlCommandEncoder
+
+# BoundingBox
+accessible   field   net/minecraft/world/entity/Entity bb Lnet/minecraft/world/phys/AABB;
+
+#Rotation
+accessible   method  net/minecraft/world/entity/Entity setRot (FF)V
+
+# AutoFish#tryCatch
+accessible   class   net/minecraft/world/entity/projectile/FishingHook$FishHookState
+accessible   field   net/minecraft/world/entity/projectile/FishingHook currentState Lnet/minecraft/world/entity/projectile/FishingHook$FishHookState;
+
+accessible   method  net/minecraft/client/multiplayer/MultiPlayerGameMode startPrediction (Lnet/minecraft/client/multiplayer/ClientLevel;Lnet/minecraft/client/multiplayer/prediction/PredictiveAction;)V
+
+# GuiGraphicsExtractorAccessor
+accessible   class   net/minecraft/client/gui/GuiGraphicsExtractor$ScissorStack
+# NOTE (26.3): RenderSetup.outputTarget was removed (RenderSetup now carries the compiled
+# pipeline directly), so WireframeEntityRenderer no longer needs it.
+
+# ProjectileEntitySimulator#hitOrDeflect
+accessible   method   net/minecraft/world/entity/projectile/Projectile shouldBounceOnWorldBorder ()Z

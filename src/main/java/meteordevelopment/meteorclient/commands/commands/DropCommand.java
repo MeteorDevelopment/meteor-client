@@ -11,6 +11,7 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import meteordevelopment.meteorclient.commands.Command;
+import meteordevelopment.meteorclient.mc.Vanilla;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import net.minecraft.client.multiplayer.ClientSuggestionProvider;
 import net.minecraft.client.player.LocalPlayer;
@@ -32,7 +33,7 @@ public class DropCommand extends Command {
     @Override
     public void build(LiteralArgumentBuilder<ClientSuggestionProvider> builder) {
         // Main Hand
-        builder.then(literal("hand").executes(_ -> drop(player -> player.drop(true))));
+        builder.then(literal("hand").executes(_ -> drop(player -> Vanilla.dropMainHand(player))));
 
         // Offhand
         builder.then(literal("offhand").executes(_ -> drop(_ -> InvUtils.drop().slotOffhand())));

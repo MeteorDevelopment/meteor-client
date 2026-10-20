@@ -9,6 +9,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import meteordevelopment.meteorclient.events.render.ApplyTransformationEvent;
 import meteordevelopment.meteorclient.events.render.RenderItemEntityEvent;
+import meteordevelopment.meteorclient.mc.Vanilla;
 import meteordevelopment.meteorclient.mixin.ItemStackRenderStateAccessor;
 import meteordevelopment.meteorclient.mixin.LayerRenderStateAccessor;
 import meteordevelopment.meteorclient.settings.BoolSetting;
@@ -60,7 +61,7 @@ public class ItemPhysics extends Module {
 
         for (int i = 0; i < ((ItemStackRenderStateAccessor) event.renderState.item).meteor$getActiveLayerCount(); i++) {
             ItemStackRenderState.LayerRenderState layer = ((ItemStackRenderStateAccessor) event.renderState.item).meteor$getLayers()[i];
-            ModelInfo info = getInfo(layer.prepareQuadList());
+            ModelInfo info = getInfo(Vanilla.quads(layer));
 
             matrices.pushPose();
             applyTransformation(matrices, ((LayerRenderStateAccessor) layer).meteor$getTransform());
@@ -68,7 +69,7 @@ public class ItemPhysics extends Module {
             offsetInWater(matrices, event.itemEntity);
 
             if (info.flat) {
-                matrices.mulPose(Axis.XP.rotationDegrees(90));
+                Vanilla.rotate(matrices, Axis.XP, 90);
                 matrices.translate(0, 0, info.offsetZ);
             }
 
@@ -87,7 +88,7 @@ public class ItemPhysics extends Module {
                 float degrees = (random.nextFloat() * 2 - 1) * 90;
 
                 matrices.translate(x, y, z);
-                matrices.mulPose(axis.rotationDegrees(degrees));
+                Vanilla.rotate(matrices, axis, degrees);
                 matrices.translate(-x, -y, -z);
             }
 

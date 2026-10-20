@@ -8,7 +8,7 @@ package meteordevelopment.meteorclient.mixin;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.sugar.Local;
 import meteordevelopment.meteorclient.MeteorClient;
-import net.minecraft.server.packs.DownloadQueue;
+import meteordevelopment.meteorclient.mc.MixinTargets;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -27,7 +27,7 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
  * @author Izuna
  * @see <a href="https://github.com/CCBlueX/LiquidBounce/blob/nextgen/src/main/java/net/ccbluex/liquidbounce/injection/mixins/minecraft/util/MixinDownloader.java">MixinDownloader.java</a>
  */
-@Mixin(DownloadQueue.class)
+@Mixin(targets = MixinTargets.DOWNLOAD_QUEUE_TARGET)
 public abstract class DownloadQueueMixin {
     @Shadow
     @Final

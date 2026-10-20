@@ -19,6 +19,7 @@ import meteordevelopment.meteorclient.gui.renderer.GuiRenderer;
 import meteordevelopment.meteorclient.gui.widgets.containers.WTable;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WMinus;
+import meteordevelopment.meteorclient.mc.Vanilla;
 import meteordevelopment.meteorclient.mixin.KeyMappingAccessor;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.hud.Hud;
@@ -38,7 +39,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.util.Mth;
-import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -260,7 +260,7 @@ public class KeyboardHud extends HudElement {
     @EventHandler(priority = EventPriority.HIGH)
     private void onKey(KeyInputEvent event) {
         for (Key key : keys) {
-            if (key.matches(event.input.key(), event.input.scancode(), true)) {
+            if (key.matches(event.input.key(), Vanilla.scancode(event.input), true)) {
                 key.update(event.action);
             }
         }
@@ -384,7 +384,7 @@ public class KeyboardHud extends HudElement {
         double xPos = 0;
         keys.add(l.key(Keybind.fromKey(InputConstants.KEY_LCONTROL), xPos, row5, KeyDimensions.CTRL));
         xPos += l.px(KeyDimensions.CTRL) + l.keyGap;
-        keys.add(l.key(Keybind.fromKey(InputConstants.KEY_LSUPER), xPos, row5, KeyDimensions.GUI));
+        keys.add(l.key(Keybind.fromKey(Vanilla.SUPER_KEY_LEFT), xPos, row5, KeyDimensions.GUI));
         xPos += l.px(KeyDimensions.GUI) + l.keyGap;
         keys.add(l.key(Keybind.fromKey(InputConstants.KEY_LALT), xPos, row5, KeyDimensions.ALT));
         xPos += l.px(KeyDimensions.ALT) + l.keyGap;
@@ -392,9 +392,9 @@ public class KeyboardHud extends HudElement {
         xPos += l.px(KeyDimensions.SPACEBAR) + l.keyGap;
         keys.add(l.key(Keybind.fromKey(InputConstants.KEY_RALT), xPos, row5, KeyDimensions.ALT));
         xPos += l.px(KeyDimensions.ALT) + l.keyGap;
-        keys.add(l.key(Keybind.fromKey(InputConstants.KEY_RSUPER), xPos, row5, KeyDimensions.GUI));
+        keys.add(l.key(Keybind.fromKey(Vanilla.SUPER_KEY_RIGHT), xPos, row5, KeyDimensions.GUI));
         xPos += l.px(KeyDimensions.GUI) + l.keyGap;
-        keys.add(l.key(Keybind.fromKey(GLFW.GLFW_KEY_MENU), xPos, row5, KeyDimensions.MENU));
+        keys.add(l.key(Keybind.fromKey(Vanilla.MENU_KEY), xPos, row5, KeyDimensions.MENU));
         xPos += l.px(KeyDimensions.MENU) + l.keyGap;
         keys.add(l.key(Keybind.fromKey(InputConstants.KEY_RCONTROL), xPos, row5, KeyDimensions.CTRL));
         keys.add(l.key(Keybind.fromKey(InputConstants.KEY_LEFT), l.ux(15.5), row5));
@@ -455,7 +455,7 @@ public class KeyboardHud extends HudElement {
         // Row 4: LShift, ISO \| key, ZXCV..., RShift, Up
         keys.add(l.key(Keybind.fromKey(InputConstants.KEY_LSHIFT), 0, row4, KeyDimensions.LEFT_SHIFT_ISO));
         double lShiftEnd = l.px(KeyDimensions.LEFT_SHIFT_ISO) + l.keyGap;
-        keys.add(l.key(Keybind.fromKey(GLFW.GLFW_KEY_WORLD_2), lShiftEnd, row4));
+        keys.add(l.key(Keybind.fromKey(Vanilla.WORLD_2_KEY), lShiftEnd, row4));
 
         int[] row4Keys = {InputConstants.KEY_Z, InputConstants.KEY_X, InputConstants.KEY_C, InputConstants.KEY_V, InputConstants.KEY_B, InputConstants.KEY_N, InputConstants.KEY_M, InputConstants.KEY_COMMA, InputConstants.KEY_PERIOD, InputConstants.KEY_SLASH};
         for (int i = 0; i < row4Keys.length; i++)
@@ -469,7 +469,7 @@ public class KeyboardHud extends HudElement {
         double xPos = 0;
         keys.add(l.key(Keybind.fromKey(InputConstants.KEY_LCONTROL), xPos, row5, KeyDimensions.CTRL));
         xPos += l.px(KeyDimensions.CTRL) + l.keyGap;
-        keys.add(l.key(Keybind.fromKey(InputConstants.KEY_LSUPER), xPos, row5, KeyDimensions.GUI));
+        keys.add(l.key(Keybind.fromKey(Vanilla.SUPER_KEY_LEFT), xPos, row5, KeyDimensions.GUI));
         xPos += l.px(KeyDimensions.GUI) + l.keyGap;
         keys.add(l.key(Keybind.fromKey(InputConstants.KEY_LALT), xPos, row5, KeyDimensions.ALT));
         xPos += l.px(KeyDimensions.ALT) + l.keyGap;
@@ -477,9 +477,9 @@ public class KeyboardHud extends HudElement {
         xPos += l.px(KeyDimensions.SPACEBAR) + l.keyGap;
         keys.add(l.keyNamed(Keybind.fromKey(InputConstants.KEY_RALT), "AltGr", xPos, row5, KeyDimensions.ALT));
         xPos += l.px(KeyDimensions.ALT) + l.keyGap;
-        keys.add(l.key(Keybind.fromKey(InputConstants.KEY_RSUPER), xPos, row5, KeyDimensions.GUI));
+        keys.add(l.key(Keybind.fromKey(Vanilla.SUPER_KEY_RIGHT), xPos, row5, KeyDimensions.GUI));
         xPos += l.px(KeyDimensions.GUI) + l.keyGap;
-        keys.add(l.key(Keybind.fromKey(GLFW.GLFW_KEY_MENU), xPos, row5, KeyDimensions.MENU));
+        keys.add(l.key(Keybind.fromKey(Vanilla.MENU_KEY), xPos, row5, KeyDimensions.MENU));
         xPos += l.px(KeyDimensions.MENU) + l.keyGap;
         keys.add(l.key(Keybind.fromKey(InputConstants.KEY_RCONTROL), xPos, row5, KeyDimensions.CTRL));
         keys.add(l.key(Keybind.fromKey(InputConstants.KEY_LEFT), l.ux(15.5), row5));
@@ -717,10 +717,7 @@ public class KeyboardHud extends HudElement {
                 return keybind.isKey() == key && keybind.getValue() == input;
             } else {
                 InputConstants.Key inputKey = ((KeyMappingAccessor) binding).meteor$getKey();
-                boolean isKey = inputKey.getType() != InputConstants.Type.MOUSE;
-                return isKey == key && inputKey.getType() == InputConstants.Type.SCANCODE
-                    ? scancode == inputKey.getValue()
-                    : input == inputKey.getValue();
+                return Vanilla.matchesKey(input, scancode, key, inputKey);
             }
         }
 
@@ -736,17 +733,16 @@ public class KeyboardHud extends HudElement {
         }
 
         public boolean isNativelyPressed() {
-            long window = mc.getWindow().handle();
             if (keybind != null) {
                 if (!keybind.isSet()) return false;
                 return keybind.isKey()
-                    ? InputConstants.isKeyDown(mc.getWindow(), keybind.getValue())
-                    : GLFW.glfwGetMouseButton(window, keybind.getValue()) != InputConstants.RELEASE;
+                    ? Vanilla.isKeyDown(keybind.getValue())
+                    : Vanilla.isMouseButtonPressed(keybind.getValue());
             } else {
                 int key = ((KeyMappingAccessor) binding).meteor$getKey().getValue();
-                return key >= 0 && key < 8
-                    ? GLFW.glfwGetMouseButton(window, key) != InputConstants.RELEASE
-                    : InputConstants.isKeyDown(mc.getWindow(), key);
+                return Vanilla.isMouseButtonKey(key)
+                    ? Vanilla.isMouseButtonPressed(key)
+                    : Vanilla.isKeyDown(key);
             }
         }
 

@@ -10,6 +10,7 @@ import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import meteordevelopment.meteorclient.MeteorClient;
+import meteordevelopment.meteorclient.mc.Vanilla;
 import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
@@ -23,7 +24,7 @@ import net.minecraft.network.chat.Component;
 import java.util.List;
 
 public abstract class Command {
-    protected static CommandBuildContext REGISTRY_ACCESS = Commands.createValidationContext(VanillaRegistries.createLookup());
+    protected static CommandBuildContext REGISTRY_ACCESS = Commands.createValidationContext(Vanilla.worldLookup());
     protected static final int SINGLE_SUCCESS = com.mojang.brigadier.Command.SINGLE_SUCCESS;
     protected static final Minecraft mc = MeteorClient.mc;
 

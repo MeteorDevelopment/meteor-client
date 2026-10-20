@@ -15,13 +15,13 @@ import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.Freecam;
+import meteordevelopment.meteorclient.utils.misc.MathUtils;
 import meteordevelopment.meteorclient.utils.misc.input.Input;
 import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.gui.screens.inventory.*;
-import net.minecraft.util.Mth;
 import net.minecraft.world.item.CreativeModeTabs;
 
 import static com.mojang.blaze3d.platform.InputConstants.*;
@@ -152,7 +152,7 @@ public class GUIMove extends Module {
                 if (Input.isKeyPressed(KEY_UP)) pitch -= rotationDelta;
                 if (Input.isKeyPressed(KEY_DOWN)) pitch += rotationDelta;
 
-                pitch = Mth.clamp(pitch, -90, 90);
+                pitch = MathUtils.clamp(pitch, -90, 90);
 
                 mc.player.setYRot(yaw);
                 mc.player.setXRot(pitch);

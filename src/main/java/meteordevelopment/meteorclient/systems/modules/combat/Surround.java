@@ -8,6 +8,7 @@ package meteordevelopment.meteorclient.systems.modules.combat;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
+import meteordevelopment.meteorclient.mc.Vanilla;
 import meteordevelopment.meteorclient.mixin.DirectionAccessor;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.settings.*;
@@ -27,7 +28,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.protocol.game.ClientboundPlayerCombatKillPacket;
 import net.minecraft.network.protocol.game.ServerboundAttackPacket;
-import net.minecraft.network.protocol.game.ServerboundSwingPacket;
 import net.minecraft.server.level.BlockDestructionProgress;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
@@ -401,7 +401,9 @@ public class Surround extends Module {
                     mc.player.connection.send(new ServerboundAttackPacket(crystal.getId()));
                 }
 
-                mc.getConnection().send(new ServerboundSwingPacket(InteractionHand.MAIN_HAND));
+                        // 26.3 removed ServerboundSwingPacket: the client can no longer tell the server
+        // about a swing, so a packet-only swing is no longer expressible.
+        Vanilla.swingPacket(mc.player, InteractionHand.MAIN_HAND);
             }
         }
 

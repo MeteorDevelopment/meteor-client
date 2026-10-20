@@ -10,6 +10,7 @@ import meteordevelopment.meteorclient.events.entity.player.InteractBlockEvent;
 import meteordevelopment.meteorclient.events.entity.player.StartBreakingBlockEvent;
 import meteordevelopment.meteorclient.gui.widgets.containers.WHorizontalList;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
+import meteordevelopment.meteorclient.mc.Vanilla;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.marker.Marker;
 import meteordevelopment.meteorclient.utils.Utils;
@@ -56,7 +57,7 @@ public class WBlockPosEdit extends WHorizontalList {
             WButton here = add(theme.confirmedButton("Set Here", "Confirm")).expandX().widget();
             here.action = () -> {
                 lastValue = value;
-                set(new BlockPos(mc.player.blockPosition()));
+                set(Vanilla.copy(mc.player.blockPosition()));
                 newValueCheck();
 
                 clear();

@@ -1,7 +1,45 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.fabric.loom)
     id("maven-publish")
 }
+
+// Multi-version build.
+//
+// Every supported Minecraft version is described by gradle/mc-versions/<version>.properties
+// and may ship its own sources in src/mc/<version>/. The shared code in src/main/java stays
+// version-agnostic and programs against the compatibility layer (see COMPAT.md).
+//
+// Select a version with -PminecraftVersion=<version>; the default is taken from libs.versions.toml.
+val defaultMcVersion = libs.versions.minecraft.get()
+val mcVersion = providers.gradleProperty("minecraftVersion").getOrElse(defaultMcVersion)
+val mcVersionsDir = file("gradle/mc-versions")
+val mcDescriptor = File(mcVersionsDir, "$mcVersion.properties")
+
+require(mcDescriptor.isFile) {
+    buildString {
+        append("Unknown Minecraft version '").append(mcVersion).append("'. Expected a descriptor at ").append(mcDescriptor).append(". ")
+        val available = mcVersionsDir.listFiles()?.filter { it.name.endsWith(".properties") }
+            ?.map { it.name.removeSuffix(".properties") }?.sorted().orEmpty()
+        append(if (available.isEmpty()) "No version descriptors found." else "Available versions: ${available.joinToString(", ")}.")
+    }
+}
+
+val mcProperties = Properties().apply { mcDescriptor.inputStream().use { load(it) } }
+
+fun mc(key: String): String = mcProperties.getProperty(key)
+    ?: error("Missing property '$key' in $mcDescriptor")
+
+// Optional comma separated list of "group:artifact:version" coordinates (property
+// 'extra-compile-deps') that a given Minecraft version needs on top of the vanilla classpath.
+// Newer Minecraft versions drop dependencies that older ones shipped (e.g. 26.3 no longer
+// depends on LWJGL's tinyfd, which the shared code uses for file dialogs).
+val mcExtraCompileDeps: List<String> = mcProperties.getProperty("extra-compile-deps")
+    ?.split(',')?.map { it.trim() }?.filter { it.isNotEmpty() }
+    .orEmpty()
+
+logger.lifecycle("Building Meteor Client for Minecraft $mcVersion")
 
 val archivesBaseName = providers.gradleProperty("archives_base_name").get()
 val mavenGroup = providers.gradleProperty("maven_group").get()
@@ -11,7 +49,7 @@ base {
     group = mavenGroup
 
     val suffix = providers.gradleProperty("build_number").getOrElse("local")
-    version = "${libs.versions.minecraft.get()}-$suffix"
+    version = "${mc("minecraft")}-$suffix"
 }
 
 repositories {
@@ -48,6 +86,13 @@ val launcher = sourceSets.create("launcher") {
     java.srcDir("src/launcher/java")
 }
 
+// Version-specific sources. Only the selected version's directory is compiled, so every
+// supported version can use its own mappings for the version-fragile parts of the mod.
+sourceSets.named("main") {
+    java.srcDir("src/mc/$mcVersion")
+    resources.srcDir("src/mc/$mcVersion")
+}
+
 configurations {
     // include mods
     implementation.configure {
@@ -68,23 +113,26 @@ configurations {
 
 dependencies {
     // Fabric
-    minecraft(libs.minecraft)
+    minecraft("com.mojang:minecraft:${mc("minecraft")}")
     implementation(libs.fabric.loader)
 
-    val fapiVersion = libs.versions.fabric.api.get()
+    val fapiVersion = mc("fabric-api")
     modInclude(fabricApi.module("fabric-api-base", fapiVersion))
     modInclude(fabricApi.module("fabric-resource-loader-v1", fapiVersion))
 
     // Compat fixes
     compileOnly(fabricApi.module("fabric-renderer-indigo", fapiVersion))
-    compileOnly(libs.sodium) { isTransitive = false }
-    compileOnly(libs.lithium) { isTransitive = false }
-    compileOnly(libs.iris) { isTransitive = false }
-    compileOnly(libs.viafabricplus) { isTransitive = false }
-    compileOnly(libs.viafabricplus.api) { isTransitive = false }
+    compileOnly("maven.modrinth:sodium:${mc("sodium")}") { isTransitive = false }
+    compileOnly("maven.modrinth:lithium:${mc("lithium")}") { isTransitive = false }
+    compileOnly("maven.modrinth:iris:${mc("iris")}") { isTransitive = false }
+    compileOnly("com.viaversion:viafabricplus:${mc("viafabricplus")}") { isTransitive = false }
+    compileOnly("com.viaversion:viafabricplus-api:${mc("viafabricplus")}") { isTransitive = false }
 
-    compileOnly(libs.baritone)
-    compileOnly(libs.modmenu)
+    compileOnly("meteordevelopment:baritone:${mc("baritone")}")
+    compileOnly("maven.modrinth:modmenu:${mc("modmenu")}")
+
+    // Dependencies the vanilla classpath of this Minecraft version no longer provides
+    mcExtraCompileDeps.forEach { compileOnly(it) }
 
     // Libraries (JAR-in-JAR)
     jij(libs.orbit)
@@ -132,8 +180,58 @@ listOf("api", "implementation", "include").forEach { configName ->
     }
 }
 
+// The access widener is version specific too: prefer gradle/mc-versions/<version>.classtweaker
+// and fall back to the shared one in src/main/resources.
+val mcAccessWidener = sequenceOf(
+    File(mcVersionsDir, "$mcVersion.classtweaker"),
+    file("src/main/resources/meteor-client.classtweaker")
+).first { it.isFile }
+
 loom {
-    accessWidenerPath = file("src/main/resources/meteor-client.classtweaker")
+    accessWidenerPath = mcAccessWidener
+}
+
+// Architecture guard: the version-agnostic part of the compatibility layer must never
+// import Minecraft directly. Everything Minecraft-specific belongs in a compat/impl package.
+val compatApiDirs = buildList {
+    file("src/main/java/meteordevelopment/meteorclient/compat")
+        .takeIf { it.isDirectory }?.let { add(it) }
+
+    file("src/mc").listFiles()?.filter { it.isDirectory }?.forEach { versionDir ->
+        File(versionDir, "meteordevelopment/meteorclient/compat")
+            .takeIf { it.isDirectory }?.let { add(it) }
+    }
+}
+
+val checkCompatLayer = tasks.register("checkCompatLayer") {
+    group = "verification"
+    description = "Checks that the version-agnostic compatibility API does not depend on Minecraft."
+
+    inputs.files(compatApiDirs).withPropertyName("compatApi")
+    outputs.upToDateWhen { false }
+
+    doLast {
+        val offenders = compatApiDirs.asSequence()
+            .flatMap { dir -> dir.walkTopDown().filter { it.isFile && it.name.endsWith(".java") } }
+            .filter { it.parentFile.name != "impl" }
+            .filter { file -> file.readLines().any { line -> line.trimStart().startsWith("import net.minecraft") } }
+            .map { it.path }
+            .toList()
+
+        if (offenders.isNotEmpty()) {
+            throw GradleException(
+                "The compatibility API must stay version-agnostic, but net.minecraft imports were found in:\n" +
+                    offenders.joinToString("\n") { "  - $it" } +
+                    "\nMove version-specific code into a ...compat.impl package (see COMPAT.md)."
+            )
+        }
+
+        logger.lifecycle("Compatibility API is version-agnostic (${compatApiDirs.size} source roots checked).")
+    }
+}
+
+tasks.named("check") {
+    dependsOn(checkCompatLayer)
 }
 
 fun toMinecraftCompat(version: String): String {
@@ -171,12 +269,13 @@ tasks {
             "build_number" to buildNumber,
             "commit" to commit,
             "jdk_version" to libs.versions.jdk.get(),
-            "minecraft_version" to toMinecraftCompat(libs.versions.minecraft.get()),
-            "loader_version" to libs.versions.fabric.loader.get()
+            "minecraft_version" to toMinecraftCompat(mc("minecraft")),
+            "loader_version" to libs.versions.fabric.loader.get(),
+            "compat_impl" to mc("compat-impl")
         )
 
         inputs.properties(propertyMap)
-        filesMatching("fabric.mod.json") {
+        filesMatching(listOf("fabric.mod.json", "meteor-compat.properties")) {
             expand(propertyMap)
         }
     }
@@ -233,7 +332,7 @@ publishing {
             from(components["java"])
             artifactId = "meteor-client"
 
-            version = "${libs.versions.minecraft.get()}-SNAPSHOT"
+            version = "${mc("minecraft")}-SNAPSHOT"
         }
     }
 

@@ -8,6 +8,7 @@ package meteordevelopment.meteorclient.systems.modules.player;
 import meteordevelopment.meteorclient.events.entity.player.StartBreakingBlockEvent;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
+import meteordevelopment.meteorclient.mc.Vanilla;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
@@ -19,7 +20,6 @@ import meteordevelopment.orbit.EventHandler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
-import net.minecraft.network.protocol.game.ServerboundSwingPacket;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.InteractionHand;
 
@@ -110,7 +110,9 @@ public class InstantRebreak extends Module {
                     Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), this::sendPacket);
                 else sendPacket();
 
-                mc.getConnection().send(new ServerboundSwingPacket(InteractionHand.MAIN_HAND));
+                        // 26.3 removed ServerboundSwingPacket: the client can no longer tell the server
+        // about a swing, so a packet-only swing is no longer expressible.
+        Vanilla.swingPacket(mc.player, InteractionHand.MAIN_HAND);
             }
         } else {
             ticks++;

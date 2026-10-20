@@ -12,7 +12,9 @@ import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.movement.NoSlow;
 import meteordevelopment.meteorclient.systems.modules.movement.Sneak;
 import meteordevelopment.meteorclient.utils.Utils;
+import meteordevelopment.meteorclient.utils.misc.MathUtils;
 import meteordevelopment.meteorclient.utils.player.Rotations;
+import meteordevelopment.meteorclient.mc.Vanilla;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.core.component.DataComponents;
@@ -210,7 +212,7 @@ public class ProjectileEntitySimulator {
             pose = Pose.CROUCHING;
         Utils.set(pos, user, tickDelta).sub(i * 0.3, 0, h * 0.3).add(0, user.getEyeHeight(pose), 0);
 
-        velocity.set(-i, Mth.clamp(-(k / j), -5, 5), -h);
+        velocity.set(-i, MathUtils.clamp(-(k / j), -5, 5), -h);
 
         double l = velocity.length();
         velocity.mul(0.6 / l + 0.5, 0.6 / l + 0.5, 0.6 / l + 0.5);
@@ -365,7 +367,7 @@ public class ProjectileEntitySimulator {
 
         /// {@link AbstractArrow#stepMoveAndHit(BlockHitResult)}
         if (simulatingEntity instanceof AbstractArrow) {
-            Collection<EntityHitResult> entityCollisions = ProjectileUtil.getManyEntityHitResult(
+            Collection<EntityHitResult> entityCollisions = Vanilla.getManyEntityHitResult(
                 mc.level,
                 simulatingEntity,
                 prevPos3d,
@@ -374,6 +376,7 @@ public class ProjectileEntitySimulator {
                 entity -> !entity.isSpectator() && entity.isAlive() && entity.isPickable(),
                 getToleranceMargin(),
                 ClipContext.Block.COLLIDER,
+                false,
                 false
             );
 

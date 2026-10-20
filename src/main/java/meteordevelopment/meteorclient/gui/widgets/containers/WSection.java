@@ -8,8 +8,8 @@ package meteordevelopment.meteorclient.gui.widgets.containers;
 import meteordevelopment.meteorclient.gui.renderer.GuiRenderer;
 import meteordevelopment.meteorclient.gui.utils.Cell;
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
+import meteordevelopment.meteorclient.utils.misc.MathUtils;
 import net.minecraft.client.input.MouseButtonEvent;
-import net.minecraft.util.Mth;
 
 import static com.mojang.blaze3d.platform.InputConstants.MOUSE_BUTTON_LEFT;
 
@@ -88,7 +88,7 @@ public abstract class WSection extends WVerticalList {
         double preProgress = animProgress;
 
         animProgress += (expanded ? 1 : -1) * delta * 14;
-        animProgress = Mth.clamp(animProgress, 0, 1);
+        animProgress = MathUtils.clamp(animProgress, 0, 1);
 
         if (animProgress != preProgress) {
             forcedHeight = (actualHeight - header.height) * animProgress + header.height;

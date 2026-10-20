@@ -9,9 +9,9 @@ import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.game.GameJoinedEvent;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.utils.Utils;
+import meteordevelopment.meteorclient.utils.misc.MathUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.network.protocol.game.ClientboundSetTimePacket;
-import net.minecraft.util.Mth;
 
 import java.util.Arrays;
 
@@ -35,7 +35,7 @@ public class TickRate {
         if (event.packet instanceof ClientboundSetTimePacket) {
             long now = System.currentTimeMillis();
             float timeElapsed = (now - timeLastTimeUpdate) / 1000.0F;
-            tickRates[nextIndex] = Mth.clamp(20.0f / timeElapsed, 0.0f, 20.0f);
+            tickRates[nextIndex] = MathUtils.clamp(20.0f / timeElapsed, 0.0f, 20.0f);
             nextIndex = (nextIndex + 1) % tickRates.length;
             timeLastTimeUpdate = now;
         }

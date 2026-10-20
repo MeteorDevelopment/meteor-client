@@ -7,6 +7,7 @@ package meteordevelopment.meteorclient.utils.world;
 
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.world.TickEvent;
+import meteordevelopment.meteorclient.mc.Vanilla;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.player.InstantRebreak;
 import meteordevelopment.meteorclient.utils.PreInit;
@@ -19,7 +20,6 @@ import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.network.protocol.game.ServerboundSwingPacket;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -137,8 +137,8 @@ public class BlockUtils {
         InteractionResult result = mc.gameMode.useItemOn(mc.player, hand, blockHitResult);
 
         if (result.consumesAction()) {
-            if (swing) mc.player.swing(hand);
-            else mc.getConnection().send(new ServerboundSwingPacket(hand));
+            if (swing) Vanilla.swing(mc.player, hand);
+            else Vanilla.swingPacket(mc.player, hand);
         }
 
         mc.player.setShiftKeyDown(wasSneaking);
@@ -240,7 +240,7 @@ public class BlockUtils {
         if (!canBreak(blockPos, mc.level.getBlockState(blockPos))) return false;
 
         // Creating new instance of block pos because minecraft assigns the parameter to a field, and we don't want it to change when it has been stored in a field somewhere
-        BlockPos pos = blockPos instanceof BlockPos.MutableBlockPos ? new BlockPos(blockPos) : blockPos;
+        BlockPos pos = blockPos instanceof BlockPos.MutableBlockPos ? Vanilla.copy(blockPos) : blockPos;
 
         InstantRebreak ir = Modules.get().get(InstantRebreak.class);
         if (ir != null && ir.isActive() && ir.blockPos.equals(pos) && ir.shouldMine()) {
@@ -254,7 +254,7 @@ public class BlockUtils {
             mc.gameMode.startDestroyBlock(pos, getDirection(blockPos));
 
         if (swing)
-            mc.player.swing(hand);
+            Vanilla.swing(mc.player, hand);
 
         breaking = true;
         breakingThisTick = true;

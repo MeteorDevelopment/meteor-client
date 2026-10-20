@@ -39,9 +39,9 @@ public abstract class VulkanDeviceMixin implements IGpuDevice {
 
     @Deprecated
     @Override
-    public void meteor$onCreateRenderPass(RenderPassBackend backend) {
+    public void meteor$onCreateRenderPass(Object backend) {
         if (set) {
-            backend.enableScissor(x, y, width, height);
+            ((RenderPassBackend) backend).enableScissor(x, y, width, height);
         }
     }
 }

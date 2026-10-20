@@ -6,13 +6,14 @@
 package meteordevelopment.meteorclient.systems.waypoints;
 
 import meteordevelopment.meteorclient.MeteorClient;
+import meteordevelopment.meteorclient.mc.Vanilla;
+import meteordevelopment.meteorclient.renderer.McTexture;
 import meteordevelopment.meteorclient.renderer.Renderer2D;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.utils.misc.ISerializable;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.meteorclient.utils.world.Dimension;
-import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.nbt.CompoundTag;
@@ -135,7 +136,7 @@ public class Waypoint implements ISerializable<Waypoint> {
     }
 
     public void renderIcon(double x, double y, double a, double size) {
-        AbstractTexture texture = Waypoints.get().icons.get(icon.get());
+        McTexture texture = Waypoints.get().icons.get(icon.get());
         if (texture == null) return;
 
         int preA = color.get().a;
@@ -143,7 +144,7 @@ public class Waypoint implements ISerializable<Waypoint> {
 
         Renderer2D.TEXTURE.begin();
         Renderer2D.TEXTURE.texQuad(x, y, size, size, color.get());
-        Renderer2D.TEXTURE.render(texture.getTextureView(), texture.getSampler());
+        Vanilla.renderTexture(Renderer2D.TEXTURE, texture);
 
         color.get().a = preA;
     }
@@ -170,9 +171,9 @@ public class Waypoint implements ISerializable<Waypoint> {
     }
 
     private void validateIcon() {
-        Map<String, AbstractTexture> icons = Waypoints.get().icons;
+        Map<String, McTexture> icons = Waypoints.get().icons;
 
-        AbstractTexture texture = icons.get(icon.get());
+        McTexture texture = icons.get(icon.get());
         if (texture == null && !icons.isEmpty()) {
             icon.set(icons.keySet().iterator().next());
         }

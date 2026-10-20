@@ -22,12 +22,12 @@ import meteordevelopment.meteorclient.systems.modules.movement.elytrafly.modes.V
 import meteordevelopment.meteorclient.systems.modules.player.ChestSwap;
 import meteordevelopment.meteorclient.systems.modules.player.Rotation;
 import meteordevelopment.meteorclient.systems.modules.render.Freecam;
+import meteordevelopment.meteorclient.utils.misc.MathUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket;
 import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
 import net.minecraft.network.protocol.game.ServerboundPlayerCommandPacket;
-import net.minecraft.util.Mth;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ClipContext;
@@ -468,13 +468,13 @@ public class ElytraFly extends Module {
             if (!underCollidable && under2Collidable) {
                 ((IVec3) event.movement).meteor$set(event.movement.x, -0.1f, event.movement.z);
 
-                mc.player.setXRot(Mth.clamp(mc.player.getXRot(0), -50.f, 20.f)); // clamp between -50 and 20 (>= 30 will pop you off, but lag makes that threshold lower)
+                mc.player.setXRot(MathUtils.clamp(mc.player.getXRot(0), -50.f, 20.f)); // clamp between -50 and 20 (>= 30 will pop you off, but lag makes that threshold lower)
             }
 
             if (underCollidable) {
                 ((IVec3) event.movement).meteor$set(event.movement.x, -0.03f, event.movement.z);
 
-                mc.player.setXRot(Mth.clamp(mc.player.getXRot(0), -50.f, 20.f));
+                mc.player.setXRot(MathUtils.clamp(mc.player.getXRot(0), -50.f, 20.f));
 
                 if (mc.player.position().y <= mc.player.blockPosition().below().getY() + 1.34f) {
                     ((IVec3) event.movement).meteor$set(event.movement.x, 0, event.movement.z);

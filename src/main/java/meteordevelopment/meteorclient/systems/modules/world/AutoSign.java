@@ -8,6 +8,7 @@ package meteordevelopment.meteorclient.systems.modules.world;
 import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
+import meteordevelopment.meteorclient.mc.Vanilla;
 import meteordevelopment.meteorclient.mixin.AbstractSignEditScreenAccessor;
 import meteordevelopment.meteorclient.settings.IntSetting;
 import meteordevelopment.meteorclient.settings.Setting;
@@ -74,7 +75,7 @@ public class AutoSign extends Module {
     private void onSendPacket(PacketEvent.Send event) {
         if (!(event.packet instanceof ServerboundSignUpdatePacket)) return;
 
-        text = ((ServerboundSignUpdatePacket) event.packet).getLines();
+        text = Vanilla.signLines((ServerboundSignUpdatePacket) event.packet);
     }
 
     @EventHandler
@@ -83,7 +84,7 @@ public class AutoSign extends Module {
 
         SignBlockEntity sign = ((AbstractSignEditScreenAccessor) event.screen).meteor$getSign();
 
-        queue.add(new ServerboundSignUpdatePacket(sign.getBlockPos(), true, text[0], text[1], text[2], text[3]));
+        queue.add(Vanilla.signUpdate(sign.getBlockPos(), text));
 
         event.cancel();
     }

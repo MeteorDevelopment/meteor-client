@@ -54,13 +54,6 @@ public abstract class PlayerMixin extends LivingEntity {
         if (event.isSet()) cir.setReturnValue(event.isClip());
     }
 
-    @Inject(method = "drop", at = @At("HEAD"), cancellable = true)
-    private void onDropItem(ItemStack itemStack, boolean thrownFromHand, CallbackInfoReturnable<ItemEntity> cir) {
-        if (level().isClientSide() && !itemStack.isEmpty()) {
-            if (MeteorClient.EVENT_BUS.post(DropItemsEvent.get(itemStack)).isCancelled()) cir.setReturnValue(null);
-        }
-    }
-
     @Inject(method = "isSpectator", at = @At("HEAD"), cancellable = true)
     private void onIsSpectator(CallbackInfoReturnable<Boolean> cir) {
         if (mc.getConnection() == null) cir.setReturnValue(false);

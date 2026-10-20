@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.utils.player;
 
+import meteordevelopment.meteorclient.mc.Vanilla;
 import meteordevelopment.meteorclient.mixininterface.IVec3;
 import meteordevelopment.meteorclient.pathing.PathManagers;
 import meteordevelopment.meteorclient.systems.config.Config;
@@ -206,7 +207,7 @@ public class PlayerUtils {
             }
 
             // Check for beds if in nether
-            if (mc.level.environmentAttributes().getDimensionValue(EnvironmentAttributes.BED_RULE).explodes()) {
+            if (Vanilla.bedDestroysOnUse(mc.level.environmentAttributes().getDimensionValue(EnvironmentAttributes.BED_RULE))) {
                 BlockPos playerPos = mc.player.blockPosition();
                 int range = 6;
 

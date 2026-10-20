@@ -31,7 +31,7 @@ public abstract class GpuDeviceMixin implements IGpuDevice {
 
     @SuppressWarnings("deprecation")
     @Override
-    public void meteor$onCreateRenderPass(RenderPassBackend backend) {
+    public void meteor$onCreateRenderPass(Object backend) {
         ((IGpuDevice) this.backend).meteor$onCreateRenderPass(backend);
     }
 }

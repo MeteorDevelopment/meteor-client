@@ -10,6 +10,7 @@ import meteordevelopment.meteorclient.events.meteor.CharTypedEvent;
 import meteordevelopment.meteorclient.events.meteor.KeyInputEvent;
 import meteordevelopment.meteorclient.gui.GuiKeyEvents;
 import meteordevelopment.meteorclient.gui.WidgetScreen;
+import meteordevelopment.meteorclient.mc.Vanilla;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.input.Input;
 import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
@@ -44,12 +45,12 @@ public abstract class KeyboardHandlerMixin {
             }
 
             if (minecraft.gui.screen() instanceof WidgetScreen widgetScreen && action == InputConstants.REPEAT) {
-                widgetScreen.keyRepeated(new KeyEvent(event.key(), event.scancode(), modifiers));
+                widgetScreen.keyRepeated(new KeyEvent(event.key(), Vanilla.scancode(event), modifiers));
             }
 
             if (GuiKeyEvents.canUseKeys) {
                 Input.setKeyState(event.key(), action != InputConstants.RELEASE);
-                if (MeteorClient.EVENT_BUS.post(KeyInputEvent.get(new KeyEvent(event.key(), event.scancode(), modifiers), KeyAction.get(action))).isCancelled())
+                if (MeteorClient.EVENT_BUS.post(KeyInputEvent.get(new KeyEvent(event.key(), Vanilla.scancode(event), modifiers), KeyAction.get(action))).isCancelled())
                     ci.cancel();
             }
         }

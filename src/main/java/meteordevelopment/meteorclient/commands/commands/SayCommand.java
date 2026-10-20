@@ -8,6 +8,7 @@ package meteordevelopment.meteorclient.commands.commands;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import meteordevelopment.meteorclient.commands.Command;
+import meteordevelopment.meteorclient.mc.Vanilla;
 import meteordevelopment.meteorclient.mixin.ClientPacketListenerAccessor;
 import meteordevelopment.meteorclient.utils.misc.MeteorStarscript;
 import net.minecraft.client.multiplayer.ClientPacketListener;
@@ -41,7 +42,7 @@ public class SayCommand extends Command {
                     ClientPacketListener handler = mc.getConnection();
                     LastSeenMessagesTracker.Update lastSeenMessages = ((ClientPacketListenerAccessor) handler).meteor$getLastSeenMessages().generateAndApplyUpdate();
                     MessageSignature messageSignatureData = ((ClientPacketListenerAccessor) handler).meteor$getSignedMessageEncoder().pack(new SignedMessageBody(message, instant, l, lastSeenMessages.lastSeen()));
-                    handler.send(new ServerboundChatPacket(message, instant, l, messageSignatureData, lastSeenMessages.update()));
+                    handler.send(Vanilla.chat(message, instant, l, messageSignatureData, lastSeenMessages.update()));
                 }
             }
 

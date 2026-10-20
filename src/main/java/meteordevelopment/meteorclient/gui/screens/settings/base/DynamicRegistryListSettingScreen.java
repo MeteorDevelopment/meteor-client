@@ -10,6 +10,7 @@ import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.widgets.containers.WHorizontalList;
 import meteordevelopment.meteorclient.gui.widgets.containers.WTable;
 import meteordevelopment.meteorclient.gui.widgets.input.WTextBox;
+import meteordevelopment.meteorclient.mc.Vanilla;
 import meteordevelopment.meteorclient.settings.Setting;
 import net.minecraft.IdentifierException;
 import net.minecraft.client.Minecraft;
@@ -37,7 +38,7 @@ public abstract class DynamicRegistryListSettingScreen<T> extends CollectionList
 
         Optional.ofNullable(Minecraft.getInstance().getConnection())
             .map(networkHandler -> (HolderLookup.Provider) networkHandler.registryAccess())
-            .orElseGet(VanillaRegistries::createLookup)
+            .orElseGet(Vanilla::worldLookup)
             .lookup(registryKey)
             .ifPresent(registry -> registry.listElementIds().forEach(set::add));
 

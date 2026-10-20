@@ -32,8 +32,6 @@ import net.minecraft.client.renderer.RenderBuffers;
 import net.minecraft.client.renderer.state.GameRenderState;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.util.profiling.Profiler;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import org.joml.Matrix4f;
 import org.joml.Matrix4fc;
 import org.spongepowered.asm.mixin.Final;
@@ -141,13 +139,6 @@ public abstract class GameRendererMixin {
     @Inject(method = "renderLevel", at = @At("TAIL"))
     private void onRenderLevelTail(CallbackInfo ci) {
         MeteorClient.EVENT_BUS.post(RenderAfterWorldEvent.get());
-    }
-
-    @Inject(method = "displayItemActivation", at = @At("HEAD"), cancellable = true)
-    private void onDisplayItemActivation(ItemStack itemStack, CallbackInfo ci) {
-        if (itemStack.getItem() == Items.TOTEM_OF_UNDYING && Modules.get().get(NoRender.class).noTotemAnimation()) {
-            ci.cancel();
-        }
     }
 
     @ModifyExpressionValue(method = "renderLevel", at = @At(value = "INVOKE", target = "Ljava/lang/Math;max(FF)F", ordinal = 0))

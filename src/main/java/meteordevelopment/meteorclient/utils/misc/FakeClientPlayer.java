@@ -7,6 +7,7 @@ package meteordevelopment.meteorclient.utils.misc;
 
 import com.mojang.authlib.GameProfile;
 import meteordevelopment.meteorclient.MeteorClient;
+import meteordevelopment.meteorclient.mc.Vanilla;
 import meteordevelopment.meteorclient.utils.PreInit;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.ClientPacketListener;
@@ -42,7 +43,7 @@ public class FakeClientPlayer {
 
         if (player == null || (!id.equals(lastId))) {
             if (world == null) {
-                world = new ClientLevel(
+                world = Vanilla.createClientLevel(
                     new ClientPacketListener(mc, new Connection(PacketFlow.CLIENTBOUND), new CommonListenerCookie(
                         null,
                         new GameProfile(mc.getUser().getProfileId(), mc.getUser().getName()),
@@ -66,7 +67,6 @@ public class FakeClientPlayer {
                     1,
                     null,
                     false,
-                    0,
                     world.getSeaLevel()
                 );
             }

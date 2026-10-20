@@ -7,6 +7,7 @@ package meteordevelopment.meteorclient.systems.modules.player;
 
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import meteordevelopment.meteorclient.events.entity.player.DoItemUseEvent;
+import meteordevelopment.meteorclient.mc.Vanilla;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
@@ -49,7 +50,7 @@ public class GhostHand extends Module {
                 for (InteractionHand hand : InteractionHand.values()) {
                     InteractionResult result = mc.gameMode.useItemOn(mc.player, hand, new BlockHitResult(new Vec3(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5), Direction.UP, pos, true));
                     if (result instanceof InteractionResult.Success || result instanceof InteractionResult.Fail) {
-                        mc.player.swing(hand);
+                        Vanilla.swing(mc.player, hand);
                         event.cancel();
                         return;
                     }

@@ -7,6 +7,7 @@ package meteordevelopment.meteorclient.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.mojang.blaze3d.vertex.QuadInstance;
+import meteordevelopment.meteorclient.mc.Vanilla;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.Xray;
 import net.minecraft.client.renderer.block.BlockAndTintGetter;
@@ -68,14 +69,7 @@ public abstract class ModelBlockRendererMixin {
         BakedQuad.MaterialInfo materialInfo = quad.materialInfo();
         if (materialInfo.layer() == ChunkSectionLayer.TRANSLUCENT) return quad;
 
-        BakedQuad.MaterialInfo translucentInfo = new BakedQuad.MaterialInfo(
-            materialInfo.sprite(),
-            ChunkSectionLayer.TRANSLUCENT,
-            materialInfo.itemRenderType(),
-            materialInfo.tintIndex(),
-            materialInfo.shade(),
-            materialInfo.lightEmission()
-        );
+        BakedQuad.MaterialInfo translucentInfo = Vanilla.translucentMaterialInfo(materialInfo);
 
         return new BakedQuad(
             quad.position0(),

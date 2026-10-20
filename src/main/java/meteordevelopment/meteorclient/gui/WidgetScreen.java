@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.gui;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.platform.MacosUtil;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.gui.renderer.GuiDebugRenderer;
@@ -15,8 +16,10 @@ import meteordevelopment.meteorclient.gui.widgets.WRoot;
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.gui.widgets.containers.WContainer;
 import meteordevelopment.meteorclient.gui.widgets.input.WTextBox;
+import meteordevelopment.meteorclient.mc.Vanilla;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.CursorStyle;
+import meteordevelopment.meteorclient.utils.misc.MathUtils;
 import meteordevelopment.meteorclient.utils.misc.input.Input;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
@@ -24,7 +27,6 @@ import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
-import net.minecraft.util.Mth;
 import org.jspecify.annotations.NonNull;
 
 import java.util.ArrayList;
@@ -268,7 +270,7 @@ public abstract class WidgetScreen extends Screen {
         mouseY *= s;
 
         animProgress += (delta / 20 * 14) * (closing ? -1 : 1);
-        animProgress = Mth.clamp(animProgress, 0, 1);
+        animProgress = MathUtils.clamp(animProgress, 0, 1);
 
         if (closing && (animProgress == 0 || parent != null)) {
             closeInternal();
@@ -354,7 +356,7 @@ public abstract class WidgetScreen extends Screen {
 
                     // Restore mouse position to where it was when the screen was closed
                     if (parent != null) {
-                        grabOrReleaseMouse(mc.getWindow(), CURSOR_NORMAL, restoreX, restoreY);
+                        Vanilla.releaseMouse(mc.getWindow(), restoreX, restoreY);
                     }
                 };
             }

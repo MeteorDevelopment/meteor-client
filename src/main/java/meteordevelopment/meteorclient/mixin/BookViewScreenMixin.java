@@ -56,7 +56,7 @@ public abstract class BookViewScreenMixin extends Screen {
     @Inject(method = "init", at = @At("TAIL"))
     private void onInit(CallbackInfo ci) {
         addRenderableWidget(
-            new Button.Builder(Component.literal("Copy"), _ -> {
+            Button.builder(Component.literal("Copy"), _ -> {
                 ListTag listTag = new ListTag();
                 for (int i = 0; i < bookAccess.getPageCount(); i++)
                     listTag.add(StringTag.valueOf(bookAccess.getPage(i).getString()));
@@ -104,7 +104,7 @@ public abstract class BookViewScreenMixin extends Screen {
         InteractionHand hand2 = hand; // Honestly
 
         addRenderableWidget(
-            new Button.Builder(Component.literal("Edit title & author"), _ -> mc.gui.setScreen(new EditBookTitleAndAuthorScreen(GuiThemes.get(), book, hand2)))
+            Button.builder(Component.literal("Edit title & author"), _ -> mc.gui.setScreen(new EditBookTitleAndAuthorScreen(GuiThemes.get(), book, hand2)))
                 .pos(4, 4 + 20 + 2)
                 .size(120, 20)
                 .build()

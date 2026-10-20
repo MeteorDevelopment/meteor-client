@@ -16,6 +16,7 @@ import meteordevelopment.meteorclient.gui.widgets.WLabel;
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.gui.widgets.containers.WTable;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
+import meteordevelopment.meteorclient.mc.Vanilla;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.renderer.text.TextRenderer;
 import meteordevelopment.meteorclient.settings.*;
@@ -834,7 +835,7 @@ public class Notebot extends Module {
         }
 
         if (swingArm.get()) {
-            mc.player.swing(InteractionHand.MAIN_HAND);
+            Vanilla.swing(mc.player, InteractionHand.MAIN_HAND);
         }
 
         int iterations = 0;
@@ -904,7 +905,7 @@ public class Notebot extends Module {
 
             // Swing arm
             if (swingArm.get()) {
-                mc.player.swing(InteractionHand.MAIN_HAND);
+                Vanilla.swing(mc.player, InteractionHand.MAIN_HAND);
             }
 
             // Play notes

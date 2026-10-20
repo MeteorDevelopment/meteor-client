@@ -6,6 +6,7 @@
 package meteordevelopment.meteorclient.systems.modules.world;
 
 import meteordevelopment.meteorclient.events.world.TickEvent;
+import meteordevelopment.meteorclient.mc.Vanilla;
 import meteordevelopment.meteorclient.settings.BoolSetting;
 import meteordevelopment.meteorclient.settings.EnumSetting;
 import meteordevelopment.meteorclient.settings.Setting;
@@ -18,7 +19,6 @@ import meteordevelopment.orbit.EventHandler;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.monster.EnderMan;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 
@@ -51,27 +51,27 @@ public class EndermanLook extends Module {
             return;
 
         for (Entity entity : mc.level.entitiesForRendering()) {
-            if (!(entity instanceof EnderMan enderman) || !enderman.isAlive() || !mc.player.hasLineOfSight(enderman))
+            if (!Vanilla.isEnderman(entity) || !entity.isAlive() || !mc.player.hasLineOfSight(entity))
                 continue;
 
             switch (lookMode.get()) {
                 case Away -> {
-                    if (enderman.isCreepy() && stun.get())
-                        Rotations.rotate(Rotations.getYaw(enderman), Rotations.getPitch(enderman, Target.Head), -75, null);
-                    else if (angleCheck(enderman)) Rotations.rotate(mc.player.getYRot(), 90, -75, null);
+                    if (Vanilla.isCreepy(entity) && stun.get())
+                        Rotations.rotate(Rotations.getYaw(entity), Rotations.getPitch(entity, Target.Head), -75, null);
+                    else if (angleCheck(entity)) Rotations.rotate(mc.player.getYRot(), 90, -75, null);
                 }
                 case At -> {
-                    if (!enderman.isCreepy())
-                        Rotations.rotate(Rotations.getYaw(enderman), Rotations.getPitch(enderman, Target.Head), -75, null);
+                    if (!Vanilla.isCreepy(entity))
+                        Rotations.rotate(Rotations.getYaw(entity), Rotations.getPitch(entity, Target.Head), -75, null);
                 }
             }
         }
     }
 
     /**
-     * @see EnderMan#isBeingStaredBy(Player)
+     * @see net.minecraft.world.entity.Entity#isAlive()
      */
-    private boolean angleCheck(EnderMan entity) {
+    private boolean angleCheck(net.minecraft.world.entity.Entity entity) {
         Vec3 vec3d = mc.player.getViewVector(1.0F).normalize();
         Vec3 vec3d2 = new Vec3(entity.getX() - mc.player.getX(), entity.getEyeY() - mc.player.getEyeY(), entity.getZ() - mc.player.getZ());
 

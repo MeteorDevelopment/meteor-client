@@ -10,6 +10,7 @@ import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.llamalad7.mixinextras.sugar.Local;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.render.GetFovEvent;
+import meteordevelopment.meteorclient.mc.MixinTargets;
 import meteordevelopment.meteorclient.mixininterface.ICamera;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.CameraTweaks;
@@ -17,8 +18,8 @@ import meteordevelopment.meteorclient.systems.modules.render.FreeLook;
 import meteordevelopment.meteorclient.systems.modules.render.Freecam;
 import meteordevelopment.meteorclient.systems.modules.render.NoRender;
 import meteordevelopment.meteorclient.systems.modules.world.HighwayBuilder;
+import meteordevelopment.meteorclient.utils.misc.MathUtils;
 import net.minecraft.client.Camera;
-import net.minecraft.util.Mth;
 import net.minecraft.world.level.material.FogType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -43,7 +44,7 @@ public abstract class CameraMixin implements ICamera {
     @Shadow
     protected abstract void setRotation(float yRot, float xRot);
 
-    @Inject(method = "getFluidInCamera", at = @At("HEAD"), cancellable = true)
+    @Inject(method = MixinTargets.CAMERA_FLUID_METHOD, at = @At("HEAD"), cancellable = true)
     private void getSubmergedFluidState(CallbackInfoReturnable<FogType> cir) {
         if (Modules.get().get(NoRender.class).noLiquidOverlay()) cir.setReturnValue(FogType.NONE);
     }
@@ -113,6 +114,6 @@ public abstract class CameraMixin implements ICamera {
 
     @Override
     public void meteor$setRot(double yaw, double pitch) {
-        setRotation((float) yaw, (float) Mth.clamp(pitch, -90, 90));
+        setRotation((float) yaw, (float) MathUtils.clamp(pitch, -90, 90));
     }
 }
