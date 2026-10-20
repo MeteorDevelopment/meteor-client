@@ -26,10 +26,7 @@ import meteordevelopment.meteorclient.utils.entity.DamageUtils;
 import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.meteorclient.utils.entity.Target;
 import meteordevelopment.meteorclient.utils.misc.Keybind;
-import meteordevelopment.meteorclient.utils.player.FindItemResult;
-import meteordevelopment.meteorclient.utils.player.InvUtils;
-import meteordevelopment.meteorclient.utils.player.PlayerUtils;
-import meteordevelopment.meteorclient.utils.player.Rotations;
+import meteordevelopment.meteorclient.utils.player.*;
 import meteordevelopment.meteorclient.utils.render.NametagUtils;
 import meteordevelopment.meteorclient.utils.render.RenderUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
@@ -871,11 +868,7 @@ public class CrystalAura extends Module {
         // Attack
         mc.player.connection.send(new ServerboundAttackPacket(entity.getId()));
 
-        InteractionHand hand = InvUtils.findInHotbar(Items.END_CRYSTAL).getHand();
-        if (hand == null) hand = InteractionHand.MAIN_HAND;
-
-        if (swingMode.get().client()) mc.player.swing(hand, mc.player.getItemInHand(hand).getAttackAnimation(), false);
-        if (swingMode.get().packet()) mc.getConnection().send(new ServerboundPunchPacket());
+        swingMode.get().attackSwing(InteractionHand.MAIN_HAND);
 
         attacks++;
     }
@@ -1037,8 +1030,7 @@ public class CrystalAura extends Module {
             // Place crystal
             mc.gameMode.startPrediction(mc.level, sequence -> new ServerboundUseItemOnPacket(hand, result, sequence));
 
-            if (swingMode.get().client()) mc.player.swing(hand, mc.player.getItemInHand(hand).getAttackAnimation(), false);
-            if (swingMode.get().packet()) mc.getConnection().send(new ServerboundPunchPacket());
+            swingMode.get().interactSwing(hand);
 
             placing = true;
             placingTimer = 4;
@@ -1363,21 +1355,6 @@ public class CrystalAura extends Module {
 
         public boolean matches(PauseMode process) {
             return this == process || this == PauseMode.Both;
-        }
-    }
-
-    public enum SwingMode {
-        Both,
-        Packet,
-        Client,
-        None;
-
-        public boolean packet() {
-            return this == Packet || this == Both;
-        }
-
-        public boolean client() {
-            return this == Client || this == Both;
         }
     }
 
