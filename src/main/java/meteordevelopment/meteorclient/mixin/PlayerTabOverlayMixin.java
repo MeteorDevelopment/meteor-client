@@ -9,13 +9,13 @@ import com.llamalad7.mixinextras.sugar.Local;
 import com.llamalad7.mixinextras.sugar.ref.LocalIntRef;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.BetterTab;
+import meteordevelopment.meteorclient.utils.misc.MathUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.PlayerTabOverlay;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.network.chat.Component;
-import net.minecraft.util.Mth;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.*;
@@ -74,7 +74,7 @@ public abstract class PlayerTabOverlayMixin {
             Minecraft mc = Minecraft.getInstance();
             Font font = mc.font;
 
-            int latency = Mth.clamp(info.getLatency(), 0, 9999);
+            int latency = MathUtils.clamp(info.getLatency(), 0, 9999);
             int color = latency < 150 ? 0xFF00E970 :
                 latency < 300 ? 0xFFE7D020 : 0xFFD74238;
             String text = latency + "ms";

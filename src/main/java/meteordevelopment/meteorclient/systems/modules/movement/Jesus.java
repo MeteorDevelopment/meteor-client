@@ -33,6 +33,7 @@ import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.tags.FluidTags;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.shapes.Shapes;
@@ -229,9 +230,9 @@ public class Jesus extends Module {
     private void onCanWalkOnFluid(CanWalkOnFluidEvent event) {
         if (mc.player != null && mc.player.isSwimming()) return;
 
-        if ((event.fluidState.getType() == Fluids.WATER || event.fluidState.getType() == Fluids.FLOWING_WATER) && waterShouldBeSolid()) {
+        if (event.fluidState.is(FluidTags.WATER) && waterShouldBeSolid()) {
             event.walkOnFluid = true;
-        } else if ((event.fluidState.getType() == Fluids.LAVA || event.fluidState.getType() == Fluids.FLOWING_LAVA) && lavaShouldBeSolid()) {
+        } else if (event.fluidState.is(FluidTags.LAVA) && lavaShouldBeSolid()) {
             event.walkOnFluid = true;
         }
     }

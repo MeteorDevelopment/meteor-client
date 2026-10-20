@@ -9,6 +9,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import meteordevelopment.meteorclient.events.render.ArmRenderEvent;
 import meteordevelopment.meteorclient.events.render.HeldItemRendererEvent;
+import meteordevelopment.meteorclient.mc.Vanilla;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
@@ -207,9 +208,9 @@ public class HandView extends Module {
     }
 
     private void rotate(PoseStack matrix, Vector3d rotation) {
-        matrix.mulPose(Axis.XP.rotationDegrees((float) rotation.x));
-        matrix.mulPose(Axis.YP.rotationDegrees((float) rotation.y));
-        matrix.mulPose(Axis.ZP.rotationDegrees((float) rotation.z));
+        Vanilla.rotate(matrix, Axis.XP, (float) rotation.x);
+        Vanilla.rotate(matrix, Axis.YP, (float) rotation.y);
+        Vanilla.rotate(matrix, Axis.ZP, (float) rotation.z);
     }
 
     private void scale(PoseStack matrix, Vector3d scale) {
@@ -221,8 +222,8 @@ public class HandView extends Module {
     }
 
     private void applyServerRotations(PoseStack matrix) {
-        matrix.mulPose(Axis.XP.rotationDegrees(mc.player.getXRot() - Rotations.serverPitch));
-        matrix.mulPose(Axis.YP.rotationDegrees(mc.player.getYRot() - Rotations.serverYaw));
+        Vanilla.rotate(matrix, Axis.XP, mc.player.getXRot() - Rotations.serverPitch);
+        Vanilla.rotate(matrix, Axis.YP, mc.player.getYRot() - Rotations.serverYaw);
     }
 
     public boolean oldAnimations() {

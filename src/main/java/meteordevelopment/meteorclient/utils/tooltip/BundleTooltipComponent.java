@@ -5,12 +5,12 @@
 
 package meteordevelopment.meteorclient.utils.tooltip;
 
+import meteordevelopment.meteorclient.mc.Vanilla;
+import meteordevelopment.meteorclient.utils.misc.MathUtils;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
-import net.minecraft.client.gui.screens.inventory.tooltip.DefaultTooltipPositioner;
 import net.minecraft.client.renderer.RenderPipelines;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.CommonColors;
@@ -122,14 +122,12 @@ public class BundleTooltipComponent implements ClientTooltipComponent, MeteorToo
             int i = font.width(text.getVisualOrderText());
             int j = x + width / 2 - 12;
             ClientTooltipComponent tooltipComponent = ClientTooltipComponent.create(text.getVisualOrderText());
-            graphics.tooltip(
-                font, List.of(tooltipComponent), j - i / 2, y - 37, DefaultTooltipPositioner.INSTANCE, itemStack.get(DataComponents.TOOLTIP_STYLE)
-            );
+            Vanilla.tooltip(graphics, font, List.of(tooltipComponent), j - i / 2, y - 37, itemStack);
         }
     }
 
     private void drawProgressBar(int x, int y, Font font, GuiGraphicsExtractor graphics) {
-        int fillAmount = Mth.clamp(Mth.mulAndTruncate(bundleContents.weight().getOrThrow(), PROGRESS_BAR_WIDTH), 0, PROGRESS_BAR_WIDTH);
+        int fillAmount = MathUtils.clamp(Mth.mulAndTruncate(bundleContents.weight().getOrThrow(), PROGRESS_BAR_WIDTH), 0, PROGRESS_BAR_WIDTH);
 
         Identifier fillTexture = bundleContents.weight().getOrThrow().compareTo(Fraction.ONE) >= 0
             ? BUNDLE_PROGRESS_BAR_FULL_TEXTURE

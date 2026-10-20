@@ -71,14 +71,14 @@ public abstract class AbstractContainerScreenMixin<T extends AbstractContainerMe
 
         if (invTweaks.isActive() && invTweaks.showButtons() && invTweaks.canSteal(getMenu())) {
             addRenderableWidget(
-                new Button.Builder(Component.literal("Steal"), _ -> invTweaks.steal(getMenu()))
+                Button.builder(Component.literal("Steal"), _ -> invTweaks.steal(getMenu()))
                     .pos(leftPos, topPos - 22)
                     .size(40, 20)
                     .build()
             );
 
             addRenderableWidget(
-                new Button.Builder(Component.literal("Dump"), _ -> invTweaks.dump(getMenu()))
+                Button.builder(Component.literal("Dump"), _ -> invTweaks.dump(getMenu()))
                     .pos(leftPos + 42, topPos - 22)
                     .size(40, 20)
                     .build()

@@ -8,6 +8,7 @@ package meteordevelopment.meteorclient.systems.modules.combat;
 
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
+import meteordevelopment.meteorclient.mc.Vanilla;
 import meteordevelopment.meteorclient.mixininterface.IServerboundMovePlayerPacket;
 import meteordevelopment.meteorclient.mixininterface.IVec3;
 import meteordevelopment.meteorclient.settings.*;
@@ -18,7 +19,6 @@ import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.network.protocol.game.ServerboundAttackPacket;
 import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
-import net.minecraft.network.protocol.game.ServerboundSwingPacket;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.MaceItem;
@@ -61,7 +61,7 @@ public class Criticals extends Module {
     );
 
     private ServerboundAttackPacket attackPacket;
-    private ServerboundSwingPacket swingPacket;
+    private Object swingPacket;
     private boolean sendPackets;
     private int sendTimer;
     private double lastY;
@@ -130,11 +130,11 @@ public class Criticals extends Module {
                     }
                 }
             }
-        } else if (event.packet instanceof ServerboundSwingPacket serverboundSwingPacket && mode.get() != Mode.Packet) {
+        } else if (Vanilla.isSwingPacket(event.packet) && mode.get() != Mode.Packet) {
             if (skipCrit()) return;
 
             if (sendPackets && swingPacket == null) {
-                swingPacket = serverboundSwingPacket;
+                swingPacket = event.packet;
                 event.cancel();
             }
         }
@@ -154,12 +154,12 @@ public class Criticals extends Module {
             }
 
             if (sendTimer <= 0) {
-                if (attackPacket == null || swingPacket == null) {
+                if (attackPacket == null || (Vanilla.requiresSwingPacket() && swingPacket == null)) {
                     sendPackets = false;
                     return;
                 }
                 mc.getConnection().send(attackPacket);
-                mc.getConnection().send(swingPacket);
+                Vanilla.sendSwingPacket(swingPacket);
 
                 attackPacket = null;
                 swingPacket = null;

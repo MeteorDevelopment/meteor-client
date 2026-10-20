@@ -6,6 +6,7 @@
 package meteordevelopment.meteorclient.mixin;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import meteordevelopment.meteorclient.mc.Vanilla;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.NoRender;
 import net.minecraft.client.model.object.banner.BannerModel;
@@ -64,17 +65,6 @@ public abstract class BannerRendererMixin {
     @Unique
     private static void renderPillar(PoseStack matrices, SubmitNodeCollector submitNodeCollector, int light, BannerModel model, SpriteGetter sprites, ModelFeatureRenderer.CrumblingOverlay breakProgress) {
         SpriteId sprite = Sheets.BANNER_BASE;
-        submitNodeCollector.submitModel(
-            model,
-            Unit.INSTANCE,
-            matrices,
-            light,
-            OverlayTexture.NO_OVERLAY,
-            -1,
-            sprite,
-            sprites,
-            0,
-            breakProgress
-        );
+        Vanilla.submitBannerModel(submitNodeCollector, model, Unit.INSTANCE, matrices, light, OverlayTexture.NO_OVERLAY, -1, sprite, sprites, 0, breakProgress);
     }
 }

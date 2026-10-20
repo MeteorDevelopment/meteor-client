@@ -7,6 +7,7 @@ package meteordevelopment.meteorclient.mixin.sodium;
 
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.llamalad7.mixinextras.sugar.Local;
+import meteordevelopment.meteorclient.mc.Vanilla;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.Xray;
 import net.caffeinemc.mods.sodium.client.model.color.ColorProvider;
@@ -71,7 +72,7 @@ public abstract class SodiumDefaultFluidRendererMixin {
         if (original || !forceXrayFluidSides || facing.getAxis().isVertical()) return original;
         if (!xray.isBlocked(otherState.getBlock(), null)) return false;
 
-        return !otherState.getFluidState().getType().isSame(fluid.getType());
+        return !Vanilla.isSameFluid(otherState.getFluidState().getType(), fluid.getType());
     }
 
     @ModifyReturnValue(method = "isFluidSideExposed(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/core/Direction;F)Z", at = @At("RETURN"))
@@ -79,7 +80,7 @@ public abstract class SodiumDefaultFluidRendererMixin {
         if (original || !forceXrayFluidSides || facing.getAxis().isVertical()) return original;
         if (!xray.isBlocked(neighborBlockState.getBlock(), null)) return false;
 
-        return !neighborBlockState.getFluidState().getType().isSame(ownBlockState.getFluidState().getType());
+        return !Vanilla.isSameFluid(neighborBlockState.getFluidState().getType(), ownBlockState.getFluidState().getType());
     }
 
     @Inject(method = "getUpFaceExposureByNeighbors", at = @At("HEAD"), cancellable = true)

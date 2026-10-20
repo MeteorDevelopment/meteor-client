@@ -11,10 +11,10 @@ import meteordevelopment.meteorclient.gui.widgets.WRoot;
 import meteordevelopment.meteorclient.gui.widgets.containers.WVerticalList;
 import meteordevelopment.meteorclient.gui.widgets.containers.WView;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WPressable;
+import meteordevelopment.meteorclient.utils.misc.MathUtils;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
-import net.minecraft.util.Mth;
 
 import static meteordevelopment.meteorclient.utils.Utils.getWindowHeight;
 
@@ -111,7 +111,7 @@ public abstract class WDropdown<T> extends WPressable {
         boolean render = super.render(renderer, mouseX, mouseY, delta);
 
         animProgress += (expanded ? 1 : -1) * delta * 14;
-        animProgress = Mth.clamp(animProgress, 0, 1);
+        animProgress = MathUtils.clamp(animProgress, 0, 1);
 
         WView view = getView();
         boolean rootInView = view == null || view.isWidgetInView(this);

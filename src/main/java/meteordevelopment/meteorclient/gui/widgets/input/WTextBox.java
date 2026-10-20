@@ -14,11 +14,11 @@ import meteordevelopment.meteorclient.gui.utils.Cell;
 import meteordevelopment.meteorclient.gui.utils.CharFilter;
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.gui.widgets.containers.WContainer;
+import meteordevelopment.meteorclient.utils.misc.MathUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
-import net.minecraft.util.Mth;
 import org.apache.commons.lang3.SystemUtils;
 
 import java.lang.reflect.InvocationTargetException;
@@ -644,7 +644,7 @@ public abstract class WTextBox extends WWidget {
             textStart += cursor - (textStart + maxTextWidth());
         }
 
-        textStart = Mth.clamp(textStart, 0, Math.max(textWidth() - maxTextWidth(), 0));
+        textStart = MathUtils.clamp(textStart, 0, Math.max(textWidth() - maxTextWidth(), 0));
 
         onCursorChanged();
 
@@ -701,7 +701,7 @@ public abstract class WTextBox extends WWidget {
     public void set(String text) {
         this.text = text;
 
-        cursor = Mth.clamp(cursor, 0, text.length());
+        cursor = MathUtils.clamp(cursor, 0, text.length());
         selectionStart = cursor;
         selectionEnd = cursor;
 

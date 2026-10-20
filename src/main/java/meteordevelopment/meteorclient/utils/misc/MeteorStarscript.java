@@ -9,6 +9,7 @@ import baritone.api.BaritoneAPI;
 import baritone.api.pathing.goals.Goal;
 import baritone.api.process.IBaritoneProcess;
 import meteordevelopment.meteorclient.MeteorClient;
+import meteordevelopment.meteorclient.compat.Compat;
 import meteordevelopment.meteorclient.mixin.MinecraftAccessor;
 import meteordevelopment.meteorclient.mixin.MultiPlayerGameModeAccessor;
 import meteordevelopment.meteorclient.pathing.BaritoneUtils;
@@ -23,7 +24,6 @@ import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.world.Dimension;
 import meteordevelopment.meteorclient.utils.world.TickRate;
 import net.minecraft.IdentifierException;
-import net.minecraft.SharedConstants;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
@@ -78,7 +78,7 @@ public class MeteorStarscript {
         StandardLib.init(ss);
 
         // General
-        ss.set("mc_version", SharedConstants.getCurrentVersion().name());
+        ss.set("mc_version", Compat.get().versionName());
         ss.set("fps", () -> Value.number(MinecraftAccessor.meteor$getFps()));
         ss.set("ping", MeteorStarscript::ping);
         ss.set("time", () -> Value.string(LocalTime.now().format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT))));

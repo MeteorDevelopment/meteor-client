@@ -69,13 +69,6 @@ public abstract class LivingEntityMixin extends Entity {
         return hand;
     }
 
-    @ModifyExpressionValue(method = "getCurrentSwingDuration", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/component/SwingAnimation;duration()I"))
-    private int getHandSwingDuration(int original) {
-        if ((Object) this != mc.player) return original;
-
-        return Modules.get().get(HandView.class).isActive() && mc.options.getCameraType().isFirstPerson() ? Modules.get().get(HandView.class).swingSpeed.get() : original;
-    }
-
     @ModifyReturnValue(method = "isFallFlying", at = @At("RETURN"))
     private boolean isGlidingHook(boolean original) {
         if ((Object) this != mc.player) return original;

@@ -6,6 +6,7 @@
 package meteordevelopment.meteorclient.systems.modules.player;
 
 import meteordevelopment.meteorclient.events.world.TickEvent;
+import meteordevelopment.meteorclient.mc.Vanilla;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
@@ -185,7 +186,7 @@ public class AntiAFK extends Module {
 
         // Swing
         if (swing.get() && random.nextInt(99) == 0) {
-            mc.player.swing(mc.player.getUsedItemHand());
+            Vanilla.swing(mc.player, mc.player.getUsedItemHand());
         }
 
         // Sneak

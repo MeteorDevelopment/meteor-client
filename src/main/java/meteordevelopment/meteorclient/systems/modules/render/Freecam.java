@@ -24,6 +24,7 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.movement.GUIMove;
 import meteordevelopment.meteorclient.utils.Utils;
+import meteordevelopment.meteorclient.utils.misc.MathUtils;
 import meteordevelopment.meteorclient.utils.misc.input.Input;
 import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
 import meteordevelopment.meteorclient.utils.player.Rotations;
@@ -461,7 +462,7 @@ public class Freecam extends Module {
         yaw += (float) deltaX;
         pitch += (float) deltaY;
 
-        pitch = Mth.clamp(pitch, -90, 90);
+        pitch = MathUtils.clamp(pitch, -90, 90);
     }
 
     public boolean renderHands() {

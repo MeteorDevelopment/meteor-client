@@ -11,6 +11,7 @@ import meteordevelopment.meteorclient.mixininterface.IVec3;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.utils.misc.MathUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
@@ -124,8 +125,8 @@ public class Anchor extends Module {
 
         if (foundHole) {
             controlMovement = true;
-            deltaX = Mth.clamp(holeX - mc.player.getX(), -0.05, 0.05);
-            deltaZ = Mth.clamp(holeZ - mc.player.getZ(), -0.05, 0.05);
+            deltaX = MathUtils.clamp(holeX - mc.player.getX(), -0.05, 0.05);
+            deltaZ = MathUtils.clamp(holeZ - mc.player.getZ(), -0.05, 0.05);
 
             ((IVec3) mc.player.getDeltaMovement()).meteor$set(deltaX, mc.player.getDeltaMovement().y - (pull.get() ? pullSpeed.get() : 0), deltaZ);
         }

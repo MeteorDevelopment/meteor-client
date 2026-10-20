@@ -9,10 +9,10 @@ import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.utils.misc.MathUtils;
 import meteordevelopment.meteorclient.utils.misc.input.Input;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.CameraType;
-import net.minecraft.util.Mth;
 import com.mojang.blaze3d.platform.InputConstants;
 
 public class FreeLook extends Module {
@@ -120,8 +120,8 @@ public class FreeLook extends Module {
             }
         }
 
-        mc.player.setXRot(Mth.clamp(mc.player.getXRot(), -90, 90));
-        cameraPitch = Mth.clamp(cameraPitch, -90, 90);
+        mc.player.setXRot(MathUtils.clamp(mc.player.getXRot(), -90, 90));
+        cameraPitch = MathUtils.clamp(cameraPitch, -90, 90);
     }
 
     public enum Mode {

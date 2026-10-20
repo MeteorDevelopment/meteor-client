@@ -134,7 +134,7 @@ public class HudRenderer {
     public void texture(Identifier id, double x, double y, double width, double height, Color color) {
         Renderer2D.TEXTURE.begin();
         Renderer2D.TEXTURE.texQuad(x, y, width, height, color);
-        Renderer2D.TEXTURE.render(mc.getTextureManager().getTexture(id).getTextureView(), mc.getTextureManager().getTexture(id).getSampler());
+        Renderer2D.TEXTURE.render(Texture.getTextureView(id), Texture.getSampler(id));
     }
 
     public double text(String text, double x, double y, Color color, boolean shadow, double scale) {

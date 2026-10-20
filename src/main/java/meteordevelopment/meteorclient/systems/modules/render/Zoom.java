@@ -17,6 +17,7 @@ import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.utils.misc.MathUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.util.Mth;
 import com.mojang.blaze3d.platform.InputConstants;
@@ -155,7 +156,7 @@ public class Zoom extends Module {
         if (isActive()) time += event.frameTime * 5;
         else time -= event.frameTime * 5;
 
-        time = Mth.clamp(time, 0, 1);
+        time = MathUtils.clamp(time, 0, 1);
     }
 
     @EventHandler

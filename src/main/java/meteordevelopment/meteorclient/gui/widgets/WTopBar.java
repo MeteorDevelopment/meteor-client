@@ -5,17 +5,18 @@
 
 package meteordevelopment.meteorclient.gui.widgets;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import meteordevelopment.meteorclient.gui.renderer.GuiRenderer;
 import meteordevelopment.meteorclient.gui.tabs.Tab;
 import meteordevelopment.meteorclient.gui.tabs.TabScreen;
 import meteordevelopment.meteorclient.gui.tabs.Tabs;
 import meteordevelopment.meteorclient.gui.widgets.containers.WHorizontalList;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WPressable;
+import meteordevelopment.meteorclient.mc.Vanilla;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import net.minecraft.client.gui.screens.Screen;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
-import static com.mojang.blaze3d.platform.InputConstants.*;
 
 public abstract class WTopBar extends WHorizontalList {
     protected abstract Color getButtonColor(boolean pressed, boolean hovered);
@@ -57,7 +58,7 @@ public abstract class WTopBar extends WHorizontalList {
                 double mouseY = mc.mouseHandler.ypos();
 
                 tab.openScreen(theme);
-                grabOrReleaseMouse(mc.getWindow(), CURSOR_NORMAL, mouseX, mouseY);
+                Vanilla.releaseMouse(mc.getWindow(), mouseX, mouseY);
             }
         }
 

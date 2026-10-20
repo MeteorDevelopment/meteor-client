@@ -7,6 +7,7 @@ package meteordevelopment.meteorclient.systems.modules.movement.elytrafly;
 
 import meteordevelopment.meteorclient.events.entity.player.PlayerMoveEvent;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
+import meteordevelopment.meteorclient.mc.Vanilla;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
@@ -125,12 +126,12 @@ public class ElytraFlightMode {
 
                 if (itemResult.isOffhand()) {
                     mc.gameMode.useItem(mc.player, InteractionHand.OFF_HAND);
-                    mc.player.swing(InteractionHand.OFF_HAND);
+                    Vanilla.swing(mc.player, InteractionHand.OFF_HAND);
                 } else {
                     InvUtils.swap(itemResult.slot(), true);
 
                     mc.gameMode.useItem(mc.player, InteractionHand.MAIN_HAND);
-                    mc.player.swing(InteractionHand.MAIN_HAND);
+                    Vanilla.swing(mc.player, InteractionHand.MAIN_HAND);
 
                     InvUtils.swapBack();
                 }

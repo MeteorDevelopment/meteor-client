@@ -1,0 +1,188 @@
+/*
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
+ */
+
+package meteordevelopment.meteorclient.utils.render;
+
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import meteordevelopment.meteorclient.renderer.MeshBuilder;
+import meteordevelopment.meteorclient.utils.render.color.Color;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.NullMarked;
+
+public class MeshBuilderVertexConsumerProvider implements IVertexConsumerProvider {
+    private final MeshBuilderVertexConsumer vertexConsumer;
+
+    public MeshBuilderVertexConsumerProvider(MeshBuilder mesh) {
+        vertexConsumer = new MeshBuilderVertexConsumer(mesh);
+    }
+
+    @Override
+    public VertexConsumer getBuffer(RenderType layer) {
+        return new W(vertexConsumer); // new instance each call to fix duplicate delegates
+    }
+
+    @NullMarked
+    private record W(MeshBuilderVertexConsumer d) implements VertexConsumer {
+        public VertexConsumer addVertex(float x, float y, float z) {
+            d.addVertex(x, y, z);
+            return this;
+        }
+
+        public VertexConsumer setColor(int r, int g, int b, int a) {
+            return this;
+        }
+
+        public VertexConsumer setColor(int c) {
+            return this;
+        }
+
+        /**
+         * Set texture coordinates
+         */
+        public VertexConsumer setUv(float u, float v) {
+            return this;
+        }
+
+        /**
+         * Set overlay coordinates
+         */
+        public VertexConsumer setUv1(int u, int v) {
+            return this;
+        }
+
+        /**
+         * Set lightmap coordinates
+         */
+        public VertexConsumer setUv2(int u, int v) {
+            return this;
+        }
+
+        /**
+         * Set texture coordinates (3 component, 26.3)
+         */
+        public VertexConsumer setUv3(float u, float v) {
+            return this;
+        }
+
+        public VertexConsumer setNormal(float x, float y, float z) {
+            return this;
+        }
+
+        public VertexConsumer setLineWidth(float w) {
+            return this;
+        }
+    }
+
+    public void setColor(Color color) {
+        vertexConsumer.fixedColor(color.r, color.g, color.b, color.a);
+    }
+
+    @Override
+    public void setOffset(int offsetX, int offsetY, int offsetZ) {
+        vertexConsumer.setOffset(offsetX, offsetY, offsetZ);
+    }
+
+    public static class MeshBuilderVertexConsumer implements VertexConsumer {
+        private final MeshBuilder mesh;
+
+        private int offsetX, offsetY, offsetZ;
+
+        private final double[] xs = new double[4];
+        private final double[] ys = new double[4];
+        private final double[] zs = new double[4];
+        private final Color color = new Color();
+
+        private int i;
+
+        public MeshBuilderVertexConsumer(MeshBuilder mesh) {
+            this.mesh = mesh;
+        }
+
+        public void setOffset(int offsetX, int offsetY, int offsetZ) {
+            this.offsetX = offsetX;
+            this.offsetY = offsetY;
+            this.offsetZ = offsetZ;
+        }
+
+        @Override
+        public @NonNull VertexConsumer addVertex(float x, float y, float z) {
+            xs[i] = (double) offsetX + x;
+            ys[i] = (double) offsetY + y;
+            zs[i] = (double) offsetZ + z;
+
+            if (++i >= 4) {
+                mesh.ensureQuadCapacity();
+
+                mesh.quad(
+                    mesh.vec3(xs[0], ys[0], zs[0]).color(color).next(),
+                    mesh.vec3(xs[1], ys[1], zs[1]).color(color).next(),
+                    mesh.vec3(xs[2], ys[2], zs[2]).color(color).next(),
+                    mesh.vec3(xs[3], ys[3], zs[3]).color(color).next()
+                );
+
+                i = 0;
+            }
+
+            return this;
+        }
+
+        @Override
+        public @NonNull VertexConsumer setColor(int red, int green, int blue, int alpha) {
+            return this;
+        }
+
+        @Override
+        public @NonNull VertexConsumer setColor(int argb) {
+            return this;
+        }
+
+        /**
+         * Set texture coordinates
+         */
+        @Override
+        public @NonNull VertexConsumer setUv(float u, float v) {
+            return this;
+        }
+
+        /**
+         * Set overlay coordinates
+         */
+        @Override
+        public @NonNull VertexConsumer setUv1(int u, int v) {
+            return this;
+        }
+
+        /**
+         * Set lightmap coordinates
+         */
+        @Override
+        public @NonNull VertexConsumer setUv2(int u, int v) {
+            return this;
+        }
+
+        /**
+         * Set texture coordinates (3 component, 26.3)
+         */
+        @Override
+        public @NonNull VertexConsumer setUv3(float u, float v) {
+            return this;
+        }
+
+        @Override
+        public @NonNull VertexConsumer setNormal(float x, float y, float z) {
+            return this;
+        }
+
+        @Override
+        public @NonNull VertexConsumer setLineWidth(float width) {
+            return this;
+        }
+
+        public void fixedColor(int red, int green, int blue, int alpha) {
+            color.set(red, green, blue, alpha);
+        }
+    }
+}

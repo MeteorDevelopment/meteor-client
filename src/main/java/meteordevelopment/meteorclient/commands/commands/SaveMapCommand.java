@@ -5,12 +5,14 @@
 
 package meteordevelopment.meteorclient.commands.commands;
 
+import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.commands.Command;
+import meteordevelopment.meteorclient.mc.Vanilla;
 import meteordevelopment.meteorclient.mixin.MapTextureManagerAccessor;
 import net.minecraft.client.multiplayer.ClientSuggestionProvider;
 import net.minecraft.client.resources.MapTextureManager;
@@ -72,13 +74,13 @@ public class SaveMapCommand extends Command {
         if (path == null) throw OOPS.create();
 
         MapTextureManagerAccessor textureManager = (MapTextureManagerAccessor) mc.getMapTextureManager();
-        MapTextureManager.MapInstance texture = textureManager.meteor$invokeGetOrCreateMapInstance(map.get(DataComponents.MAP_ID), state);
-        if (texture.texture.getPixels() == null) throw OOPS.create();
+        NativeImage mapImage = Vanilla.mapImage(textureManager, map.get(DataComponents.MAP_ID), state);
+        if (mapImage == null) throw OOPS.create();
 
         try {
-            if (scale == 128) texture.texture.getPixels().writeToFile(path);
+            if (scale == 128) mapImage.writeToFile(path);
             else {
-                int[] data = texture.texture.getPixels().makePixelArray();
+                int[] data = mapImage.makePixelArray();
                 BufferedImage image = new BufferedImage(128, 128, BufferedImage.TYPE_INT_ARGB);
                 image.setRGB(0, 0, image.getWidth(), image.getHeight(), data, 0, 128);
 
@@ -90,6 +92,8 @@ public class SaveMapCommand extends Command {
         } catch (IOException e) {
             error("Error writing map texture");
             MeteorClient.LOG.error(e.toString());
+        } finally {
+            Vanilla.closeMapImage(mapImage);
         }
     }
 

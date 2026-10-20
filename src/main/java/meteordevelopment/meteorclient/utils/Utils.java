@@ -5,13 +5,14 @@
 
 package meteordevelopment.meteorclient.utils;
 
-import com.mojang.blaze3d.ProjectionType;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.serialization.DataResult;
 import it.unimi.dsi.fastutil.objects.*;
 import meteordevelopment.meteorclient.MeteorClient;
+import meteordevelopment.meteorclient.compat.Compat;
+import meteordevelopment.meteorclient.compat.ScreenKind;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.gui.tabs.TabScreen;
+import meteordevelopment.meteorclient.mc.Vanilla;
 import meteordevelopment.meteorclient.mixin.*;
 import meteordevelopment.meteorclient.mixininterface.IMinecraft;
 import meteordevelopment.meteorclient.settings.StatusEffectAmplifierMapSetting;
@@ -25,13 +26,7 @@ import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.world.BlockEntityIterator;
 import meteordevelopment.meteorclient.utils.world.ChunkIterator;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.client.ResourceLoadStateTracker;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.gui.screens.TitleScreen;
-import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
-import net.minecraft.client.gui.screens.worldselection.SelectWorldScreen;
-import net.minecraft.client.renderer.Projection;
-import net.minecraft.client.renderer.ProjectionMatrixBuffer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponentMap;
@@ -60,10 +55,8 @@ import net.minecraft.world.phys.Vec3;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Range;
-import org.joml.Matrix4f;
 import org.joml.Vector3d;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetSocketAddress;
@@ -83,8 +76,6 @@ public class Utils {
     public static double frameTime;
     public static Screen screenToOpen;
 
-    private static final ProjectionMatrixBuffer matrixBuffer = new ProjectionMatrixBuffer("meteor-projection-matrix");
-
     private Utils() {
     }
 
@@ -95,7 +86,7 @@ public class Utils {
 
     @EventHandler
     private static void onTick(TickEvent.Post event) {
-        if (screenToOpen != null && mc.gui.screen() == null) {
+        if (screenToOpen != null && Compat.get().currentScreenKind() == ScreenKind.NONE) {
             mc.gui.setScreen(screenToOpen);
             screenToOpen = null;
         }
@@ -112,13 +103,7 @@ public class Utils {
     }
 
     public static String getWorldTime() {
-        if (mc.level == null) return "00:00";
-
-        int ticks = (int) (mc.level.getGameTime() % 24000);
-        ticks += 6000;
-        if (ticks > 24000) ticks -= 24000;
-
-        return String.format("%02d:%02d", ticks / 1000, (int) (ticks % 1000 / 1000.0 * 60));
+        return Compat.get().getWorldTime();
     }
 
     public static Iterable<ChunkAccess> chunks(boolean onlyWithLoadedNeighbours) {
@@ -197,42 +182,24 @@ public class Utils {
     }
 
     public static int getRenderDistance() {
-        return Math.max(mc.options.renderDistance().get(), ((ClientPacketListenerAccessor) mc.getConnection()).meteor$getServerChunkRadius());
+        return Compat.get().getRenderDistance();
     }
 
     public static int getWindowWidth() {
-        return mc.getWindow().getWidth();
+        return Compat.get().getWindowWidth();
     }
 
     public static int getWindowHeight() {
-        return mc.getWindow().getHeight();
+        return Compat.get().getWindowHeight();
     }
 
     public static void unscaledProjection() {
-        float width = mc.getWindow().getWidth();
-        float height = mc.getWindow().getHeight();
-
-        var proj = new Projection();
-        proj.setupOrtho(-10, 100, width, height, true);
-        var matrix = proj.getMatrix(new Matrix4f());
-
-        RenderSystem.setProjectionMatrix(matrixBuffer.getBuffer(matrix), ProjectionType.ORTHOGRAPHIC);
-        RenderUtils.projection.set(matrix);
-
+        RenderUtils.projection.set(Compat.get().applyProjection(false));
         rendering3D = false;
     }
 
     public static void scaledProjection() {
-        float width = (float) (mc.getWindow().getWidth() / mc.getWindow().getGuiScale());
-        float height = (float) (mc.getWindow().getHeight() / mc.getWindow().getGuiScale());
-
-        var proj = new Projection();
-        proj.setupOrtho(-10, 100, width, height, true);
-        var matrix = proj.getMatrix(new Matrix4f());
-
-        RenderSystem.setProjectionMatrix(matrixBuffer.getBuffer(matrix), ProjectionType.PERSPECTIVE);
-        RenderUtils.projection.set(matrix);
-
+        RenderUtils.projection.set(Compat.get().applyProjection(true));
         rendering3D = true;
     }
 
@@ -264,7 +231,7 @@ public class Utils {
         DataComponentMap components = itemStack.getComponents();
 
         if (components.has(DataComponents.CONTAINER)) {
-            var stacks = components.get(DataComponents.CONTAINER).allItemsCopyStream().toList();
+            var stacks = Vanilla.containerItems(components);
 
             for (int i = 0; i < stacks.size(); i++) {
                 if (i >= 0 && i < items.length) items[i] = stacks.get(i);
@@ -303,7 +270,7 @@ public class Utils {
                 DyeColor dye = shulkerBlock.getColor();
                 if (dye == null) return WHITE;
 
-                final int color = dye.getTextureDiffuseColor();
+                final int color = Vanilla.dyeDiffuseColor(dye);
                 return new Color((color >> 16) & 0xFF, (color >> 8) & 0xFF, color & 0xFF, 255);
             }
         }
@@ -408,24 +375,7 @@ public class Utils {
      * Use {@link Utils#getFileWorldName()} if you are using the world name as a file/directory name
      */
     public static String getWorldName() {
-        // Singleplayer
-        if (mc.isLocalServer()) {
-            if (mc.level == null) return "";
-            if (mc.getSingleplayerServer() == null) return "FAILED_BECAUSE_LEFT_WORLD";
-
-            File folder = ((MinecraftServerAccessor) mc.getSingleplayerServer()).meteor$getStorageSource().getDimensionPath(mc.level.dimension()).toFile();
-            if (folder.toPath().relativize(mc.gameDirectory.toPath()).getNameCount() != 2) {
-                folder = folder.getParentFile();
-            }
-            return folder.getName();
-        }
-
-        // Multiplayer
-        if (mc.getCurrentServer() != null) {
-            return mc.getCurrentServer().isRealm() ? "realms" : mc.getCurrentServer().ip;
-        }
-
-        return "";
+        return Compat.get().getWorldName();
     }
 
     public static String nameToTitle(String name) {
@@ -448,14 +398,16 @@ public class Utils {
     }
 
     public static boolean canUpdate() {
-        return mc != null && mc.level != null && mc.player != null;
+        return Compat.get().isInGame();
     }
 
     public static boolean canOpenGui() {
-        if (canUpdate()) return mc.gui.screen() == null;
-        return mc.gui.screen() instanceof TitleScreen
-            || mc.gui.screen() instanceof JoinMultiplayerScreen
-            || mc.gui.screen() instanceof SelectWorldScreen;
+        ScreenKind kind = Compat.get().currentScreenKind();
+        if (canUpdate()) return kind == ScreenKind.NONE;
+
+        return kind == ScreenKind.TITLE
+            || kind == ScreenKind.MULTIPLAYER
+            || kind == ScreenKind.WORLD_SELECTION;
     }
 
     public static boolean canCloseGui() {
@@ -539,8 +491,7 @@ public class Utils {
     }
 
     public static boolean isLoading() {
-        ResourceLoadStateTracker.ReloadState state = ((ResourceLoadStateTrackerAccessor) ((MinecraftAccessor) mc).meteor$getReloadStateTracker()).meteor$getReloadState();
-        return state == null || !((ReloadStateAccessor) state).meteor$isFinished();
+        return Compat.get().isLoading();
     }
 
     public static int parsePort(String full) {

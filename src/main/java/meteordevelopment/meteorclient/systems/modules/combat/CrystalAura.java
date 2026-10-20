@@ -13,6 +13,7 @@ import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.render.Render2DEvent;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
+import meteordevelopment.meteorclient.mc.Vanilla;
 import meteordevelopment.meteorclient.mixininterface.IAABB;
 import meteordevelopment.meteorclient.mixininterface.IClipContext;
 import meteordevelopment.meteorclient.mixininterface.IVec3;
@@ -874,8 +875,8 @@ public class CrystalAura extends Module {
         InteractionHand hand = InvUtils.findInHotbar(Items.END_CRYSTAL).getHand();
         if (hand == null) hand = InteractionHand.MAIN_HAND;
 
-        if (swingMode.get().client()) mc.player.swing(hand);
-        if (swingMode.get().packet()) mc.getConnection().send(new ServerboundSwingPacket(hand));
+        if (swingMode.get().client()) Vanilla.swing(mc.player, hand);
+        if (swingMode.get().packet()) Vanilla.swingPacket(mc.player, hand);
 
         attacks++;
     }
@@ -1037,8 +1038,8 @@ public class CrystalAura extends Module {
             // Place crystal
             mc.gameMode.startPrediction(mc.level, sequence -> new ServerboundUseItemOnPacket(hand, result, sequence));
 
-            if (swingMode.get().client()) mc.player.swing(hand);
-            if (swingMode.get().packet()) mc.getConnection().send(new ServerboundSwingPacket(hand));
+            if (swingMode.get().client()) Vanilla.swing(mc.player, hand);
+            if (swingMode.get().packet()) Vanilla.swingPacket(mc.player, hand);
 
             placing = true;
             placingTimer = 4;

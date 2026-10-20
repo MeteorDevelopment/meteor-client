@@ -6,6 +6,7 @@
 package meteordevelopment.meteorclient.systems.modules.world;
 
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
+import meteordevelopment.meteorclient.mc.Vanilla;
 import meteordevelopment.meteorclient.mixin.BlockHitResultAccessor;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
@@ -22,8 +23,8 @@ public class BuildHeight extends Module {
     private void onSendPacket(PacketEvent.Send event) {
         if (!(event.packet instanceof ServerboundUseItemOnPacket p)) return;
         if (mc.level == null) return;
-        if (p.getHitResult().getLocation().y >= mc.level.getHeight() && p.getHitResult().getDirection() == Direction.UP) {
-            ((BlockHitResultAccessor) p.getHitResult()).meteor$setDirection(Direction.DOWN);
+        if (Vanilla.hitResult(p).getLocation().y >= mc.level.getHeight() && Vanilla.hitResult(p).getDirection() == Direction.UP) {
+            ((BlockHitResultAccessor) Vanilla.hitResult(p)).meteor$setDirection(Direction.DOWN);
         }
     }
 }

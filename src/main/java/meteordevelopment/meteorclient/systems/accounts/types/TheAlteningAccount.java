@@ -6,9 +6,9 @@
 package meteordevelopment.meteorclient.systems.accounts.types;
 
 import com.mojang.authlib.Environment;
-import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
 import com.mojang.util.UndashedUuid;
 import meteordevelopment.meteorclient.MeteorClient;
+import meteordevelopment.meteorclient.mc.Vanilla;
 import meteordevelopment.meteorclient.systems.accounts.Account;
 import meteordevelopment.meteorclient.systems.accounts.AccountType;
 import meteordevelopment.meteorclient.systems.accounts.TokenAccount;
@@ -23,8 +23,8 @@ import java.util.UUID;
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class TheAlteningAccount extends Account<TheAlteningAccount> implements TokenAccount {
-    private static final Environment ENVIRONMENT = new Environment("http://sessionserver.thealtening.com", "http://authserver.thealtening.com", "https://api.mojang.com", "The Altening");
-    private static final YggdrasilAuthenticationService SERVICE = new YggdrasilAuthenticationService(mc.getProxy(), ENVIRONMENT);
+    private static final Object ENVIRONMENT = Vanilla.createAlteningEnvironment();
+    private static final Object SERVICE = Vanilla.createAlteningService(ENVIRONMENT);
     private String token;
     private String accessToken;
 
@@ -69,7 +69,7 @@ public class TheAlteningAccount extends Account<TheAlteningAccount> implements T
     }
 
     private AuthResponse authenticate() {
-        return Http.post(ENVIRONMENT.servicesHost() + "/authenticate")
+        return Http.post(Vanilla.alteningAuthUrl(ENVIRONMENT))
             .bodyJson(new AuthRequest("MINECRAFT", token, "Meteor on Crack!", UUID.randomUUID().toString(), true))
             .sendJson(AuthResponse.class);
     }

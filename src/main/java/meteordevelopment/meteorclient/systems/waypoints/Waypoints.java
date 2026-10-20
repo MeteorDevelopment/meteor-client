@@ -9,6 +9,8 @@ import com.mojang.blaze3d.platform.NativeImage;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.game.GameJoinedEvent;
 import meteordevelopment.meteorclient.events.game.GameLeftEvent;
+import meteordevelopment.meteorclient.mc.Vanilla;
+import meteordevelopment.meteorclient.renderer.McTexture;
 import meteordevelopment.meteorclient.systems.System;
 import meteordevelopment.meteorclient.systems.Systems;
 import meteordevelopment.meteorclient.systems.waypoints.events.WaypointAddedEvent;
@@ -20,8 +22,6 @@ import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.world.Dimension;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
-import net.minecraft.client.renderer.texture.AbstractTexture;
-import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import org.apache.commons.lang3.Strings;
@@ -42,7 +42,7 @@ public class Waypoints extends System<Waypoints> implements Iterable<Waypoint> {
 
     public static final String[] BUILTIN_ICONS = {"square", "circle", "triangle", "star", "diamond", "skull"};
 
-    public final Map<String, AbstractTexture> icons = new ConcurrentHashMap<>();
+    public final Map<String, McTexture> icons = new ConcurrentHashMap<>();
 
     private final List<Waypoint> waypoints = new CopyOnWriteArrayList<>();
 
@@ -71,7 +71,7 @@ public class Waypoints extends System<Waypoints> implements Iterable<Waypoint> {
             if (file.getName().endsWith(PNG)) {
                 try (FileInputStream inputStream = new FileInputStream(file)) {
                     String name = Strings.CS.removeEnd(file.getName(), PNG);
-                    AbstractTexture texture = new DynamicTexture(() -> name, NativeImage.read(inputStream));
+                    McTexture texture = Vanilla.createTexture(() -> name, NativeImage.read(inputStream));
                     icons.put(name, texture);
                 } catch (Exception e) {
                     MeteorClient.LOG.error("Failed to read a waypoint icon", e);

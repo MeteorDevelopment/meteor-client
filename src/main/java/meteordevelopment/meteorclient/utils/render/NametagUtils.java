@@ -9,8 +9,8 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.Zoom;
 import meteordevelopment.meteorclient.utils.Utils;
+import meteordevelopment.meteorclient.utils.misc.MathUtils;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.util.Mth;
 import org.joml.*;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
@@ -112,7 +112,7 @@ public class NametagUtils {
 
     private static double getScale(Vector3d pos) {
         double dist = camera.distance(pos);
-        return Mth.clamp(1 - dist * 0.01, 0.5, Integer.MAX_VALUE);
+        return MathUtils.clamp(1 - dist * 0.01, 0.5, Integer.MAX_VALUE);
     }
 
     private static void toScreen(Vector4f vec) {

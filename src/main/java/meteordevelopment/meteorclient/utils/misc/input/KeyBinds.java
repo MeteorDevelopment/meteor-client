@@ -7,13 +7,14 @@ package meteordevelopment.meteorclient.utils.misc.input;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import meteordevelopment.meteorclient.MeteorClient;
+import meteordevelopment.meteorclient.mc.Vanilla;
 import net.minecraft.client.KeyMapping;
 
 public class KeyBinds {
     private static final KeyMapping.Category CATEGORY = KeyMapping.Category.register(MeteorClient.identifier("meteor-client"));
 
-    public static KeyMapping OPEN_GUI = new KeyMapping("key.meteor-client.open-gui", InputConstants.Type.KEYSYM, InputConstants.KEY_RSHIFT, CATEGORY);
-    public static KeyMapping OPEN_COMMANDS = new KeyMapping("key.meteor-client.open-commands", InputConstants.Type.KEYSYM, InputConstants.KEY_PERIOD, CATEGORY);
+    public static KeyMapping OPEN_GUI = new KeyMapping("key.meteor-client.open-gui", Vanilla.KEY_TYPE, InputConstants.KEY_RSHIFT, CATEGORY);
+    public static KeyMapping OPEN_COMMANDS = new KeyMapping("key.meteor-client.open-commands", Vanilla.KEY_TYPE, InputConstants.KEY_PERIOD, CATEGORY);
 
     private KeyBinds() {
     }

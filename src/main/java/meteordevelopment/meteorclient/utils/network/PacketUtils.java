@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.utils.network;
 
+import meteordevelopment.meteorclient.mc.Vanilla;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 import net.minecraft.network.ProtocolInfo;
@@ -191,7 +192,7 @@ public class PacketUtils {
         builder.put("ServerboundSignUpdatePacket", GamePacketTypes.SERVERBOUND_SIGN_UPDATE);
         builder.put("ServerboundSpectatorActionPacket", GamePacketTypes.SERVERBOUND_SPECTATOR_ACTION);
         builder.put("ServerboundStatusRequestPacket", StatusPacketTypes.SERVERBOUND_STATUS_REQUEST);
-        builder.put("ServerboundSwingPacket", GamePacketTypes.SERVERBOUND_SWING);
+        Vanilla.registerSwingPacket(builder);
         builder.put("ServerboundTeleportToEntityPacket", GamePacketTypes.SERVERBOUND_TELEPORT_TO_ENTITY);
         builder.put("ServerboundTestInstanceBlockActionPacket", GamePacketTypes.SERVERBOUND_TEST_INSTANCE_BLOCK_ACTION);
         builder.put("ServerboundUseItemOnPacket", GamePacketTypes.SERVERBOUND_USE_ITEM_ON);

@@ -7,6 +7,7 @@ package meteordevelopment.meteorclient.systems.modules.movement;
 
 import com.google.common.collect.Streams;
 import meteordevelopment.meteorclient.events.world.TickEvent;
+import meteordevelopment.meteorclient.mc.Vanilla;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
@@ -211,7 +212,7 @@ public class Scaffold extends Module {
         if (bp.getY() >= mc.player.blockPosition().getY()) {
             bp.setY(mc.player.blockPosition().getY() - 1);
         }
-        BlockPos targetBlock = bp.immutable();
+        BlockPos targetBlock = Vanilla.copy(bp);
 
         if (!airPlace.get() && (BlockUtils.getPlaceSide(bp) == null)) {
             Vec3 pos = mc.player.position();
@@ -227,7 +228,7 @@ public class Scaffold extends Module {
                         if (!BlockUtils.canPlace(bp)) continue;
                         if (mc.player.getEyePosition().distanceToSqr(Vec3.atCenterOf(bp.relative(BlockUtils.getClosestPlaceSide(bp)))) > 36)
                             continue;
-                        blockPosArray.add(new BlockPos(bp));
+                        blockPosArray.add(Vanilla.copy(bp));
                     }
                 }
             }
@@ -314,7 +315,7 @@ public class Scaffold extends Module {
         if (BlockUtils.place(bp, item, rotate.get(), 50, renderSwing.get(), true)) {
             // Render block if was placed
             if (render.get())
-                RenderUtils.renderTickingBlock(bp.immutable(), sideColor.get(), lineColor.get(), shapeMode.get(), 0, 8, true, false);
+                RenderUtils.renderTickingBlock(Vanilla.copy(bp), sideColor.get(), lineColor.get(), shapeMode.get(), 0, 8, true, false);
             return true;
         }
         return false;

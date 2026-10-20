@@ -8,9 +8,9 @@ package meteordevelopment.meteorclient.utils.network;
 import com.mojang.blaze3d.platform.NativeImage;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.world.TickEvent;
+import meteordevelopment.meteorclient.mc.Vanilla;
 import meteordevelopment.meteorclient.utils.PreInit;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
 
@@ -172,7 +172,7 @@ public class Capes {
         }
 
         public void register() {
-            mc.getTextureManager().register(identifier, new DynamicTexture(null, img));
+            Vanilla.registerTexture(identifier, Vanilla.createTexture(() -> "cape", img));
             img = null;
 
             downloading = false;

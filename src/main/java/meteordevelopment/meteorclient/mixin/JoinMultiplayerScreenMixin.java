@@ -67,7 +67,7 @@ public abstract class JoinMultiplayerScreenMixin extends Screen {
 
         if (accounts == null) {
             accounts = addRenderableWidget(
-                new Button.Builder(Component.literal("Accounts"), _ -> minecraft.gui.setScreen(GuiThemes.get().accountsScreen()))
+                Button.builder(Component.literal("Accounts"), _ -> minecraft.gui.setScreen(GuiThemes.get().accountsScreen()))
                     .size(BUTTON_WIDTH, BUTTON_HEIGHT)
                     .build()
             );
@@ -75,7 +75,7 @@ public abstract class JoinMultiplayerScreenMixin extends Screen {
 
         if (proxies == null) {
             proxies = addRenderableWidget(
-                new Button.Builder(Component.literal("Proxies"), _ -> minecraft.gui.setScreen(GuiThemes.get().proxiesScreen()))
+                Button.builder(Component.literal("Proxies"), _ -> minecraft.gui.setScreen(GuiThemes.get().proxiesScreen()))
                     .size(BUTTON_WIDTH, BUTTON_HEIGHT)
                     .build()
             );
@@ -87,8 +87,9 @@ public abstract class JoinMultiplayerScreenMixin extends Screen {
         boolean accountsVisible = accountPos != Config.ButtonPosition.Hidden;
         boolean proxiesVisible = proxiesPos != Config.ButtonPosition.Hidden;
 
-        accounts.visible = accountsVisible;
-        proxies.visible = proxiesVisible;
+        // 26.4: AbstractWidget#visible became protected, so it is accessed through the accessor.
+        ((AbstractWidgetAccessor) accounts).meteor$setVisible(accountsVisible);
+        ((AbstractWidgetAccessor) proxies).meteor$setVisible(proxiesVisible);
 
         positionButton(accounts, accountPos, proxiesVisible && proxiesPos == accountPos, true);
         positionButton(proxies, proxiesPos, accountsVisible && accountPos == proxiesPos, false);

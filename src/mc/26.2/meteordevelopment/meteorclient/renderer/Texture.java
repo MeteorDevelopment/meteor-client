@@ -7,11 +7,15 @@ package meteordevelopment.meteorclient.renderer;
 
 import com.mojang.blaze3d.GpuFormat;
 import com.mojang.blaze3d.platform.NativeImage;
+import meteordevelopment.meteorclient.MeteorClient;
 import com.mojang.blaze3d.platform.TextureUtil;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.textures.GpuSampler;
+import com.mojang.blaze3d.textures.GpuTextureView;
 import com.mojang.blaze3d.textures.AddressMode;
 import com.mojang.blaze3d.textures.FilterMode;
 import net.minecraft.client.renderer.texture.AbstractTexture;
+import net.minecraft.resources.Identifier;
 import org.jspecify.annotations.NonNull;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.stb.STBImage;
@@ -28,6 +32,20 @@ public class Texture extends AbstractTexture {
         sampler = RenderSystem.getSamplerCache().getSampler(AddressMode.REPEAT, AddressMode.REPEAT, min, mag, false);
 
         textureView = RenderSystem.getDevice().createTextureView(texture);
+    }
+
+    /**
+     * Version-agnostic access to a texture registered with Minecraft's texture manager.
+     *
+     * <p>26.4 replaced {@code AbstractTexture} with {@code TextureHandle}, whose accessors are
+     * named differently, so the shared code goes through these helpers.
+     */
+    public static com.mojang.blaze3d.textures.GpuTextureView getTextureView(Identifier id) {
+        return MeteorClient.mc.getTextureManager().getTexture(id).getTextureView();
+    }
+
+    public static com.mojang.blaze3d.textures.GpuSampler getSampler(Identifier id) {
+        return MeteorClient.mc.getTextureManager().getTexture(id).getSampler();
     }
 
     public int getWidth() {
@@ -63,6 +81,11 @@ public class Texture extends AbstractTexture {
         // Workaround for writeToTexture(IntBuffer) overload comparing width * height to the size of the int buffer.
         // And since we are working with pixels which are only one byte in size, the sizes don't match
         return new NativeImage(imageFormat, getWidth(), getHeight(), false);
+    }
+
+    /** Reads a resource with the nearest filter, the default for pixel art. */
+    public static Texture readResource(String path, boolean flipY) {
+        return readResource(path, flipY, FilterMode.NEAREST);
     }
 
     public static Texture readResource(String path, boolean flipY, FilterMode filter) {

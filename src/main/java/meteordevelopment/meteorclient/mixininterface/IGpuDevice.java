@@ -5,8 +5,6 @@
 
 package meteordevelopment.meteorclient.mixininterface;
 
-import com.mojang.blaze3d.systems.RenderPassBackend;
-
 public interface IGpuDevice {
     /**
      * Currently there can only be a single scissor pushed at once.
@@ -17,8 +15,11 @@ public interface IGpuDevice {
 
     /**
      * This is an *INTERNAL* method, it shouldn't be called.
+     *
+     * <p>The backend is passed as an {@link Object} because its type differs between the
+     * supported Minecraft versions; the implementations cast it back.
      */
     @Deprecated
     @SuppressWarnings("DeprecatedIsStillUsed")
-    void meteor$onCreateRenderPass(RenderPassBackend backend);
+    void meteor$onCreateRenderPass(Object backend);
 }

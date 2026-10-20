@@ -7,6 +7,7 @@ package meteordevelopment.meteorclient.systems.modules.combat;
 
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
+import meteordevelopment.meteorclient.mc.Vanilla;
 import meteordevelopment.meteorclient.pathing.PathManagers;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.friends.Friends;
@@ -19,6 +20,7 @@ import meteordevelopment.meteorclient.utils.entity.SortPriority;
 import meteordevelopment.meteorclient.utils.entity.Target;
 import meteordevelopment.meteorclient.utils.entity.TargetUtils;
 import meteordevelopment.meteorclient.utils.entity.fakeplayer.FakePlayerEntity;
+import meteordevelopment.meteorclient.utils.misc.MathUtils;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
@@ -27,13 +29,11 @@ import meteordevelopment.meteorclient.utils.world.TickRate;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.network.protocol.game.ServerboundSetCarriedItemPacket;
 import net.minecraft.tags.ItemTags;
-import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.animal.frog.Frog;
 import net.minecraft.world.entity.animal.parrot.Parrot;
 import net.minecraft.world.entity.animal.wolf.Wolf;
-import net.minecraft.world.entity.monster.EnderMan;
 import net.minecraft.world.entity.monster.Zoglin;
 import net.minecraft.world.entity.monster.hoglin.Hoglin;
 import net.minecraft.world.entity.monster.piglin.Piglin;
@@ -335,7 +335,7 @@ public class KillAura extends Module {
                 weaponResult = InvUtils.find(this::acceptableWeapon, 0, 8);
 
             if (shouldShieldBreak()) {
-                FindItemResult axeResult = InvUtils.find(itemStack -> itemStack.getItem() instanceof AxeItem, 0, 8);
+                FindItemResult axeResult = InvUtils.find(itemStack -> itemStack.is(ItemTags.AXES), 0, 8);
                 if (axeResult.found()) weaponResult = axeResult;
             }
 
@@ -403,9 +403,9 @@ public class KillAura extends Module {
 
         AABB hitbox = entity.getBoundingBox();
         if (!PlayerUtils.isWithin(
-            Mth.clamp(mc.player.getX(), hitbox.minX, hitbox.maxX),
-            Mth.clamp(mc.player.getY(), hitbox.minY, hitbox.maxY),
-            Mth.clamp(mc.player.getZ(), hitbox.minZ, hitbox.maxZ),
+            MathUtils.clamp(mc.player.getX(), hitbox.minX, hitbox.maxX),
+            MathUtils.clamp(mc.player.getY(), hitbox.minY, hitbox.maxY),
+            MathUtils.clamp(mc.player.getZ(), hitbox.minZ, hitbox.maxZ),
             range.get()
         )) return false;
 
@@ -419,7 +419,7 @@ public class KillAura extends Module {
             ) return false;
         }
         if (ignorePassive.get()) {
-            if (entity instanceof EnderMan enderman && !enderman.isCreepy()) return false;
+            if (Vanilla.isEnderman(entity) && !Vanilla.isCreepy(entity)) return false;
             if ((entity instanceof Piglin || entity instanceof ZombifiedPiglin || entity instanceof Wolf) && !((Mob) entity).isAggressive())
                 return false;
         }
@@ -465,13 +465,13 @@ public class KillAura extends Module {
             Rotations.rotate(Rotations.getYaw(target), Rotations.getPitch(target, Target.Body));
 
         mc.gameMode.attack(mc.player, target);
-        mc.player.swing(InteractionHand.MAIN_HAND);
+        Vanilla.swing(mc.player, InteractionHand.MAIN_HAND);
 
         hitTimer = 0;
     }
 
     private boolean acceptableWeapon(ItemStack stack) {
-        if (shouldShieldBreak()) return stack.getItem() instanceof AxeItem;
+        if (shouldShieldBreak()) return stack.is(ItemTags.AXES);
         if (attackWhenHolding.get() == AttackItems.All) return true;
 
         if (weapons.get().contains(Items.DIAMOND_SWORD) && stack.is(ItemTags.SWORDS)) return true;

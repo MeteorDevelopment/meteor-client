@@ -12,6 +12,7 @@ import meteordevelopment.meteorclient.renderer.Renderer2D;
 import meteordevelopment.meteorclient.systems.hud.Hud;
 import meteordevelopment.meteorclient.systems.hud.HudElement;
 import meteordevelopment.meteorclient.utils.Utils;
+import meteordevelopment.meteorclient.utils.misc.MathUtils;
 import meteordevelopment.meteorclient.utils.misc.input.Input;
 import meteordevelopment.meteorclient.utils.other.Snapper;
 import meteordevelopment.meteorclient.utils.render.color.Color;
@@ -19,7 +20,6 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
-import net.minecraft.util.Mth;
 import org.jspecify.annotations.NonNull;
 import com.mojang.blaze3d.platform.InputConstants;
 
@@ -295,7 +295,7 @@ public class HudEditorScreen extends WidgetScreen implements Snapper.Container {
     private void renderSplitLines(boolean increment, double delta) {
         if (increment) splitLinesAnimation += delta * 6;
         else splitLinesAnimation -= delta * 6;
-        splitLinesAnimation = Mth.clamp(splitLinesAnimation, 0, 1);
+        splitLinesAnimation = MathUtils.clamp(splitLinesAnimation, 0, 1);
 
         Renderer2D renderer = Renderer2D.COLOR;
         renderer.begin();
@@ -405,8 +405,8 @@ public class HudEditorScreen extends WidgetScreen implements Snapper.Container {
             int lastY = y;
 
             int border = Hud.get().border.get();
-            x = Mth.clamp(x + deltaX, border, Utils.getWindowWidth() - width - border);
-            y = Mth.clamp(y + deltaY, border, Utils.getWindowHeight() - height - border);
+            x = MathUtils.clamp(x + deltaX, border, Utils.getWindowWidth() - width - border);
+            y = MathUtils.clamp(y + deltaY, border, Utils.getWindowHeight() - height - border);
 
             for (HudElement element : selection) element.move(x - lastX, y - lastY);
         }

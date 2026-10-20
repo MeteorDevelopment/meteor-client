@@ -8,6 +8,7 @@ package meteordevelopment.meteorclient.systems.modules.world;
 import meteordevelopment.meteorclient.events.entity.player.StartBreakingBlockEvent;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
+import meteordevelopment.meteorclient.mc.Vanilla;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
@@ -221,7 +222,7 @@ public class VeinMiner extends Module {
 
         public void mine() {
             if (!mining) {
-                mc.player.swing(InteractionHand.MAIN_HAND);
+                Vanilla.swing(mc.player, InteractionHand.MAIN_HAND);
                 mining = true;
             }
             if (rotate.get())

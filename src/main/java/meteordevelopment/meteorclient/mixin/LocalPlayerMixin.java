@@ -47,12 +47,6 @@ public abstract class LocalPlayerMixin extends AbstractClientPlayer {
         super(world, profile);
     }
 
-    @Inject(method = "drop", at = @At("HEAD"), cancellable = true)
-    private void onDrop(boolean all, CallbackInfoReturnable<Boolean> cir) {
-        if (MeteorClient.EVENT_BUS.post(DropItemsEvent.get(getMainHandItem())).isCancelled())
-            cir.setReturnValue(false);
-    }
-
     @ModifyExpressionValue(method = "handlePortalTransitionEffect", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Gui;screen()Lnet/minecraft/client/gui/screens/Screen;", ordinal = 0))
     private Screen modifyPortalTransitionEffect(Screen original) {
         if (Modules.get().isActive(Portals.class)) return null;

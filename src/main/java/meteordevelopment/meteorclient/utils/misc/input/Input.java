@@ -6,6 +6,7 @@
 package meteordevelopment.meteorclient.utils.misc.input;
 
 import meteordevelopment.meteorclient.gui.GuiKeyEvents;
+import meteordevelopment.meteorclient.mc.Vanilla;
 import meteordevelopment.meteorclient.mixin.KeyMappingAccessor;
 import meteordevelopment.meteorclient.utils.misc.CursorStyle;
 import net.minecraft.client.KeyMapping;
@@ -56,7 +57,7 @@ public class Input {
 
     public static void setCursorStyle(CursorStyle style) {
         if (lastCursorStyle != style) {
-            style.getCursor().select(mc.getWindow());
+            Vanilla.selectCursor(style.getCursor());
             lastCursorStyle = style;
         }
     }
@@ -66,7 +67,7 @@ public class Input {
             case InputConstants.KEY_LSHIFT, InputConstants.KEY_RSHIFT -> InputConstants.MOD_SHIFT;
             case InputConstants.KEY_LCONTROL, InputConstants.KEY_RCONTROL -> InputConstants.MOD_CONTROL;
             case InputConstants.KEY_LALT, InputConstants.KEY_RALT -> InputConstants.MOD_ALT;
-            case InputConstants.KEY_LSUPER, InputConstants.KEY_RSUPER -> InputConstants.MOD_SUPER;
+            case Vanilla.SUPER_KEY_LEFT, Vanilla.SUPER_KEY_RIGHT -> InputConstants.MOD_SUPER;
             default -> 0;
         };
     }

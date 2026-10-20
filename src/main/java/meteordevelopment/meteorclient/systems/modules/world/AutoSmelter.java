@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.systems.modules.world;
 
+import meteordevelopment.meteorclient.mc.Vanilla;
 import meteordevelopment.meteorclient.mixininterface.IAbstractFurnaceMenu;
 import meteordevelopment.meteorclient.settings.BoolSetting;
 import meteordevelopment.meteorclient.settings.IntSetting;
@@ -15,6 +16,7 @@ import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.inventory.AbstractFurnaceMenu;
 import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.item.Item;
@@ -74,7 +76,8 @@ public class AutoSmelter extends Module {
     private boolean fuelItemFilter(Item item) {
         if (!Utils.canUpdate()) return false;
 
-        return mc.getConnection().fuelValues().fuelItems().contains(item);
+        // 26.3 replaced the FuelValues registry with a per-item COOKING_FUEL data component.
+        return Vanilla.isFuel(item);
     }
 
     private boolean smeltableItemFilter(Item item) {

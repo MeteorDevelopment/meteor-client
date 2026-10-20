@@ -8,9 +8,11 @@ package meteordevelopment.meteorclient.utils.entity;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.LongBidirectionalIterator;
 import it.unimi.dsi.fastutil.longs.LongSortedSet;
+import meteordevelopment.meteorclient.mc.Vanilla;
 import meteordevelopment.meteorclient.mixin.*;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
+import net.minecraft.tags.FluidTags;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -113,10 +115,9 @@ public class EntityUtils {
         while (blockPos.getY() > bottom) {
             BlockState state = mc.level.getBlockState(blockPos);
 
-            if (state.blocksMotion()) break;
+            if (Vanilla.blocksMotion(state)) break;
 
-            Fluid fluid = state.getFluidState().getType();
-            if (fluid == Fluids.WATER || fluid == Fluids.FLOWING_WATER) {
+            if (state.getFluidState().is(FluidTags.WATER)) {
                 return true;
             }
 
