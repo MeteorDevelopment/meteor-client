@@ -33,7 +33,7 @@ CACHE = os.path.expanduser("~/.gradle/caches/fabric-loom/minecraftMaven/net/mine
 
 MIXIN_RE = re.compile(r"@Mixin\s*\(\s*(?:value\s*=\s*)?([\w.]+)\.class")
 MIXIN_TARGETS_RE = re.compile(r'@Mixin\s*\([^)]*targets\s*=\s*"([\w.$]+)"')
-METHOD_RE = re.compile(r'method\s*=\s*"([\w$<>]+)(?:\([^"]*\))?"')
+METHOD_RE = re.compile(r'method\s*=\s*"([^"]*)"')
 METHOD_LIST_RE = re.compile(r'method\s*=\s*\{([^}]*)\}')
 DESCRIPTOR_RE = re.compile(r'target\s*=\s*"(L[^"]+;)"')
 IMPORT_RE = re.compile(r"^import\s+(?:static\s+)?([\w.]+)\s*;", re.M)
@@ -57,6 +57,73 @@ VALUE_INJECTORS = ("ModifyArg", "ModifyArgs", "ModifyConstant", "ModifyVariable"
 # the injectors of mixin extras, their handlers have their own rules
 EXTRAS_INJECTORS = ("ModifyExpressionValue", "ModifyReturnValue", "ModifyReceiver", "WrapWithCondition")
 ALL_INJECTORS = ARG_INJECTORS + VALUE_INJECTORS + EXTRAS_INJECTORS + ("Overwrite", "WrapOperation")
+
+
+LOCAL_RE = re.compile(r'@(Local|Share)\s*\(\s*(?:name\s*=\s*)?"([^"]+)"')
+DECOMPILE_CACHE = os.path.expanduser(
+    "~/.gradle/caches/fabric-loom/decompile/v1.zip")
+
+
+def decompiled_sources():
+    """The decompiled sources of Minecraft, by class name.
+
+    Loom keeps them in a cache of files that hold the name of the class and its source. The
+    sources have the names of the parameters and the local variables, which the jar itself does
+    not have, so they are the only way to check the @Local captures.
+    """
+    if not os.path.isfile(DECOMPILE_CACHE):
+        return {}
+
+    import struct
+    import zipfile
+
+    sources = {}
+    with zipfile.ZipFile(DECOMPILE_CACHE) as archive:
+        for entry in archive.namelist():
+            data = archive.read(entry)
+            if not data.startswith(b"LOOM"):
+                continue
+
+            name = source = None
+            for key in (b"NAME", b"SRC"):
+                index = data.find(key)
+                if index < 0:
+                    continue
+                length = struct.unpack(">I", data[index + 4:index + 8])[0]
+                value = data[index + 8:index + 8 + length]
+                if key == b"NAME":
+                    name = value.decode("latin1")
+                else:
+                    source = value.decode("utf-8", "ignore")
+
+            if name and source:
+                sources.setdefault(name, []).append(source)
+
+    return sources
+
+
+def source_methods(source, method):
+    """The declaration and the body of every overload of a method of a decompiled source."""
+    found = []
+
+    for match in re.finditer(r"^\s+(?:public|private|protected)[^\n]*\b" + re.escape(method) + r"\s*\(",
+                             source, re.M):
+        declaration = source[match.start():source.find(")", match.end()) + 1]
+        start = source.find("{", match.end())
+        if start < 0:
+            continue
+
+        depth = 0
+        for index in range(start, len(source)):
+            if source[index] == "{":
+                depth += 1
+            elif source[index] == "}":
+                depth -= 1
+                if depth == 0:
+                    found.append((declaration, source[start:index + 1]))
+                    break
+
+    return found
 
 
 def jar(version):
@@ -97,6 +164,24 @@ def superclass(javap_output):
 def is_interface(javap_output):
     return any(re.match(r"(?:public |abstract |static |final )*interface ", line.strip())
                for line in javap_output.splitlines())
+
+
+def descriptor_of(line, method):
+    """The internal descriptor of a javap method line."""
+    match = re.search(r"\b" + re.escape(method) + r"\(", line)
+    if match is None:
+        return None
+
+    head = line[:match.start()].strip().split()
+    return_type = head[-1] if head else "void"
+
+    start = line.find("(", match.start())
+    end = line.find(")", start)
+    if start < 0 or end < 0:
+        return None
+
+    args = split_parameters(line[start + 1:end])
+    return "(" + to_descriptor(args) + ")" + to_descriptor([return_type])
 
 
 def method_lines(javap_output, method):
@@ -176,6 +261,34 @@ def descriptor_types(descriptor):
     return types
 
 
+PRIMITIVE_DESCRIPTORS = {"int": "I", "long": "J", "float": "F", "double": "D", "boolean": "Z",
+                          "byte": "B", "char": "C", "short": "S", "void": "V"}
+
+
+def to_descriptor(types):
+    """The internal descriptor of a list of java types."""
+    descriptors = ""
+
+    for type_name in types:
+        type_name = type_name.strip().rstrip(";")
+        if "<" in type_name:
+            type_name = type_name[:type_name.index("<")]
+
+        dimensions = 0
+        while type_name.endswith("[]"):
+            dimensions += 1
+            type_name = type_name[:-2].strip()
+
+        if type_name in PRIMITIVE_DESCRIPTORS:
+            descriptors += PRIMITIVE_DESCRIPTORS[type_name]
+        else:
+            descriptors += "L" + type_name.replace(".", "/") + ";"
+
+        descriptors += "[" * dimensions
+
+    return descriptors
+
+
 def simple_name(type_name):
     """The name of a type without the package and the generics."""
     type_name = type_name.strip()
@@ -208,7 +321,7 @@ class Jar:
                 self.cache[fqn] = ""
             else:
                 self.archive.extract(entry, self.out_dir)
-                result = subprocess.run(["javap", "-p", "-c", "-classpath", self.out_dir, fqn],
+                result = subprocess.run(["javap", "-p", "-c", "-s", "-classpath", self.out_dir, fqn],
                                         capture_output=True, text=True)
                 self.cache[fqn] = result.stdout
         return self.cache[fqn]
@@ -282,6 +395,15 @@ class Jar:
 
             return {"calls": calls, "fields": fields, "strings": strings}
         return None
+
+    def method_descriptors(self, fqn, method):
+        """The descriptors of every overload of a method."""
+        found = []
+
+        for _, output in self.hierarchy(fqn):
+            found.extend(method_descriptors_of(output, method))
+
+        return found
 
     def argument_types(self, fqn, method):
         """The types of the arguments of every overload of a method."""
@@ -423,6 +545,25 @@ def method_body(output, method):
     return body
 
 
+def method_descriptors_of(output, method):
+    """The descriptors of every overload of a method, without the generics."""
+    found = []
+    lines = output.splitlines()
+    inside = False
+
+    for line in lines:
+        if re.match(r"\s{2}[\w $<>\[\],.?]*\s\w+\(", line):
+            inside = re.search(r"\b" + re.escape(method) + r"\(", line) is not None
+            continue
+        if inside:
+            match = re.match(r"\s+descriptor: (\S+)", line)
+            if match:
+                found.append(match.group(1))
+                inside = False
+
+    return found
+
+
 def collect(text, class_name):
     """The declarations of a java file, with the annotations that belong to them.
 
@@ -474,20 +615,29 @@ def injector_of(annotations):
 
 
 def target_methods(annotations, mixin_targets):
-    """The methods an injector injects into."""
-    methods = set()
+    """The methods an injector injects into, with the descriptor the mixin names."""
+    methods = {}
+
+    def add(value):
+        if not value:
+            return
+        name = value.split("(")[0]
+        if name.startswith("L") and ";" in name:
+            value = value[value.index(";") + 1:]
+            name = value.split("(")[0]
+        methods.setdefault(name, value[value.index("("):] if "(" in value else None)
+
     for annotation in annotations:
         for match in METHOD_RE.finditer(annotation):
-            methods.add(match.group(1).split("(")[0])
+            add(match.group(1))
         for match in METHOD_LIST_RE.finditer(annotation):
             for part in match.group(1).split(","):
-                part = part.strip().strip('"')
-                if part:
-                    methods.add(part.split("(")[0])
+                add(part.strip().strip('"'))
         for match in re.finditer(r"MixinTargets\.([A-Z_]+)", annotation):
             value = mixin_targets.get(match.group(1))
             if value and not value.startswith("L"):
-                methods.add(value.split("(")[0])
+                add(value)
+
     return methods
 
 
@@ -502,6 +652,7 @@ def main():
     minecraft = Jar(jar_file, out_dir)
 
     problems = []
+    sources = decompiled_sources()
     descriptor_targets = []
     checked_methods = 0
     checked_targets = 0
@@ -649,7 +800,8 @@ def main():
                                             f"\"{string}\"")
 
                 # 4. the injected methods
-                injected = {m.group(1) for m in METHOD_RE.finditer(text)}
+                injected = {m.group(1).split("(")[0] if "(" not in m.group(1) else m.group(1)
+                            for m in METHOD_RE.finditer(text)}
                 for m in re.finditer(r"MixinTargets\.([A-Z_]+)", text):
                     value = mixin_targets.get(m.group(1))
                     if value is None:
@@ -674,9 +826,23 @@ def main():
                         checked_methods += 1
                         if method == "<init>":
                             continue  # constructors are always there, javap does not name them
+
                         name = method.split("(")[0]
+                        if name.startswith("L") and ";" in name:
+                            # the whole member is named: Lowner/Class;member(args)ret
+                            name = name[name.index(";") + 1:].split("(")[0]
+                            method = method[method.index(";") + 1:]
                         if minecraft.find(fqn, name) is None:
                             problems.append(f"{relative}: {fqn}#{method} does not exist")
+                            continue
+
+                        # the mixin names the descriptor, so it has to be the one of the method
+                        if "(" in method:
+                            descriptor = "(" + method[method.index("(") + 1:]
+                            descriptors = minecraft.method_descriptors(fqn, name)
+                            if descriptors and descriptor not in descriptors:
+                                problems.append(f"{relative}: {fqn}#{name} is {descriptors}, "
+                                                f"but the mixin wants {descriptor}")
 
                 for annotations, declaration_kind, member, modifiers, count, types, param_types in declarations:
                     # 5. accessors and invokers
@@ -751,7 +917,12 @@ def main():
                                 # the handler takes the arguments of the target, a callback and
                                 # maybe captured locals, or only the callback
                                 matched = False
-                                for target_types in minecraft.argument_types(fqn, target_method):
+                                wanted_descriptor = target_methods(annotations, mixin_targets).get(target_method)
+                                for descriptor in minecraft.method_descriptors(fqn, target_method):
+                                    if wanted_descriptor and descriptor != wanted_descriptor:
+                                        continue
+
+                                    target_types = descriptor_types(descriptor)
                                     arity = len(target_types)
 
                                     if re.search(r"CallbackInfo", types[0]):
@@ -766,6 +937,9 @@ def main():
 
                                     matched = True
                                     for index, (mine, theirs) in enumerate(zip(types[:arity], target_types)):
+                                        # a type variable of the target is erased to its bound
+                                        if len(mine) == 1 and mine.isupper():
+                                            continue
                                         if mine != theirs:
                                             problems.append(
                                                 f"{relative}: {member} takes {mine} as its argument "
@@ -781,6 +955,36 @@ def main():
                                     problems.append(f"{relative}: {member} takes {count} arguments, "
                                                     f"{fqn}#{target_method} takes "
                                                     f"{[arity for arity, _ in arities]}")
+
+                # the @Local captures: the local has to exist in the target method
+                if sources:
+                    for annotations, declaration_kind, member, modifiers, count, types, param_types in declarations:
+                        if declaration_kind != "method":
+                            continue
+
+                        captures = set(name for kind, name in LOCAL_RE.findall(param_types) if kind == "Local")
+                        if not captures:
+                            continue
+
+                        for fqn in targets:
+                            variants = sources.get(fqn.replace(".", "/"), [])
+                            if not variants:
+                                continue
+
+                            for target_method in sorted(target_methods(annotations, mixin_targets)):
+                                for capture in sorted(captures):
+                                    found = False
+                                    for source in variants:
+                                        for declaration, body in source_methods(source, target_method):
+                                            if re.search(r"\b" + re.escape(capture) + r"\b", body):
+                                                found = True
+                                                break
+                                        if found:
+                                            break
+                                    if not found:
+                                        problems.append(f"{relative}: {fqn}#{target_method} has no local "
+                                                        f"\"{capture}\" to capture")
+
 
     for owner, member in descriptor_targets:
         checked_targets += 1

@@ -9,6 +9,7 @@ import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.entity.player.CanWalkOnFluidEvent;
+import meteordevelopment.meteorclient.mc.MixinTargets;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.movement.HighJump;
 import meteordevelopment.meteorclient.systems.modules.movement.Sprint;
@@ -56,7 +57,7 @@ public abstract class LivingEntityMixin extends Entity {
         if (noRender.noEatParticles() && itemStack.getComponents().has(DataComponents.FOOD)) ci.cancel();
     }
 
-    @ModifyVariable(method = "swing(Lnet/minecraft/world/InteractionHand;)V", at = @At("HEAD"), argsOnly = true, name = "hand")
+    @ModifyVariable(method = MixinTargets.SWING_METHOD, at = @At("HEAD"), argsOnly = true, index = 1)
     private InteractionHand setHand(InteractionHand hand) {
         if ((Object) this != mc.player) return hand;
 

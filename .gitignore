@@ -16,4 +16,3 @@ logs
 .idea/*
 !.idea/copyright/*
 !.idea/scopes/*
-__pycache__/

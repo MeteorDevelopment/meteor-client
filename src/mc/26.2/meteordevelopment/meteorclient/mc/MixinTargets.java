@@ -15,6 +15,8 @@ public final class MixinTargets {
     private MixinTargets() {}
 
     public static final String ITEM_ACTIVATION_TARGET = "net.minecraft.client.renderer.GameRenderer";
+    public static final String HIT_RESULT_METHOD = "getManyEntityHitResult(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/phys/Vec3;Lnet/minecraft/world/phys/Vec3;Lnet/minecraft/world/phys/AABB;Ljava/util/function/Predicate;FLnet/minecraft/world/level/ClipContext$Block;Z)Ljava/util/Collection;";
+    public static final String SWING_METHOD = "swing(Lnet/minecraft/world/InteractionHand;)V";
     public static final String SKY_METHOD = "addSkyPass";
     public static final String INPUT_METHOD = "tick";
     public static final String FOIL_SUBMIT_METHOD = "prepareFoilSubmit";

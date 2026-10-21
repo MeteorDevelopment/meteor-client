@@ -66,7 +66,10 @@ public abstract class GameRendererRenderLevelMixin {
     private final PoseStack matrices = new PoseStack();
 
     @Inject(method = "renderLevel", at = @At("TAIL"))
-    private void onRenderLevel(CallbackInfo ci, @Local(name = "projectionMatrix") Matrix4f projectionMatrix, @Local(name = "modelViewMatrix") Matrix4fc modelViewMatrix, @Local(name = "worldPartialTicks") float worldPartialTicks, @Local(name = "bobStack") PoseStack bobStack) {
+    private void onRenderLevel(CallbackInfo ci, @Local(name = "projectionMatrix") Matrix4f projectionMatrix, @Local(name = "worldPartialTicks") float worldPartialTicks, @Local(name = "bobStack") PoseStack bobStack) {
+        // the model view matrix is not a local of renderLevel any more
+        Matrix4fc modelViewMatrix = this.gameRenderState.levelRenderState.cameraRenderState.viewRotationMatrix;
+
         if (!Utils.canUpdate()) return;
 
         Profiler.get().push(MeteorClient.MOD_ID + "_render");

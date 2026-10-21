@@ -69,10 +69,13 @@ jobs:
         run: ./gradlew build -PminecraftVersion=${{ matrix.version }}
 
       # A mixin that points at something that no longer exists compiles fine and then throws
-      # while the game starts, so the mixins are checked against the jar of the version.
+      # while the game starts, so the mixins are checked against the jar of the version. The
+      # decompiled sources have the names of the local variables, which the jar does not have,
+      # so the @Local captures can be checked too.
       - name: Audit the mixins
         run: |
           minecraft=$(grep '^minecraft=' "gradle/mc-versions/${{ matrix.version }}.properties" | cut -d= -f2)
+          ./gradlew genSources -PminecraftVersion=${{ matrix.version }}
           python3 scripts/audit-mixin-targets.py "$minecraft" "src/mc/${{ matrix.version }}" src/main/java
 
       - name: Archive Artifacts

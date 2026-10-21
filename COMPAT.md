@@ -225,7 +225,10 @@ mixin:
    method**, with the ordinal it asks for, and the string argument it names is really used,
 7. the handler takes the arguments Mixin passes to it — the arguments of the target method and a
    callback, or only the callback — with the same types, and a static method is injected into
-   with a static handler.
+   with a static handler,
+8. every `@Local` capture names a local variable that really exists in the target method. The
+   jar has no local variable table, so this needs the decompiled sources, which loom keeps in
+   its cache (`./gradlew genSources`).
 
 ```
 scripts/audit-mixin-targets.py 26.4-snapshot-4 src/mc/26.4 src/main/java
@@ -236,8 +239,13 @@ not fit the version it is built for fails the build instead of the game.
 
 All the checks are clean for 26.2, 26.3 and 26.4. The audit also uncovered mixins that were
 already broken — the totem animation, both drop events, the swing duration, the enchant glint,
-the block-break particles, and the whole renderer stack of 26.3 and 26.4, where the handlers
-still had the arguments of 26.2. Those are fixed for all three versions now.
+the block-break particles, the whole renderer stack of 26.3 and 26.4, where the handlers still
+had the arguments of 26.2, and the two mixins whose target method changed its signature
+(`LivingEntity#swing` and `ProjectileUtil#getManyEntityHitResult`). Those are fixed for all three
+versions now.
+
+A mixin that names the descriptor of its target has to name the one of the version it is built
+for, so the descriptors that differ live in `MixinTargets` like the names of the methods do.
 
 ### Two things the build had to learn
 

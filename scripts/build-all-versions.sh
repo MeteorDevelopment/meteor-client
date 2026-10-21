@@ -27,6 +27,8 @@ for version in "${versions[@]}"; do
     # A mixin that points at something that no longer exists compiles fine and then throws
     # while the game starts, so the mixins are checked against the jar of the version.
     minecraft=$(grep '^minecraft=' "gradle/mc-versions/$version.properties" | cut -d= -f2)
+    # the decompiled sources have the names of the local variables, the jar does not
+    ./gradlew genSources -PminecraftVersion="$version" > /dev/null
     if python3 scripts/audit-mixin-targets.py "$minecraft" "src/mc/$version" src/main/java; then
       echo "--- OK: $version"
     else
