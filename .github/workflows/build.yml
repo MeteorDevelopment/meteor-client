@@ -8,10 +8,47 @@ on:
   push:
     branches:
       - master
+  pull_request:
+    branches:
+      - master
 
 jobs:
-  build:
+  prepare:
+    name: Collect versions
     runs-on: ubuntu-latest
+
+    outputs:
+      versions: ${{ steps.versions.outputs.versions }}
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      # The supported versions are the descriptors in gradle/mc-versions, so adding a version
+      # there is enough to have it built and archived.
+      - name: Find supported versions
+        id: versions
+        run: |
+          versions=$(ls gradle/mc-versions/*.properties \
+            | xargs -n1 basename \
+            | sed 's/\.properties$//' \
+            | sort -V)
+          json=$(printf '%s\n' "$versions" | sed 's/.*/"&"/' | paste -sd, -)
+          echo "versions=[$json]" >> "$GITHUB_OUTPUT"
+          echo "Building Minecraft $versions" >> "$GITHUB_STEP_SUMMARY"
+
+  build:
+    name: Build ${{ matrix.version }}
+    needs: prepare
+    runs-on: ubuntu-latest
+
+    strategy:
+      # Every version is built on its own, one failing version must not hide the others.
+      fail-fast: false
+      matrix:
+        version: ${{ fromJSON(needs.prepare.outputs.versions) }}
 
     steps:
       - name: Checkout Repository
@@ -28,11 +65,34 @@ jobs:
           distribution: 'temurin'
           java-version: '25'
 
-      - name: Build
-        run: ./gradlew build
+      - name: Build ${{ matrix.version }}
+        run: ./gradlew build -PminecraftVersion=${{ matrix.version }}
+
+      - name: Archive Artifacts
+        uses: actions/upload-artifact@v5
+        with:
+          name: meteor-client-${{ matrix.version }}
+          path: build/libs/
+          if-no-files-found: error
+
+  collect:
+    name: Collect all versions
+    needs: [prepare, build]
+    if: always()
+    runs-on: ubuntu-latest
+
+    steps:
+      # One artifact with the jars of every version, next to the per version artifacts.
+      - name: Download all artifacts
+        uses: actions/download-artifact@v5
+        with:
+          pattern: meteor-client-*
+          path: build/libs
+          merge-multiple: true
 
       - name: Archive Artifacts
         uses: actions/upload-artifact@v5
         with:
           name: Artifacts
           path: build/libs/
+          if-no-files-found: ignore
