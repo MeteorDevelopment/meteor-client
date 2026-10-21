@@ -39,7 +39,6 @@ public class AccountsScreen extends WindowScreen {
         addButton(l, "Cracked", () -> mc.gui.setScreen(new AddCrackedAccountScreen(theme, this)));
         addButton(l, "Altening", () -> mc.gui.setScreen(new AddAlteningAccountScreen(theme, this)));
         addButton(l, "Session", () -> mc.gui.setScreen(new AddSessionAccountScreen(theme, this)));
-        addButton(l, "Microsoft", () -> mc.gui.setScreen(new AddMicrosoftAccountScreen(theme, this)));
     }
 
     private void addButton(WContainer c, String text, Runnable action) {

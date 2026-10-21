@@ -8,6 +8,7 @@ package meteordevelopment.meteorclient.gui;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import meteordevelopment.meteorclient.gui.renderer.GuiRenderer;
+import meteordevelopment.meteorclient.gui.screens.FileBrowserScreen;
 import meteordevelopment.meteorclient.gui.screens.settings.*;
 import meteordevelopment.meteorclient.gui.themes.meteor.widgets.WMeteorLabel;
 import meteordevelopment.meteorclient.gui.utils.Cell;
@@ -28,9 +29,10 @@ import meteordevelopment.meteorclient.utils.render.DisplayItemUtils;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.client.resources.language.I18n;
 import org.apache.commons.lang3.Strings;
-import org.lwjgl.util.tinyfd.TinyFileDialogs;
 
 import java.io.File;
+import org.lwjgl.PointerBuffer;
+import org.lwjgl.system.MemoryUtil;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -479,6 +481,22 @@ public class DefaultSettingsWidgetFactory extends SettingsWidgetFactory {
         KeyboardHud.fillTable(theme, wtable, setting);
     }
 
+    /** The filters of a file setting are patterns like {@code *.txt}. */
+    private static List<String> fileFilters(FileSetting setting) {
+        List<String> filters = new ArrayList<>();
+        PointerBuffer buffer = setting.filters;
+
+        for (int i = 0; i < buffer.limit(); i++) {
+            long pointer = buffer.get(i);
+            if (pointer == 0) continue;
+
+            String pattern = MemoryUtil.memUTF8(pointer);
+            if (!pattern.isEmpty()) filters.add(pattern);
+        }
+
+        return filters;
+    }
+
     private void fileW(WTable table, FileSetting setting) {
         WHorizontalList list = table.add(theme.horizontalList()).expandX().widget();
 
@@ -486,20 +504,11 @@ public class DefaultSettingsWidgetFactory extends SettingsWidgetFactory {
 
         WLabel fileName = list.add(theme.label((setting.get() != null && setting.get().exists()) ? setting.get().getName() : "No file selected.")).widget();
 
-        selectFile.action = () -> {
-            String path = TinyFileDialogs.tinyfd_openFileDialog(
-                "Select File",
-                null,
-                setting.filters,
-                null,
-                false
-            );
-
-            if (path != null) {
-                setting.set(new File(path));
+        selectFile.action = () -> mc.gui.setScreen(new FileBrowserScreen(GuiThemes.get(), "Select File", false,
+            fileFilters(setting), file -> {
+                setting.set(file);
                 fileName.set(setting.get().getName());
-            }
-        };
+            }));
 
         reset(table, setting, () -> fileName.set((setting.get() != null && setting.get().exists()) ? setting.get().getName() : "No file selected."));
     }

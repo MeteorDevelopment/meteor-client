@@ -9,7 +9,6 @@ import com.mojang.brigadier.StringReader;
 import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.mixininterface.IChatHud;
-import meteordevelopment.meteorclient.pathing.BaritoneUtils;
 import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.utils.PostInit;
 import meteordevelopment.meteorclient.utils.misc.text.MeteorClickEvent;
@@ -255,18 +254,6 @@ public class ChatUtils {
     public static MutableComponent formatCoords(Vec3 pos) {
         String coordsString = String.format("(highlight)(underline)%.0f, %.0f, %.0f(default)", pos.x, pos.y, pos.z);
         MutableComponent coordsText = formatMsg(coordsString, ChatFormatting.GRAY);
-
-        if (BaritoneUtils.IS_AVAILABLE) {
-            Style style = coordsText.getStyle().applyFormats(ChatFormatting.BOLD)
-                .withHoverEvent(new HoverEvent.ShowText(
-                    Component.literal("Set as Baritone goal")
-                ))
-                .withClickEvent(new MeteorClickEvent(
-                    String.format("%sgoto %d %d %d", BaritoneUtils.getPrefix(), (int) pos.x, (int) pos.y, (int) pos.z)
-                ));
-
-            coordsText.setStyle(style);
-        }
 
         return coordsText;
     }

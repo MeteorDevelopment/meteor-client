@@ -28,13 +28,6 @@ public class PathManagers {
             }
         }
 
-        if (exists("baritone.api.BaritoneAPI")) {
-            BaritoneUtils.IS_AVAILABLE = true;
-
-            if (INSTANCE instanceof NopPathManager)
-                INSTANCE = new BaritonePathManager();
-        }
-
         MeteorClient.LOG.info("Path Manager: {}", INSTANCE.getName());
     }
 

@@ -31,7 +31,6 @@ public class MeteorTextHud {
     public static final HudElementInfo<TextHud>.Preset MODULE_ENABLED;
     public static final HudElementInfo<TextHud>.Preset MODULE_ENABLED_WITH_INFO;
     public static final HudElementInfo<TextHud>.Preset WATERMARK;
-    public static final HudElementInfo<TextHud>.Preset BARITONE;
 
     static {
         addPreset("Empty", null);
@@ -55,7 +54,6 @@ public class MeteorTextHud {
         MODULE_ENABLED = addPreset("Module enabled", "Kill Aura: {meteor.is_module_active(\"kill-aura\") ? #2 \"ON\" : #3 \"OFF\"}", 0);
         MODULE_ENABLED_WITH_INFO = addPreset("Module enabled with info", "Kill Aura: {meteor.is_module_active(\"kill-aura\") ? #2 \"ON\" : #3 \"OFF\"} #1{meteor.get_module_info(\"kill-aura\")}", 0);
         WATERMARK = addPreset("Watermark", "{meteor.name} #1{meteor.version}");
-        BARITONE = addPreset("Baritone", "Baritone: #1{baritone.process_name}");
     }
 
     private static TextHud create() {

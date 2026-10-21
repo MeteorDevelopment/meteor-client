@@ -111,7 +111,6 @@ the behaviour below has been exercised.
 | Item | Risk | Notes |
 | --- | --- | --- |
 | Sodium / Lithium / Iris | Not supported | There is no build of these mods for 26.4 yet, and their 26.3 builds are compiled against APIs that 26.4 removed. The mixin plugin only applies those mixins when the mod is loaded, so they stay dormant. |
-| `tinyfd` file dialogs | `NoClassDefFoundError` | 26.3 already dropped `lwjgl-tinyfd`; the build only adds it as `compileOnly`, so the jar (and its natives) must be bundled for Save/Load dialogs to work. |
 | Item in hand rendering | High | `FirstPersonHandsAndItemsRenderer` was reworked for 26.3 and reworked again for 26.4. The injection points were re-derived from the bytecode but never executed. |
 | `HandView` equip animations | Feature lost | 26.3 removed `tick()` / `shouldInstantlyReplaceVisibleItem()` / the renderer's `mainHandHeight` fields, so HandView's "skip swapping" and "old animations" options have no hook point. |
 | Fog rework | Medium | 26.4 replaced the fog type with a `FogEnvironment` system; `NoRender`'s "no liquid overlay" now hooks `Camera#getFogType` instead of `Camera#getFluidInCamera`. |

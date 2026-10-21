@@ -13,7 +13,6 @@ import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.Xray;
-import meteordevelopment.meteorclient.systems.modules.world.InfinityMiner;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.ListMode;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
@@ -127,7 +126,6 @@ public class AutoTool extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
-        if (Modules.get().isActive(InfinityMiner.class)) return;
 
         if (switchBack.get() && !mc.options.keyAttack.isDown() && wasPressed && InvUtils.previousSlot != -1) {
             InvUtils.swapBack();
@@ -147,7 +145,6 @@ public class AutoTool extends Module {
 
     @EventHandler(priority = EventPriority.HIGH)
     private void onStartBreakingBlock(StartBreakingBlockEvent event) {
-        if (Modules.get().isActive(InfinityMiner.class)) return;
         if (mc.player.isCreative()) return;
 
         // Get blockState

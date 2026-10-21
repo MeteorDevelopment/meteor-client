@@ -13,7 +13,6 @@ import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
-import net.irisshaders.iris.api.v0.IrisApi;
 import net.minecraft.world.level.block.Block;
 
 import java.util.List;
@@ -66,14 +65,6 @@ public class WallHack extends Module {
     @Override
     public void onDeactivate() {
         mc.levelExtractor.allChanged();
-    }
-
-    @Override
-    public WWidget getWidget(GuiTheme theme) {
-        if (MixinPlugin.isIrisPresent && IrisApi.getInstance().isShaderPackInUse())
-            return theme.label("Warning: Due to shaders in use, opacity is overridden to 0.");
-
-        return null;
     }
 
     @EventHandler

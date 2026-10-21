@@ -120,8 +120,8 @@ public class KillAura extends Module {
     );
 
     private final Setting<Boolean> pauseOnCombat = sgGeneral.add(new BoolSetting.Builder()
-        .name("pause-baritone")
-        .description("Freezes Baritone temporarily until you are finished attacking the entity.")
+        .name("pause-pathing")
+        .description("Freezes pathing temporarily until you are finished attacking the entity.")
         .defaultValue(true)
         .build()
     );

@@ -5,13 +5,11 @@
 
 package meteordevelopment.meteorclient.commands.commands;
 
-import baritone.api.BaritoneAPI;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.commands.Command;
 import meteordevelopment.meteorclient.events.entity.EntityRemovedEvent;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
-import meteordevelopment.meteorclient.pathing.BaritoneUtils;
 import meteordevelopment.meteorclient.pathing.PathManagers;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
@@ -30,6 +28,8 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.LodestoneTracker;
 import net.minecraft.world.item.component.MapDecorations;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
@@ -161,8 +161,8 @@ public class LocateCommand extends Command {
                 return SINGLE_SUCCESS;
             }
 
-            // If the player is not holding a valid map, try to locate the monument using Baritone
-            if (BaritoneUtils.IS_AVAILABLE) {
+            // If the player is not holding a valid map, try to locate the monument by scanning
+            if (true) {
                 Vec3 coords = findByBlockList(monumentBlocks);
                 if (coords == null) {
                     error("No monument found. Try using an (highlight)ocean explorer map(default) for more success.");
@@ -175,7 +175,7 @@ public class LocateCommand extends Command {
                 return SINGLE_SUCCESS;
             }
 
-            error("Locating this structure without an (highlight)ocean explorer map(default) requires Baritone.");
+            error("Couldn't locate the monument.");
             return SINGLE_SUCCESS;
         }));
 
@@ -183,14 +183,14 @@ public class LocateCommand extends Command {
             boolean foundEye = InvUtils.testInHotbar(Items.ENDER_EYE);
 
             if (foundEye) {
-                if (BaritoneUtils.IS_AVAILABLE) PathManagers.get().follow(EyeOfEnder.class::isInstance);
+                PathManagers.get().follow(EyeOfEnder.class::isInstance);
                 firstStart = null;
                 firstEnd = null;
                 secondStart = null;
                 secondEnd = null;
                 MeteorClient.EVENT_BUS.subscribe(this);
                 info("Please throw the first Eye of Ender");
-            } else if (BaritoneUtils.IS_AVAILABLE) {
+            } else {
                 Vec3 coords = findByBlockList(strongholdBlocks);
                 if (coords == null) {
                     error("No stronghold found nearby. You can use (highlight)Ender Eyes(default) for more success.");
@@ -200,8 +200,6 @@ public class LocateCommand extends Command {
                 text.append(ChatUtils.formatCoords(coords));
                 text.append(".");
                 info(text);
-            } else {
-                error("No Eyes of Ender found in hotbar.");
             }
 
             return SINGLE_SUCCESS;
@@ -212,11 +210,6 @@ public class LocateCommand extends Command {
         builder.then(literal("nether_fortress").executes(_ -> {
             if (mc.level.dimension() != Level.NETHER) {
                 error("You need to be in the nether to locate a nether fortress.");
-                return SINGLE_SUCCESS;
-            }
-
-            if (!BaritoneUtils.IS_AVAILABLE) {
-                error("Locating this structure requires Baritone.");
                 return SINGLE_SUCCESS;
             }
 
@@ -237,11 +230,6 @@ public class LocateCommand extends Command {
         builder.then(literal("end_city").executes(_ -> {
             if (mc.level.dimension() != Level.END) {
                 error("You need to be in the end to locate an end city.");
-                return SINGLE_SUCCESS;
-            }
-
-            if (!BaritoneUtils.IS_AVAILABLE) {
-                error("Locating this structure requires Baritone.");
                 return SINGLE_SUCCESS;
             }
 
@@ -300,15 +288,55 @@ public class LocateCommand extends Command {
         MeteorClient.EVENT_BUS.unsubscribe(this);
     }
 
+    /** Scans the chunks around the player for the given blocks. */
     private @Nullable Vec3 findByBlockList(List<Block> blockList) {
-        List<BlockPos> posList = BaritoneAPI.getProvider().getWorldScanner().scanChunkRadius(BaritoneAPI.getProvider().getPrimaryBaritone().getPlayerContext(), blockList, 64, 10, 32);
-        if (posList.isEmpty()) {
-            return null;
+        if (mc.level == null || mc.player == null) return null;
+
+        BlockPos origin = mc.player.blockPosition();
+        int radius = 8;
+        int minX = (origin.getX() >> 4) - radius;
+        int maxX = (origin.getX() >> 4) + radius;
+        int minZ = (origin.getZ() >> 4) - radius;
+        int maxZ = (origin.getZ() >> 4) + radius;
+
+        int found = 0;
+        Vec3 result = null;
+
+        for (int x = minX; x <= maxX; x++) {
+            for (int z = minZ; z <= maxZ; z++) {
+                if (!mc.level.hasChunk(x, z)) continue;
+
+                ChunkAccess chunk = mc.level.getChunk(x, z);
+
+                for (int sectionIndex = 0; sectionIndex < chunk.getSections().length; sectionIndex++) {
+                    LevelChunkSection section = chunk.getSections()[sectionIndex];
+                    if (section.hasOnlyAir()) continue;
+
+                    int baseY = chunk.getMinY() + sectionIndex * 16;
+
+                    for (int lx = 0; lx < 16; lx++) {
+                        for (int lz = 0; lz < 16; lz++) {
+                            for (int ly = 0; ly < 16; ly++) {
+                                if (!blockList.contains(section.getBlockState(lx, ly, lz).getBlock())) continue;
+
+                                BlockPos pos = new BlockPos(x << 4, baseY + ly, z << 4);
+                                pos = pos.offset(lx, 0, lz);
+
+                                if (result == null) result = Vec3.atBottomCenterOf(pos);
+                                found++;
+
+                                if (found >= 3) {
+                                    warning("Only %d block(s) found. This search might be a false positive.", found);
+                                    return result;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
-        if (posList.size() < 3) {
-            warning("Only %d block(s) found. This search might be a false positive.", posList.size());
-        }
-        return new Vec3(posList.getFirst().getX(), posList.getFirst().getY(), posList.getFirst().getZ());
+
+        return result;
     }
 
     @EventHandler

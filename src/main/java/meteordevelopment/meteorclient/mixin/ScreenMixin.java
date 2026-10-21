@@ -29,7 +29,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import static com.mojang.blaze3d.platform.InputConstants.*;
 
-@Mixin(value = Screen.class, priority = 500) // needs to be before baritone
+@Mixin(value = Screen.class, priority = 500)
 public abstract class ScreenMixin {
 
     @Unique

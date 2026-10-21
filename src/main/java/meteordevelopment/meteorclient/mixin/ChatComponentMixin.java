@@ -143,7 +143,7 @@ public abstract class ChatComponentMixin implements IChatHud {
 
     @Inject(method = "addMessageToDisplayQueue", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/components/ChatComponent;isChatFocused()Z"))
     private void onBreakChatMessageLines(GuiMessage message, CallbackInfo ci, @Local(name = "lines") List<FormattedCharSequence> lines) {
-        if (Modules.get() == null) return; // baritone calls addMessage before we initialise
+        if (Modules.get() == null) return; // a path manager may call addMessage before we initialise
 
         getBetterChat().lines.addFirst(lines.size());
     }

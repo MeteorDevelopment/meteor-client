@@ -5,14 +5,10 @@
 
 package meteordevelopment.meteorclient.utils.misc;
 
-import baritone.api.BaritoneAPI;
-import baritone.api.pathing.goals.Goal;
-import baritone.api.process.IBaritoneProcess;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.compat.Compat;
 import meteordevelopment.meteorclient.mixin.MinecraftAccessor;
 import meteordevelopment.meteorclient.mixin.MultiPlayerGameModeAccessor;
-import meteordevelopment.meteorclient.pathing.BaritoneUtils;
 import meteordevelopment.meteorclient.pathing.PathManagers;
 import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.systems.modules.Module;
@@ -95,17 +91,6 @@ public class MeteorStarscript {
             .set("get_module_setting", MeteorStarscript::getModuleSetting)
             .set("prefix", MeteorStarscript::getMeteorPrefix)
         );
-
-        // Baritone
-        if (BaritoneUtils.IS_AVAILABLE) {
-            ss.set("baritone", new ValueMap()
-                .set("is_pathing", () -> Value.bool(BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing()))
-                .set("distance_to_goal", MeteorStarscript::baritoneDistanceToGoal)
-                .set("process", MeteorStarscript::baritoneProcess)
-                .set("process_name", MeteorStarscript::baritoneProcessName)
-                .set("eta", MeteorStarscript::baritoneETA)
-            );
-        }
 
         // Camera
         ss.set("camera", new ValueMap()
@@ -422,41 +407,6 @@ public class MeteorStarscript {
 
     // Other
 
-    private static Value baritoneProcess() {
-        Optional<IBaritoneProcess> process = BaritoneAPI.getProvider().getPrimaryBaritone().getPathingControlManager().mostRecentInControl();
-        return Value.string(process.isEmpty() ? "" : process.get().displayName0());
-    }
-
-    private static Value baritoneProcessName() {
-        Optional<IBaritoneProcess> process = BaritoneAPI.getProvider().getPrimaryBaritone().getPathingControlManager().mostRecentInControl();
-        if (process.isEmpty()) return Value.string("");
-
-        String className = process.get().getClass().getSimpleName();
-        if (className.endsWith("Process")) className = className.substring(0, className.length() - 7);
-
-        SB.append(className);
-        int i = 0;
-        for (int j = 0; j < className.length(); j++) {
-            if (j > 0 && Character.isUpperCase(className.charAt(j))) {
-                SB.insert(i, ' ');
-                i++;
-            }
-
-            i++;
-        }
-
-        String name = SB.toString();
-        SB.setLength(0);
-        return Value.string(name);
-    }
-
-    // Returns the ETA in seconds
-    private static Value baritoneETA() {
-        if (mc.player == null) return Value.number(0);
-        Optional<Double> ticksTillGoal = BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().estimatedTicksToGoal();
-        return ticksTillGoal.map(aDouble -> Value.number(aDouble / 20)).orElseGet(() -> Value.number(0));
-    }
-
     private static Value oppositeX(boolean camera) {
         double x = camera ? mc.gameRenderer.mainCamera().position().x : (mc.player != null ? mc.player.getX() : 0);
         Dimension dimension = PlayerUtils.getDimension();
@@ -541,11 +491,6 @@ public class MeteorStarscript {
 
         PlayerInfo playerListEntry = mc.getConnection().getPlayerInfo(mc.player.getUUID());
         return Value.number(playerListEntry != null ? playerListEntry.getLatency() : 0);
-    }
-
-    private static Value baritoneDistanceToGoal() {
-        Goal goal = BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().getGoal();
-        return Value.number((goal != null && mc.player != null) ? goal.heuristic(mc.player.blockPosition()) : 0);
     }
 
     private static Value posString(boolean opposite, boolean camera) {

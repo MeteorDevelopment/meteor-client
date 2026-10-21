@@ -12,6 +12,8 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.commands.Command;
+import meteordevelopment.meteorclient.gui.GuiThemes;
+import meteordevelopment.meteorclient.gui.screens.FileBrowserScreen;
 import meteordevelopment.meteorclient.mc.Vanilla;
 import meteordevelopment.meteorclient.mixin.MapTextureManagerAccessor;
 import net.minecraft.client.multiplayer.ClientSuggestionProvider;
@@ -23,32 +25,19 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.MapItem;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import org.jspecify.annotations.Nullable;
-import org.lwjgl.BufferUtils;
-import org.lwjgl.PointerBuffer;
-import org.lwjgl.system.MemoryUtil;
-import org.lwjgl.util.tinyfd.TinyFileDialogs;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
+import java.util.List;
 import java.io.File;
 import java.io.IOException;
-import java.nio.ByteBuffer;
 
 public class SaveMapCommand extends Command {
     private static final SimpleCommandExceptionType MAP_NOT_FOUND = new SimpleCommandExceptionType(Component.literal("You must be holding a filled map."));
     private static final SimpleCommandExceptionType OOPS = new SimpleCommandExceptionType(Component.literal("Something went wrong."));
 
-    private final PointerBuffer filters;
-
     public SaveMapCommand() {
         super("save-map", "Saves a map to an image.", "sm");
-
-        filters = BufferUtils.createPointerBuffer(1);
-
-        ByteBuffer pngFilter = MemoryUtil.memASCII("*.png");
-
-        filters.put(pngFilter);
-        filters.rewind();
     }
 
     @Override
@@ -70,9 +59,18 @@ public class SaveMapCommand extends Command {
         MapItemSavedData state = getMapState();
         if (map == null || state == null) throw MAP_NOT_FOUND.create();
 
-        File path = getPath();
-        if (path == null) throw OOPS.create();
+        mc.gui.setScreen(new FileBrowserScreen(GuiThemes.get(), "Save image", true, List.of("*.png"), file -> {
+            if (!file.getName().endsWith(".png")) file = new File(file.getPath() + ".png");
 
+            try {
+                writeMap(file, scale, map, state);
+            } catch (CommandSyntaxException e) {
+                error(e.getMessage());
+            }
+        }));
+    }
+
+    private void writeMap(File path, int scale, ItemStack map, MapItemSavedData state) throws CommandSyntaxException {
         MapTextureManagerAccessor textureManager = (MapTextureManagerAccessor) mc.getMapTextureManager();
         NativeImage mapImage = Vanilla.mapImage(textureManager, map.get(DataComponents.MAP_ID), state);
         if (mapImage == null) throw OOPS.create();
@@ -102,14 +100,6 @@ public class SaveMapCommand extends Command {
         if (map == null) return null;
 
         return MapItem.getSavedData(map.get(DataComponents.MAP_ID), mc.level);
-    }
-
-    private @Nullable File getPath() {
-        String path = TinyFileDialogs.tinyfd_saveFileDialog("Save image", null, filters, null);
-        if (path == null) return null;
-        if (!path.endsWith(".png")) path += ".png";
-
-        return new File(path);
     }
 
     private @Nullable ItemStack getMap() {

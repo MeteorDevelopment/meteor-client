@@ -117,19 +117,7 @@ public class Config extends System<Config> {
         .build()
     );
 
-    public final Setting<ButtonPosition> proxiesButtonAnchor = sgVisual.add(new EnumSetting.Builder<ButtonPosition>()
-        .name("proxies-button")
-        .description("Controls the position and visibility of the proxies button in the multiplayer screen.")
-        .defaultValue(ButtonPosition.TopRight)
-        .build()
-    );
 
-    public final Setting<Boolean> showProxiesStatus = sgVisual.add(new BoolSetting.Builder()
-        .name("proxy-status")
-        .description("Shows information about the current proxy in the multiplayer screen.")
-        .defaultValue(true)
-        .build()
-    );
 
     // Modules
 

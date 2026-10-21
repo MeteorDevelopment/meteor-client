@@ -18,7 +18,6 @@ import meteordevelopment.meteorclient.events.meteor.ActiveModulesChangedEvent;
 import meteordevelopment.meteorclient.events.meteor.KeyInputEvent;
 import meteordevelopment.meteorclient.events.meteor.ModuleBindChangedEvent;
 import meteordevelopment.meteorclient.events.meteor.MouseClickEvent;
-import meteordevelopment.meteorclient.pathing.BaritoneUtils;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.System;
@@ -560,11 +559,6 @@ public class Modules extends System<Modules> {
         add(new Timer());
         add(new VeinMiner());
         add(new WorkersModule());
-
-        if (BaritoneUtils.IS_AVAILABLE) {
-            add(new Excavator());
-            add(new InfinityMiner());
-        }
     }
 
     private void initMisc() {

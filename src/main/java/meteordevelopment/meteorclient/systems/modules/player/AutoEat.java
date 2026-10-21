@@ -66,9 +66,9 @@ public class AutoEat extends Module {
         .build()
     );
 
-    private final Setting<Boolean> pauseBaritone = sgGeneral.add(new BoolSetting.Builder()
-        .name("pause-baritone")
-        .description("Pause baritone when eating.")
+    private final Setting<Boolean> pausePathing = sgGeneral.add(new BoolSetting.Builder()
+        .name("pause-pathing")
+        .description("Pause pathing when eating.")
         .defaultValue(true)
         .build()
     );
@@ -120,7 +120,7 @@ public class AutoEat extends Module {
     private int slot, prevSlot;
 
     private final List<Class<? extends Module>> wasAura = new ReferenceArrayList<>();
-    private boolean wasBaritone = false;
+    private boolean wasPathing = false;
 
     public AutoEat() {
         super(Categories.Player, "auto-eat", "Automatically eats food.");
@@ -195,9 +195,9 @@ public class AutoEat extends Module {
             }
         }
 
-        // Pause baritone
-        if (pauseBaritone.get() && PathManagers.get().isPathing() && !wasBaritone) {
-            wasBaritone = true;
+        // Pause pathing
+        if (pausePathing.get() && PathManagers.get().isPathing() && !wasPathing) {
+            wasPathing = true;
             PathManagers.get().pause();
         }
     }
@@ -225,9 +225,9 @@ public class AutoEat extends Module {
             }
         }
 
-        // Resume baritone
-        if (pauseBaritone.get() && wasBaritone) {
-            wasBaritone = false;
+        // Resume pathing
+        if (pausePathing.get() && wasPathing) {
+            wasPathing = false;
             PathManagers.get().resume();
         }
     }
