@@ -15,6 +15,8 @@ public final class MixinTargets {
     private MixinTargets() {}
 
     public static final String ITEM_ACTIVATION_TARGET = "net.minecraft.client.renderer.GameRenderer";
+    public static final String SKY_METHOD = "addSkyPass";
+    public static final String INPUT_METHOD = "tick";
     public static final String FOIL_SUBMIT_METHOD = "prepareFoilSubmit";
     public static final String SWING_DURATION_METHOD = "getCurrentSwingDuration";
     public static final String SHADER_MANAGER_APPLY = "apply(Lnet/minecraft/client/renderer/ShaderManager$Configs;Lnet/minecraft/server/packs/resources/ResourceManager;Lnet/minecraft/util/profiling/ProfilerFiller;)V";

@@ -14,7 +14,6 @@ import meteordevelopment.meteorclient.systems.modules.render.Nametags;
 import meteordevelopment.meteorclient.systems.modules.render.NoRender;
 import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
-import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
@@ -22,7 +21,6 @@ import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.item.FallingBlockEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.LightLayer;
 import org.objectweb.asm.Opcodes;
@@ -54,12 +52,6 @@ public abstract class EntityRendererMixin<T extends Entity, S extends EntityRend
         if (!(entity instanceof Player player)) return;
         if (Modules.get().get(Nametags.class).playerNametags() && !(EntityUtils.getGameMode(player) == null && Modules.get().get(Nametags.class).excludeBots()))
             cir.setReturnValue(null);
-    }
-
-    @Inject(method = "shouldRender", at = @At("HEAD"), cancellable = true)
-    private void shouldRender(T entity, Frustum culler, double camX, double camY, double camZ, CallbackInfoReturnable<Boolean> cir) {
-        if (noRender.noEntity(entity)) cir.setReturnValue(false);
-        if (noRender.noFallingBlocks() && entity instanceof FallingBlockEntity) cir.setReturnValue(false);
     }
 
     @Inject(method = "affectedByCulling", at = @At("HEAD"), cancellable = true)

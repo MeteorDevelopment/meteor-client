@@ -15,7 +15,9 @@ public final class MixinTargets {
     private MixinTargets() {}
 
     public static final String ITEM_ACTIVATION_TARGET = "net.minecraft.client.player.LocalPlayer";
-    public static final String FOIL_SUBMIT_METHOD = "prepareSubmit";
+    public static final String SKY_METHOD = "addSkyPass";
+    public static final String INPUT_METHOD = "sendChanges";
+    public static final String FOIL_SUBMIT_METHOD = "prepareMainSubmit";
     public static final String SWING_DURATION_METHOD = "getModifiedSwingDuration";
     public static final String SHADER_MANAGER_APPLY = "apply(Lcom/mojang/renderpearl/api/device/GpuDevice;Lnet/minecraft/client/renderer/ShaderManager$PendingResults;)V";
     public static final String CAMERA_FLUID_METHOD = "getFluidInCamera";

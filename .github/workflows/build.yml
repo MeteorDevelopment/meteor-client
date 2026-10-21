@@ -68,6 +68,13 @@ jobs:
       - name: Build ${{ matrix.version }}
         run: ./gradlew build -PminecraftVersion=${{ matrix.version }}
 
+      # A mixin that points at something that no longer exists compiles fine and then throws
+      # while the game starts, so the mixins are checked against the jar of the version.
+      - name: Audit the mixins
+        run: |
+          minecraft=$(grep '^minecraft=' "gradle/mc-versions/${{ matrix.version }}.properties" | cut -d= -f2)
+          python3 scripts/audit-mixin-targets.py "$minecraft" "src/mc/${{ matrix.version }}" src/main/java
+
       - name: Archive Artifacts
         uses: actions/upload-artifact@v5
         with:

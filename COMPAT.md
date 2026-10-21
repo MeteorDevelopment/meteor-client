@@ -213,17 +213,31 @@ game starts**, so compiling is not enough. `scripts/audit-mixin-targets.py` chec
 mixin:
 
 1. the `@Mixin` target class exists,
-2. every injected method exists on that target class (walking up the superclass chain, because a
-   descriptor names the type the call site used),
-3. every `@At(INVOKE)` / `@At(FIELD)` target still resolves.
+2. the mixin has the kind Mixin requires of its target — a class target needs a class mixin, an
+   interface target needs an interface mixin (an interface mixin with methods of its own may
+   only target an interface, one with only `@Accessor` / `@Invoker` methods may only target a
+   class),
+3. every `@Shadow` field and method exists on that target class,
+4. every injected / overwritten method exists on that target class (walking up the superclass
+   chain, because a descriptor names the type the call site used),
+5. every `@Accessor` / `@Invoker` member exists on that target class,
+6. every `@At(INVOKE)` / `@At(FIELD)` target still resolves **in the bytecode of the target
+   method**, with the ordinal it asks for, and the string argument it names is really used,
+7. the handler takes the arguments Mixin passes to it — the arguments of the target method and a
+   callback, or only the callback — with the same types, and a static method is injected into
+   with a static handler.
 
 ```
 scripts/audit-mixin-targets.py 26.4-snapshot-4 src/mc/26.4 src/main/java
 ```
 
-All three checks are clean for 26.2, 26.3 and 26.4. The audit also uncovered six mixins that were
-already broken in 26.3 (the totem animation, both drop events, the swing duration, the enchant
-glint and the block-break particles) — those are fixed for all three versions now.
+The audit runs as a part of `scripts/build-all-versions.sh` and in the CI, so a mixin that does
+not fit the version it is built for fails the build instead of the game.
+
+All the checks are clean for 26.2, 26.3 and 26.4. The audit also uncovered mixins that were
+already broken — the totem animation, both drop events, the swing duration, the enchant glint,
+the block-break particles, and the whole renderer stack of 26.3 and 26.4, where the handlers
+still had the arguments of 26.2. Those are fixed for all three versions now.
 
 ### Two things the build had to learn
 

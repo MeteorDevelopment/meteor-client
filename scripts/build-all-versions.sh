@@ -24,7 +24,15 @@ status=0
 for version in "${versions[@]}"; do
   echo "=== Building for Minecraft $version ==="
   if ./gradlew build -PminecraftVersion="$version"; then
-    echo "--- OK: $version"
+    # A mixin that points at something that no longer exists compiles fine and then throws
+    # while the game starts, so the mixins are checked against the jar of the version.
+    minecraft=$(grep '^minecraft=' "gradle/mc-versions/$version.properties" | cut -d= -f2)
+    if python3 scripts/audit-mixin-targets.py "$minecraft" "src/mc/$version" src/main/java; then
+      echo "--- OK: $version"
+    else
+      echo "--- FAILED: $version (the mixins do not fit)" >&2
+      status=1
+    fi
   else
     echo "--- FAILED: $version" >&2
     status=1

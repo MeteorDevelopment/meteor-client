@@ -88,20 +88,35 @@ calling code did not have to change):
 
 `Waypoints`, `Waypoint`, `Capes`, `FakeClientPlayer`, `SaveMapCommand`, `ClientLevelMixin`,
 `CameraMixin`, `BuiltInRegistriesMixin`, `ShaderManagerMixin`, `DownloadQueueMixin`,
-`MapTextureManagerAccessor`, `ItemRendererMixin`, `SodiumDefaultFluidRendererMixin`, plus the new
-`ItemActivationMixin`, `ItemDropMixin`, `DropAllMixin` and `SwingDurationMixin`.
+`MapTextureManagerAccessor`, `ItemRendererMixin`, `SodiumDefaultFluidRendererMixin`,
+`LightningBoltRendererMixin`, plus the new `ItemActivationMixin`, `ItemDropMixin`, `DropAllMixin`,
+`SwingDurationMixin`, `EntityShouldRenderMixin` and `GameRendererRenderLevelMixin`.
+
+The last two are new because Mixin requires the handler to take exactly the arguments of the
+method it injects into, and those methods changed:
+
+| Mixin | 26.2 | 26.3 / 26.4 |
+| --- | --- | --- |
+| `EntityShouldRenderMixin` | `EntityRenderer#shouldRender(T, Frustum, double, double, double)` | `... , float` |
+| `GameRendererRenderLevelMixin` | `GameRenderer#renderLevel(DeltaTracker)` | `GameRenderer#renderLevel()` |
+
+`CloudRendererMixin`, `ScreenEffectRendererMixin` and the `renderItemInHand` injection of
+`GameRendererMixin` went the other way: their handlers did not use the arguments at all, so they
+take only the callback now and are shared by every version again.
 
 ## Mixin audits
 
-Two scripts were used to catch mixin targets that compile but cannot be applied at runtime
-(a missing method makes Mixin throw when the game starts):
+`scripts/audit-mixin-targets.py` catches the mixins that compile but cannot be applied at runtime
+(a missing method makes Mixin throw when the game starts). It checks that the target class
+exists, that the mixin has the kind Mixin requires of its target, that the `@Shadow`,
+`@Accessor` and `@Invoker` members exist, that the `@At(INVOKE)` / `@At(FIELD)` targets are really
+in the bytecode of the target method, and that the handler takes the arguments Mixin passes to it.
 
-* every injected method exists on its target class,
-* every `@At(INVOKE)` / `@At(FIELD)` target still resolves.
-
-Both are clean for 26.2, 26.3 and 26.4. They also uncovered **six mixins that were already
-broken in 26.3** (a totem animation, the drop events, the swing duration, the enchant glint and
-the block-break particles); those are fixed now for all three versions.
+The audit is clean for 26.2, 26.3 and 26.4, and it runs as a part of the build. It uncovered
+**six mixins that were already broken in 26.3** (a totem animation, the drop events, the swing
+duration, the enchant glint and the block-break particles) and **the whole renderer stack of 26.3
+and 26.4**, whose handlers still had the arguments of 26.2 — the game could not even start there.
+Those are fixed now for all three versions.
 
 ## Runtime risks
 

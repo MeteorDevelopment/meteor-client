@@ -10,7 +10,6 @@ import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import meteordevelopment.meteorclient.MeteorClient;
-import meteordevelopment.meteorclient.MixinPlugin;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.events.render.RenderAfterWorldEvent;
 import meteordevelopment.meteorclient.renderer.MeteorRenderPipelines;
@@ -87,55 +86,6 @@ public abstract class GameRendererMixin {
         return result;
     }
 
-    @Inject(method = "renderLevel", at = @At(value = "INVOKE_STRING", target = "Lnet/minecraft/util/profiling/ProfilerFiller;popPush(Ljava/lang/String;)V", args = "ldc=hand"))
-    private void onRenderLevel(DeltaTracker deltaTracker, CallbackInfo ci, @Local(name = "projectionMatrix") Matrix4f projectionMatrix, @Local(name = "modelViewMatrix") Matrix4fc modelViewMatrix, @Local(name = "worldPartialTicks") float worldPartialTicks, @Local(name = "bobStack") PoseStack bobStack) {
-        if (!Utils.canUpdate()) return;
-
-        Profiler.get().push(MeteorClient.MOD_ID + "_render");
-
-        // Create renderer and event
-
-        if (renderer == null)
-            renderer = new Renderer3D(MeteorRenderPipelines.WORLD_COLORED_LINES, MeteorRenderPipelines.WORLD_COLORED);
-        if (depthRenderer == null)
-            depthRenderer = new Renderer3D(MeteorRenderPipelines.WORLD_COLORED_LINES_DEPTH, MeteorRenderPipelines.WORLD_COLORED_DEPTH);
-        Render3DEvent event = Render3DEvent.get(bobStack, renderer, depthRenderer, worldPartialTicks, mainCamera.position().x, mainCamera.position().y, mainCamera.position().z);
-
-        // Update model view matrix
-
-        RenderSystem.getModelViewStack().pushMatrix().mul(modelViewMatrix);
-
-        matrices.pushPose();
-        bobHurt(this.gameRenderState.levelRenderState.cameraRenderState, matrices);
-        if (minecraft.options.bobView().get()) {
-            bobView(this.gameRenderState.levelRenderState.cameraRenderState, matrices);
-        }
-
-        Matrix4f inverseBob = new Matrix4f(matrices.last().pose()).invert();
-        RenderSystem.getModelViewStack().mul(inverseBob);
-        matrices.popPose();
-
-        // Call utility classes (apply bob correction when Iris shaders are active)
-
-        Matrix4fc correctedPosition = modelViewMatrix;
-        RenderUtils.updateScreenCenter(projectionMatrix, correctedPosition);
-        NametagUtils.onRender(modelViewMatrix);
-
-        // Render
-
-        renderer.begin();
-        depthRenderer.begin();
-        MeteorClient.EVENT_BUS.post(event);
-        renderer.render(bobStack);
-        depthRenderer.render(bobStack);
-
-        // Revert model view matrix
-
-        RenderSystem.getModelViewStack().popMatrix();
-
-        Profiler.get().pop();
-    }
-
     @Inject(method = "renderLevel", at = @At("TAIL"))
     private void onRenderLevelTail(CallbackInfo ci) {
         MeteorClient.EVENT_BUS.post(RenderAfterWorldEvent.get());
@@ -147,7 +97,7 @@ public abstract class GameRendererMixin {
     }
 
     @Inject(method = "renderItemInHand", at = @At("HEAD"), cancellable = true)
-    private void renderItemInHand(CameraRenderState cameraState, float deltaPartialTick, Matrix4fc modelViewMatrix, CallbackInfo ci) {
+    private void renderItemInHand(CallbackInfo ci) {
         if (!Modules.get().get(Freecam.class).renderHands() || !Modules.get().get(Zoom.class).renderHands()) {
             ci.cancel();
         }
