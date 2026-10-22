@@ -24,6 +24,7 @@ public class MixinPlugin implements IMixinConfigPlugin {
     private static boolean isLithiumPresent;
     public static boolean isIrisPresent;
     private static boolean isBaritonePresent;
+    private static boolean isMetallumPresent;
 
     @Override
     public void onLoad(String mixinPackage) {
@@ -35,6 +36,7 @@ public class MixinPlugin implements IMixinConfigPlugin {
         isLithiumPresent = FabricLoader.getInstance().isModLoaded("lithium");
         isIrisPresent = FabricLoader.getInstance().isModLoaded("iris");
         isBaritonePresent = FabricLoader.getInstance().isModLoaded("baritone") || FabricLoader.getInstance().isModLoaded("baritone-meteor");
+        isMetallumPresent = FabricLoader.getInstance().isModLoaded("metallum");
 
         loaded = true;
     }
@@ -58,6 +60,8 @@ public class MixinPlugin implements IMixinConfigPlugin {
             return isLithiumPresent;
         } else if (mixinClassName.startsWith(mixinPackage + ".baritone")) {
             return isBaritonePresent;
+        } else if (mixinClassName.startsWith(mixinPackage + ".metallum")) {
+            return isMetallumPresent;
         }
 
 
