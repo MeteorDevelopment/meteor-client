@@ -288,8 +288,9 @@ public class ActiveModulesHud extends HudElement {
 
         if (activeInfo.get()) {
             String info = module.getInfoString();
+            Color infoColor = module.getInfoStringColor();
             if (info != null) {
-                renderer.text(info, x + textLength + emptySpace, y, moduleInfoColor.get(), shadow.get(), getScale());
+                renderer.text(info, x + textLength + emptySpace, y, (infoColor != null) ? infoColor : moduleInfoColor.get(), shadow.get(), getScale());
                 textLength += emptySpace + renderer.textWidth(info, shadow.get(), getScale());
             }
         }
