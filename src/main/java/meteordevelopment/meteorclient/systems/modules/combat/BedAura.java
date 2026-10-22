@@ -325,12 +325,7 @@ public class BedAura extends Module {
 
         if (!(mc.level.getBlockState(pos).getBlock() instanceof BedBlock)) return;
 
-        boolean wasSneaking = mc.player.isShiftKeyDown();
-        if (wasSneaking) mc.player.setShiftKeyDown(false);
-
-        mc.gameMode.useItemOn(mc.player, InteractionHand.OFF_HAND, new BlockHitResult(Vec3.atCenterOf(pos), Direction.UP, pos, false));
-
-        mc.player.setShiftKeyDown(wasSneaking);
+        BlockUtils.interact(new BlockHitResult(Vec3.atCenterOf(pos), Direction.UP, pos, false), InteractionHand.OFF_HAND, false);
     }
 
     @EventHandler

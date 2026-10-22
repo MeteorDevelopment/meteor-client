@@ -130,7 +130,7 @@ public class BlockUtils {
         return true;
     }
 
-    public static void interact(BlockHitResult blockHitResult, InteractionHand hand, boolean swing) {
+    public static InteractionResult interact(BlockHitResult blockHitResult, InteractionHand hand, boolean swing) {
         boolean wasSneaking = mc.player.isShiftKeyDown();
         mc.player.setShiftKeyDown(false);
 
@@ -141,6 +141,8 @@ public class BlockUtils {
         }
 
         mc.player.setShiftKeyDown(wasSneaking);
+
+        return result;
     }
 
     public static boolean canPlaceBlock(BlockPos blockPos, boolean checkEntities, Block block) {
