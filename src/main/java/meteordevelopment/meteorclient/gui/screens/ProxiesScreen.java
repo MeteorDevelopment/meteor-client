@@ -19,14 +19,10 @@ import meteordevelopment.meteorclient.gui.widgets.pressable.WMinus;
 import meteordevelopment.meteorclient.settings.Settings;
 import meteordevelopment.meteorclient.systems.proxies.Proxies;
 import meteordevelopment.meteorclient.systems.proxies.Proxy;
+import meteordevelopment.meteorclient.utils.misc.FileDialogs;
 import meteordevelopment.meteorclient.utils.misc.NbtUtils;
 import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
-import org.lwjgl.sdl.SDLDialog;
-import org.lwjgl.sdl.SDL_DialogFileFilter;
-import org.lwjgl.system.MemoryStack;
-import org.lwjgl.system.MemoryUtil;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -59,23 +55,8 @@ public class ProxiesScreen extends WindowScreen {
         newBtn.action = () -> mc.gui.setScreen(new EditProxyScreen(theme, null, this::reload));
 
         // Import
-        MemoryStack stack = MemoryStack.stackPush();
-        SDL_DialogFileFilter.Buffer filters = SDL_DialogFileFilter.malloc(1, stack);
-        filters.name(stack.UTF8("Txt Files")).pattern(stack.UTF8("txt"));
-
         WButton importBtn = l.add(theme.button("Import")).expandX().widget();
-        importBtn.action = () -> SDLDialog.SDL_ShowOpenFileDialog((_, fileptr, _) -> {
-            if (fileptr == 0) return;
-
-            long filePointer = MemoryUtil.memGetAddress(fileptr);
-            if (filePointer == 0) return;
-
-            String selectedFile = MemoryUtil.memUTF8(filePointer);
-            if (!selectedFile.isEmpty()){
-                File file = new File(selectedFile);
-                mc.gui.setScreen(new ProxiesImportScreen(theme, file));
-            }
-        }, 0L, 0, filters, "", false);
+        importBtn.action = () -> FileDialogs.openFile("txt", file -> mc.gui.setScreen(new ProxiesImportScreen(theme, file)));
 
         l.add(refreshButton).expandX();
         refreshButton.action = () -> Proxies.get().checkProxies(true);

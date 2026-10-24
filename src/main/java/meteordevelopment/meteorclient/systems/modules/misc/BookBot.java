@@ -47,7 +47,7 @@ public class BookBot extends Module {
         .name("file")
         .description("Which file to use.")
         .defaultValue(DEFAULT_FILE)
-        .filter("*.txt")
+        .filter("txt")
         .visible(() -> mode.get() == Mode.File)
         .build()
     );

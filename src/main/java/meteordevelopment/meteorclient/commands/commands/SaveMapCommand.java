@@ -12,6 +12,7 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.commands.Command;
 import meteordevelopment.meteorclient.mixin.MapTextureManagerAccessor;
+import meteordevelopment.meteorclient.utils.misc.FileDialogs;
 import net.minecraft.client.multiplayer.ClientSuggestionProvider;
 import net.minecraft.client.resources.MapTextureManager;
 import net.minecraft.core.component.DataComponents;
@@ -21,10 +22,6 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.MapItem;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import org.jspecify.annotations.Nullable;
-import org.lwjgl.sdl.SDLDialog;
-import org.lwjgl.sdl.SDL_DialogFileFilter;
-import org.lwjgl.system.MemoryStack;
-import org.lwjgl.system.MemoryUtil;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -35,14 +32,8 @@ public class SaveMapCommand extends Command {
     private static final SimpleCommandExceptionType MAP_NOT_FOUND = new SimpleCommandExceptionType(Component.literal("You must be holding a filled map."));
     private static final SimpleCommandExceptionType OOPS = new SimpleCommandExceptionType(Component.literal("Something went wrong."));
 
-    private final SDL_DialogFileFilter.Buffer filters;
-
     public SaveMapCommand() {
         super("save-map", "Saves a map to an image.", "sm");
-
-        MemoryStack stack = MemoryStack.stackPush();
-        filters = SDL_DialogFileFilter.malloc(1, stack);
-        filters.name(stack.UTF8("NBT Files")).pattern(stack.UTF8("nbt"));
     }
 
     @Override
@@ -64,14 +55,8 @@ public class SaveMapCommand extends Command {
         MapItemSavedData state = getMapState();
         if (map == null || state == null) throw MAP_NOT_FOUND.create();
 
-        SDLDialog.SDL_ShowSaveFileDialog((_, file, _) -> {
-            if (file == 0) return;
-
-            long filePointer = MemoryUtil.memGetAddress(file);
-            if (filePointer == 0) return;
-
-            String str = MemoryUtil.memUTF8(filePointer);
-            if (str.isBlank()) return;
+        FileDialogs.saveFile("png", selectedFile -> {
+            String str = selectedFile.getPath();
             if (!str.endsWith(".png")) str += ".png";
             File path = new File(str);
 
@@ -95,7 +80,7 @@ public class SaveMapCommand extends Command {
                 error("Error writing map texture");
                 MeteorClient.LOG.error(e.toString());
             }
-        }, 0, 0, filters, "");
+        });
     }
 
     private @Nullable MapItemSavedData getMapState() {

@@ -6,19 +6,18 @@
 package meteordevelopment.meteorclient.settings;
 
 import net.minecraft.nbt.CompoundTag;
-import org.lwjgl.sdl.SDL_DialogFileFilter;
-import org.lwjgl.system.MemoryStack;
 
 import java.io.File;
 import java.util.function.Consumer;
 
 public class FileSetting extends Setting<File> {
-    public final SDL_DialogFileFilter.Buffer filters;
+    /** SDL filter extensions, e.g. {@code "txt"}, {@code "txt;json"} or {@code "*"} */
+    public final String filter;
 
-    public FileSetting(String name, String description, File defaultValue, Consumer<File> onChanged, Consumer<Setting<File>> onModuleActivated, IVisible visible, SDL_DialogFileFilter.Buffer filters) {
+    public FileSetting(String name, String description, File defaultValue, Consumer<File> onChanged, Consumer<Setting<File>> onModuleActivated, IVisible visible, String filter) {
         super(name, description, defaultValue, onChanged, onModuleActivated, visible);
 
-        this.filters = filters;
+        this.filter = filter;
     }
 
     @Override
@@ -51,23 +50,14 @@ public class FileSetting extends Setting<File> {
     }
 
     public static class Builder extends SettingBuilder<FileSetting.Builder, File, FileSetting> {
-        private SDL_DialogFileFilter.Buffer filter;
+        private String filter = "*";
 
         public Builder() {
             super(null);
         }
 
-        public FileSetting.Builder filter(SDL_DialogFileFilter.Buffer filter) {
+        public FileSetting.Builder filter(String filter) {
             this.filter = filter;
-            return this;
-        }
-
-        public FileSetting.Builder filter(String... filters) {
-            MemoryStack stack = MemoryStack.stackPush();
-            filter = SDL_DialogFileFilter.malloc(filters.length, stack);
-            for (int i = 0; i < filters.length; i++) {
-                filter.get(i).name(stack.UTF8("Filter " + i)).pattern(stack.UTF8(filters[i]));
-            }
             return this;
         }
 

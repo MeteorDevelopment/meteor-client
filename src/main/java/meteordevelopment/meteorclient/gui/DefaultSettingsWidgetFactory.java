@@ -24,14 +24,12 @@ import meteordevelopment.meteorclient.renderer.Fonts;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.hud.elements.keyboard.KeyboardHud;
 import meteordevelopment.meteorclient.utils.Utils;
+import meteordevelopment.meteorclient.utils.misc.FileDialogs;
 import meteordevelopment.meteorclient.utils.render.DisplayItemUtils;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.client.resources.language.I18n;
 import org.apache.commons.lang3.Strings;
-import org.lwjgl.sdl.SDLDialog;
-import org.lwjgl.system.MemoryUtil;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -496,23 +494,18 @@ public class DefaultSettingsWidgetFactory extends SettingsWidgetFactory {
 
         WButton selectFile = list.add(theme.button("Select File")).widget();
 
-        WLabel fileName = list.add(theme.label((setting.get() != null && setting.get().exists()) ? setting.get().getName() : "No file selected.")).widget();
+        WLabel fileName = list.add(theme.label(fileName(setting))).widget();
 
-        selectFile.action = () -> SDLDialog.SDL_ShowOpenFileDialog((_, file, _) -> {
-            if (file == 0) return;
+        selectFile.action = () -> FileDialogs.openFile(setting.filter, file -> {
+            setting.set(file);
+            fileName.set(fileName(setting));
+        });
 
-            long filePointer = MemoryUtil.memGetAddress(file);
-            if (filePointer == 0) return;
+        reset(table, setting, () -> fileName.set(fileName(setting)));
+    }
 
-            String path = MemoryUtil.memUTF8(filePointer);
-            if (!path.isEmpty()) {
-                setting.set(new File(path));
-                fileName.set(setting.get().getName());
-            }
-
-            reset(table, setting, () -> fileName.set((setting.get() != null && setting.get().exists()) ? setting.get().getName() : "No file selected."));
-        }, 0L, 0, setting.filters, "", false);
-
+    private static String fileName(FileSetting setting) {
+        return setting.get() != null && setting.get().exists() ? setting.get().getName() : "No file selected.";
     }
 
     // Other
