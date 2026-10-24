@@ -104,7 +104,7 @@ public class NoSlow extends Module {
         .build()
     );
 
-    private boolean resetTimer;
+    private boolean hasTimerOverride;
 
     public NoSlow() {
         super(Categories.Movement, "no-slow", "Allows you to move normally when using objects that will slow you.");
@@ -112,7 +112,12 @@ public class NoSlow extends Module {
 
     @Override
     public void onActivate() {
-        resetTimer = false;
+        hasTimerOverride = false;
+    }
+
+    @Override
+    public void onDeactivate() {
+        resetTimer();
     }
 
     public boolean airStrict() {
@@ -161,15 +166,19 @@ public class NoSlow extends Module {
 
     @EventHandler
     private void onPreTick(TickEvent.Pre event) {
-        if (web.get() == WebMode.Timer) {
-            if (mc.level.getBlockState(mc.player.blockPosition()).getBlock() == Blocks.COBWEB && !mc.player.onGround()) {
-                resetTimer = false;
-                Modules.get().get(Timer.class).setOverride(webTimer.get());
-            } else if (!resetTimer) {
-                Modules.get().get(Timer.class).setOverride(Timer.OFF);
-                resetTimer = true;
-            }
+        if (web.get() == WebMode.Timer && mc.level.getBlockState(mc.player.blockPosition()).getBlock() == Blocks.COBWEB && !mc.player.onGround()) {
+            hasTimerOverride = true;
+            Modules.get().get(Timer.class).setOverride(webTimer.get());
+        } else {
+            resetTimer();
         }
+    }
+
+    private void resetTimer() {
+        if (!hasTimerOverride) return;
+
+        Modules.get().get(Timer.class).setOverride(Timer.OFF);
+        hasTimerOverride = false;
     }
 
     public enum WebMode {
