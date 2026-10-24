@@ -23,17 +23,13 @@ import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.systems.profiles.Profile;
 import meteordevelopment.meteorclient.systems.profiles.Profiles;
 import meteordevelopment.meteorclient.utils.Utils;
+import meteordevelopment.meteorclient.utils.misc.FileDialogs;
 import meteordevelopment.meteorclient.utils.misc.NbtUtils;
 import meteordevelopment.meteorclient.utils.render.prompts.OkPrompt;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtIo;
 import org.apache.commons.io.FilenameUtils;
-import org.lwjgl.sdl.SDLDialog;
-import org.lwjgl.sdl.SDLError;
-import org.lwjgl.sdl.SDL_DialogFileFilter;
-import org.lwjgl.system.MemoryStack;
-import org.lwjgl.system.MemoryUtil;
 
 import java.io.DataOutputStream;
 import java.io.File;
@@ -47,14 +43,6 @@ import java.util.Optional;
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class ProfilesTab extends Tab {
-    private static final SDL_DialogFileFilter.Buffer filters;
-
-    static {
-        MemoryStack stack = MemoryStack.stackPush();
-        filters = SDL_DialogFileFilter.malloc(1, stack);
-        filters.name(stack.UTF8("NBT Files")).pattern(stack.UTF8("nbt"));
-    }
-
     public ProfilesTab() {
         super("Profiles");
     }
@@ -91,16 +79,8 @@ public class ProfilesTab extends Tab {
             // Import
             WButton importBtn = l.add(theme.button("Import")).expandX().widget();
             importBtn.tooltip = "Import profile";
-            importBtn.action = () -> SDLDialog.SDL_ShowOpenFileDialog((_, file, _) -> {
+            importBtn.action = () -> FileDialogs.openFile("nbt", profileFile -> {
                 try {
-                    if (file == 0) throw new IOException("Dialog Error: " + SDLError.SDL_GetError());
-
-                    long filePointer = MemoryUtil.memGetAddress(file);
-                    if (filePointer == 0) return;
-
-                    String path = MemoryUtil.memUTF8(filePointer);
-                    File profileFile = new File(path);
-
                     Profile profile = importProfile(profileFile);
 
                     if (profile != null)
@@ -115,7 +95,7 @@ public class ProfilesTab extends Tab {
                         .dontShowAgainCheckboxVisible(false)
                         .show();
                 }
-            }, 0L, 0, filters, "", false);
+            });
         }
 
         private void initTable(WTable table) {
@@ -295,16 +275,10 @@ public class ProfilesTab extends Tab {
             add(theme.horizontalSeparator()).expandX();
 
             WButton export = add(theme.button("Export profile")).expandX().widget();
-            export.action = () -> SDLDialog.SDL_ShowSaveFileDialog((_, file, _) -> {
-                if (file == 0) return;
-
-                long filePointer = MemoryUtil.memGetAddress(file);
-                if (filePointer == 0) return;
-
-                String path = MemoryUtil.memUTF8(filePointer);
-                exportProfile(path, profile, hud.checked, macros.checked, modules.checked, waypoints.checked);
+            export.action = () -> FileDialogs.saveFile("nbt", file -> {
+                exportProfile(file.getPath(), profile, hud.checked, macros.checked, modules.checked, waypoints.checked);
                 onClose();
-            }, 0, 0, filters, "");
+            });
         }
 
         private WCheckbox addBool(WContainer container, Setting<Boolean> setting) {
