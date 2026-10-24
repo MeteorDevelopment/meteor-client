@@ -5,9 +5,9 @@
 
 package meteordevelopment.meteorclient.gui.screens.settings;
 
-import com.mojang.renderpearl.api.textures.FilterMode;
 import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.WindowScreen;
+import meteordevelopment.meteorclient.gui.renderer.GuiRenderer;
 import meteordevelopment.meteorclient.gui.utils.Cell;
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.gui.widgets.containers.WSection;
@@ -15,7 +15,6 @@ import meteordevelopment.meteorclient.gui.widgets.containers.WTable;
 import meteordevelopment.meteorclient.gui.widgets.containers.WVerticalList;
 import meteordevelopment.meteorclient.gui.widgets.input.WTextBox;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WCheckbox;
-import meteordevelopment.meteorclient.renderer.Texture;
 import meteordevelopment.meteorclient.settings.EntityTypeListSetting;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.Names;
@@ -32,7 +31,6 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public class EntityTypeListSettingScreen extends WindowScreen {
-    private static Texture EMPTY_SPAWN_EGG_TEXTURE;
 
     private final EntityTypeListSetting setting;
 
@@ -247,13 +245,7 @@ public class EntityTypeListSettingScreen extends WindowScreen {
         }
 
         if (stack != null) table.add(theme.item(stack));
-        else {
-            if (EMPTY_SPAWN_EGG_TEXTURE == null) {
-                EMPTY_SPAWN_EGG_TEXTURE = Texture.readResource("/assets/meteor-client/textures/empty_spawn_egg.png", false, FilterMode.NEAREST);
-            }
-
-            table.add(theme.texture(32, 32, 0, EMPTY_SPAWN_EGG_TEXTURE));
-        }
+        else table.add(theme.texture(32, 32, 0, GuiRenderer.EMPTY_SPAWN_EGG));
 
         // Name
 

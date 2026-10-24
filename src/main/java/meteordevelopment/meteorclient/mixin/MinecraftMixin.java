@@ -117,6 +117,8 @@ public abstract class MinecraftMixin implements IMinecraft {
 
         startUseItemCalled = false;
 
+        Modules.get().updateModuleSubscriptions();
+
         Profiler.get().push(MeteorClient.MOD_ID + "_pre_update");
         MeteorClient.EVENT_BUS.post(TickEvent.Pre.get());
         Profiler.get().pop();

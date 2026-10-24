@@ -64,6 +64,7 @@ public class Modules extends System<Modules> {
     private final Set<Module> active = new ReferenceOpenHashSet<>();
     private @Nullable Module moduleToBind;
     private boolean awaitingKeyRelease = false;
+    private boolean inGame, modulesSubscribed;
 
     public Modules() {
         super("modules");
@@ -323,6 +324,9 @@ public class Modules extends System<Modules> {
                     module.onActivate();
                 }
             }
+
+            inGame = true;
+            modulesSubscribed = true;
         }
     }
 
@@ -335,6 +339,29 @@ public class Modules extends System<Modules> {
                     module.onDeactivate();
                 }
             }
+
+            inGame = false;
+            modulesSubscribed = false;
+        }
+    }
+
+    /**
+     * Module event handlers expect a world and player, so while either is missing (e.g. the world is still loading)
+     * their listeners are removed and added back once both exist. Called before each tick.
+     */
+    public void updateModuleSubscriptions() {
+        synchronized (active) {
+            boolean canUpdate = Utils.canUpdate();
+            if (!inGame || canUpdate == modulesSubscribed) return;
+
+            for (Module module : active) {
+                if (module.runInMainMenu || !module.autoSubscribe) continue;
+
+                if (canUpdate) MeteorClient.EVENT_BUS.subscribe(module);
+                else MeteorClient.EVENT_BUS.unsubscribe(module);
+            }
+
+            modulesSubscribed = canUpdate;
         }
     }
 

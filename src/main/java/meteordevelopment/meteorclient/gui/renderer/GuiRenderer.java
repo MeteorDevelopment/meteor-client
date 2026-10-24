@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.gui.renderer;
 
+import com.mojang.renderpearl.api.textures.FilterMode;
 import it.unimi.dsi.fastutil.Stack;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import meteordevelopment.meteorclient.MeteorClient;
@@ -43,6 +44,8 @@ public class GuiRenderer {
     public static GuiTexture FAVORITE_NO, FAVORITE_YES;
     public static GuiTexture COPY, PASTE;
 
+    public static Texture EMPTY_SPAWN_EGG;
+
     public GuiTheme theme;
 
     private final Renderer2D r = new Renderer2D(false);
@@ -79,6 +82,8 @@ public class GuiRenderer {
         PASTE = addTexture(MeteorClient.identifier("textures/icons/gui/paste.png"));
 
         TEXTURE = TEXTURE_PACKER.pack();
+
+        EMPTY_SPAWN_EGG = Texture.readResource("/assets/meteor-client/textures/empty_spawn_egg.png", false, FilterMode.NEAREST);
     }
 
     public void begin(GuiGraphicsExtractor graphics) {

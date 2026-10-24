@@ -19,6 +19,7 @@ import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 
@@ -67,7 +68,7 @@ public class Texture extends AbstractTexture {
 
     public static Texture readResource(String path, boolean flipY, FilterMode filter) {
         try (var in = Texture.class.getResourceAsStream(path)) {
-            if (in == null) return null;
+            if (in == null) throw new IllegalStateException("Missing built-in texture: " + path);
 
             var data = TextureUtil.readResource(in).rewind();
 
@@ -78,6 +79,7 @@ public class Texture extends AbstractTexture {
 
                 STBImage.stbi_set_flip_vertically_on_load(flipY);
                 ByteBuffer image = STBImage.stbi_load_from_memory(data, width, height, comp, 4);
+                if (image == null) throw new IllegalStateException("Failed to decode built-in texture " + path + ": " + STBImage.stbi_failure_reason());
 
                 var texture = new Texture(width.get(0), height.get(0), GpuFormat.RGBA8_UNORM, filter, filter);
                 texture.upload(image);
@@ -87,8 +89,8 @@ public class Texture extends AbstractTexture {
 
                 return texture;
             }
-        } catch (IOException _) {
-            return null;
+        } catch (IOException e) {
+            throw new UncheckedIOException("Failed to read built-in texture: " + path, e);
         }
     }
 }
