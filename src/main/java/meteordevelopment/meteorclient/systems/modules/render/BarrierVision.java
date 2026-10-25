@@ -30,7 +30,8 @@ public class BarrierVision extends Module {
 
     private final Setting<Integer> range = sgGeneral.add(new IntSetting.Builder()
         .name("range")
-        .description("Zasięg wyszukiwania bloków (w blokach).")
+        .description("The block search range (in blocks).")
+
         .defaultValue(24)
         .min(1)
         .sliderRange(5, 48)
