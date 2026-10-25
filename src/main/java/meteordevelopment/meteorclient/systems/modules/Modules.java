@@ -506,6 +506,7 @@ public class Modules extends System<Modules> {
     }
 
     private void initRender() {
+        add(new BarrierVision());
         add(new BetterTab());
         add(new BetterTooltips());
         add(new BlockESP());
