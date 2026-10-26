@@ -14,6 +14,7 @@ import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
+import meteordevelopment.meteorclient.utils.player.SlotUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.Item;
@@ -94,23 +95,10 @@ public class AutoMend extends Module {
     }
 
     private int getSlot() {
-        for (int i = 0; i < mc.player.getInventory().getNonEquipmentItems().size(); i++) {
-            ItemStack itemStack = mc.player.getInventory().getItem(i);
-            if (blacklist.get().contains(itemStack.getItem())) continue;
-
-            if (Utils.hasEnchantments(itemStack, Enchantments.MENDING) && itemStack.getDamageValue() > 0) {
-                return i;
-            }
-        }
-
-        return -1;
+        return InvUtils.find(itemStack -> !blacklist.get().contains(itemStack.getItem()) && Utils.hasEnchantments(itemStack, Enchantments.MENDING) && itemStack.getDamageValue() > 0, SlotUtils.HOTBAR_START, SlotUtils.MAIN_END).slot();
     }
 
     private int getEmptySlot() {
-        for (int i = 0; i < mc.player.getInventory().getNonEquipmentItems().size(); i++) {
-            if (mc.player.getInventory().getItem(i).isEmpty()) return i;
-        }
-
-        return -1;
+        return InvUtils.find(ItemStack::isEmpty, SlotUtils.HOTBAR_START, SlotUtils.MAIN_END).slot();
     }
 }

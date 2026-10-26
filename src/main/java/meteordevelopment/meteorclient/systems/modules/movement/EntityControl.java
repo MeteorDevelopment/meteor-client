@@ -174,7 +174,7 @@ public class EntityControl extends Module {
     private void onPreTick(TickEvent.Pre event) {
         if (sentPacket && mc.player.getVehicle() != null) {
             ServerboundMoveVehiclePacket packet = ServerboundMoveVehiclePacket.fromEntity(mc.player.getVehicle());
-            ((IVec3) packet.position()).meteor$setY(lastPacketY);
+            ((IVec3) packet.movingTo().position()).meteor$setY(lastPacketY);
             mc.getConnection().send(packet);
             sentPacket = false;
         }
@@ -214,9 +214,9 @@ public class EntityControl extends Module {
     private void onSendPacket(PacketEvent.Send event) {
         if (!(event.packet instanceof ServerboundMoveVehiclePacket packet) || !antiKick.get()) return;
 
-        double currentY = packet.position().y;
+        double currentY = packet.movingTo().position().y;
         if (delayLeft <= 0 && !sentPacket && shouldFlyDown(currentY) && EntityUtils.isOnAir(mc.player.getVehicle()) && !mc.player.getVehicle().isFlyingVehicle()) {
-            ((IVec3) packet.position()).meteor$setY(lastPacketY - 0.03130D);
+            ((IVec3) packet.movingTo().position()).meteor$setY(lastPacketY - 0.03130D);
             sentPacket = true;
             delayLeft = delay.get();
         }

@@ -1,7 +1,8 @@
-#version 330 core
+#version 330
+#extension GL_ARB_separate_shader_objects : require
 
-in vec2 v_TexCoord;
-in vec2 v_OneTexel;
+layout (location = 0) in vec2 v_TexCoord;
+layout (location = 1) in vec2 v_OneTexel;
 
 uniform sampler2D u_Texture;
 
@@ -12,7 +13,7 @@ layout (std140) uniform OutlineData {
     float glowMultiplier;
 } u_Outline;
 
-out vec4 color;
+layout (location = 0) out vec4 color;
 
 void main() {
     vec4 center = texture(u_Texture, v_TexCoord);

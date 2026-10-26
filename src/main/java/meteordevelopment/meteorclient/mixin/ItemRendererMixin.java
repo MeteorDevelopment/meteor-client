@@ -15,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.At;
 
 @Mixin(ItemFeatureRenderer.class)
 public abstract class ItemRendererMixin {
-    @ModifyExpressionValue(method = "prepareFoilSubmit", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/feature/ItemFeatureRenderer$Submit;foilType()Lnet/minecraft/client/renderer/item/ItemStackRenderState$FoilType;"))
+    @ModifyExpressionValue(method = "prepareMainSubmit", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/feature/ItemFeatureRenderer$Submit;foilType()Lnet/minecraft/client/renderer/item/ItemStackRenderState$FoilType;"))
     private ItemStackRenderState.FoilType modifyEnchant(ItemStackRenderState.FoilType foilType) {
         if (Modules.get().get(NoRender.class).noEnchantGlint()) {
             return ItemStackRenderState.FoilType.NONE;

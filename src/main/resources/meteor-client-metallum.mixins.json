@@ -1,12 +1,15 @@
 {
   "required": false,
-  "package": "meteordevelopment.meteorclient.mixin.viafabricplus",
+  "package": "meteordevelopment.meteorclient.mixin.metallum",
   "compatibilityLevel": "JAVA_21",
   "plugin": "meteordevelopment.meteorclient.MixinPlugin",
   "client": [
-    "GeneralSettingsMixin"
+    "MetalDeviceMixin"
   ],
   "injectors": {
     "defaultRequire": 1
+  },
+  "mixinextras": {
+    "minVersion": "0.5.0"
   }
 }

@@ -199,8 +199,8 @@ public class NoFall extends Module {
     @EventHandler
     private void onSendPacket(PacketEvent.Send event) {
         if (usingBucket) {
-            int sequence = event.packet instanceof ServerboundUseItemPacket packet ? packet.getSequence()
-                : event.packet instanceof ServerboundUseItemOnPacket packet ? packet.getSequence() : -1;
+            int sequence = event.packet instanceof ServerboundUseItemPacket packet ? packet.sequence()
+                : event.packet instanceof ServerboundUseItemOnPacket packet ? packet.sequence() : -1;
             if (sequence >= 0) {
                 if (collecting) pickupSequence = sequence;
                 else placementSequence = sequence;

@@ -9,6 +9,7 @@ import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import meteordevelopment.meteorclient.events.entity.player.DoItemUseEvent;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -42,14 +43,13 @@ public class GhostHand extends Module {
         for (int i = 1; i < mc.player.blockInteractionRange() * 10; i++) {
             BlockPos pos = BlockPos.containing(mc.player.getEyePosition(mc.getDeltaTracker().getGameTimeDeltaPartialTick(true)).add(direction.scale(i)));
 
-            if (posList.contains(pos)) continue;
-            posList.add(pos);
+            if (!posList.add(pos)) continue;
 
             if (mc.level.getBlockState(pos).hasBlockEntity()) {
                 for (InteractionHand hand : InteractionHand.values()) {
-                    InteractionResult result = mc.gameMode.useItemOn(mc.player, hand, new BlockHitResult(new Vec3(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5), Direction.UP, pos, true));
+                    InteractionResult result = BlockUtils.interact(new BlockHitResult(new Vec3(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5), Direction.UP, pos, true), hand, true);
+
                     if (result instanceof InteractionResult.Success || result instanceof InteractionResult.Fail) {
-                        mc.player.swing(hand);
                         event.cancel();
                         return;
                     }

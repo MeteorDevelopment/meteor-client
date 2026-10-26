@@ -12,6 +12,7 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.commands.Command;
 import meteordevelopment.meteorclient.mixin.MapTextureManagerAccessor;
+import meteordevelopment.meteorclient.utils.misc.FileDialogs;
 import net.minecraft.client.multiplayer.ClientSuggestionProvider;
 import net.minecraft.client.resources.MapTextureManager;
 import net.minecraft.core.component.DataComponents;
@@ -21,32 +22,18 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.MapItem;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import org.jspecify.annotations.Nullable;
-import org.lwjgl.BufferUtils;
-import org.lwjgl.PointerBuffer;
-import org.lwjgl.system.MemoryUtil;
-import org.lwjgl.util.tinyfd.TinyFileDialogs;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.nio.ByteBuffer;
 
 public class SaveMapCommand extends Command {
     private static final SimpleCommandExceptionType MAP_NOT_FOUND = new SimpleCommandExceptionType(Component.literal("You must be holding a filled map."));
     private static final SimpleCommandExceptionType OOPS = new SimpleCommandExceptionType(Component.literal("Something went wrong."));
 
-    private final PointerBuffer filters;
-
     public SaveMapCommand() {
         super("save-map", "Saves a map to an image.", "sm");
-
-        filters = BufferUtils.createPointerBuffer(1);
-
-        ByteBuffer pngFilter = MemoryUtil.memASCII("*.png");
-
-        filters.put(pngFilter);
-        filters.rewind();
     }
 
     @Override
@@ -68,29 +55,32 @@ public class SaveMapCommand extends Command {
         MapItemSavedData state = getMapState();
         if (map == null || state == null) throw MAP_NOT_FOUND.create();
 
-        File path = getPath();
-        if (path == null) throw OOPS.create();
+        FileDialogs.saveFile("png", selectedFile -> {
+            String str = selectedFile.getPath();
+            if (!str.endsWith(".png")) str += ".png";
+            File path = new File(str);
 
-        MapTextureManagerAccessor textureManager = (MapTextureManagerAccessor) mc.getMapTextureManager();
-        MapTextureManager.MapInstance texture = textureManager.meteor$invokeGetOrCreateMapInstance(map.get(DataComponents.MAP_ID), state);
-        if (texture.texture.getPixels() == null) throw OOPS.create();
+            MapTextureManagerAccessor textureManager = (MapTextureManagerAccessor) mc.getMapTextureManager();
+            MapTextureManager.MapInstance texture = textureManager.meteor$invokeGetOrCreateMapInstance(map.get(DataComponents.MAP_ID), state);
+            if (texture.texture.getPixels() == null) return;
 
-        try {
-            if (scale == 128) texture.texture.getPixels().writeToFile(path);
-            else {
-                int[] data = texture.texture.getPixels().makePixelArray();
-                BufferedImage image = new BufferedImage(128, 128, BufferedImage.TYPE_INT_ARGB);
-                image.setRGB(0, 0, image.getWidth(), image.getHeight(), data, 0, 128);
+            try {
+                if (scale == 128) texture.texture.getPixels().writeToFile(path);
+                else {
+                    int[] data = texture.texture.getPixels().makePixelArray();
+                    BufferedImage image = new BufferedImage(128, 128, BufferedImage.TYPE_INT_ARGB);
+                    image.setRGB(0, 0, image.getWidth(), image.getHeight(), data, 0, 128);
 
-                BufferedImage scaledImage = new BufferedImage(scale, scale, 2);
-                scaledImage.createGraphics().drawImage(image, 0, 0, scale, scale, null);
+                    BufferedImage scaledImage = new BufferedImage(scale, scale, 2);
+                    scaledImage.createGraphics().drawImage(image, 0, 0, scale, scale, null);
 
-                ImageIO.write(scaledImage, "png", path);
+                    ImageIO.write(scaledImage, "png", path);
+                }
+            } catch (IOException e) {
+                error("Error writing map texture");
+                MeteorClient.LOG.error(e.toString());
             }
-        } catch (IOException e) {
-            error("Error writing map texture");
-            MeteorClient.LOG.error(e.toString());
-        }
+        });
     }
 
     private @Nullable MapItemSavedData getMapState() {
@@ -98,14 +88,6 @@ public class SaveMapCommand extends Command {
         if (map == null) return null;
 
         return MapItem.getSavedData(map.get(DataComponents.MAP_ID), mc.level);
-    }
-
-    private @Nullable File getPath() {
-        String path = TinyFileDialogs.tinyfd_saveFileDialog("Save image", null, filters, null);
-        if (path == null) return null;
-        if (!path.endsWith(".png")) path += ".png";
-
-        return new File(path);
     }
 
     private @Nullable ItemStack getMap() {

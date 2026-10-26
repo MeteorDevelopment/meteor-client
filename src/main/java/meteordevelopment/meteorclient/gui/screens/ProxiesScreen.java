@@ -19,15 +19,10 @@ import meteordevelopment.meteorclient.gui.widgets.pressable.WMinus;
 import meteordevelopment.meteorclient.settings.Settings;
 import meteordevelopment.meteorclient.systems.proxies.Proxies;
 import meteordevelopment.meteorclient.systems.proxies.Proxy;
+import meteordevelopment.meteorclient.utils.misc.FileDialogs;
 import meteordevelopment.meteorclient.utils.misc.NbtUtils;
 import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
-import org.lwjgl.BufferUtils;
-import org.lwjgl.PointerBuffer;
-import org.lwjgl.system.MemoryUtil;
-import org.lwjgl.util.tinyfd.TinyFileDialogs;
 
-import java.io.File;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -60,21 +55,8 @@ public class ProxiesScreen extends WindowScreen {
         newBtn.action = () -> mc.gui.setScreen(new EditProxyScreen(theme, null, this::reload));
 
         // Import
-        PointerBuffer filters = BufferUtils.createPointerBuffer(1);
-
-        ByteBuffer txtFilter = MemoryUtil.memASCII("*.txt");
-
-        filters.put(txtFilter);
-        filters.rewind();
-
         WButton importBtn = l.add(theme.button("Import")).expandX().widget();
-        importBtn.action = () -> {
-            String selectedFile = TinyFileDialogs.tinyfd_openFileDialog("Import Proxies", null, filters, null, false);
-            if (selectedFile != null) {
-                File file = new File(selectedFile);
-                mc.gui.setScreen(new ProxiesImportScreen(theme, file));
-            }
-        };
+        importBtn.action = () -> FileDialogs.openFile("txt", file -> mc.gui.setScreen(new ProxiesImportScreen(theme, file)));
 
         l.add(refreshButton).expandX();
         refreshButton.action = () -> Proxies.get().checkProxies(true);
