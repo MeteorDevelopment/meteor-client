@@ -195,39 +195,37 @@ public class ServerCommand extends Command {
 
     private void printUptime() {
         if (mc.hasSingleplayerServer()) {
-            info("Uptime: unavailable for the integrated server.");
+            info("Uptime: unavailable (singleplayer).");
             return;
         }
         long millis = uptime.getUptimeMillis(System.nanoTime());
         if (millis >= 0) {
             long seconds = millis / 1000;
             String duration = String.format(Locale.ROOT, "%dd %02dh %02dm %02ds", seconds / 86400, seconds / 3600 % 24, seconds / 60 % 60, seconds % 60);
-            info("Host-clock uptime estimate: %s (%s keepalives).", duration, uptime.getClockType());
-            info("Clock origins and proxies can make this differ from host or process uptime.");
+            info("Uptime (estimated): %s.", duration);
         } else switch (uptime.getClockType()) {
-            case Collecting -> info("Uptime: collecting three consistent keepalives (%d/3).", uptime.getSamples());
-            case Epoch -> info("Uptime: unavailable; keepalives use an epoch-like clock.");
-            case Unsupported -> info("Uptime: unavailable; keepalive IDs are not a supported clock.");
-            default -> info("Uptime: unavailable; keepalive samples are stale.");
+            case Collecting -> info("Uptime: collecting (%d/3).", uptime.getSamples());
+            case Epoch, Unsupported -> info("Uptime: unavailable (requires a compatible server clock).");
+            default -> info("Uptime: unavailable (stale data).");
         }
     }
 
     private void printPing() {
         var connection = mc.getConnection();
         var player = connection.getPlayerInfo(mc.player.getUUID());
-        if (player == null || player.getLatency() < 0) info("Tab-list ping: unavailable.");
-        else info("Server-reported tab ping: %d ms.", player.getLatency());
+        if (player == null || player.getLatency() < 0) info("Ping: unavailable.");
+        else info("Ping: %d ms.", player.getLatency());
 
         ServerData server = connection.getServerData();
-        if (server != null && server.players != null && server.ping >= 0) info("Server-list ping: %d ms (cached).", server.ping);
+        if (server != null && server.players != null && server.ping >= 0) info("List ping: %d ms (cached).", server.ping);
     }
 
     private void printPlayers() {
         var connection = mc.getConnection();
-        info("Known players: %d; tab-listed: %d.", connection.getOnlinePlayers().size(), connection.getListedOnlinePlayers().size());
+        info("Players: %d known, %d listed.", connection.getOnlinePlayers().size(), connection.getListedOnlinePlayers().size());
         ServerData server = connection.getServerData();
-        if (server != null && server.players != null) info("Advertised players: %d/%d (server-list cache).", server.players.online(), server.players.max());
-        info("Server-reported online authentication: %s.", connection.onlineMode());
+        if (server != null && server.players != null) info("Players (cached): %d/%d.", server.players.online(), server.players.max());
+        info("Online mode: %s.", connection.onlineMode());
     }
 
     private void printChannels(int page) {
@@ -237,7 +235,7 @@ public class ServerCommand extends Command {
         }
         List<String> channels = ClientPlayNetworking.getSendable().stream().map(Object::toString).sorted().toList();
         if (channels.isEmpty()) {
-            info("Server-advertised receive channels: none exposed.");
+            info("Channels: none.");
             return;
         }
         int pages = (channels.size() - 1) / 25 + 1;
@@ -246,9 +244,8 @@ public class ServerCommand extends Command {
             return;
         }
         int start = (page - 1) * 25;
-        info("Server-advertised receive channels (%d, page %d/%d): %s", channels.size(), page, pages,
+        info("Channels (%d, page %d/%d): %s", channels.size(), page, pages,
             String.join(", ", channels.subList(start, Math.min(start + 25, channels.size()))));
-        info("Channel names are hints, not a complete plugin or mod list.");
         if (page < pages) info("Next page: %s", toString("channels", Integer.toString(page + 1)));
     }
 
