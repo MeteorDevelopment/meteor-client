@@ -5,16 +5,23 @@
 
 package meteordevelopment.meteorclient.commands.commands;
 
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.suggestion.Suggestion;
 import com.mojang.brigadier.suggestion.Suggestions;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.commands.Command;
+import meteordevelopment.meteorclient.events.game.GameJoinedEvent;
+import meteordevelopment.meteorclient.events.game.GameLeftEvent;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.mixin.ClientPacketListenerAccessor;
+import meteordevelopment.meteorclient.utils.Utils;
+import meteordevelopment.meteorclient.utils.network.ServerUptime;
 import meteordevelopment.meteorclient.utils.world.TickRate;
 import meteordevelopment.orbit.EventHandler;
+import meteordevelopment.orbit.EventPriority;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.multiplayer.ClientSuggestionProvider;
 import net.minecraft.client.multiplayer.ServerData;
@@ -25,6 +32,7 @@ import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.protocol.common.ClientboundKeepAlivePacket;
 import net.minecraft.network.protocol.game.ClientboundCommandSuggestionsPacket;
 import net.minecraft.network.protocol.game.ClientboundCommandsPacket;
 import net.minecraft.network.protocol.game.ServerboundCommandSuggestionPacket;
@@ -39,6 +47,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Random;
 import java.util.Set;
 
@@ -51,7 +60,8 @@ public class ServerCommand extends Command {
     private final List<String> plugins = new ArrayList<>();
     private final List<String> commandTreePlugins = new ArrayList<>();
     private static final Random RANDOM = new Random();
-
+    private final ServerUptime uptime = new ServerUptime();
+    private volatile int connectionGeneration;
 
     public ServerCommand() {
         super("server", "Prints server information");
@@ -91,6 +101,26 @@ public class ServerCommand extends Command {
             info("Current TPS: %s%.2f(default).", color, tps);
             return SINGLE_SUCCESS;
         }));
+
+        for (String section : new String[]{"uptime", "ping", "players"}) {
+            builder.then(literal(section).executes(_ -> {
+                if (!Utils.canUpdate()) error("Join a server first.");
+                else switch (section) {
+                    case "uptime" -> printUptime();
+                    case "ping" -> printPing();
+                    case "players" -> printPlayers();
+                }
+                return SINGLE_SUCCESS;
+            }));
+        }
+
+        builder.then(literal("channels").executes(_ -> {
+            printChannels(1);
+            return SINGLE_SUCCESS;
+        }).then(argument("page", IntegerArgumentType.integer(1)).executes(context -> {
+            printChannels(IntegerArgumentType.getInteger(context, "page"));
+            return SINGLE_SUCCESS;
+        })));
     }
 
     private void basicInfo() {
@@ -158,6 +188,93 @@ public class ServerCommand extends Command {
         );
         info("Day: %d", mc.level.getDefaultClockTime() / 24000L);
         info("Permission level: %s", formatPerms());
+        printUptime();
+        printPing();
+        printPlayers();
+    }
+
+    private void printUptime() {
+        if (mc.hasSingleplayerServer()) {
+            info("Uptime: unavailable for the integrated server.");
+            return;
+        }
+        long millis = uptime.getUptimeMillis(System.nanoTime());
+        if (millis >= 0) {
+            long seconds = millis / 1000;
+            String duration = String.format(Locale.ROOT, "%dd %02dh %02dm %02ds", seconds / 86400, seconds / 3600 % 24, seconds / 60 % 60, seconds % 60);
+            info("Host-clock uptime estimate: %s (%s keepalives).", duration, uptime.getClockType());
+            info("Clock origins and proxies can make this differ from host or process uptime.");
+        } else switch (uptime.getClockType()) {
+            case Collecting -> info("Uptime: collecting three consistent keepalives (%d/3).", uptime.getSamples());
+            case Epoch -> info("Uptime: unavailable; keepalives use an epoch-like clock.");
+            case Unsupported -> info("Uptime: unavailable; keepalive IDs are not a supported clock.");
+            default -> info("Uptime: unavailable; keepalive samples are stale.");
+        }
+    }
+
+    private void printPing() {
+        var connection = mc.getConnection();
+        var player = connection.getPlayerInfo(mc.player.getUUID());
+        if (player == null || player.getLatency() < 0) info("Tab-list ping: unavailable.");
+        else info("Server-reported tab ping: %d ms.", player.getLatency());
+
+        ServerData server = connection.getServerData();
+        if (server != null && server.players != null && server.ping >= 0) info("Server-list ping: %d ms (cached).", server.ping);
+    }
+
+    private void printPlayers() {
+        var connection = mc.getConnection();
+        info("Known players: %d; tab-listed: %d.", connection.getOnlinePlayers().size(), connection.getListedOnlinePlayers().size());
+        ServerData server = connection.getServerData();
+        if (server != null && server.players != null) info("Advertised players: %d/%d (server-list cache).", server.players.online(), server.players.max());
+        info("Server-reported online authentication: %s.", connection.onlineMode());
+    }
+
+    private void printChannels(int page) {
+        if (!Utils.canUpdate()) {
+            error("Join a server first.");
+            return;
+        }
+        List<String> channels = ClientPlayNetworking.getSendable().stream().map(Object::toString).sorted().toList();
+        if (channels.isEmpty()) {
+            info("Server-advertised receive channels: none exposed.");
+            return;
+        }
+        int pages = (channels.size() - 1) / 25 + 1;
+        if (page > pages) {
+            error("Page out of range; choose 1-%d.", pages);
+            return;
+        }
+        int start = (page - 1) * 25;
+        info("Server-advertised receive channels (%d, page %d/%d): %s", channels.size(), page, pages,
+            String.join(", ", channels.subList(start, Math.min(start + 25, channels.size()))));
+        info("Channel names are hints, not a complete plugin or mod list.");
+        if (page < pages) info("Next page: %s", toString("channels", Integer.toString(page + 1)));
+    }
+
+    @EventHandler
+    private void onJoin(GameJoinedEvent event) {
+        connectionGeneration++;
+        uptime.reset();
+    }
+
+    @EventHandler
+    private void onLeave(GameLeftEvent event) {
+        connectionGeneration++;
+        uptime.reset();
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    private void onKeepalive(PacketEvent.Receive event) {
+        if (event.isCancelled() || !(event.packet instanceof ClientboundKeepAlivePacket packet)) return;
+        int generation = connectionGeneration;
+        long receivedNs = System.nanoTime();
+        var connection = event.connection;
+        mc.execute(() -> {
+            if (generation == connectionGeneration && mc.getConnection() != null && connection == mc.getConnection().getConnection()) {
+                uptime.observe(packet.getId(), receivedNs);
+            }
+        });
     }
 
     public String formatPerms() {
