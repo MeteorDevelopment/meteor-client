@@ -74,8 +74,26 @@ public abstract class SodiumDefaultFluidRendererMixin {
         return !otherState.getFluidState().getType().isSame(fluid.getType());
     }
 
-    @ModifyReturnValue(method = "isFluidSideExposed(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/core/Direction;F)Z", at = @At("RETURN"))
-    private boolean onIsFluidSideExposed(boolean original, BlockState ownBlockState, BlockState neighborBlockState, Direction facing, float height) {
+    @ModifyReturnValue(method = "isFullBlockFluidSelfVisible(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/core/Direction;)Z", at = @At("RETURN"))
+    private boolean onIsFullBlockFluidSelfVisible(boolean original, BlockState selfBlockState, Direction facing) {
+        if (!forceXrayFluidSides || facing.getAxis().isVertical()) return original;
+
+        // Xray should ignore the block's own occlusion for fluid faces we are intentionally exposing.
+        return true;
+    }
+
+    @ModifyReturnValue(method = "isSliceFluidSelfVisible(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/core/Direction;FF)Z", at = @At("RETURN"))
+    private boolean onIsSliceFluidSelfVisible(boolean original, BlockState selfBlockState, Direction facing, float minThickness, float maxThickness) {
+        if (!forceXrayFluidSides || facing.getAxis().isVertical()) return original;
+
+        // Xray should ignore self-occlusion when the fluid face is being forced visible.
+        return true;
+    }
+
+    @ModifyReturnValue(method = "isFluidSideExposed(Lnet/minecraft/client/renderer/block/BlockAndTintGetter;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/core/BlockPos;Lnet/minecraft/core/Direction;F)Z", at = @At("RETURN"))
+    private boolean onIsFluidSideExposed(boolean original, BlockAndTintGetter world, BlockState ownBlockState, BlockPos neighborPos, Direction facing, float height) {
+        BlockState neighborBlockState = world.getBlockState(neighborPos);
+
         if (original || !forceXrayFluidSides || facing.getAxis().isVertical()) return original;
         if (!xray.isBlocked(neighborBlockState.getBlock(), null)) return false;
 
