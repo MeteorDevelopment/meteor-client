@@ -150,6 +150,8 @@ public class AutoReplenish extends Module {
             fromSlot = findItem(prevStack, slot, 1, false);
         }
 
+        if (fromSlot == -1) return;
+
         // eliminate occasional loops when moving items from hotbar to itself
         if (fromSlot == mc.player.getInventory().getSelectedSlot() || fromSlot == SlotUtils.OFFHAND) return;
         if (fromSlot < 9 && fromSlot < slot && slot != mc.player.getInventory().getSelectedSlot() && slot != SlotUtils.OFFHAND)
@@ -168,7 +170,9 @@ public class AutoReplenish extends Module {
             ItemStack stack = mc.player.getInventory().getItem(i);
             if (stack.getItem() != lookForStack.getItem()) continue;
 
-            if (mustCombine && !ItemStack.isSameItemSameComponents(lookForStack, stack)) continue;
+            // Stackable items must have matching components even when replacing
+            // an empty slot, otherwise differently named stacks can swap endlessly.
+            if ((mustCombine || lookForStack.isStackable()) && !ItemStack.isSameItemSameComponents(lookForStack, stack)) continue;
             if (sameEnchants.get() && !stack.getEnchantments().equals(lookForStack.getEnchantments())) continue;
 
             if (stack.getCount() > count) {
