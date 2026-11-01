@@ -37,7 +37,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(value = DefaultFluidRenderer.class, remap = false)
-public abstract class SodiumDefaultFluidRendererMixin {
+public abstract class SodiumDefaultFluidRendererNewMixin {
     @Final
     @Shadow
     private int[] quadColors;
