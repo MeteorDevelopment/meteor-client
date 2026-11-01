@@ -559,19 +559,21 @@ public abstract class WTextBox extends WWidget {
     public boolean onCharTyped(CharacterEvent input) {
         if (!focused) return false;
 
-        if (filter.filter(text, input.codepoint())) {
-            clearSelection();
+        int start = selectionStart != selectionEnd ? selectionStart : cursor;
+        int end = selectionStart != selectionEnd ? selectionEnd : cursor;
 
-            text = text.substring(0, cursor) + input.codepointAsString() + text.substring(cursor);
+        // Validate against the text that would remain after replacing the selection.
+        // Rejected characters must not clear the selection.
+        String remaining = text.substring(0, start) + text.substring(end);
+        if (!filter.filter(remaining, input.codepoint())) return false;
 
-            cursor++;
-            resetSelection();
+        String character = input.codepointAsString();
+        text = remaining.substring(0, start) + character + remaining.substring(start);
+        cursor = start + character.length();
+        resetSelection();
 
-            runAction();
-            return true;
-        }
-
-        return false;
+        runAction();
+        return true;
     }
 
     @Override
