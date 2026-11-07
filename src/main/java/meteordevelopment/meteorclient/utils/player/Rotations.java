@@ -89,6 +89,8 @@ public class Rotations {
     }
 
     private static void queueRotations() {
+        // Post a TickEvent.Rotate event, which is used for synchronizing a module's calculation to its rotation.
+        // Using TickEvent.Rotate in modules instead of TickEvent.Pre allows for more accurate rotations (when the player is not using movefix).
         MeteorClient.EVENT_BUS.post(TickEvent.Rotate.get());
 
         rotating = false;
@@ -105,10 +107,11 @@ public class Rotations {
         if (!queue.isEmpty()) {
             rotating = true;
 
-            for (Rotation rotation : queue) {
-                setServerRotation(rotation.yaw, rotation.pitch);
-                rotations.add(rotation);
-            }
+            rotations.addAll(queue);
+
+            // Set the server rotation early so movefix inputs compensate.
+            Rotation last = queue.get(queue.size() - 1);
+            setServerRotation(last.yaw, last.pitch);
 
             queue.clear();
         }
@@ -142,7 +145,7 @@ public class Rotations {
 
         setClientRotation(preYaw, prePitch);
 
-        // First rotation packet was already sent to server last tick naturally
+        // First rotation packet was already sent to server naturally
         Rotation first = rotations.get(0);
         if (first.clientSide) setClientRotation(first.yaw, first.pitch);
         first.runCallback();
@@ -236,6 +239,7 @@ public class Rotations {
     public static void setCorrectedPlayerInput(ClientInput input) {
         input.keyPresses = getInputFromRelativeYaw(input.keyPresses);
 
+        // The movement vector must be adjusted according to the new input
         int x = (input.keyPresses.left() ? 1 : 0) - (input.keyPresses.right() ? 1 : 0);
         int y = (input.keyPresses.forward() ? 1 : 0) - (input.keyPresses.backward() ? 1 : 0);
         input.moveVector = new Vec2(x, y).normalized();
