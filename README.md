@@ -35,14 +35,8 @@ We will review and help with all reasonable pull requests as long as the guideli
 - If you need help, check out the [Google Java Style Guide](https://google.github.io/styleguide/javaguide.html) for a reference.
 
 ## Bugs and Suggestions
-Bug reports and suggestions should be made in this repo's [issue tracker](https://github.com/MeteorDevelopment/meteor-client/issues) using the templates provided.  
+Bug reports and suggestions should be made in this repo's [issue tracker](https://github.com/casefir/krypto-client/issues) using the templates provided.  
 Please provide as much information as you can to best help us understand your issue and give a better chance of it being resolved.
-
-## Donations
-All of our work is completely free and non-profit (donations pay only for hosting costs), therefore we are very grateful for all donations made to support us in running our community.  
-Donations can be made via our [website](https://meteorclient.com/donate) and the minimum amount to get donor benefits is €5.  
-You will be rewarded with a role on our Discord server and a customisable in-game cape.  
-⚠️ _Make sure to create a Krypto account and link your Discord and Minecraft accounts to fully experience your rewards._ ⚠️
 
 ## Credits
 [Cabaletta](https://github.com/cabaletta) and [WagYourTail](https://github.com/wagyourtail) for [Baritone](https://github.com/cabaletta/baritone)  
@@ -54,6 +48,6 @@ This project is licensed under the [GNU General Public License v3.0](https://www
 If you use **ANY** code from the source:
 - You must disclose the source code of your modified work and the source code you took from this project. This means you are not allowed to use code from this project (even partially) in a closed-source application.
 - You must state clearly and obviously to all end users that you are using code from this project.
-- Your application must also be licensed under the same license.
+- Your application must also be licensed under the same license. [METOR CLIENT](https://github.com/MetorDevelopment/)
 
-*If you have any other questions, check our [FAQ](https://meteorclient.com/faq) or ask in our [Discord](https://meteorclient.com/discord) server.*
+*If you have any other questions, check our [FAQ](https://meteorclient.com/faq)*
