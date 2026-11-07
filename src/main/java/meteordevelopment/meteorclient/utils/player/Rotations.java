@@ -223,11 +223,9 @@ public class Rotations {
     }
 
     /**
-    * setCorrectedPlayerInput & getInputFromRelativeYaw are derived from Lambda Client.
+    * setCorrectedPlayerInput and getInputFromRelativeYaw are derived from Lambda Client.
     * @see https://github.com/lambda-client/lambda/blob/1.21.11/src/main/kotlin/com/lambda/util/player/RotationUtils.kt
-    *
     * @author dinosaurwizard
-    * @date 2026-10-10
     * 
     * Implementation of Grim movefix logic.
     **/
