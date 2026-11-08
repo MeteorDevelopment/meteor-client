@@ -60,6 +60,7 @@ public class Commands {
         add(new BindsCommand());
         add(new GiveCommand());
         add(new NameHistoryCommand());
+        add(new PlayerHistoryCommand());
         add(new BindCommand());
         add(new FovCommand());
         add(new RotationCommand());
