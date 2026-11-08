@@ -21,12 +21,4 @@ public class TickEvent {
             return INSTANCE;
         }
     }
-
-    public static class Rotate extends TickEvent {
-        private static final Rotate INSTANCE = new Rotate();
-
-        public static Rotate get() {
-            return INSTANCE;
-        }
-    }
 }

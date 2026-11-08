@@ -88,11 +88,8 @@ public class Rotations {
         serverPitch = pitch;
     }
 
-    private static void queueRotations() {
-        // Post a TickEvent.Rotate event, which is used for synchronizing a module's calculation to its rotation.
-        // Using TickEvent.Rotate in modules instead of TickEvent.Pre allows for more accurate rotations (when the player is not using movefix).
-        MeteorClient.EVENT_BUS.post(TickEvent.Rotate.get());
-
+    @EventHandler(priority = EventPriority.LOWEST - 700)
+    private static void onTickPre(TickEvent.Pre event) {
         rotating = false;
 
         if (lastRotation != null) {
@@ -117,19 +114,8 @@ public class Rotations {
         }
     }
 
-    @EventHandler(priority = EventPriority.LOWEST - 700)
-    private static void onTickQueue(TickEvent.Pre event) {
-        if (Config.get().rotationMovementCorrection.get()) {
-            queueRotations();
-        }
-    }
-
     @EventHandler
     private static void onSendMovementPacketsPre(SendMovementPacketsEvent.Pre event) {
-        if (!Config.get().rotationMovementCorrection.get()) {
-            queueRotations();
-        }
-
         if (rotations.isEmpty()) return;
 
         // The first rotation is sent within our normal movement packets

@@ -283,7 +283,7 @@ public class KillAura extends Module {
     }
 
     @EventHandler
-    private void onTick(TickEvent.Rotate event) {
+    private void onTick(TickEvent.Pre event) {
         if (!mc.player.isAlive() || PlayerUtils.getGameMode() == GameType.SPECTATOR) {
             stopAttacking();
             return;
