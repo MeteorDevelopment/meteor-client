@@ -189,7 +189,7 @@ public class Config extends System<Config> {
 
     public final Setting<Boolean> rotationMovementCorrection = sgMisc.add(new BoolSetting.Builder()
         .name("rotation-movement-correction")
-        .description("Adjust player movement inputs depending on server side rotation (Grim movefix).")
+        .description("Adjust player movement depending on server side rotation (Grim movefix).")
         .defaultValue(true)
         .build()
     );

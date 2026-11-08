@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.mixin;
 
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
 import meteordevelopment.meteorclient.MeteorClient;
@@ -15,6 +16,7 @@ import meteordevelopment.meteorclient.systems.modules.movement.NoSlow;
 import meteordevelopment.meteorclient.systems.modules.movement.Sprint;
 import meteordevelopment.meteorclient.systems.modules.player.Reach;
 import meteordevelopment.meteorclient.systems.modules.player.SpeedMine;
+import meteordevelopment.meteorclient.utils.player.Rotations;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.EntityType;
@@ -113,6 +115,12 @@ public abstract class PlayerMixin extends LivingEntity {
     @WrapWithCondition(method = "causeExtraKnockback", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;setSprinting(Z)V"))
     private boolean keepSprint$setSprinting(Player instance, boolean b) {
         return Modules.get().get(Sprint.class).stopSprinting();
+    }
+
+    @ModifyExpressionValue(method = {"causeExtraKnockback", "doSweepAttack"}, at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;getYRot()F"))
+    private float fixAttackYaw(float original) {
+        if ((Object) this == mc.player && Rotations.shouldCorrectPlayerInput()) return Rotations.serverYaw;
+        return original;
     }
 
     @ModifyReturnValue(method = "blockInteractionRange", at = @At("RETURN"))
