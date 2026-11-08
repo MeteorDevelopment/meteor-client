@@ -192,7 +192,7 @@ public class Rotations {
             case Body -> entity.getY() + entity.getBbHeight() / 2;
             case Feet -> entity.getY();
         };
-        
+
         return getPitch(entity.getX(), y, entity.getZ());
     }
 
@@ -212,12 +212,16 @@ public class Rotations {
     * setCorrectedPlayerInput and getInputFromRelativeYaw are derived from Lambda Client.
     * @see https://github.com/lambda-client/lambda/blob/1.21.11/src/main/kotlin/com/lambda/util/player/RotationUtils.kt
     * @author dinosaurwizard
-    * 
+    *
     * Implementation of Grim movefix logic.
     **/
-    
+
     public static boolean shouldCorrectPlayerInput() {
         return rotating && Config.get().rotationMovementCorrection.get();
+    }
+
+    public static Vec3 getServerDirection() {
+        return Vec3.directionFromRotation(serverPitch, serverYaw);
     }
 
     public static void setCorrectedPlayerInput(ClientInput input) {
