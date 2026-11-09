@@ -20,12 +20,14 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import org.jspecify.annotations.NonNull;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.UUID;
 
 public class PlayerHistory extends System<PlayerHistory> {
@@ -34,7 +36,7 @@ public class PlayerHistory extends System<PlayerHistory> {
     private static final int MAX_RESULTS = 5;
 
     private final List<Sighting> sightings = new ArrayList<>();
-    private final java.util.Map<UUID, Long> lastRecorded = new java.util.HashMap<>();
+    private final Map<UUID, Long> lastRecorded = new HashMap<>();
     private long nextPeriodicRecord;
 
     public PlayerHistory() {
@@ -60,14 +62,14 @@ public class PlayerHistory extends System<PlayerHistory> {
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
-        if (System.currentTimeMillis() < nextPeriodicRecord || mc.level == null) return;
+        if (System.currentTimeMillis() < nextPeriodicRecord || MeteorClient.mc.level == null) return;
 
         nextPeriodicRecord = System.currentTimeMillis() + RECORD_INTERVAL_MS;
-        for (Player player : mc.level.players()) record(player);
+        for (Player player : MeteorClient.mc.level.players()) record(player);
     }
 
     private void record(Player player) {
-        if (mc.player == null || mc.level == null || player == mc.player) return;
+        if (MeteorClient.mc.player == null || MeteorClient.mc.level == null || player == MeteorClient.mc.player) return;
 
         long now = System.currentTimeMillis();
         Long previous = lastRecorded.get(player.getUUID());
@@ -78,7 +80,7 @@ public class PlayerHistory extends System<PlayerHistory> {
             player.getUUID(),
             player.getName().getString(),
             now,
-            mc.level.dimension().identifier().toString(),
+            MeteorClient.mc.level.dimension().identifier().toString(),
             player.getBlockX(),
             player.getBlockY(),
             player.getBlockZ(),
@@ -103,9 +105,9 @@ public class PlayerHistory extends System<PlayerHistory> {
     }
 
     public List<Sighting> search(String name) {
-        String query = name.toLowerCase(java.util.Locale.ROOT);
+        String query = name.toLowerCase(Locale.ROOT);
         return sightings.stream()
-            .filter(sighting -> sighting.name.toLowerCase(java.util.Locale.ROOT).contains(query))
+            .filter(sighting -> sighting.name.toLowerCase(Locale.ROOT).contains(query))
             .sorted(Comparator.comparingLong((Sighting sighting) -> sighting.timestamp).reversed())
             .limit(MAX_RESULTS)
             .toList();
