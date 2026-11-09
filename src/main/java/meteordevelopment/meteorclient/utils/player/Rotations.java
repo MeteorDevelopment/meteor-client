@@ -23,6 +23,7 @@ import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.ArrayList;
+import java.util.function.Supplier;
 import java.util.List;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
@@ -46,32 +47,67 @@ public class Rotations {
         MeteorClient.EVENT_BUS.subscribe(Rotations.class);
     }
 
-    public static void rotate(double yaw, double pitch, int priority, boolean clientSide, Runnable callback) {
-        Rotation rotation = new Rotation(yaw, pitch, priority, clientSide, callback);
-
+    // Rotation Setup
+    
+    private static void rotate(Rotation rotation) {
         int i = 0;
         for (; i < queue.size(); i++) {
-            if (priority > queue.get(i).priority) break;
+            if (rotation.priority > queue.get(i).priority) break;
         }
 
         queue.add(i, rotation);
     }
 
+    @Deprecated // clientSide boolean is no longer used.
+    public static void rotate(double yaw, double pitch, int priority, boolean clientSide, Runnable callback) {
+        rotate(new Rotation(yaw, pitch, priority, callback));
+    }
+
     public static void rotate(double yaw, double pitch, int priority, Runnable callback) {
-        rotate(yaw, pitch, priority, true, callback);
+        rotate(new Rotation(yaw, pitch, priority, callback));
     }
 
     public static void rotate(double yaw, double pitch, Runnable callback) {
-        rotate(yaw, pitch, 0, true, callback);
+        rotate(new Rotation(yaw, pitch, 0, callback));
     }
 
     public static void rotate(double yaw, double pitch, int priority) {
-        rotate(yaw, pitch, priority, true, null);
+        rotate(new Rotation(yaw, pitch, priority, null));
     }
 
     public static void rotate(double yaw, double pitch) {
-        rotate(yaw, pitch, 0, true, null);
+        rotate(new Rotation(yaw, pitch, 0, null));
     }
+
+    public static void rotate(Entity entity, int priority, Runnable callback) {
+        rotate(new Rotation(entity, priority, callback));
+    }
+
+    public static void rotate(Entity entity, Runnable callback) {
+        rotate(new Rotation(entity, 0, callback));
+    }
+
+    public static void rotate(Vec3 position, int priority, Runnable callback) {
+        rotate(new Rotation(position, priority, callback));
+    }
+
+    public static void rotate(Vec3 position, Runnable callback) {
+        rotate(new Rotation(position, 0, callback));
+    }
+
+    public static void rotate(int priority, Supplier<Vec2> calculate, Runnable callback) {
+        rotate(new Rotation(priority, calculate, callback));
+    }
+
+    public static void rotate(Supplier<Vec2> calculate, Runnable callback) {
+        rotate(new Rotation(0, calculate, callback));
+    }
+
+    public static void rotate(Supplier<Vec2> calculate) {
+        rotate(new Rotation(0, calculate, null));
+    }
+
+    // Rotation Execution
 
     private static void setPreRotation() {
         preYaw = mc.player.getYRot();
@@ -104,12 +140,11 @@ public class Rotations {
         if (!queue.isEmpty()) {
             rotating = true;
 
-            rotations.addAll(queue);
-
             // Set the server rotation early so movefix inputs compensate.
             Rotation last = queue.get(queue.size() - 1);
             setServerRotation(last.yaw, last.pitch);
 
+            rotations.addAll(queue);
             queue.clear();
         }
     }
@@ -117,6 +152,11 @@ public class Rotations {
     @EventHandler
     private static void onSendMovementPacketsPre(SendMovementPacketsEvent.Pre event) {
         if (rotations.isEmpty()) return;
+
+        // Recalculate yaw and pitch due to entities moving around.
+        if (!Config.get().rotationMovementCorrection.get()) {
+            rotations.forEach(Rotation::recalculate);
+        }
 
         // The first rotation is sent within our normal movement packets
         Rotation first = rotations.get(0);
@@ -129,18 +169,16 @@ public class Rotations {
     private static void onSendMovementPacketsPost(SendMovementPacketsEvent.Post event) {
         if (rotations.isEmpty()) return;
 
-        setClientRotation(preYaw, prePitch);
-
-        // First rotation packet was already sent to server naturally
+        // First rotation packet was already sent to server naturally.
         Rotation first = rotations.get(0);
-        if (first.clientSide) setClientRotation(first.yaw, first.pitch);
+        setClientRotation(first.yaw, first.pitch);
         first.runCallback();
 
         // All subsequent rotations require a packet sent
         for (int i = 1; i < rotations.size(); i++) {
             Rotation rotation = rotations.get(i);
             setServerRotation(rotation.yaw, rotation.pitch);
-            if (rotation.clientSide) setClientRotation(rotation.yaw, rotation.pitch);
+            setClientRotation(rotation.yaw, rotation.pitch);
             rotation.sendPacket();
             rotation.runCallback();
         }
@@ -227,7 +265,7 @@ public class Rotations {
     public static void setCorrectedPlayerInput(ClientInput input) {
         input.keyPresses = getInputFromRelativeYaw(input.keyPresses);
 
-        // The movement vector must be adjusted according to the new input
+        // The movement vector must be adjusted according to the new input.
         int x = (input.keyPresses.left() ? 1 : 0) - (input.keyPresses.right() ? 1 : 0);
         int y = (input.keyPresses.forward() ? 1 : 0) - (input.keyPresses.backward() ? 1 : 0);
         input.moveVector = new Vec2(x, y).normalized();
@@ -280,15 +318,36 @@ public class Rotations {
     private static class Rotation {
         public float yaw, pitch;
         public int priority;
-        public boolean clientSide;
         public Runnable callback;
+        public Supplier<Vec2> calculate;
 
-        public Rotation(double yaw, double pitch, int priority, boolean clientSide, Runnable callback) {
+        public Rotation(double yaw, double pitch, int priority, Runnable callback) {
             this.yaw = (float) yaw;
             this.pitch = (float) pitch;
             this.priority = priority;
-            this.clientSide = clientSide;
             this.callback = callback;
+        }
+
+        public Rotation(int priority, Supplier<Vec2> calculate, Runnable callback) {
+            this(0, 0, priority, callback);
+            this.calculate = calculate;
+            recalculate();
+        }
+
+        public Rotation(Vec3 position, int priority, Runnable callback) {
+            this(priority, () -> new Vec2((float) getYaw(position), (float) getPitch(position)), callback);
+        }
+
+        public Rotation(Entity entity, int priority, Runnable callback) {
+            this(priority, () -> new Vec2((float) getYaw(entity), (float) getPitch(entity)), callback);
+        }
+
+        public void recalculate() {
+            if (calculate != null) {
+                Vec2 result = calculate.get();
+                this.yaw = result.x;
+                this.pitch = result.y;
+            }
         }
 
         public void sendPacket() {

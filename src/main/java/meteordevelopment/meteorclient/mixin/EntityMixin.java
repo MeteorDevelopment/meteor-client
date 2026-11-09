@@ -110,10 +110,7 @@ public abstract class EntityMixin {
 
     @ModifyExpressionValue(method = "moveRelative", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;getYRot()F"))
     private float moveRelativeYaw(float original) {
-        if ((Object) this == mc.player && Rotations.shouldCorrectPlayerInput()) {
-            return Rotations.serverYaw;
-        }
-
+        if ((Object) this == mc.player && Rotations.shouldCorrectPlayerInput()) return Rotations.serverYaw;
         return original;
     }
 

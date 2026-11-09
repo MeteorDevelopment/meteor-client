@@ -109,10 +109,7 @@ public abstract class LocalPlayerMixin extends AbstractClientPlayer {
     @WrapOperation(method = "aiStep", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/ClientInput;tick()V"))
     private void wrapTick(ClientInput input, Operation<Void> original) {
         original.call(input);
-
-        if (Rotations.shouldCorrectPlayerInput()) {
-            Rotations.setCorrectedPlayerInput(input);
-        }
+        if (Rotations.shouldCorrectPlayerInput()) Rotations.setCorrectedPlayerInput(input);
     }
 
     @ModifyReturnValue(method = "getJumpRidingScale", at = @At("RETURN"))

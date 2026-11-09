@@ -68,7 +68,7 @@ public class KillAura extends Module {
         .build()
     );
 
-    private final Setting<RotationMode> rotation = sgGeneral.add(new EnumSetting.Builder<RotationMode>()
+    private final Setting<RotationMode> rotate = sgGeneral.add(new EnumSetting.Builder<RotationMode>()
         .name("rotate")
         .description("Determines when you should rotate towards the target.")
         .defaultValue(RotationMode.Always)
@@ -356,8 +356,8 @@ public class KillAura extends Module {
             wasPathing = true;
         }
 
-        if (rotation.get() == RotationMode.Always) {
-            Rotations.rotate(Rotations.getYaw(primary), Rotations.getPitch(primary, Target.Body), () -> attackTargets());
+        if (rotate.get() == RotationMode.Always) {
+            Rotations.rotate(primary, 30, () -> attackTargets());
         } else {
             attackTargets();
         }
@@ -464,8 +464,8 @@ public class KillAura extends Module {
         if (!delayCheck()) return;
 
         for (Entity target : targets) {
-            if (rotation.get() == RotationMode.OnHit) {
-                Rotations.rotate(Rotations.getYaw(target), Rotations.getPitch(target, Target.Body), () -> attack(target));
+            if (rotate.get() == RotationMode.OnHit) {
+                Rotations.rotate(target, 30, () -> attack(target));
             } else {
                 attack(target);
             }
