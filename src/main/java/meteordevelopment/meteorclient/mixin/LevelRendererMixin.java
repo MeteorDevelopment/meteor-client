@@ -71,14 +71,7 @@ public abstract class LevelRendererMixin implements ILevelRenderer {
 
     // Entity Shaders
 
-    @ModifyExpressionValue(
-        method = "executeOutline",
-        at = @At(
-            value = "FIELD",
-            target = "Lnet/minecraft/client/renderer/LevelRenderer;currentFrameRendersEntityOutline:Z",
-            opcode = Opcodes.GETFIELD
-        )
-    )
+    @ModifyExpressionValue(method = "executeOutline", at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/LevelRenderer;currentFrameRendersEntityOutline:Z", opcode = Opcodes.GETFIELD))
     private boolean meteor$allowCustomEntityOutlines(boolean original) {
         return original || !framebufferStack.isEmpty();
     }
