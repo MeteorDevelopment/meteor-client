@@ -26,6 +26,7 @@ import meteordevelopment.meteorclient.systems.hud.HudElement;
 import meteordevelopment.meteorclient.systems.hud.HudElementInfo;
 import meteordevelopment.meteorclient.systems.hud.HudRenderer;
 import meteordevelopment.meteorclient.utils.misc.Keybind;
+import meteordevelopment.meteorclient.utils.misc.input.Input;
 import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
 import meteordevelopment.meteorclient.utils.misc.input.KeyBinds;
 import meteordevelopment.meteorclient.utils.render.color.Color;
@@ -713,9 +714,7 @@ public class KeyboardHud extends HudElement {
             } else {
                 InputConstants.Key inputKey = ((KeyMappingAccessor) binding).meteor$getKey();
                 boolean isKey = inputKey.getType() != InputConstants.Type.MOUSE;
-                return isKey == key && inputKey.getType() == InputConstants.Type.KEYBOARD
-                    ? keycode == inputKey.getValue()
-                    : input == inputKey.getValue();
+                return isKey == key && input == inputKey.getValue();
             }
         }
 
@@ -731,17 +730,12 @@ public class KeyboardHud extends HudElement {
         }
 
         public boolean isNativelyPressed() {
-            if (keybind != null) {
-                if (!keybind.isSet()) return false;
-                return keybind.isKey()
-                    ? Type.KEYBOARD.getOrCreate(keybind.getValue()).getValue() != RELEASE
-                    : Type.MOUSE.getOrCreate(keybind.getValue()).getValue() != RELEASE;
-            } else {
-                int key = ((KeyMappingAccessor) binding).meteor$getKey().getValue();
-                return key >= 0 && key < 8
-                    ? Type.MOUSE.getOrCreate(key).getValue() != RELEASE
-                    : Type.KEYBOARD.getOrCreate(key).getValue() != RELEASE;
-            }
+            InputConstants.Key key = keybind != null ? keybind.key : ((KeyMappingAccessor) binding).meteor$getKey();
+            if (key.equals(InputConstants.UNKNOWN)) return false;
+
+            return key.getType() == InputConstants.Type.MOUSE
+                ? Input.isButtonPressed(key.getValue())
+                : InputConstants.isKeyDown(key.getValue());
         }
 
         public int getCps() {

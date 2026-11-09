@@ -5,7 +5,7 @@
 
 package meteordevelopment.meteorclient.systems.modules.render;
 
-
+import com.mojang.blaze3d.platform.InputConstants;
 import meteordevelopment.meteorclient.events.game.GameLeftEvent;
 import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
 import meteordevelopment.meteorclient.events.meteor.KeyInputEvent;
@@ -309,7 +309,7 @@ public class Freecam extends Module {
         if (Input.isKeyPressed(KEY_F3)) return;
         if (checkGuiMove()) return;
 
-        if (onInput(event.key(), event.action)) event.cancel();
+        if (onInput(InputConstants.getKey(event.input), event.action)) event.cancel();
     }
 
     @Nullable
@@ -377,26 +377,26 @@ public class Freecam extends Module {
             setGoal();
         }
 
-        if (onInput(event.button(), event.action)) event.cancel();
+        if (onInput(InputConstants.Type.MOUSE.getOrCreate(event.button()), event.action)) event.cancel();
     }
 
-    private boolean onInput(int key, KeyAction action) {
-        if (Input.getKey(mc.options.keyUp) == key) {
+    private boolean onInput(InputConstants.Key key, KeyAction action) {
+        if (Input.matches(mc.options.keyUp, key)) {
             forward = action != KeyAction.Release;
             mc.options.keyUp.setDown(false);
-        } else if (Input.getKey(mc.options.keyDown) == key) {
+        } else if (Input.matches(mc.options.keyDown, key)) {
             backward = action != KeyAction.Release;
             mc.options.keyDown.setDown(false);
-        } else if (Input.getKey(mc.options.keyRight) == key) {
+        } else if (Input.matches(mc.options.keyRight, key)) {
             right = action != KeyAction.Release;
             mc.options.keyRight.setDown(false);
-        } else if (Input.getKey(mc.options.keyLeft) == key) {
+        } else if (Input.matches(mc.options.keyLeft, key)) {
             left = action != KeyAction.Release;
             mc.options.keyLeft.setDown(false);
-        } else if (Input.getKey(mc.options.keyJump) == key) {
+        } else if (Input.matches(mc.options.keyJump, key)) {
             up = action != KeyAction.Release;
             mc.options.keyJump.setDown(false);
-        } else if (Input.getKey(mc.options.keyShift) == key) {
+        } else if (Input.matches(mc.options.keyShift, key)) {
             down = action != KeyAction.Release;
             mc.options.keyShift.setDown(false);
         } else {
