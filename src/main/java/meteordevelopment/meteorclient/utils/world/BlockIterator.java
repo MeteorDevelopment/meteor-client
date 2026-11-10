@@ -61,7 +61,7 @@ public class BlockIterator {
                     for (int z = pz - scanHRadius; z <= pz + scanHRadius; z++) {
                         for (int y = Math.max(mc.level.getMinY(), py - scanVRadius); y <= py + scanVRadius; y++) {
                             if (callbacks.isEmpty()) break scan;
-                            if (y > mc.level.getMaxY()) break;
+                            if (y >= mc.level.getMaxY()) break;
 
                             blockPos.set(x, y, z);
                             BlockState blockState = mc.level.getBlockState(blockPos);
