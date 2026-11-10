@@ -80,7 +80,7 @@ public class AutoMount extends Module {
 
     private void interact(Entity entity, boolean rotate) {
         if (rotate) {
-            Rotations.rotate(Rotations.getYaw(entity), Rotations.getPitch(entity), -100, () -> interact(entity));
+            Rotations.rotate(entity, -100, () -> interact(entity));
         } else {
             interact(entity);
         }

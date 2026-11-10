@@ -242,7 +242,7 @@ public class PacketMine extends Module {
 
         public void mine() {
             if (rotate.get())
-                Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), 50, this::sendMinePackets);
+                Rotations.rotate(blockPos, 50, this::sendMinePackets);
             else sendMinePackets();
         }
 

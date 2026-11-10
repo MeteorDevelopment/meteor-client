@@ -27,6 +27,7 @@ import net.minecraft.world.item.ArrowItem;
 import net.minecraft.world.item.BowItem;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.Vec2;
 
 import java.util.Set;
 
@@ -126,7 +127,7 @@ public class BowAimbot extends Module {
                 wasPathing = true;
             }
 
-            aim();
+            Rotations.rotate(() -> aim());
         }
     }
 
@@ -134,7 +135,9 @@ public class BowAimbot extends Module {
         return InvUtils.testInMainHand(Items.BOW, Items.CROSSBOW);
     }
 
-    private void aim() {
+    private Vec2 aim() {
+        if (target == null) return null;
+
         // Velocity based on bow charge.
         float velocity = BowItem.getPowerForTime(mc.player.getTicksUsingItem());
 
@@ -154,9 +157,9 @@ public class BowAimbot extends Module {
 
         // Set player rotation
         if (Float.isNaN(pitch)) {
-            Rotations.rotate(Rotations.getYaw(target), Rotations.getPitch(target));
+            return new Vec2((float) Rotations.getYaw(target), (float) Rotations.getPitch(target));
         } else {
-            Rotations.rotate(Rotations.getYaw(new Vec3(pos.x, pos.y, pos.z)), pitch);
+            return new Vec2((float) Rotations.getYaw(new Vec3(pos.x, pos.y, pos.z)), pitch);
         }
     }
 

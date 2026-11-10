@@ -111,7 +111,7 @@ public class BlockUtils {
         BlockHitResult bhr = new BlockHitResult(hitPos, side.getOpposite(), neighbour, false);
 
         if (rotate) {
-            Rotations.rotate(Rotations.getYaw(hitPos), Rotations.getPitch(hitPos), rotationPriority, () -> {
+            Rotations.rotate(hitPos, rotationPriority, () -> {
                 InvUtils.swap(slot, swapBack);
 
                 interact(bhr, hand, swingHand);

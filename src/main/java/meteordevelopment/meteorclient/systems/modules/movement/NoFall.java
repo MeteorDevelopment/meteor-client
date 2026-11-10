@@ -426,8 +426,7 @@ public class NoFall extends Module {
         // Use reachable water before falling again, rather than waiting until after movement.
         boolean useNow = pickup || isWithinPlaceReach(hit.getLocation());
         Vec3 aim = pickup ? Vec3.atCenterOf(hit.getBlockPos()) : hit.getLocation();
-        if (rotate.get()) Rotations.rotate(Rotations.getYaw(aim), Rotations.getPitch(aim),
-            Integer.MAX_VALUE, useNow ? null : use);
+        if (rotate.get()) Rotations.rotate(aim, Integer.MAX_VALUE, useNow ? null : use);
         else if (!useNow) pendingBucketUse = use;
         if (useNow) use.run();
     }

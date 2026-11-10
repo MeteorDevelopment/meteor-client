@@ -490,7 +490,7 @@ public class Nuker extends Module {
                 boolean canInstaMine = BlockUtils.canInstaBreak(block);
 
                 if (rotate.get())
-                    Rotations.rotate(Rotations.getYaw(block), Rotations.getPitch(block), () -> breakBlock(block));
+                    Rotations.rotate(block, () -> breakBlock(block));
                 else breakBlock(block);
 
                 if (enableRenderBreaking.get())

@@ -95,6 +95,14 @@ public class Rotations {
         rotate(new Rotation(position, 0, callback));
     }
 
+    public static void rotate(BlockPos blockPos, int priority, Runnable callback) {
+        rotate(new Rotation(Vec3.atCenterOf(blockPos), priority, callback));
+    }
+
+    public static void rotate(BlockPos blockPos, Runnable callback) {
+        rotate(new Rotation(Vec3.atCenterOf(blockPos), 0, callback));
+    }
+
     public static void rotate(int priority, Supplier<Vec2> calculate, Runnable callback) {
         rotate(new Rotation(priority, calculate, callback));
     }
@@ -345,8 +353,10 @@ public class Rotations {
         public void recalculate() {
             if (calculate != null) {
                 Vec2 result = calculate.get();
-                this.yaw = result.x;
-                this.pitch = result.y;
+                if (result != null) {
+                    this.yaw = result.x;
+                    this.pitch = result.y;
+                }
             }
         }
 
