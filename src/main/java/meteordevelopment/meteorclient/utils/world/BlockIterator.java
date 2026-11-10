@@ -55,47 +55,59 @@ public class BlockIterator {
         processing = true;
 
         try {
-            for (int x = px - scanHRadius; x <= px + scanHRadius; x++) {
-                for (int z = pz - scanHRadius; z <= pz + scanHRadius; z++) {
-                    for (int y = Math.max(mc.level.getMinY(), py - scanVRadius); y <= py + scanVRadius; y++) {
-                        if (y > mc.level.getMaxY()) break;
+            try {
+                scan:
+                for (int x = px - scanHRadius; x <= px + scanHRadius; x++) {
+                    for (int z = pz - scanHRadius; z <= pz + scanHRadius; z++) {
+                        for (int y = Math.max(mc.level.getMinY(), py - scanVRadius); y <= py + scanVRadius; y++) {
+                            if (callbacks.isEmpty()) break scan;
+                            if (y > mc.level.getMaxY()) break;
 
-                        blockPos.set(x, y, z);
-                        BlockState blockState = mc.level.getBlockState(blockPos);
+                            blockPos.set(x, y, z);
+                            BlockState blockState = mc.level.getBlockState(blockPos);
 
-                        int dx = Math.abs(x - px);
-                        int dy = Math.abs(y - py);
-                        int dz = Math.abs(z - pz);
+                            int dx = Math.abs(x - px);
+                            int dy = Math.abs(y - py);
+                            int dz = Math.abs(z - pz);
 
-                        Iterator<Callback> iterator = callbacks.iterator();
-                        while (iterator.hasNext()) {
-                            Callback callback = iterator.next();
+                            Iterator<Callback> iterator = callbacks.iterator();
+                            while (iterator.hasNext()) {
+                                Callback callback = iterator.next();
 
-                            if (dx <= callback.hRadius && dy <= callback.vRadius && dz <= callback.hRadius) {
-                                disableCurrent = false;
-                                callback.function.accept(blockPos, blockState);
+                                if (dx <= callback.hRadius && dy <= callback.vRadius && dz <= callback.hRadius) {
+                                    disableCurrent = false;
+                                    callback.function.accept(blockPos, blockState);
 
-                                if (disableCurrent) {
-                                    iterator.remove();
-                                    completedCallbacks.add(callback);
+                                    if (disableCurrent) {
+                                        iterator.remove();
+                                        completedCallbacks.add(callback);
+                                    }
                                 }
                             }
                         }
                     }
                 }
+            } finally {
+                processing = false;
+                callbackPool.freeAll(callbacks);
+                callbackPool.freeAll(completedCallbacks);
+                callbacks.clear();
+                completedCallbacks.clear();
+                callbacks.addAll(pendingCallbacks);
+                pendingCallbacks.clear();
             }
         } finally {
-            processing = false;
-            callbackPool.freeAll(callbacks);
-            callbackPool.freeAll(completedCallbacks);
-            callbacks.clear();
-            completedCallbacks.clear();
-            callbacks.addAll(pendingCallbacks);
-            pendingCallbacks.clear();
-        }
+            List<Runnable> callbacksToRun = new ReferenceArrayList<>(afterCallbacks);
+            afterCallbacks.clear();
 
-        for (Runnable callback : afterCallbacks) callback.run();
-        afterCallbacks.clear();
+            for (Runnable callback : callbacksToRun) {
+                try {
+                    callback.run();
+                } catch (RuntimeException e) {
+                    MeteorClient.LOG.error("Error while executing a BlockIterator after callback.", e);
+                }
+            }
+        }
     }
 
     public static void register(int horizontalRadius, int verticalRadius, BiConsumer<BlockPos, BlockState> function) {
