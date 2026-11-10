@@ -71,6 +71,11 @@ public abstract class LevelRendererMixin implements ILevelRenderer {
 
     // Entity Shaders
 
+    @ModifyExpressionValue(method = "executeOutline", at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/LevelRenderer;currentFrameRendersEntityOutline:Z", opcode = Opcodes.GETFIELD))
+    private boolean meteor$allowCustomEntityOutlines(boolean original) {
+        return original || !framebufferStack.isEmpty();
+    }
+
     @Inject(method = "render", at = @At("HEAD"))
     private void onRenderLevelHead(GraphicsResourceAllocator resourceAllocator, boolean renderOutline, CameraRenderState cameraState, GpuBufferSlice terrainFog, Vector4f fogColor, boolean shouldRenderSky, boolean consistentDepthRequired, CallbackInfo ci) {
         PostProcessShaders.beginRender();
