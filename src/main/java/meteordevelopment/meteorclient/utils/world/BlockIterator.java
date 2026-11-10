@@ -25,15 +25,12 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 public class BlockIterator {
     private static final Pool<Callback> callbackPool = new Pool<>(Callback::new);
     private static final List<Callback> callbacks = new ReferenceArrayList<>();
-    private static final List<Callback> pendingCallbacks = new ReferenceArrayList<>();
-    private static final List<Callback> completedCallbacks = new ReferenceArrayList<>();
 
     private static final List<Runnable> afterCallbacks = new ReferenceArrayList<>();
 
     private static final BlockPos.MutableBlockPos blockPos = new BlockPos.MutableBlockPos();
     private static int hRadius, vRadius;
 
-    private static boolean processing;
     private static boolean disableCurrent;
 
     private BlockIterator() {
@@ -48,80 +45,70 @@ public class BlockIterator {
     private static void onTick(TickEvent.Pre event) {
         if (!Utils.canUpdate()) return;
 
-        int px = mc.player.getBlockX(), py = mc.player.getBlockY(), pz = mc.player.getBlockZ();
-        int scanHRadius = hRadius, scanVRadius = vRadius;
-        hRadius = 0;
-        vRadius = 0;
-        processing = true;
+        int px = mc.player.getBlockX();
+        int py = mc.player.getBlockY();
+        int pz = mc.player.getBlockZ();
 
         try {
-            try {
-                scan:
-                for (int x = px - scanHRadius; x <= px + scanHRadius; x++) {
-                    for (int z = pz - scanHRadius; z <= pz + scanHRadius; z++) {
-                        for (int y = Math.max(mc.level.getMinY(), py - scanVRadius); y <= py + scanVRadius; y++) {
-                            if (callbacks.isEmpty()) break scan;
-                            if (y >= mc.level.getMaxY()) break;
+            scan(px, py, pz);
+        } finally {
+            hRadius = 0;
+            vRadius = 0;
 
-                            blockPos.set(x, y, z);
-                            BlockState blockState = mc.level.getBlockState(blockPos);
+            callbackPool.freeAll(callbacks);
+            callbacks.clear();
+        }
 
-                            int dx = Math.abs(x - px);
-                            int dy = Math.abs(y - py);
-                            int dz = Math.abs(z - pz);
+        List<Runnable> callbacksToRun = new ReferenceArrayList<>(afterCallbacks);
+        afterCallbacks.clear();
 
-                            Iterator<Callback> iterator = callbacks.iterator();
-                            while (iterator.hasNext()) {
-                                Callback callback = iterator.next();
+        for (Runnable callback : callbacksToRun) callback.run();
+    }
 
-                                if (dx <= callback.hRadius && dy <= callback.vRadius && dz <= callback.hRadius) {
-                                    disableCurrent = false;
-                                    callback.function.accept(blockPos, blockState);
+    private static void scan(int px, int py, int pz) {
+        for (int x = px - hRadius; x <= px + hRadius; x++) {
+            for (int z = pz - hRadius; z <= pz + hRadius; z++) {
+                for (int y = Math.max(mc.level.getMinY(), py - vRadius); y <= py + vRadius; y++) {
+                    if (callbacks.isEmpty()) return;
+                    if (y >= mc.level.getMaxY()) break;
 
-                                    if (disableCurrent) {
-                                        iterator.remove();
-                                        completedCallbacks.add(callback);
-                                    }
-                                }
+                    blockPos.set(x, y, z);
+                    BlockState blockState = mc.level.getBlockState(blockPos);
+
+                    int dx = Math.abs(x - px);
+                    int dy = Math.abs(y - py);
+                    int dz = Math.abs(z - pz);
+
+                    Iterator<Callback> iterator = callbacks.iterator();
+                    while (iterator.hasNext()) {
+                        Callback callback = iterator.next();
+
+                        if (dx <= callback.hRadius && dy <= callback.vRadius && dz <= callback.hRadius) {
+                            disableCurrent = false;
+                            callback.function.accept(blockPos, blockState);
+
+                            if (disableCurrent) {
+                                iterator.remove();
+                                callbackPool.free(callback);
                             }
                         }
                     }
-                }
-            } finally {
-                processing = false;
-                callbackPool.freeAll(callbacks);
-                callbackPool.freeAll(completedCallbacks);
-                callbacks.clear();
-                completedCallbacks.clear();
-                callbacks.addAll(pendingCallbacks);
-                pendingCallbacks.clear();
-            }
-        } finally {
-            List<Runnable> callbacksToRun = new ReferenceArrayList<>(afterCallbacks);
-            afterCallbacks.clear();
-
-            for (Runnable callback : callbacksToRun) {
-                try {
-                    callback.run();
-                } catch (RuntimeException e) {
-                    MeteorClient.LOG.error("Error while executing a BlockIterator after callback.", e);
                 }
             }
         }
     }
 
     public static void register(int horizontalRadius, int verticalRadius, BiConsumer<BlockPos, BlockState> function) {
+        hRadius = Math.max(hRadius, horizontalRadius);
+        vRadius = Math.max(vRadius, verticalRadius);
+
         Callback callback = callbackPool.get();
 
         callback.function = function;
         callback.hRadius = horizontalRadius;
         callback.vRadius = verticalRadius;
 
-        hRadius = Math.max(hRadius, horizontalRadius);
-        vRadius = Math.max(vRadius, verticalRadius);
-
-        if (processing) pendingCallbacks.add(callback);
-        else callbacks.add(callback);
+        callbacks.add(callback);
     }
 
     public static void disableCurrent() {
