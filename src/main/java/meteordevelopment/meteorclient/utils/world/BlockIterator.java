@@ -16,6 +16,7 @@ import meteordevelopment.orbit.EventPriority;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.state.BlockState;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.function.BiConsumer;
 
@@ -48,29 +49,7 @@ public class BlockIterator {
         int py = mc.player.getBlockY();
         int pz = mc.player.getBlockZ();
 
-        for (int x = px - hRadius; x <= px + hRadius; x++) {
-            for (int z = pz - hRadius; z <= pz + hRadius; z++) {
-                for (int y = Math.max(mc.level.getMinY(), py - vRadius); y <= py + vRadius; y++) {
-                    if (y > mc.level.getHeight()) break;
-
-                    blockPos.set(x, y, z);
-                    BlockState blockState = mc.level.getBlockState(blockPos);
-
-                    int dx = Math.abs(x - px);
-                    int dy = Math.abs(y - py);
-                    int dz = Math.abs(z - pz);
-
-                    callbacks.removeIf(callback -> {
-                        if (dx <= callback.hRadius && dy <= callback.vRadius && dz <= callback.hRadius) {
-                            disableCurrent = false;
-                            callback.function.accept(blockPos, blockState);
-                            return disableCurrent;
-                        }
-                        return false;
-                    });
-                }
-            }
-        }
+        scan(px, py, pz);
 
         hRadius = 0;
         vRadius = 0;
@@ -80,6 +59,39 @@ public class BlockIterator {
 
         for (Runnable callback : afterCallbacks) callback.run();
         afterCallbacks.clear();
+    }
+
+    private static void scan(int px, int py, int pz) {
+        for (int x = px - hRadius; x <= px + hRadius; x++) {
+            for (int z = pz - hRadius; z <= pz + hRadius; z++) {
+                for (int y = Math.max(mc.level.getMinY(), py - vRadius); y <= py + vRadius; y++) {
+                    if (callbacks.isEmpty()) return;
+                    if (y >= mc.level.getMaxY()) break;
+
+                    blockPos.set(x, y, z);
+                    BlockState blockState = mc.level.getBlockState(blockPos);
+
+                    int dx = Math.abs(x - px);
+                    int dy = Math.abs(y - py);
+                    int dz = Math.abs(z - pz);
+
+                    Iterator<Callback> iterator = callbacks.iterator();
+                    while (iterator.hasNext()) {
+                        Callback callback = iterator.next();
+
+                        if (dx <= callback.hRadius && dy <= callback.vRadius && dz <= callback.hRadius) {
+                            disableCurrent = false;
+                            callback.function.accept(blockPos, blockState);
+
+                            if (disableCurrent) {
+                                iterator.remove();
+                                callbackPool.free(callback);
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
     public static void register(int horizontalRadius, int verticalRadius, BiConsumer<BlockPos, BlockState> function) {
