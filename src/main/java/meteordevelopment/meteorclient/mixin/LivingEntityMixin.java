@@ -12,6 +12,7 @@ import meteordevelopment.meteorclient.events.entity.DropItemsEvent;
 import meteordevelopment.meteorclient.events.entity.player.CanWalkOnFluidEvent;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.movement.HighJump;
+import meteordevelopment.meteorclient.systems.modules.movement.NoJumpDelay;
 import meteordevelopment.meteorclient.systems.modules.movement.Sprint;
 import meteordevelopment.meteorclient.systems.modules.movement.elytrafly.ElytraFlightModes;
 import meteordevelopment.meteorclient.systems.modules.movement.elytrafly.ElytraFly;
@@ -140,5 +141,14 @@ public abstract class LivingEntityMixin extends Entity {
         if (level().isClientSide() && !itemStack.isEmpty()) {
             if (MeteorClient.EVENT_BUS.post(DropItemsEvent.get(itemStack)).isCancelled()) cir.setReturnValue(null);
         }
+    }
+
+    @Unique
+    NoJumpDelay noJumpDelay = Modules.get().get(NoJumpDelay.class);
+
+    @ModifyConstant(method = "tickMovement", constant = @Constant(intValue = 10))
+    int onTickMovement(int constant) {
+        if (noJumpDelay.isActive()) return 0;
+        return constant;
     }
 }
