@@ -49,25 +49,16 @@ public class BlockIterator {
         int py = mc.player.getBlockY();
         int pz = mc.player.getBlockZ();
 
-        boolean scanCompleted = false;
+        scan(px, py, pz);
 
-        try {
-            scan(px, py, pz);
-            scanCompleted = true;
-        } finally {
-            hRadius = 0;
-            vRadius = 0;
+        hRadius = 0;
+        vRadius = 0;
 
-            callbackPool.freeAll(callbacks);
-            callbacks.clear();
+        callbackPool.freeAll(callbacks);
+        callbacks.clear();
 
-            if (!scanCompleted) afterCallbacks.clear();
-        }
-
-        List<Runnable> callbacksToRun = new ReferenceArrayList<>(afterCallbacks);
+        for (Runnable callback : afterCallbacks) callback.run();
         afterCallbacks.clear();
-
-        for (Runnable callback : callbacksToRun) callback.run();
     }
 
     private static void scan(int px, int py, int pz) {
