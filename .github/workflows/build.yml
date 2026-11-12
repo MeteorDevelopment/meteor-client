@@ -37,7 +37,6 @@ jobs:
         id: build-number
         run: |
           cd .github/builds
-          npm install
           npm run --silent get_number >> $GITHUB_OUTPUT
 
       - name: Build

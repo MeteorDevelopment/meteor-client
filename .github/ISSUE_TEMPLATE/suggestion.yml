@@ -15,7 +15,7 @@ body:
       label: Before submitting a suggestion
       options:
         - label: |
-            This feature doesn't already exist in the client. (I have checked every module and their settings on the **latest dev build**)
+            This feature doesn't already exist in the client. (I have checked every module and their settings on the **latest build**)
           required: true
         - label: |
             This wasn't already suggested. (I have searched suggestions on GitHub and read the FAQ)
