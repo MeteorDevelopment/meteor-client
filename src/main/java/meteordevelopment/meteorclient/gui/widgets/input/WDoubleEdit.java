@@ -95,7 +95,7 @@ public class WDoubleEdit extends WHorizontalList {
         boolean good;
         boolean validate = true;
 
-        if (c == '-' && !text.contains("-") && textBox.cursor == 0) {
+        if (c == '-' && !text.contains("-") && Math.min(textBox.selectionStart, textBox.selectionEnd) == 0) {
             good = true;
             validate = false;
         } else if (c == '.' && !text.contains(".")) {
