@@ -5,7 +5,6 @@
 
 package meteordevelopment.meteorclient.systems.modules.render;
 
-import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.meteor.MouseScrollEvent;
 import meteordevelopment.meteorclient.events.render.GetFovEvent;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
@@ -87,7 +86,7 @@ public class Zoom extends Module {
         value = zoom.get();
         time = 0.001;
 
-        MeteorClient.EVENT_BUS.subscribe(this);
+        subscribeToEvents();
         enabled = true;
     }
 
@@ -105,7 +104,7 @@ public class Zoom extends Module {
         }
 
         if (time == 0) {
-            MeteorClient.EVENT_BUS.unsubscribe(this);
+            unsubscribeFromEvents();
             enabled = false;
 
             onStop();
