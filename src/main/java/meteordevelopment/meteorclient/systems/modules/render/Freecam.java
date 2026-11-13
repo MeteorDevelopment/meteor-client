@@ -244,18 +244,12 @@ public class Freecam extends Module {
         double velZ = 0;
 
         if (rotate.get()) {
-            BlockPos crossHairPos;
-            Vec3 crossHairPosition;
-
-            if (mc.hitResult instanceof EntityHitResult ehr) {
-                crossHairPos = ehr.getEntity().blockPosition();
-                Rotations.rotate(Rotations.getYaw(crossHairPos), Rotations.getPitch(crossHairPos), 0, null);
+            if (mc.hitResult instanceof EntityHitResult entityHitResult) {
+                Rotations.rotate(entityHitResult.getEntity(), null);
             } else {
-                crossHairPosition = mc.hitResult.getLocation();
-                crossHairPos = ((BlockHitResult) mc.hitResult).getBlockPos();
-
-                if (!mc.level.getBlockState(crossHairPos).isAir()) {
-                    Rotations.rotate(Rotations.getYaw(crossHairPosition), Rotations.getPitch(crossHairPosition), 0, null);
+                BlockPos crossHairBlockPos = ((BlockHitResult) mc.hitResult).getBlockPos();
+                if (!mc.level.getBlockState(crossHairBlockPos).isAir()) {
+                    Rotations.rotate(mc.hitResult.getLocation(), null);
                 }
             }
         }

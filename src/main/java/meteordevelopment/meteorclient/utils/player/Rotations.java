@@ -11,31 +11,32 @@ import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.utils.PreInit;
 import meteordevelopment.meteorclient.utils.entity.Target;
-import meteordevelopment.meteorclient.utils.misc.Pool;
 import meteordevelopment.orbit.EventHandler;
+import meteordevelopment.orbit.EventPriority;
+import net.minecraft.client.player.ClientInput;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Input;
+import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.ArrayList;
+import java.util.function.Supplier;
 import java.util.List;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class Rotations {
-    private static final Pool<Rotation> rotationPool = new Pool<>(Rotation::new);
+    private static final List<Rotation> queue = new ArrayList<>();
     private static final List<Rotation> rotations = new ArrayList<>();
-    public static float serverYaw;
-    public static float serverPitch;
-    public static int rotationTimer;
     private static float preYaw, prePitch;
-    private static int i = 0;
+    public static float serverYaw, serverPitch;
 
     private static Rotation lastRotation;
     private static int lastRotationTimer;
-    private static boolean sentLastRotation;
+
     public static boolean rotating = false;
 
     private Rotations() {
@@ -46,140 +47,189 @@ public class Rotations {
         MeteorClient.EVENT_BUS.subscribe(Rotations.class);
     }
 
-    public static void rotate(double yaw, double pitch, int priority, boolean clientSide, Runnable callback) {
-        Rotation rotation = rotationPool.get();
-        rotation.set(yaw, pitch, priority, clientSide, callback);
-
+    // Rotation Setup
+    
+    private static void rotate(Rotation rotation) {
         int i = 0;
-        for (; i < rotations.size(); i++) {
-            if (priority > rotations.get(i).priority) break;
+        for (; i < queue.size(); i++) {
+            if (rotation.priority > queue.get(i).priority) break;
         }
 
-        rotations.add(i, rotation);
+        queue.add(i, rotation);
+    }
+
+    @Deprecated // clientSide boolean is no longer used.
+    public static void rotate(double yaw, double pitch, int priority, boolean clientSide, Runnable callback) {
+        rotate(new Rotation(yaw, pitch, priority, callback));
     }
 
     public static void rotate(double yaw, double pitch, int priority, Runnable callback) {
-        rotate(yaw, pitch, priority, false, callback);
+        rotate(new Rotation(yaw, pitch, priority, callback));
     }
 
     public static void rotate(double yaw, double pitch, Runnable callback) {
-        rotate(yaw, pitch, 0, callback);
+        rotate(new Rotation(yaw, pitch, 0, callback));
     }
 
     public static void rotate(double yaw, double pitch, int priority) {
-        rotate(yaw, pitch, priority, null);
+        rotate(new Rotation(yaw, pitch, priority, null));
     }
 
     public static void rotate(double yaw, double pitch) {
-        rotate(yaw, pitch, 0, null);
+        rotate(new Rotation(yaw, pitch, 0, null));
     }
 
-    private static void resetLastRotation() {
-        if (lastRotation != null) {
-            rotationPool.free(lastRotation);
+    public static void rotate(Entity entity, int priority, Runnable callback) {
+        rotate(new Rotation(entity, priority, callback));
+    }
 
-            lastRotation = null;
-            lastRotationTimer = 0;
+    public static void rotate(Entity entity, Runnable callback) {
+        rotate(new Rotation(entity, 0, callback));
+    }
+
+    public static void rotate(Vec3 position, int priority, Runnable callback) {
+        rotate(new Rotation(position, priority, callback));
+    }
+
+    public static void rotate(Vec3 position, Runnable callback) {
+        rotate(new Rotation(position, 0, callback));
+    }
+
+    public static void rotate(BlockPos blockPos, int priority, Runnable callback) {
+        rotate(new Rotation(Vec3.atCenterOf(blockPos), priority, callback));
+    }
+
+    public static void rotate(BlockPos blockPos, Runnable callback) {
+        rotate(new Rotation(Vec3.atCenterOf(blockPos), 0, callback));
+    }
+
+    public static void rotate(int priority, Supplier<Vec2> calculate, Runnable callback) {
+        rotate(new Rotation(priority, calculate, callback));
+    }
+
+    public static void rotate(Supplier<Vec2> calculate, Runnable callback) {
+        rotate(new Rotation(0, calculate, callback));
+    }
+
+    public static void rotate(Supplier<Vec2> calculate) {
+        rotate(new Rotation(0, calculate, null));
+    }
+
+    // Rotation Execution
+
+    private static void setPreRotation() {
+        preYaw = mc.player.getYRot();
+        prePitch = mc.player.getXRot();
+    }
+
+    private static void setClientRotation(float yaw, float pitch) {
+        mc.player.setYRot(yaw);
+        mc.player.setXRot(pitch);
+    }
+
+    private static void setServerRotation(float yaw, float pitch) {
+        serverYaw = yaw;
+        serverPitch = pitch;
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST - 700)
+    private static void onTickPre(TickEvent.Pre event) {
+        rotating = false;
+
+        if (lastRotation != null) {
+            if (lastRotationTimer++ >= Config.get().rotationHoldTicks.get()) {
+                lastRotation = null;
+                lastRotationTimer = 0;
+            } else if (queue.isEmpty()) {
+                queue.add(lastRotation);
+            }
+        }
+
+        if (!queue.isEmpty()) {
+            rotating = true;
+
+            // Set the server rotation early so movefix inputs compensate.
+            Rotation last = queue.get(queue.size() - 1);
+            setServerRotation(last.yaw, last.pitch);
+
+            rotations.addAll(queue);
+            queue.clear();
         }
     }
 
     @EventHandler
     private static void onSendMovementPacketsPre(SendMovementPacketsEvent.Pre event) {
-        if (mc.getCameraEntity() != mc.player) return;
-        sentLastRotation = false;
+        if (rotations.isEmpty()) return;
 
-        if (!rotations.isEmpty()) {
-            rotating = true;
-            resetLastRotation();
-
-            Rotation rotation = rotations.get(i);
-            setupMovementPacketRotation(rotation);
-
-            if (rotations.size() > 1) rotationPool.free(rotation);
-
-            i++;
-        } else if (lastRotation != null) {
-            if (lastRotationTimer >= Config.get().rotationHoldTicks.get()) {
-                resetLastRotation();
-                rotating = false;
-            } else {
-                setupMovementPacketRotation(lastRotation);
-                sentLastRotation = true;
-
-                lastRotationTimer++;
-            }
+        // Recalculate yaw and pitch due to entities moving around.
+        if (!Config.get().rotationMovementCorrection.get()) {
+            rotations.forEach(Rotation::recalculate);
         }
-    }
 
-    private static void setupMovementPacketRotation(Rotation rotation) {
-        setClientRotation(rotation);
-        setCamRotation(rotation.yaw, rotation.pitch);
-    }
-
-    private static void setClientRotation(Rotation rotation) {
-        preYaw = mc.player.getYRot();
-        prePitch = mc.player.getXRot();
-
-        mc.player.setYRot((float) rotation.yaw);
-        mc.player.setXRot((float) rotation.pitch);
+        // The first rotation is sent within our normal movement packets
+        Rotation first = rotations.get(0);
+        setPreRotation();
+        setServerRotation(first.yaw, first.pitch);
+        setClientRotation(first.yaw, first.pitch);
     }
 
     @EventHandler
     private static void onSendMovementPacketsPost(SendMovementPacketsEvent.Post event) {
-        if (!rotations.isEmpty()) {
-            if (mc.getCameraEntity() == mc.player) {
-                rotations.get(i - 1).runCallback();
+        if (rotations.isEmpty()) return;
 
-                if (rotations.size() == 1) lastRotation = rotations.get(i - 1);
+        // First rotation packet was already sent to server naturally.
+        Rotation first = rotations.get(0);
+        setClientRotation(first.yaw, first.pitch);
+        first.runCallback();
 
-                resetPreRotation();
-            }
-
-            for (; i < rotations.size(); i++) {
-                Rotation rotation = rotations.get(i);
-
-                setCamRotation(rotation.yaw, rotation.pitch);
-                if (rotation.clientSide) setClientRotation(rotation);
-                rotation.sendPacket();
-                if (rotation.clientSide) resetPreRotation();
-
-                if (i == rotations.size() - 1) lastRotation = rotation;
-                else rotationPool.free(rotation);
-            }
-
-            rotations.clear();
-            i = 0;
-        } else if (sentLastRotation) {
-            resetPreRotation();
+        // All subsequent rotations require a packet sent
+        for (int i = 1; i < rotations.size(); i++) {
+            Rotation rotation = rotations.get(i);
+            setServerRotation(rotation.yaw, rotation.pitch);
+            setClientRotation(rotation.yaw, rotation.pitch);
+            rotation.sendPacket();
+            rotation.runCallback();
         }
+
+        setClientRotation(preYaw, prePitch);
+
+        Rotation lastIndexRotation = rotations.get(rotations.size() - 1);
+        if (lastIndexRotation != lastRotation) {
+            lastRotation = lastIndexRotation;
+            lastRotation.callback = null;
+            lastRotationTimer = 0;
+            rotating = Config.get().rotationHoldTicks.get() > 0;
+        }
+
+        rotations.clear();
     }
 
-    private static void resetPreRotation() {
-        mc.player.setYRot(preYaw);
-        mc.player.setXRot(prePitch);
+    // Utilities
+
+    public static double getYaw(double x, double z) {
+        return Mth.wrapDegrees((float) Math.toDegrees(Math.atan2(z - mc.player.getZ(), x - mc.player.getX())) - 90f);
     }
 
-    @EventHandler
-    private static void onTick(TickEvent.Pre event) {
-        rotationTimer++;
-    }
+    public static double getPitch(double x, double y, double z) {
+        double diffX = x - mc.player.getX();
+        double diffY = y - mc.player.getEyeY();
+        double diffZ = z - mc.player.getZ();
 
-    public static double getYaw(Entity entity) {
-        return mc.player.getYRot() + Mth.wrapDegrees((float) Math.toDegrees(Math.atan2(entity.getZ() - mc.player.getZ(), entity.getX() - mc.player.getX())) - 90f - mc.player.getYRot());
+        double diffXZ = Math.hypot(diffX, diffZ);
+
+        return Mth.wrapDegrees((float) -Math.toDegrees(Math.atan2(diffY, diffXZ)));
     }
 
     public static double getYaw(Vec3 pos) {
-        return mc.player.getYRot() + Mth.wrapDegrees((float) Math.toDegrees(Math.atan2(pos.z() - mc.player.getZ(), pos.x() - mc.player.getX())) - 90f - mc.player.getYRot());
+        return getYaw(pos.x(), pos.z());
     }
 
     public static double getPitch(Vec3 pos) {
-        double diffX = pos.x() - mc.player.getX();
-        double diffY = pos.y() - (mc.player.getY() + mc.player.getEyeHeight(mc.player.getPose()));
-        double diffZ = pos.z() - mc.player.getZ();
+        return getPitch(pos.x(), pos.y(), pos.z());
+    }
 
-        double diffXZ = Math.sqrt(diffX * diffX + diffZ * diffZ);
-
-        return mc.player.getXRot() + Mth.wrapDegrees((float) -Math.toDegrees(Math.atan2(diffY, diffXZ)) - mc.player.getXRot());
+    public static double getYaw(Entity entity) {
+        return getYaw(entity.getX(), entity.getZ());
     }
 
     public static double getPitch(Entity entity, Target target) {
@@ -189,13 +239,7 @@ public class Rotations {
             case Feet -> entity.getY();
         };
 
-        double diffX = entity.getX() - mc.player.getX();
-        double diffY = y - (mc.player.getY() + mc.player.getEyeHeight(mc.player.getPose()));
-        double diffZ = entity.getZ() - mc.player.getZ();
-
-        double diffXZ = Math.sqrt(diffX * diffX + diffZ * diffZ);
-
-        return mc.player.getXRot() + Mth.wrapDegrees((float) -Math.toDegrees(Math.atan2(diffY, diffXZ)) - mc.player.getXRot());
+        return getPitch(entity.getX(), y, entity.getZ());
     }
 
     public static double getPitch(Entity entity) {
@@ -203,42 +247,121 @@ public class Rotations {
     }
 
     public static double getYaw(BlockPos pos) {
-        return mc.player.getYRot() + Mth.wrapDegrees((float) Math.toDegrees(Math.atan2(pos.getZ() + 0.5 - mc.player.getZ(), pos.getX() + 0.5 - mc.player.getX())) - 90f - mc.player.getYRot());
+        return getYaw(pos.getX() + 0.5, pos.getZ() + 0.5);
     }
 
     public static double getPitch(BlockPos pos) {
-        double diffX = pos.getX() + 0.5 - mc.player.getX();
-        double diffY = pos.getY() + 0.5 - (mc.player.getY() + mc.player.getEyeHeight(mc.player.getPose()));
-        double diffZ = pos.getZ() + 0.5 - mc.player.getZ();
-
-        double diffXZ = Math.sqrt(diffX * diffX + diffZ * diffZ);
-
-        return mc.player.getXRot() + Mth.wrapDegrees((float) -Math.toDegrees(Math.atan2(diffY, diffXZ)) - mc.player.getXRot());
+        return getPitch(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5);
     }
 
-    public static void setCamRotation(double yaw, double pitch) {
-        serverYaw = (float) yaw;
-        serverPitch = (float) pitch;
-        rotationTimer = 0;
+    /**
+    * setCorrectedPlayerInput and getInputFromRelativeYaw are derived from Lambda Client.
+    * @see https://github.com/lambda-client/lambda/blob/1.21.11/src/main/kotlin/com/lambda/util/player/RotationUtils.kt
+    * @author dinosaurwizard
+    *
+    * Implementation of Grim movefix logic.
+    **/
+
+    public static boolean shouldCorrectPlayerInput() {
+        return rotating && Config.get().rotationMovementCorrection.get();
+    }
+
+    public static Vec3 getServerDirection() {
+        return Vec3.directionFromRotation(serverPitch, serverYaw);
+    }
+
+    public static void setCorrectedPlayerInput(ClientInput input) {
+        input.keyPresses = getInputFromRelativeYaw(input.keyPresses);
+
+        // The movement vector must be adjusted according to the new input.
+        int x = (input.keyPresses.left() ? 1 : 0) - (input.keyPresses.right() ? 1 : 0);
+        int y = (input.keyPresses.forward() ? 1 : 0) - (input.keyPresses.backward() ? 1 : 0);
+        input.moveVector = new Vec2(x, y).normalized();
+    }
+
+    private static Input getInputFromRelativeYaw(Input input) {
+        int strafe = (input.left() ? 1 : 0) - (input.right() ? 1 : 0);
+        int forward = (input.forward() ? 1 : 0) - (input.backward() ? 1 : 0);
+        if (strafe == 0 && forward == 0) return input;
+
+        double deltaYawRad = Math.toRadians(mc.player.getYRot() - serverYaw);
+        double cos = Math.cos(deltaYawRad);
+        double sin = Math.sin(deltaYawRad);
+        double newStrafe = strafe * cos - forward * sin;
+        double newForward = strafe * sin + forward * cos;
+        double angle = Math.atan2(newStrafe, newForward);
+        double sector = Math.PI / 4.0;
+        double boundary = Math.PI / 8.0;
+
+        boolean pressForward = false;
+        boolean pressBackward = false;
+        boolean pressLeft = false;
+        boolean pressRight = false;
+
+        if (angle > -boundary && angle <= boundary) {
+            pressForward = true;
+        } else if (angle > boundary && angle <= boundary + sector) {
+            pressForward = true;
+            pressLeft = true;
+        } else if (angle > boundary + sector && angle <= boundary + 2 * sector) {
+            pressLeft = true;
+        } else if (angle > boundary + 2 * sector && angle <= boundary + 3 * sector) {
+            pressBackward = true;
+            pressLeft = true;
+        } else if (angle > boundary + 3 * sector || angle <= -(boundary + 3 * sector)) {
+            pressBackward = true;
+        } else if (angle > -(boundary + 3 * sector) && angle <= -(boundary + 2 * sector)) {
+            pressBackward = true;
+            pressRight = true;
+        } else if (angle > -(boundary + 2 * sector) && angle <= -(boundary + sector)) {
+            pressRight = true;
+        } else if (angle > -(boundary + sector) && angle <= -boundary) {
+            pressForward = true;
+            pressRight = true;
+        }
+
+        return new Input(pressForward, pressBackward, pressLeft, pressRight, input.jump(), input.shift(), input.sprint());
     }
 
     private static class Rotation {
-        public double yaw, pitch;
+        public float yaw, pitch;
         public int priority;
-        public boolean clientSide;
         public Runnable callback;
+        public Supplier<Vec2> calculate;
 
-        public void set(double yaw, double pitch, int priority, boolean clientSide, Runnable callback) {
-            this.yaw = yaw;
-            this.pitch = pitch;
+        public Rotation(double yaw, double pitch, int priority, Runnable callback) {
+            this.yaw = (float) yaw;
+            this.pitch = (float) pitch;
             this.priority = priority;
-            this.clientSide = clientSide;
             this.callback = callback;
         }
 
+        public Rotation(int priority, Supplier<Vec2> calculate, Runnable callback) {
+            this(0, 0, priority, callback);
+            this.calculate = calculate;
+            recalculate();
+        }
+
+        public Rotation(Vec3 position, int priority, Runnable callback) {
+            this(priority, () -> new Vec2((float) getYaw(position), (float) getPitch(position)), callback);
+        }
+
+        public Rotation(Entity entity, int priority, Runnable callback) {
+            this(priority, () -> new Vec2((float) getYaw(entity), (float) getPitch(entity)), callback);
+        }
+
+        public void recalculate() {
+            if (calculate != null) {
+                Vec2 result = calculate.get();
+                if (result != null) {
+                    this.yaw = result.x;
+                    this.pitch = result.y;
+                }
+            }
+        }
+
         public void sendPacket() {
-            mc.getConnection().send(new ServerboundMovePlayerPacket.Rot((float) yaw, (float) pitch, mc.player.onGround(), mc.player.horizontalCollision));
-            runCallback();
+            mc.getConnection().send(new ServerboundMovePlayerPacket.Rot(yaw, pitch, mc.player.onGround(), mc.player.horizontalCollision));
         }
 
         public void runCallback() {

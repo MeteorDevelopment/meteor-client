@@ -75,7 +75,7 @@ public class AutoShearer extends Module {
             this.entity = entity;
 
             if (rotate.get())
-                Rotations.rotate(Rotations.getYaw(entity), Rotations.getPitch(entity), -100, this::interact);
+                Rotations.rotate(entity, -100, this::interact);
             else interact();
 
             return;

@@ -1302,7 +1302,7 @@ public class HighwayBuilder extends Module {
                     if (!EChestMemory.isKnown()) {
                         BlockHitResult bhr = new BlockHitResult(Vec3.atCenterOf(bp), Direction.UP, bp, false);
 
-                        if (b.rotation.get().place) Rotations.rotate(Rotations.getYaw(bp), Rotations.getPitch(bp), () -> BlockUtils.interact(bhr, InteractionHand.MAIN_HAND, true));
+                        if (b.rotation.get().place) Rotations.rotate(bp, () -> BlockUtils.interact(bhr, InteractionHand.MAIN_HAND, true));
                         else BlockUtils.interact(bhr, InteractionHand.MAIN_HAND, true);
 
                         return;
@@ -1339,7 +1339,7 @@ public class HighwayBuilder extends Module {
                         rebreakTimer = b.rebreakTimer.get();
 
                         if (b.rotation.get().mine) {
-                            Rotations.rotate(Rotations.getYaw(bp), Rotations.getPitch(bp), () ->
+                            Rotations.rotate(bp, () ->
                                 b.mc.gameMode.startPrediction(b.mc.level, sequence ->
                                     new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.STOP_DESTROY_BLOCK, bp, BlockUtils.getDirection(bp), sequence)
                                 )
@@ -1349,7 +1349,7 @@ public class HighwayBuilder extends Module {
                         );
                     } else {
                         if (b.rotation.get().mine)
-                            Rotations.rotate(Rotations.getYaw(bp), Rotations.getPitch(bp), () -> BlockUtils.breakBlock(bp, true));
+                            Rotations.rotate(bp, () -> BlockUtils.breakBlock(bp, true));
                         else BlockUtils.breakBlock(bp, true);
                     }
                 } else {
@@ -1690,13 +1690,13 @@ public class HighwayBuilder extends Module {
                     InvUtils.swap(toolSlot, false);
 
                     if (b.rotation.get().mine)
-                        Rotations.rotate(Rotations.getYaw(bp), Rotations.getPitch(bp), () -> BlockUtils.breakBlock(bp, true));
+                        Rotations.rotate(bp, () -> BlockUtils.breakBlock(bp, true));
                     else BlockUtils.breakBlock(bp, true);
                 } else {
                     BlockHitResult bhr = new BlockHitResult(Vec3.atCenterOf(bp), Direction.UP, bp, false);
 
                     if (b.rotation.get().place)
-                        Rotations.rotate(Rotations.getYaw(bp), Rotations.getPitch(bp), () -> BlockUtils.interact(bhr, InteractionHand.MAIN_HAND, true));
+                        Rotations.rotate(bp, () -> BlockUtils.interact(bhr, InteractionHand.MAIN_HAND, true));
                     else BlockUtils.interact(bhr, InteractionHand.MAIN_HAND, true);
 
                     delayTimer = b.inventoryDelay.get();
@@ -1939,7 +1939,7 @@ public class HighwayBuilder extends Module {
                 boolean multiBreak = b.blocksPerTick.get() > 1 && BlockUtils.canInstaBreak(mcPos) && !b.rotation.get().mine;
                 if (BlockUtils.canBreak(mcPos)) {
                     if (b.rotation.get().mine)
-                        Rotations.rotate(Rotations.getYaw(mcPos), Rotations.getPitch(mcPos), () -> BlockUtils.breakBlock(mcPos, true));
+                        Rotations.rotate(mcPos, () -> BlockUtils.breakBlock(mcPos, true));
                     else BlockUtils.breakBlock(mcPos, true);
                     breaking = true;
 

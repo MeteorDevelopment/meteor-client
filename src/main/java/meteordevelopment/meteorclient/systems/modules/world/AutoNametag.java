@@ -111,7 +111,7 @@ public class AutoNametag extends Module {
         offHand = findNametag.isOffhand();
 
         // Interaction
-        if (rotate.get()) Rotations.rotate(Rotations.getYaw(target), Rotations.getPitch(target), -100, this::interact);
+        if (rotate.get()) Rotations.rotate(target, -100, this::interact);
         else interact();
     }
 

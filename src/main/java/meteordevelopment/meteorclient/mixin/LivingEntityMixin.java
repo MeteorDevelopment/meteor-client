@@ -19,6 +19,7 @@ import meteordevelopment.meteorclient.systems.modules.movement.elytrafly.modes.B
 import meteordevelopment.meteorclient.systems.modules.player.NoStatusEffects;
 import meteordevelopment.meteorclient.systems.modules.render.HandView;
 import meteordevelopment.meteorclient.systems.modules.render.NoRender;
+import meteordevelopment.meteorclient.utils.player.Rotations;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.util.Prediction;
@@ -31,6 +32,7 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.*;
@@ -107,6 +109,7 @@ public abstract class LivingEntityMixin extends Entity {
     @ModifyExpressionValue(method = "jumpFromGround", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;getYRot()F"))
     private float modifyGetYaw(float original) {
         if ((Object) this != mc.player) return original;
+        if (Rotations.shouldCorrectPlayerInput()) original = Rotations.serverYaw;
         if (!Modules.get().get(Sprint.class).rageSprint()) return original;
 
         float forward = Math.signum(mc.player.zza);
@@ -140,5 +143,17 @@ public abstract class LivingEntityMixin extends Entity {
         if (level().isClientSide() && !itemStack.isEmpty()) {
             if (MeteorClient.EVENT_BUS.post(DropItemsEvent.get(itemStack)).isCancelled()) cir.setReturnValue(null);
         }
+    }
+
+    @ModifyExpressionValue(method = "updateFallFlyingMovement", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;getLookAngle()Lnet/minecraft/world/phys/Vec3;"))
+    private Vec3 fixFallFlyingLookAngle(Vec3 original) {
+        if ((Object) this == mc.player && Rotations.shouldCorrectPlayerInput()) return Rotations.getServerDirection();
+        return original;
+    }
+
+    @ModifyExpressionValue(method = "updateFallFlyingMovement", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;getXRot()F"))
+    private float fixFallFlyingPitch(float original) {
+        if ((Object) this == mc.player && Rotations.shouldCorrectPlayerInput()) return Rotations.serverPitch;
+        return original;
     }
 }

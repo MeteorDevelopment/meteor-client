@@ -8,6 +8,8 @@ package meteordevelopment.meteorclient.mixin;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.authlib.GameProfile;
 import meteordevelopment.meteorclient.MeteorClient;
@@ -20,6 +22,7 @@ import meteordevelopment.meteorclient.systems.modules.player.NoMiningTrace;
 import meteordevelopment.meteorclient.systems.modules.player.Portals;
 import meteordevelopment.meteorclient.systems.modules.render.NoRender;
 import meteordevelopment.meteorclient.utils.entity.fakeplayer.FakePlayerEntity;
+import meteordevelopment.meteorclient.utils.player.Rotations;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.AbstractClientPlayer;
@@ -101,6 +104,12 @@ public abstract class LocalPlayerMixin extends AbstractClientPlayer {
     @Inject(method = "aiStep", at = @At("HEAD"))
     private void preAiStep(CallbackInfo ci) {
         MeteorClient.EVENT_BUS.post(PlayerTickMovementEvent.get());
+    }
+
+    @WrapOperation(method = "aiStep", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/ClientInput;tick()V"))
+    private void wrapTick(ClientInput input, Operation<Void> original) {
+        original.call(input);
+        if (Rotations.shouldCorrectPlayerInput()) Rotations.setCorrectedPlayerInput(input);
     }
 
     @ModifyReturnValue(method = "getJumpRidingScale", at = @At("RETURN"))

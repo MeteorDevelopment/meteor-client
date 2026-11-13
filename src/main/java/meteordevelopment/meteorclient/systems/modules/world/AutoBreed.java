@@ -101,7 +101,7 @@ public class AutoBreed extends Module {
                 || !animal.isFood(hand.get() == InteractionHand.MAIN_HAND ? mc.player.getMainHandItem() : mc.player.getOffhandItem()))
                 continue;
 
-            Rotations.rotate(Rotations.getYaw(entity), Rotations.getPitch(entity), -100, () -> {
+            Rotations.rotate(entity, -100, () -> {
                 EntityHitResult location = new EntityHitResult(animal, animal.getBoundingBox().getCenter());
                 mc.gameMode.interact(mc.player, animal, location, hand.get());
                 mc.player.swing(hand.get(), mc.player.getItemInHand(hand.get()).getInteractAnimation(), false);

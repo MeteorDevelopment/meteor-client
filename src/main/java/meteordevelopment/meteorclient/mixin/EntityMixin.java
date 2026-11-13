@@ -23,6 +23,7 @@ import meteordevelopment.meteorclient.systems.modules.render.NoRender;
 import meteordevelopment.meteorclient.systems.modules.world.HighwayBuilder;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.entity.fakeplayer.FakePlayerEntity;
+import meteordevelopment.meteorclient.utils.player.Rotations;
 import net.minecraft.client.Camera;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.MoverType;
@@ -105,6 +106,12 @@ public abstract class EntityMixin {
         } else {
             MeteorClient.EVENT_BUS.post(EntityMoveEvent.get((Entity) (Object) this, delta));
         }
+    }
+
+    @ModifyExpressionValue(method = "moveRelative", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;getYRot()F"))
+    private float moveRelativeYaw(float original) {
+        if ((Object) this == mc.player && Rotations.shouldCorrectPlayerInput()) return Rotations.serverYaw;
+        return original;
     }
 
     @ModifyExpressionValue(method = "getBlockSpeedFactor", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/state/BlockState;getBlock()Lnet/minecraft/world/level/block/Block;"))

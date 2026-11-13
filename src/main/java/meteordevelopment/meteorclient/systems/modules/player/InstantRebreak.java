@@ -106,7 +106,7 @@ public class InstantRebreak extends Module {
 
             if (shouldMine()) {
                 if (rotate.get())
-                    Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), this::sendPacket);
+                    Rotations.rotate(blockPos, this::sendPacket);
                 else sendPacket();
 
                 mc.getConnection().send(new ServerboundPunchPacket());

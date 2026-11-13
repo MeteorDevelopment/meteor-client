@@ -68,7 +68,7 @@ public class KillAura extends Module {
         .build()
     );
 
-    private final Setting<RotationMode> rotation = sgGeneral.add(new EnumSetting.Builder<RotationMode>()
+    private final Setting<RotationMode> rotate = sgGeneral.add(new EnumSetting.Builder<RotationMode>()
         .name("rotate")
         .description("Determines when you should rotate towards the target.")
         .defaultValue(RotationMode.Always)
@@ -350,14 +350,17 @@ public class KillAura extends Module {
         }
 
         attacking = true;
-        if (rotation.get() == RotationMode.Always)
-            Rotations.rotate(Rotations.getYaw(primary), Rotations.getPitch(primary, Target.Body));
+
         if (pauseOnCombat.get() && PathManagers.get().isPathing() && !wasPathing) {
             PathManagers.get().pause();
             wasPathing = true;
         }
 
-        if (delayCheck()) targets.forEach(this::attack);
+        if (rotate.get() == RotationMode.Always) {
+            Rotations.rotate(primary, 30, () -> attackTargets());
+        } else {
+            attackTargets();
+        }
     }
 
     @EventHandler
@@ -456,11 +459,20 @@ public class KillAura extends Module {
             } else return true;
         } else return mc.player.getAttackStrengthScale(delay) >= 1;
     }
+    
+    private void attackTargets() {
+        if (!delayCheck()) return;
+
+        for (Entity target : targets) {
+            if (rotate.get() == RotationMode.OnHit) {
+                Rotations.rotate(target, 30, () -> attack(target));
+            } else {
+                attack(target);
+            }
+        }
+    }
 
     private void attack(Entity target) {
-        if (rotation.get() == RotationMode.OnHit)
-            Rotations.rotate(Rotations.getYaw(target), Rotations.getPitch(target, Target.Body));
-
         mc.gameMode.attack(mc.player, target);
         SwingMode.Both.attackSwing(InteractionHand.MAIN_HAND);
 

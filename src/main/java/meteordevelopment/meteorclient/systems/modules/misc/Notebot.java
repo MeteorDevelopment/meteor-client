@@ -850,7 +850,7 @@ public class Notebot extends Module {
             int hitsNumber = entry.getValue();
 
             if (autoRotate.get()) {
-                Rotations.rotate(Rotations.getYaw(pos), Rotations.getPitch(pos), 100, () -> tuneNoteblockWithPackets(pos));
+                Rotations.rotate(pos, () -> tuneNoteblockWithPackets(pos));
             } else {
                 this.tuneNoteblockWithPackets(pos);
             }
@@ -900,7 +900,7 @@ public class Notebot extends Module {
                     BlockPos firstPos = noteBlockPositions.get(firstNote.get());
 
                     if (firstPos != null) {
-                        Rotations.rotate(Rotations.getYaw(firstPos), Rotations.getPitch(firstPos));
+                        Rotations.rotate(firstPos, null);
                     }
                 }
             }

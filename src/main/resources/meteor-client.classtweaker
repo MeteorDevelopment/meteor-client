@@ -43,3 +43,6 @@ accessible method com/mojang/renderpearl/api/pipeline/RenderPipeline$Builder <in
 
 # ItemPhysics
 accessible field net/minecraft/client/renderer/item/ItemStackRenderState$LayerRenderState quads Lnet/minecraft/client/resources/model/geometry/ItemQuads;
+
+# Rotations
+accessible field net/minecraft/client/player/ClientInput moveVector Lnet/minecraft/world/phys/Vec2;
