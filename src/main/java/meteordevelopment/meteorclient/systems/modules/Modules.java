@@ -64,6 +64,7 @@ public class Modules extends System<Modules> {
     private final Set<Module> active = new ReferenceOpenHashSet<>();
     private @Nullable Module moduleToBind;
     private boolean awaitingKeyRelease = false;
+    private boolean inGame, modulesSubscribed, moduleSubscriptionsDirty;
 
     public Modules() {
         super("modules");
@@ -323,6 +324,10 @@ public class Modules extends System<Modules> {
                     module.onActivate();
                 }
             }
+
+            inGame = true;
+            modulesSubscribed = true;
+            moduleSubscriptionsDirty = false;
         }
     }
 
@@ -335,6 +340,35 @@ public class Modules extends System<Modules> {
                     module.onDeactivate();
                 }
             }
+
+            inGame = false;
+            modulesSubscribed = false;
+            moduleSubscriptionsDirty = false;
+        }
+    }
+
+    void markModuleSubscriptionsDirty() {
+        if (inGame) moduleSubscriptionsDirty = true;
+    }
+
+    /**
+     * Keeps ordinary module listeners out of the event bus while the world or player is unavailable.
+     * This also covers disconnect paths that do not post a GameLeftEvent.
+     */
+    public void updateModuleSubscriptions() {
+        synchronized (active) {
+            boolean canUpdate = Utils.canUpdate();
+            if (!inGame || (canUpdate == modulesSubscribed && !moduleSubscriptionsDirty)) return;
+
+            for (Module module : getAll()) {
+                if (module.runInMainMenu || !module.autoSubscribe) continue;
+
+                if (canUpdate && module.isActive()) MeteorClient.EVENT_BUS.subscribe(module);
+                else MeteorClient.EVENT_BUS.unsubscribe(module);
+            }
+
+            modulesSubscribed = canUpdate;
+            moduleSubscriptionsDirty = false;
         }
     }
 
