@@ -64,6 +64,7 @@ public class Modules extends System<Modules> {
     private final Set<Module> active = new ReferenceOpenHashSet<>();
     private @Nullable Module moduleToBind;
     private boolean awaitingKeyRelease = false;
+    private boolean inGame, moduleSubscriptionsDirty = true, lastCanUpdate;
 
     public Modules() {
         super("modules");
@@ -317,24 +318,57 @@ public class Modules extends System<Modules> {
     @EventHandler
     private void onGameJoined(GameJoinedEvent event) {
         synchronized (active) {
+            inGame = true;
+            moduleSubscriptionsDirty = true;
+
             for (Module module : getAll()) {
-                if (module.isActive() && !module.runInMainMenu) {
-                    MeteorClient.EVENT_BUS.subscribe(module);
-                    module.onActivate();
-                }
+                if (module.isActive() && !module.runInMainMenu) module.activate();
             }
+
+            updateModuleSubscriptions();
         }
     }
 
     @EventHandler
     private void onGameLeft(GameLeftEvent event) {
         synchronized (active) {
+            inGame = false;
+            moduleSubscriptionsDirty = true;
+
             for (Module module : getAll()) {
-                if (module.isActive() && !module.runInMainMenu) {
-                    MeteorClient.EVENT_BUS.unsubscribe(module);
-                    module.onDeactivate();
-                }
+                if (!module.runInMainMenu) module.deactivate();
             }
+
+            updateModuleSubscriptions();
+        }
+    }
+
+    boolean isInGame() {
+        return inGame;
+    }
+
+    void markModuleSubscriptionsDirty() {
+        moduleSubscriptionsDirty = true;
+    }
+
+    /**
+     * Suspends event delivery while the player or world is unavailable without changing module
+     * activation state. Lifecycle callbacks are driven by explicit game join/leave events.
+     */
+    public void updateModuleSubscriptions() {
+        synchronized (active) {
+            boolean canUpdate = inGame && Utils.canUpdate();
+            if (!moduleSubscriptionsDirty && canUpdate == lastCanUpdate) return;
+
+            for (Module module : getAll()) {
+                if (module.runInMainMenu) continue;
+
+                if (canUpdate && module.isActive() && !module.isActivated()) module.activate();
+                module.updateSubscription();
+            }
+
+            lastCanUpdate = canUpdate;
+            moduleSubscriptionsDirty = false;
         }
     }
 

@@ -40,6 +40,9 @@ public abstract class Module implements ISerializable<Module>, Comparable<Module
     public final Settings settings = new Settings();
 
     private boolean active;
+    private boolean activated;
+    private boolean subscribed;
+    private boolean wantsSubscription;
 
     public boolean serialize = true;
     public boolean runInMainMenu = false;
@@ -94,19 +97,63 @@ public abstract class Module implements ISerializable<Module>, Comparable<Module
 
             settings.onActivated();
 
-            if (runInMainMenu || Utils.canUpdate()) {
-                if (autoSubscribe) MeteorClient.EVENT_BUS.subscribe(this);
-                onActivate();
-            }
+            if (runInMainMenu || Utils.canUpdate()) activate();
         } else {
-            if (runInMainMenu || Utils.canUpdate()) {
-                if (autoSubscribe) MeteorClient.EVENT_BUS.unsubscribe(this);
-                onDeactivate();
-            }
-
             active = false;
             Modules.get().removeActive(this);
+
+            if (activated) deactivate();
         }
+
+        Modules.get().markModuleSubscriptionsDirty();
+    }
+
+    void activate() {
+        if (activated) return;
+
+        activated = true;
+        if (autoSubscribe) wantsSubscription = true;
+        onActivate();
+        updateSubscription();
+    }
+
+    void deactivate() {
+        if (!activated) return;
+
+        activated = false;
+        onDeactivate();
+        if (autoSubscribe) wantsSubscription = false;
+        updateSubscription();
+    }
+
+    /** Requests event delivery without directly modifying the event bus. */
+    public final void subscribeToEvents() {
+        wantsSubscription = true;
+        updateSubscription();
+    }
+
+    /** Stops requesting event delivery without changing the module's active state. */
+    public final void unsubscribeFromEvents() {
+        wantsSubscription = false;
+        updateSubscription();
+    }
+
+    boolean wantsSubscription() {
+        return autoSubscribe ? active : wantsSubscription;
+    }
+
+    boolean isActivated() {
+        return activated;
+    }
+
+    void updateSubscription() {
+        boolean shouldSubscribe = wantsSubscription() && (runInMainMenu || (Modules.get().isInGame() && Utils.canUpdate()));
+        if (shouldSubscribe == subscribed) return;
+
+        if (shouldSubscribe) MeteorClient.EVENT_BUS.subscribe(this);
+        else MeteorClient.EVENT_BUS.unsubscribe(this);
+
+        subscribed = shouldSubscribe;
     }
 
     public void enable() {
