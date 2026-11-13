@@ -103,7 +103,6 @@ public abstract class Module implements ISerializable<Module>, Comparable<Module
             Modules.get().removeActive(this);
 
             if (activated) deactivate();
-            if (autoSubscribe) wantsSubscription = false;
         }
 
         Modules.get().markModuleSubscriptionsDirty();
