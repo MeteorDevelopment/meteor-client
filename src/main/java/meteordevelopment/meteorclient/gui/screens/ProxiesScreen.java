@@ -74,6 +74,7 @@ public class ProxiesScreen extends WindowScreen {
     }
 
     private void initTable(WTable table) {
+        checkboxes.clear();
         table.clear();
         if (Proxies.get().isEmpty()) return;
 
