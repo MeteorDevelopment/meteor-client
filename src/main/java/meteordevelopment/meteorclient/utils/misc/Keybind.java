@@ -227,18 +227,18 @@ public class Keybind implements ISerializable<Keybind>, ICopyable<Keybind> {
 
         tag.putString("key", key.getName());
 
-        // Keep the legacy integer field for older Meteor versions. The current format stores
-        // modifier names separately because NBT cannot store a list and an integer under one key.
-        int legacyModifiers = 0;
+        // 26.3 reads modifier names from a ListTag stored under "modifiers".
+        // Keep the newer alias as well; 1.21.11 can read either list field.
         ListTag modifiersTag = new ListTag();
+        ListTag modifierNamesTag = new ListTag();
         for (Modifier modifier : modifiers) {
-            legacyModifiers |= modifier.mask;
             modifiersTag.add(StringTag.valueOf(modifier.name()));
+            modifierNamesTag.add(StringTag.valueOf(modifier.name()));
         }
-        tag.putInt("modifiers", legacyModifiers);
-        tag.put("modifierNames", modifiersTag);
+        tag.put("modifiers", modifiersTag);
+        tag.put("modifierNames", modifierNamesTag);
 
-        // Older versions expect these fields and otherwise default every bind to mouse button 0.
+        // Preserve the raw key fields for versions that use the legacy key representation.
         tag.putBoolean("isKey", isKey());
         tag.putInt("value", key.getValue());
 
