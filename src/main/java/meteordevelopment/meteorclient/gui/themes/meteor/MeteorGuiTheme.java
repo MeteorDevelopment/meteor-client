@@ -376,7 +376,7 @@ public class MeteorGuiTheme extends GuiTheme {
         double scaled = value * scale.get();
 
         if (SystemUtils.IS_OS_MAC) {
-            scaled /= (double) mc.getWindow().getWidth() / mc.getWindow().getWidth();
+            scaled /= (double) mc.getWindow().getScreenWidth() / mc.getWindow().getWidth();
         }
 
         return scaled;
