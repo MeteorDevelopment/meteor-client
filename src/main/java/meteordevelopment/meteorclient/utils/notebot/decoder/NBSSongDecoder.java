@@ -51,9 +51,10 @@ public class NBSSongDecoder extends SongDecoder {
         DataInputStream dataInputStream = new DataInputStream(inputStream);
         short length = readShort(dataInputStream);
         int nbsversion = 0;
+        int vanillaInstrumentCount = 10; // The original format has 10 vanilla instruments.
         if (length == 0) {
-            nbsversion = dataInputStream.readByte();
-            dataInputStream.readByte(); // first custom instrument
+            nbsversion = dataInputStream.readUnsignedByte();
+            vanillaInstrumentCount = dataInputStream.readUnsignedByte();
             if (nbsversion >= 3) {
                 length = readShort(dataInputStream);
             }
@@ -91,7 +92,7 @@ public class NBSSongDecoder extends SongDecoder {
                 if (jumpLayers == 0) {
                     break;
                 }
-                byte instrument = dataInputStream.readByte();
+                int instrument = dataInputStream.readUnsignedByte();
 
                 byte key = dataInputStream.readByte();
                 if (nbsversion >= 4) {
@@ -100,9 +101,12 @@ public class NBSSongDecoder extends SongDecoder {
                     readShort(dataInputStream); // note block pitch
                 }
 
+                // Custom instruments start at the count stored in the file, not necessarily 16.
+                if (instrument >= vanillaInstrumentCount) continue;
+
                 NoteBlockInstrument inst = fromNBSInstrument(instrument);
 
-                // Probably a custom instrument. Ignore this note
+                // Unsupported vanilla instrument. Ignore this note
                 if (inst == null) continue;
 
                 Note note = new Note(inst /* instrument */, key - NOTE_OFFSET /* note */);
