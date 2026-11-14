@@ -34,7 +34,7 @@ public class ProxiesScreen extends WindowScreen {
     private final List<WCheckbox> checkboxes = new ArrayList<>();
     private final WButton refreshButton = theme.button("Refresh");
     private final WConfirmedButton cleanButton = theme.confirmedButton("Cleanup", "Confirm");
-    private Map<Proxy, WLabel> statuses = new HashMap<>();
+    private final Map<Proxy, WLabel> statuses = new HashMap<>();
     private int timer = 0;
 
     public ProxiesScreen(GuiTheme theme) {
@@ -75,10 +75,9 @@ public class ProxiesScreen extends WindowScreen {
 
     private void initTable(WTable table) {
         checkboxes.clear();
+        statuses.clear();
         table.clear();
         if (Proxies.get().isEmpty()) return;
-
-        statuses = new HashMap<>(Proxies.get().size(), 1);
         for (Proxy proxy : Proxies.get()) {
             WCheckbox enabled = table.add(theme.checkbox(proxy.enabled.get())).widget();
             checkboxes.add(enabled);
