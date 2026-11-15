@@ -6,11 +6,11 @@
 package meteordevelopment.meteorclient.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
-import com.mojang.blaze3d.buffers.GpuBufferSlice;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.resource.GraphicsResourceAllocator;
 import com.mojang.blaze3d.resource.ResourceHandle;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.renderpearl.api.buffers.GpuBufferSlice;
 import it.unimi.dsi.fastutil.Stack;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import meteordevelopment.meteorclient.mixininterface.IEntityRenderState;
@@ -23,7 +23,6 @@ import meteordevelopment.meteorclient.utils.OutlineRenderCommandQueue;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.postprocess.EntityShader;
 import meteordevelopment.meteorclient.utils.render.postprocess.PostProcessShaders;
-import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.LevelTargetBundle;
 import net.minecraft.client.renderer.RenderBuffers;
@@ -33,14 +32,9 @@ import net.minecraft.client.renderer.feature.FeatureRenderDispatcher;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.client.renderer.state.level.LevelRenderState;
 import net.minecraft.world.entity.Entity;
-import org.joml.Matrix4fc;
 import org.joml.Vector4f;
 import org.objectweb.asm.Opcodes;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Mutable;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -54,7 +48,11 @@ public abstract class LevelRendererMixin implements ILevelRenderer {
     @Unique
     private FeatureRenderDispatcher renderDispatcher;
     @Unique
-    private final OutlineRenderCommandQueue outlineRenderCommandQueue = new OutlineRenderCommandQueue();
+    private RenderBuffers outlineRenderBuffers;
+    @Unique
+    private final OutlineRenderCommandQueue chamsRenderCommandQueue = new OutlineRenderCommandQueue();
+    @Unique
+    private final OutlineRenderCommandQueue entityOutlineRenderCommandQueue = new OutlineRenderCommandQueue();
 
     @Inject(method = "checkPoseStack", at = @At("HEAD"), cancellable = true)
     private void onCheckPoseStack(PoseStack poseStack, CallbackInfo ci) {
@@ -77,16 +75,22 @@ public abstract class LevelRendererMixin implements ILevelRenderer {
 
     // Entity Shaders
 
+    @ModifyExpressionValue(method = "executeOutline", at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/LevelRenderer;currentFrameRendersEntityOutline:Z", opcode = Opcodes.GETFIELD))
+    private boolean meteor$allowCustomEntityOutlines(boolean original) {
+        return original || !framebufferStack.isEmpty();
+    }
+
     @Inject(method = "render", at = @At("HEAD"))
-    private void onRenderLevelHead(GraphicsResourceAllocator resourceAllocator, DeltaTracker deltaTracker, boolean renderOutline, CameraRenderState cameraState, Matrix4fc modelViewMatrix, GpuBufferSlice terrainFog, Vector4f fogColor, boolean shouldRenderSky, CallbackInfo ci) {
+    private void onRenderLevelHead(GraphicsResourceAllocator resourceAllocator, boolean renderOutline, CameraRenderState cameraState, GpuBufferSlice terrainFog, Vector4f fogColor, boolean shouldRenderSky, boolean consistentDepthRequired, CallbackInfo ci) {
         PostProcessShaders.beginRender();
     }
 
     @Inject(method = "submitEntities", at = @At("TAIL"))
     private void onSubmitEntities(PoseStack poseStack, LevelRenderState levelRenderState, SubmitNodeCollector output, CallbackInfo ci) {
         if (renderDispatcher == null) {
+            outlineRenderBuffers = new RenderBuffers(0);
             renderDispatcher = new FeatureRenderDispatcher(
-                renderBuffers,
+                outlineRenderBuffers,
                 mc.getModelManager(),
                 mc.getAtlasManager(),
                 mc.font,
@@ -94,14 +98,13 @@ public abstract class LevelRendererMixin implements ILevelRenderer {
             );
         }
 
-        draw(levelRenderState, poseStack, PostProcessShaders.CHAMS, _ -> Color.WHITE);
-        draw(levelRenderState, poseStack, PostProcessShaders.ENTITY_OUTLINE, entity -> Modules.get().get(ESP.class).getColor(entity));
+        draw(levelRenderState, poseStack, PostProcessShaders.CHAMS, chamsRenderCommandQueue, _ -> Color.WHITE);
+        draw(levelRenderState, poseStack, PostProcessShaders.ENTITY_OUTLINE, entityOutlineRenderCommandQueue, entity -> Modules.get().get(ESP.class).getColor(entity));
     }
 
     @Unique
-    private void draw(LevelRenderState worldState, PoseStack matrices, EntityShader shader, Function<Entity, Color> colorGetter) {
+    private void draw(LevelRenderState worldState, PoseStack matrices, EntityShader shader, OutlineRenderCommandQueue commandQueue, Function<Entity, Color> colorGetter) {
         var camera = worldState.cameraRenderState.pos;
-        var empty = true;
 
         for (var state : worldState.entityRenderStates) {
             Entity entity = ((IEntityRenderState) state).meteor$getEntity();
@@ -111,41 +114,55 @@ public abstract class LevelRendererMixin implements ILevelRenderer {
 
             var color = colorGetter.apply(entity);
             if (color == null) continue;
-            outlineRenderCommandQueue.setColor(color);
+            commandQueue.setColor(color);
 
             var renderer = entityRenderDispatcher.getRenderer(state);
             var offset = renderer.getRenderOffset(state);
 
             matrices.pushPose();
             matrices.translate(state.x - camera.x + offset.x, state.y - camera.y + offset.y, state.z - camera.z + offset.z);
-            renderer.submit(state, matrices, outlineRenderCommandQueue, worldState.cameraRenderState);
+            renderer.submit(state, matrices, commandQueue, worldState.cameraRenderState);
             matrices.popPose();
-
-            empty = false;
-        }
-
-        if (empty)
-            return;
-
-        meteor$pushEntityOutlineFramebuffer(shader.framebuffer);
-        try {
-            try (var frame = renderDispatcher.prepareFrame(outlineRenderCommandQueue)) {
-                frame.executeOutline();
-            }
-        } finally {
-            outlineRenderCommandQueue.submitsPerOrder.clear();
-            meteor$popEntityOutlineFramebuffer();
         }
     }
 
-    @Inject(method = "lambda$addMainPass$0", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/feature/FeatureRenderDispatcher$PreparedFrame;executeOutline()V", shift = At.Shift.AFTER))
+    // executeOutline must run during the main pass, before vanilla uploads its staged buffers.
+    @Inject(method = "lambda$addMainPass$0", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;executeOutline(Lnet/minecraft/client/renderer/feature/FeatureRenderDispatcher$PreparedFrame;)V"))
     private void addMainPass$submitEntityVertices(CallbackInfo ci) {
+        drawOutline(PostProcessShaders.CHAMS, chamsRenderCommandQueue);
+        drawOutline(PostProcessShaders.ENTITY_OUTLINE, entityOutlineRenderCommandQueue);
         PostProcessShaders.submitEntityVertices();
+    }
+
+    @Unique
+    private void drawOutline(EntityShader shader, OutlineRenderCommandQueue commandQueue) {
+        if (commandQueue.submitsPerOrder.isEmpty()) return;
+
+        meteor$pushEntityOutlineFramebuffer(shader.framebuffer);
+        try {
+            try (var frame = renderDispatcher.prepareFrame(commandQueue)) {
+                executeOutline(frame);
+            }
+        } finally {
+            commandQueue.submitsPerOrder.clear();
+            meteor$popEntityOutlineFramebuffer();
+        }
     }
 
     @Inject(method = "resize", at = @At("HEAD"))
     private void onResize(int width, int height, CallbackInfo ci) {
         PostProcessShaders.onResized(width, height);
+    }
+
+    @Inject(method = "endFrame", at = @At("TAIL"))
+    private void onEndFrame(CallbackInfo ci) {
+        if (outlineRenderBuffers != null) outlineRenderBuffers.endFrame();
+    }
+
+    @Inject(method = "close", at = @At("TAIL"))
+    private void onClose(CallbackInfo ci) {
+        if (outlineRenderBuffers != null) outlineRenderBuffers.close();
+        if (renderDispatcher != null) renderDispatcher.close();
     }
 
     // ILevelRenderer
@@ -163,8 +180,8 @@ public abstract class LevelRendererMixin implements ILevelRenderer {
     @Final
     private EntityRenderDispatcher entityRenderDispatcher;
     @Shadow
-    @Final
-    private RenderBuffers renderBuffers;
+    protected abstract void executeOutline(FeatureRenderDispatcher.PreparedFrame featureFrame);
+
     @Unique
     private Stack<RenderTarget> framebufferStack;
 

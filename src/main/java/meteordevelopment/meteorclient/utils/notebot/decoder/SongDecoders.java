@@ -79,8 +79,14 @@ public class SongDecoders {
 
             int n = note.getNoteLevel();
             if (n < 0 || n > 24) {
-                if (notebot.roundOutOfRange.get()) {
-                    note.setNoteLevel(n < 0 ? 0 : 24);
+                if (notebot.transposeOutOfRange.get()) {
+                    while (n < 0) {
+                        n += 12;
+                    }
+                    while (n > 24) {
+                        n -= 12;
+                    }
+                    note.setNoteLevel(n);
                 } else {
                     notebot.warning("Note at tick %d out of range.", tick);
                     iterator.remove();

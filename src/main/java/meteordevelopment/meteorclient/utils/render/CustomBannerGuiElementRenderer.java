@@ -27,12 +27,12 @@ public class CustomBannerGuiElementRenderer extends PictureInPictureRenderer<Cus
         return CustomBannerGuiElementRenderState.class;
     }
 
-    protected void renderToTexture(CustomBannerGuiElementRenderState state, PoseStack matrixStack, @NonNull SubmitNodeCollector submitNodeCollector) {
+    protected void renderToTexture(CustomBannerGuiElementRenderState state, PoseStack poseStack, @NonNull SubmitNodeCollector submitNodeCollector) {
         Minecraft.getInstance().gameRenderer.lighting().setupFor(Lighting.Entry.ITEMS_FLAT);
-        matrixStack.translate(0.0F, 0.25F, 0.0F);
+        poseStack.translate(0.0F, 0.25F, 0.0F);
         BannerRenderer.submitPatterns(
             this.sprites,
-            matrixStack,
+            poseStack,
             submitNodeCollector,
             15728880,
             OverlayTexture.NO_OVERLAY,
@@ -40,8 +40,7 @@ public class CustomBannerGuiElementRenderer extends PictureInPictureRenderer<Cus
             0.0F,
             true,
             state.baseColor(),
-            state.resultBannerPatterns(),
-            null
+            state.resultBannerPatterns()
         );
     }
 

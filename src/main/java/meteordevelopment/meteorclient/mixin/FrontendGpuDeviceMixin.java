@@ -5,16 +5,16 @@
 
 package meteordevelopment.meteorclient.mixin;
 
-import com.mojang.blaze3d.systems.GpuDevice;
-import com.mojang.blaze3d.systems.GpuDeviceBackend;
-import com.mojang.blaze3d.systems.RenderPassBackend;
+import com.mojang.renderpearl.backend.api.GpuDeviceBackend;
+import com.mojang.renderpearl.backend.api.RenderPassBackend;
+import com.mojang.renderpearl.frontend.FrontendGpuDevice;
 import meteordevelopment.meteorclient.mixininterface.IGpuDevice;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
-@Mixin(GpuDevice.class)
-public abstract class GpuDeviceMixin implements IGpuDevice {
+@Mixin(FrontendGpuDevice.class)
+public abstract class FrontendGpuDeviceMixin implements IGpuDevice {
     @Shadow
     @Final
     private GpuDeviceBackend backend;

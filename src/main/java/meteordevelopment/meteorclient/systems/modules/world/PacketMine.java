@@ -14,10 +14,10 @@ import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.BreakIndicators;
-import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.Pool;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
+import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.player.Rotations;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
@@ -224,7 +224,7 @@ public class PacketMine extends Module {
         public boolean shouldRemove() {
             boolean broken = mc.level.getBlockState(blockPos).getBlock() != block;
             boolean timeout = progress() > 2 && (mc.player.tickCount - startTime > 50);
-            boolean distance = Utils.distance(mc.player.getEyePosition().x, mc.player.getEyePosition().y, mc.player.getEyePosition().z, blockPos.getX() + direction.getStepX(), blockPos.getY() + direction.getStepY(), blockPos.getZ() + direction.getStepZ()) > mc.player.blockInteractionRange();
+            boolean distance = !PlayerUtils.isWithinReach(blockPos.getX() + direction.getStepX(), blockPos.getY() + direction.getStepY(), blockPos.getZ() + direction.getStepZ());
 
             return broken || timeout || distance;
         }

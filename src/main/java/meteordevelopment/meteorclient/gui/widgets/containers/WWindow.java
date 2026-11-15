@@ -15,9 +15,9 @@ import net.minecraft.util.Mth;
 
 import java.util.function.Consumer;
 
+import static com.mojang.blaze3d.platform.InputConstants.MOUSE_BUTTON_RIGHT;
 import static meteordevelopment.meteorclient.utils.Utils.getWindowHeight;
 import static meteordevelopment.meteorclient.utils.Utils.getWindowWidth;
-import static com.mojang.blaze3d.platform.InputConstants.MOUSE_BUTTON_RIGHT;
 
 public abstract class WWindow extends WVerticalList {
     public double padding = 8;

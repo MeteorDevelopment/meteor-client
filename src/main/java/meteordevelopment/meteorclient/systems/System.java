@@ -17,6 +17,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -48,23 +49,30 @@ public abstract class System<T> implements ISerializable<T> {
         CompoundTag tag = toTag();
         if (tag == null) return;
 
+        Path tempFile = null;
         try {
-            File tempFile = File.createTempFile(MeteorClient.MOD_ID, file.getName());
-            NbtIo.write(tag, tempFile.toPath());
+            tempFile = Files.createTempFile(MeteorClient.MOD_ID, file.getName());
+            NbtIo.write(tag, tempFile);
 
             if (folder != null) file = new File(folder, file.getName());
 
-            file.getParentFile().mkdirs();
+            Files.createDirectories(file.toPath().getParent());
 
             try {
-                Files.move(tempFile.toPath(), file.toPath(), StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
+                Files.move(tempFile, file.toPath(), StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
             } catch (AtomicMoveNotSupportedException _) {
-                StreamUtils.copy(tempFile, file);
+                StreamUtils.copy(tempFile.toFile(), file);
             }
-
-            tempFile.delete();
         } catch (IOException e) {
             MeteorClient.LOG.error("Error saving {}. Possibly corrupted?", this.name, e);
+        } finally {
+            if (tempFile != null) {
+                try {
+                    Files.deleteIfExists(tempFile);
+                } catch (IOException e) {
+                    MeteorClient.LOG.warn("Failed to delete temporary file '{}'.", tempFile, e);
+                }
+            }
         }
     }
 

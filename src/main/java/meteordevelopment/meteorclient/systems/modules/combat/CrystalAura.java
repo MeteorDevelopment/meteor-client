@@ -26,10 +26,7 @@ import meteordevelopment.meteorclient.utils.entity.DamageUtils;
 import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.meteorclient.utils.entity.Target;
 import meteordevelopment.meteorclient.utils.misc.Keybind;
-import meteordevelopment.meteorclient.utils.player.FindItemResult;
-import meteordevelopment.meteorclient.utils.player.InvUtils;
-import meteordevelopment.meteorclient.utils.player.PlayerUtils;
-import meteordevelopment.meteorclient.utils.player.Rotations;
+import meteordevelopment.meteorclient.utils.player.*;
 import meteordevelopment.meteorclient.utils.render.NametagUtils;
 import meteordevelopment.meteorclient.utils.render.RenderUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
@@ -871,11 +868,7 @@ public class CrystalAura extends Module {
         // Attack
         mc.player.connection.send(new ServerboundAttackPacket(entity.getId()));
 
-        InteractionHand hand = InvUtils.findInHotbar(Items.END_CRYSTAL).getHand();
-        if (hand == null) hand = InteractionHand.MAIN_HAND;
-
-        if (swingMode.get().client()) mc.player.swing(hand);
-        if (swingMode.get().packet()) mc.getConnection().send(new ServerboundSwingPacket(hand));
+        swingMode.get().attackSwing(InteractionHand.MAIN_HAND);
 
         attacks++;
     }
@@ -1037,8 +1030,7 @@ public class CrystalAura extends Module {
             // Place crystal
             mc.gameMode.startPrediction(mc.level, sequence -> new ServerboundUseItemOnPacket(hand, result, sequence));
 
-            if (swingMode.get().client()) mc.player.swing(hand);
-            if (swingMode.get().packet()) mc.getConnection().send(new ServerboundSwingPacket(hand));
+            swingMode.get().interactSwing(hand);
 
             placing = true;
             placingTimer = 4;
@@ -1326,7 +1318,7 @@ public class CrystalAura extends Module {
         } else vec3.set(placeRenderPos.getX() + 0.5, placeRenderPos.getY() + 0.5, placeRenderPos.getZ() + 0.5);
 
         if (NametagUtils.to2D(vec3, damageTextScale.get())) {
-            NametagUtils.begin(vec3);
+            NametagUtils.begin(vec3, event.graphics);
             TextRenderer.get().begin(event.graphics, 1, false, true);
 
             String text = String.format("%.1f", renderDamage);
@@ -1334,7 +1326,7 @@ public class CrystalAura extends Module {
             TextRenderer.get().render(text, -w, 0, damageColor.get(), true);
 
             TextRenderer.get().end();
-            NametagUtils.end();
+            NametagUtils.end(event.graphics);
         }
     }
 
@@ -1363,21 +1355,6 @@ public class CrystalAura extends Module {
 
         public boolean matches(PauseMode process) {
             return this == process || this == PauseMode.Both;
-        }
-    }
-
-    public enum SwingMode {
-        Both,
-        Packet,
-        Client,
-        None;
-
-        public boolean packet() {
-            return this == Packet || this == Both;
-        }
-
-        public boolean client() {
-            return this == Client || this == Both;
         }
     }
 

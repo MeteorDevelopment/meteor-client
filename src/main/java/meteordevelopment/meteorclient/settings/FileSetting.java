@@ -6,20 +6,18 @@
 package meteordevelopment.meteorclient.settings;
 
 import net.minecraft.nbt.CompoundTag;
-import org.lwjgl.BufferUtils;
-import org.lwjgl.PointerBuffer;
-import org.lwjgl.system.MemoryUtil;
 
 import java.io.File;
 import java.util.function.Consumer;
 
 public class FileSetting extends Setting<File> {
-    public final PointerBuffer filters;
+    /** SDL filter extensions, e.g. {@code "txt"}, {@code "txt;json"} or {@code "*"} */
+    public final String filter;
 
-    public FileSetting(String name, String description, File defaultValue, Consumer<File> onChanged, Consumer<Setting<File>> onModuleActivated, IVisible visible, PointerBuffer filters) {
+    public FileSetting(String name, String description, File defaultValue, Consumer<File> onChanged, Consumer<Setting<File>> onModuleActivated, IVisible visible, String filter) {
         super(name, description, defaultValue, onChanged, onModuleActivated, visible);
 
-        this.filters = filters;
+        this.filter = filter;
     }
 
     @Override
@@ -52,21 +50,14 @@ public class FileSetting extends Setting<File> {
     }
 
     public static class Builder extends SettingBuilder<FileSetting.Builder, File, FileSetting> {
-        private PointerBuffer filter;
+        private String filter = "*";
 
         public Builder() {
             super(null);
         }
 
-        public FileSetting.Builder filter(PointerBuffer filter) {
+        public FileSetting.Builder filter(String filter) {
             this.filter = filter;
-            return this;
-        }
-
-        public FileSetting.Builder filter(String... filters) {
-            this.filter = BufferUtils.createPointerBuffer(filters.length);
-            for (String filter : filters) this.filter.put(MemoryUtil.memASCII(filter));
-            this.filter.flip();
             return this;
         }
 

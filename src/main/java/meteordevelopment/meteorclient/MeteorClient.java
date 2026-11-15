@@ -7,7 +7,6 @@ package meteordevelopment.meteorclient;
 
 import meteordevelopment.meteorclient.addons.AddonManager;
 import meteordevelopment.meteorclient.addons.MeteorAddon;
-import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
 import meteordevelopment.meteorclient.events.meteor.KeyInputEvent;
 import meteordevelopment.meteorclient.events.meteor.MouseClickEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
@@ -18,6 +17,7 @@ import meteordevelopment.meteorclient.systems.Systems;
 import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.systems.hud.screens.AddHudElementScreen;
 import meteordevelopment.meteorclient.systems.hud.screens.HudEditorScreen;
+import meteordevelopment.meteorclient.systems.hud.screens.HudElementPresetsScreen;
 import meteordevelopment.meteorclient.systems.hud.screens.HudElementScreen;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Modules;
@@ -32,13 +32,13 @@ import meteordevelopment.meteorclient.utils.misc.input.KeyBinds;
 import meteordevelopment.meteorclient.utils.network.OnlinePlayers;
 import meteordevelopment.orbit.EventBus;
 import meteordevelopment.orbit.EventHandler;
-import meteordevelopment.orbit.EventPriority;
 import meteordevelopment.orbit.IEventBus;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.metadata.ModMetadata;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.ChatScreen;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.resources.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,8 +46,6 @@ import org.spongepowered.asm.mixin.MixinEnvironment;
 
 import java.io.File;
 import java.lang.invoke.MethodHandles;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class MeteorClient implements ClientModInitializer {
     public static final String MOD_ID = "meteor-client";
@@ -71,9 +69,9 @@ public class MeteorClient implements ClientModInitializer {
         LOG = LoggerFactory.getLogger(NAME);
 
         String versionString = MOD_META.getVersion().getFriendlyString();
-        Matcher matcher = Pattern.compile("(\\d+)\\.(\\d+)\\.(\\d+)").matcher(versionString);
+        if (versionString.contains("-")) versionString = versionString.split("-")[0];
         // When building and running through IntelliJ and not Gradle it doesn't replace the version so just use a dummy
-        versionString = !matcher.find() ? "0.0.0" : "%s.%s.%s".formatted(matcher.group(1), matcher.group(2), matcher.group(3));
+        if (versionString.equals("${version}")) versionString = "0.0.0";
 
         VERSION = new Version(versionString);
         BUILD_NUMBER = MOD_META.getCustomValue(MeteorClient.MOD_ID + ":build_number").getAsString();
@@ -178,25 +176,16 @@ public class MeteorClient implements ClientModInitializer {
 
     // Hide HUD
 
-    private boolean wasWidgetScreen, wasHudHiddenRoot;
+    public static boolean shouldHideHud() {
+        if (!GuiThemes.get().hideHUD()) return false;
 
-    @EventHandler(priority = EventPriority.LOWEST)
-    private void onOpenScreen(OpenScreenEvent event) {
-        if (event.screen instanceof WidgetScreen) {
-            if (!wasWidgetScreen) wasHudHiddenRoot = mc.gameRenderer.gameRenderState().guiRenderState.isHudHidden;
-            if (GuiThemes.get().hideHUD() || wasHudHiddenRoot) {
-                // Always show the MC HUD in the HUD editor screen since people like
-                // to align some items with the hotbar or chat
-                mc.gameRenderer.gameRenderState().guiRenderState.isHudHidden = !(event.screen instanceof HudEditorScreen)
-                    && !(event.screen instanceof AddHudElementScreen)
-                    && !(event.screen instanceof HudElementScreen);
-            }
-        } else {
-            if (wasWidgetScreen) mc.gameRenderer.gameRenderState().guiRenderState.isHudHidden = wasHudHiddenRoot;
-            wasHudHiddenRoot = mc.gameRenderer.gameRenderState().guiRenderState.isHudHidden;
-        }
+        Screen screen = mc.gui.screen();
+        if (!(screen instanceof WidgetScreen)) return false;
 
-        wasWidgetScreen = event.screen instanceof WidgetScreen;
+        return !(screen instanceof HudEditorScreen)
+            && !(screen instanceof AddHudElementScreen)
+            && !(screen instanceof HudElementScreen)
+            && !(screen instanceof HudElementPresetsScreen);
     }
 
     public static Identifier identifier(String path) {

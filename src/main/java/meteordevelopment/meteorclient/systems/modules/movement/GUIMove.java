@@ -8,6 +8,7 @@ package meteordevelopment.meteorclient.systems.modules.movement;
 import meteordevelopment.meteorclient.events.meteor.KeyInputEvent;
 import meteordevelopment.meteorclient.events.meteor.MouseClickEvent;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
+import meteordevelopment.meteorclient.gui.GuiKeyEvents;
 import meteordevelopment.meteorclient.gui.WidgetScreen;
 import meteordevelopment.meteorclient.mixin.CreativeModeInventoryScreenAccessor;
 import meteordevelopment.meteorclient.settings.*;
@@ -19,7 +20,9 @@ import meteordevelopment.meteorclient.utils.misc.input.Input;
 import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.KeyMapping;
+import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.ChatScreen;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.*;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.CreativeModeTabs;
@@ -87,12 +90,26 @@ public class GUIMove extends Module {
         .build()
     );
 
+    private boolean wasSkipped = true;
+
     public GUIMove() {
         super(Categories.Movement, "gui-move", "Allows you to perform various actions while in GUIs.");
     }
 
     @Override
+    public void onActivate() {
+        wasSkipped = true;
+    }
+
+    @Override
     public void onDeactivate() {
+        wasSkipped = true;
+        unpress();
+    }
+
+    private void unpress() {
+        if (mc == null || mc.options == null) return;
+
         mc.options.keyUp.setDown(false);
         mc.options.keyDown.setDown(false);
         mc.options.keyLeft.setDown(false);
@@ -104,11 +121,11 @@ public class GUIMove extends Module {
     }
 
     public boolean disableSpace() {
-        return isActive() && jump.get() && mc.options.keyJump.isDefault();
+        return isActive() && jump.get() && mc.options.keyJump.isDefault() && !skip();
     }
 
     public boolean disableArrows() {
-        return isActive() && arrowsRotate.get();
+        return isActive() && arrowsRotate.get() && !skip();
     }
 
     @EventHandler
@@ -122,7 +139,7 @@ public class GUIMove extends Module {
     }
 
     private void onInput(int key, KeyAction action) {
-        if (skip()) return;
+        if (checkSkip()) return;
 
         pass(mc.options.keyUp, key, action);
         pass(mc.options.keyDown, key, action);
@@ -136,7 +153,7 @@ public class GUIMove extends Module {
 
     @EventHandler
     private void onRender3D(Render3DEvent event) {
-        if (skip()) return;
+        if (checkSkip()) return;
 
         float rotationDelta = Math.min((float) (rotateSpeed.get() * event.frameTime * 20f), 100);
 
@@ -175,15 +192,35 @@ public class GUIMove extends Module {
         if (action == KeyAction.Release) bind.setDown(false);
     }
 
+    private boolean checkSkip() {
+        if (skip()) {
+            if (!wasSkipped) {
+                wasSkipped = true;
+                if (mc != null && mc.gui != null && mc.gui.screen() != null) unpress();
+            }
+            return true;
+        }
+
+        wasSkipped = false;
+        return false;
+    }
+
     public boolean skip() {
-        if (mc.gui.screen() == null ||
-            (mc.gui.screen() instanceof CreativeModeInventoryScreen && CreativeModeInventoryScreenAccessor.meteor$getSelectedTab() == CreativeModeTabs.searchTab())
-            || mc.gui.screen() instanceof ChatScreen
-            || mc.gui.screen() instanceof SignEditScreen
-            || mc.gui.screen() instanceof AnvilScreen
-            || mc.gui.screen() instanceof AbstractCommandBlockEditScreen
-            || mc.gui.screen() instanceof StructureBlockEditScreen) return true;
-        if (screens.get() == Screens.GUI && !(mc.gui.screen() instanceof WidgetScreen)) return true;
-        return screens.get() == Screens.Inventory && mc.gui.screen() instanceof WidgetScreen;
+        return mc == null || mc.gui == null || skip(mc.gui.screen());
+    }
+
+    public boolean skip(Screen screen) {
+        if (screen == null
+            || !GuiKeyEvents.canUseKeys
+            || (screen instanceof CreativeModeInventoryScreen && CreativeModeInventoryScreenAccessor.meteor$getSelectedTab() == CreativeModeTabs.searchTab())
+            || screen instanceof ChatScreen
+            || screen instanceof AbstractSignEditScreen
+            || screen instanceof AnvilScreen
+            || screen instanceof AbstractCommandBlockEditScreen
+            || screen instanceof StructureBlockEditScreen
+            || (screen.getFocused() instanceof EditBox editBox && editBox.canConsumeInput())) return true;
+        if (screens.get() == Screens.GUI) return !(screen instanceof WidgetScreen);
+        if (screens.get() == Screens.Inventory) return !(screen instanceof AbstractContainerScreen<?>);
+        return !(screen instanceof WidgetScreen || screen instanceof AbstractContainerScreen<?>);
     }
 }

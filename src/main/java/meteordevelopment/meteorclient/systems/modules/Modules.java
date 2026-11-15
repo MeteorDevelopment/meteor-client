@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.systems.modules;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.datafixers.util.Pair;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
@@ -47,7 +48,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import org.jspecify.annotations.Nullable;
-import com.mojang.blaze3d.platform.InputConstants;
 
 import java.io.File;
 import java.util.*;
@@ -279,7 +279,20 @@ public class Modules extends System<Modules> {
     private void onAction(boolean isKey, int value, int modifiers, boolean isPress) {
         if (mc.gui.screen() != null || Input.isKeyPressed(InputConstants.KEY_F3)) return;
 
+        // A bind with modifiers takes precedence over one without, so pressing Ctrl + G does not
+        // also toggle a module bound to plain G.
+        boolean modifierBindMatched = false;
+
         for (Module module : moduleInstances.values()) {
+            if (module.keybind.hasMods() && module.keybind.matches(isKey, value, modifiers)) {
+                modifierBindMatched = true;
+                break;
+            }
+        }
+
+        for (Module module : moduleInstances.values()) {
+            if (modifierBindMatched && !module.keybind.hasMods()) continue;
+
             if (module.keybind.matches(isKey, value, modifiers) && (isPress || (module.toggleOnBindRelease && module.isActive()))) {
                 module.toggle();
                 module.sendToggledMsg();

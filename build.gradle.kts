@@ -1,10 +1,14 @@
+import net.ltgt.gradle.errorprone.errorprone
+
 plugins {
     alias(libs.plugins.fabric.loom)
     id("maven-publish")
+    alias(libs.plugins.errorprone)
 }
 
 val archivesBaseName = providers.gradleProperty("archives_base_name").get()
 val mavenGroup = providers.gradleProperty("maven_group").get()
+val runErrorProne = providers.gradleProperty("errorprone").isPresent
 
 base {
     archivesName = archivesBaseName
@@ -80,8 +84,6 @@ dependencies {
     compileOnly(libs.sodium) { isTransitive = false }
     compileOnly(libs.lithium) { isTransitive = false }
     compileOnly(libs.iris) { isTransitive = false }
-    compileOnly(libs.viafabricplus) { isTransitive = false }
-    compileOnly(libs.viafabricplus.api) { isTransitive = false }
 
     compileOnly(libs.baritone)
     compileOnly(libs.modmenu)
@@ -94,7 +96,14 @@ dependencies {
     jij(libs.netty.handler.proxy) { isTransitive = false }
     jij(libs.netty.codec.socks) { isTransitive = false }
     jij(libs.waybackauthlib)
-    jij(libs.minecraft.auth)
+    jij(libs.minecraft.auth) {
+        exclude("com.google.code.gson")
+        exclude("com.google.errorprone")
+    }
+
+    // Error Prone
+    errorprone(libs.errorprone.core)
+    errorprone(libs.nullaway)
 }
 
 java {
@@ -188,9 +197,10 @@ tasks {
 
     jar {
         inputs.property("archivesName", archivesBaseName)
+        val licenseName = "LICENSE_$archivesBaseName"
 
         from("LICENSE") {
-            rename { "${it}_$archivesBaseName" }
+            rename("LICENSE", licenseName)
         }
 
         // Include launcher classes
@@ -208,6 +218,18 @@ tasks {
                 "-Xlint:unchecked"
             )
         )
+
+        options.errorprone.enabled.set(runErrorProne)
+
+        if (runErrorProne) {
+            options.errorprone {
+                check("NullAway", net.ltgt.gradle.errorprone.CheckSeverity.ERROR)
+                option("NullAway:AnnotatedPackages", "meteordevelopment.meteorclient")
+                option("NullAway:JSpecifyMode", "true")
+                // Event handlers are discovered reflectively by Orbit.
+                option("UnusedMethod:ExcludedAnnotations", "meteordevelopment.orbit.EventHandler")
+            }
+        }
     }
 
     javadoc {

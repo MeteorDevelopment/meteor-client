@@ -217,6 +217,10 @@ public abstract class GuiTheme implements ISerializable<GuiTheme> {
         return w(new WIntEdit(value, min, max, 0, 0, noSlider));
     }
 
+    public WLongEdit longEdit(long value, long min, long max) {
+        return w(new WLongEdit(value, min, max));
+    }
+
     public WDoubleEdit doubleEdit(double value, double min, double max, double sliderMin, double sliderMax, int decimalPlaces, boolean noSlider) {
         return w(new WDoubleEdit(value, min, max, sliderMin, sliderMax, decimalPlaces, noSlider));
     }
