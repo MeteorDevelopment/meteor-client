@@ -227,18 +227,20 @@ public class Keybind implements ISerializable<Keybind>, ICopyable<Keybind> {
 
         tag.putString("key", key.getName());
 
-        // Keep the modifier names for current versions and write GLFW values for legacy versions.
-        ListTag modifierNamesTag = new ListTag();
+        // Keep the ListTag under "modifiers" for configs written by earlier 26.3 builds.
+        ListTag modifiersTag = new ListTag();
         for (Modifier modifier : modifiers) {
-            modifierNamesTag.add(StringTag.valueOf(modifier.name()));
+            modifiersTag.add(StringTag.valueOf(modifier.name()));
         }
-        tag.put("modifierNames", modifierNamesTag);
+        tag.put("modifiers", modifiersTag);
 
-        // 1.21.11 and earlier use GLFW key codes, mouse buttons and modifier masks.
+        // Also store the bitmask separately for readers that understand the migration format.
+        tag.putInt("modifierMask", toLegacyModifiers());
+
+        // 1.21.11 and earlier use GLFW key codes and mouse buttons.
         boolean isKey = isKey();
         tag.putBoolean("isKey", isKey);
         tag.putInt("value", toLegacyKeyValue(isKey, key.getValue()));
-        tag.putInt("modifiers", toLegacyModifiers());
 
         return tag;
     }
@@ -254,13 +256,16 @@ public class Keybind implements ISerializable<Keybind>, ICopyable<Keybind> {
             }
 
             modifiers.clear();
-            if (tag.contains("modifierNames")) {
-                readModifierNames(tag.getListOrEmpty("modifierNames"));
-            } else if (tag.get("modifiers") instanceof ListTag modifiersTag) {
-                // Read configs written by the previous 26.3 format.
+            if (tag.get("modifiers") instanceof ListTag modifiersTag) {
+                // Original 26.3 format: modifier names were stored in a list named "modifiers".
                 readModifierNames(modifiersTag);
+            } else if (tag.get("modifierNames") instanceof ListTag modifierNamesTag) {
+                // Read configs written by the intermediate migration format.
+                readModifierNames(modifierNamesTag);
+            } else if (tag.contains("modifierMask")) {
+                modifiers.addAll(Modifier.fromRawValue(tag.getIntOr("modifierMask", 0)));
             } else {
-                // Read the legacy integer bitmask used by 1.21.11 and earlier.
+                // Legacy format: modifiers stored as a GLFW bitmask.
                 modifiers.addAll(Modifier.fromRawValue(tag.getIntOr("modifiers", 0)));
             }
         } else {
