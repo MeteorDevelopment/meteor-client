@@ -357,7 +357,7 @@ public class KillAura extends Module {
         }
 
         if (rotate.get() == RotationMode.Always) {
-            Rotations.rotate(primary, 30, () -> attackTargets());
+            Rotations.rotate(primary, 30, this::attackTargets);
         } else {
             attackTargets();
         }

@@ -127,7 +127,7 @@ public class BowAimbot extends Module {
                 wasPathing = true;
             }
 
-            Rotations.rotate(() -> aim());
+            Rotations.rotate(this::aim);
         }
     }
 
