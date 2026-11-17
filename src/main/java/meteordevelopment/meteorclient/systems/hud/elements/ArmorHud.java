@@ -152,6 +152,10 @@ public class ArmorHud extends HudElement {
 
             double armorX, armorY;
 
+            boolean durabilityText = durability.get() != Durability.Bar && durability.get() != Durability.None;
+            TextRenderer textRenderer = TextRenderer.get();
+            if (durabilityText) textRenderer.begin(renderer.graphics, Hud.get().getTextScale());
+
             for (int position = 0; position < 4; position++) {
                 ItemStack itemStack = armor[position];
 
@@ -165,7 +169,7 @@ public class ArmorHud extends HudElement {
 
                 renderer.item(itemStack, (int) armorX, (int) armorY, getScale(), (itemStack.isDamageableItem() && durability.get() == Durability.Bar));
 
-                if (itemStack.isDamageableItem() && durability.get() != Durability.Bar && durability.get() != Durability.None) {
+                if (durabilityText && itemStack.isDamageableItem()) {
                     String message = switch (durability.get()) {
                         case Total -> Integer.toString(itemStack.getMaxDamage() - itemStack.getDamageValue());
                         case Percentage ->
@@ -173,19 +177,22 @@ public class ArmorHud extends HudElement {
                         default -> "err";
                     };
 
-                    double messageWidth = renderer.textWidth(message);
+                    double messageWidth = textRenderer.getWidth(message, durabilityShadow.get());
+                    double messageHeight = textRenderer.getHeight(durabilityShadow.get());
 
                     if (orientation.get() == Orientation.Vertical) {
                         armorX = x + 8 * getScale() - messageWidth / 2.0;
-                        armorY = y + (18 * position * getScale()) + (18 * getScale() - renderer.textHeight());
+                        armorY = y + (18 * position * getScale()) + (18 * getScale() - messageHeight);
                     } else {
                         armorX = x + 18 * position * getScale() + 8 * getScale() - messageWidth / 2.0;
-                        armorY = y + (getHeight() - renderer.textHeight());
+                        armorY = y + (getHeight() - messageHeight);
                     }
 
-                    TextRenderer.get().render(message, armorX, armorY, durabilityColor.get(), durabilityShadow.get());
+                    textRenderer.render(message, armorX, armorY, durabilityColor.get(), durabilityShadow.get());
                 }
             }
+
+            if (durabilityText) textRenderer.end();
         });
     }
 
