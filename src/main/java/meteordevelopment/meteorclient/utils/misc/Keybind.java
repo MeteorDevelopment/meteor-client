@@ -57,7 +57,7 @@ public class Keybind implements ISerializable<Keybind>, ICopyable<Keybind> {
     private final EnumSet<Modifier> modifiers = EnumSet.noneOf(Modifier.class);
 
     private Keybind(InputConstants.Key key, Collection<Modifier> modifiers) {
-        this.key = key;
+        this.key = Objects.requireNonNull(key, "key");
         this.modifiers.addAll(modifiers);
     }
 
@@ -106,7 +106,7 @@ public class Keybind implements ISerializable<Keybind>, ICopyable<Keybind> {
     }
 
     public void set(InputConstants.Key key, Collection<Modifier> modifiers) {
-        this.key = key;
+        this.key = Objects.requireNonNull(key, "key");
         this.modifiers.clear();
         this.modifiers.addAll(modifiers);
     }
@@ -227,11 +227,20 @@ public class Keybind implements ISerializable<Keybind>, ICopyable<Keybind> {
 
         tag.putString("key", key.getName());
 
+        // Keep the ListTag under "modifiers" for configs written by earlier 26.3 builds.
         ListTag modifiersTag = new ListTag();
         for (Modifier modifier : modifiers) {
             modifiersTag.add(StringTag.valueOf(modifier.name()));
         }
         tag.put("modifiers", modifiersTag);
+
+        // Also store the bitmask separately for readers that understand the migration format.
+        tag.putInt("modifierMask", toLegacyModifiers());
+
+        // 1.21.11 and earlier use GLFW key codes and mouse buttons.
+        boolean isKey = isKey();
+        tag.putBoolean("isKey", isKey);
+        tag.putInt("value", toLegacyKeyValue(isKey, key.getValue()));
 
         return tag;
     }
@@ -247,23 +256,206 @@ public class Keybind implements ISerializable<Keybind>, ICopyable<Keybind> {
             }
 
             modifiers.clear();
-            ListTag modifiersTag = tag.getListOrEmpty("modifiers");
-            for (int i = 0; i < modifiersTag.size(); i++) {
-                try {
-                    modifiers.add(Modifier.valueOf(modifiersTag.getStringOr(i, "")));
-                } catch (IllegalArgumentException _) {
-                }
+            if (tag.get("modifiers") instanceof ListTag modifiersTag) {
+                // Original 26.3 format: modifier names were stored in a list named "modifiers".
+                readModifierNames(modifiersTag);
+            } else if (tag.get("modifierNames") instanceof ListTag modifierNamesTag) {
+                // Read configs written by the intermediate migration format.
+                readModifierNames(modifierNamesTag);
+            } else if (tag.contains("modifierMask")) {
+                modifiers.addAll(Modifier.fromRawValue(tag.getIntOr("modifierMask", 0)));
+            } else {
+                // Legacy format: modifiers stored as a GLFW bitmask.
+                modifiers.addAll(Modifier.fromRawValue(tag.getIntOr("modifiers", 0)));
             }
         } else {
-            // Legacy format: raw ints (GLFW)
+            // Legacy format: raw GLFW key codes and modifier masks.
             boolean isKey = tag.getBooleanOr("isKey", true);
             int value = tag.getIntOr("value", InputConstants.UNKNOWN.getValue());
             int mods = tag.getIntOr("modifiers", 0);
 
-            set(isKey ? keyboard(value) : mouse(value), isKey ? Modifier.fromRawValue(mods) : Set.of());
+            set(fromLegacyKey(isKey, value), isKey ? fromLegacyModifiers(mods) : Set.of());
         }
 
         return this;
+    }
+
+    private void readModifierNames(ListTag modifiersTag) {
+        for (int i = 0; i < modifiersTag.size(); i++) {
+            try {
+                modifiers.add(Modifier.valueOf(modifiersTag.getStringOr(i, "")));
+            } catch (IllegalArgumentException _) {
+            }
+        }
+    }
+
+    // Initialize the mapping only when a config actually needs legacy conversion.
+    // Keybind itself can be loaded before Minecraft's input constants have finished initializing.
+    private static final class LegacyKeyMappings {
+        private static final Map<Integer, Integer> LEGACY_TO_CURRENT_KEYS = createLegacyToCurrentKeyMap();
+        private static final Map<Integer, Integer> CURRENT_TO_LEGACY_KEYS = reverseKeyMap();
+
+        private static Map<Integer, Integer> createLegacyToCurrentKeyMap() {
+            Map<Integer, Integer> result = new HashMap<>();
+
+            addLegacyKey(result, 32, "key.keyboard.space");
+            addLegacyKey(result, 39, "key.keyboard.apostrophe");
+            addLegacyKey(result, 44, "key.keyboard.comma");
+            addLegacyKey(result, 45, "key.keyboard.minus");
+            addLegacyKey(result, 46, "key.keyboard.period");
+            addLegacyKey(result, 47, "key.keyboard.slash");
+
+            for (int digit = 0; digit <= 9; digit++) {
+                addLegacyKey(result, 48 + digit, "key.keyboard." + digit);
+            }
+
+            addLegacyKey(result, 59, "key.keyboard.semicolon");
+            addLegacyKey(result, 61, "key.keyboard.equal");
+
+            for (char letter = 'a'; letter <= 'z'; letter++) {
+                addLegacyKey(result, Character.toUpperCase(letter), "key.keyboard." + letter);
+            }
+
+            addLegacyKey(result, 91, "key.keyboard.left.bracket");
+            addLegacyKey(result, 92, "key.keyboard.backslash");
+            addLegacyKey(result, 93, "key.keyboard.right.bracket");
+            addLegacyKey(result, 96, "key.keyboard.grave.accent");
+            addLegacyKey(result, 161, "key.keyboard.world.1");
+            addLegacyKey(result, 162, "key.keyboard.world.2");
+
+            addLegacyKey(result, 256, "key.keyboard.escape");
+            addLegacyKey(result, 257, "key.keyboard.enter");
+            addLegacyKey(result, 258, "key.keyboard.tab");
+            addLegacyKey(result, 259, "key.keyboard.backspace");
+            addLegacyKey(result, 260, "key.keyboard.insert");
+            addLegacyKey(result, 261, "key.keyboard.delete");
+            addLegacyKey(result, 262, "key.keyboard.right");
+            addLegacyKey(result, 263, "key.keyboard.left");
+            addLegacyKey(result, 264, "key.keyboard.down");
+            addLegacyKey(result, 265, "key.keyboard.up");
+            addLegacyKey(result, 266, "key.keyboard.page.up");
+            addLegacyKey(result, 267, "key.keyboard.page.down");
+            addLegacyKey(result, 268, "key.keyboard.home");
+            addLegacyKey(result, 269, "key.keyboard.end");
+
+            addLegacyKey(result, 280, "key.keyboard.caps.lock");
+            addLegacyKey(result, 281, "key.keyboard.scroll.lock");
+            addLegacyKey(result, 282, "key.keyboard.num.lock");
+            addLegacyKey(result, 283, "key.keyboard.print.screen");
+            addLegacyKey(result, 284, "key.keyboard.pause");
+
+            for (int functionKey = 1; functionKey <= 24; functionKey++) {
+                addLegacyKey(result, 289 + functionKey, "key.keyboard.f" + functionKey);
+            }
+
+            for (int digit = 0; digit <= 9; digit++) {
+                addLegacyKey(result, 320 + digit, "key.keyboard.keypad." + digit);
+            }
+
+            // GLFW_KEY_KP_DECIMAL (330) is no longer assignable in Minecraft 26.3.
+            addLegacyKey(result, 331, "key.keyboard.keypad.divide");
+            addLegacyKey(result, 332, "key.keyboard.keypad.multiply");
+            addLegacyKey(result, 333, "key.keyboard.keypad.subtract");
+            addLegacyKey(result, 334, "key.keyboard.keypad.add");
+            addLegacyKey(result, 335, "key.keyboard.keypad.enter");
+            addLegacyKey(result, 336, "key.keyboard.keypad.equal");
+
+            addLegacyKey(result, 340, "key.keyboard.left.shift");
+            addLegacyKey(result, 341, "key.keyboard.left.control");
+            addLegacyKey(result, 342, "key.keyboard.left.alt");
+            addLegacyKey(result, 343, "key.keyboard.left.win");
+            addLegacyKey(result, 344, "key.keyboard.right.shift");
+            addLegacyKey(result, 345, "key.keyboard.right.control");
+            addLegacyKey(result, 346, "key.keyboard.right.alt");
+            addLegacyKey(result, 347, "key.keyboard.right.win");
+            // GLFW_KEY_MENU maps to SDL's application key, not SDL's Compose/menu key.
+            addLegacyKey(result, 348, "key.keyboard.application");
+
+            // GLFW_KEY_F25 (314) was removed as an assignable input in Minecraft 26.3.
+            return Map.copyOf(result);
+        }
+
+        private static void addLegacyKey(Map<Integer, Integer> map, int legacyValue, String keyName) {
+            try {
+                InputConstants.Key key = InputConstants.getKey(keyName);
+                if (!key.equals(InputConstants.UNKNOWN)) map.put(legacyValue, key.getValue());
+            } catch (IllegalArgumentException ignored) {
+                // The current Minecraft version does not expose this legacy key.
+            }
+        }
+
+        private static Map<Integer, Integer> reverseKeyMap() {
+            Map<Integer, Integer> result = new HashMap<>();
+            Set<Integer> ambiguousKeys = new HashSet<>();
+
+            LEGACY_TO_CURRENT_KEYS.forEach((legacy, current) -> {
+                Integer previous = result.putIfAbsent(current, legacy);
+                if (previous != null && previous != legacy) ambiguousKeys.add(current);
+            });
+
+            ambiguousKeys.forEach(result::remove);
+            return Map.copyOf(result);
+        }
+    }
+
+    private static final int LEGACY_MOD_SHIFT = 1;
+    private static final int LEGACY_MOD_CONTROL = 2;
+    private static final int LEGACY_MOD_ALT = 4;
+    private static final int LEGACY_MOD_SUPER = 8;
+    private static final int LEGACY_MOD_CAPS_LOCK = 16;
+    private static final int LEGACY_MOD_NUM_LOCK = 32;
+
+    private static final int LEGACY_UNKNOWN_KEY = -1;
+
+    private static InputConstants.Key fromLegacyKey(boolean isKey, int value) {
+        if (!isKey) {
+            // GLFW: left=0, right=1, middle=2. SDL: left=1, middle=2, right=3.
+            return switch (value) {
+                case 0 -> mouse(InputConstants.MOUSE_BUTTON_LEFT);
+                case 1 -> mouse(InputConstants.MOUSE_BUTTON_RIGHT);
+                case 2 -> mouse(InputConstants.MOUSE_BUTTON_MIDDLE);
+                default -> value >= 3 && value <= 15 ? mouse(value + 1) : InputConstants.UNKNOWN;
+            };
+        }
+
+        if (value < 0) return InputConstants.UNKNOWN;
+        return keyboard(LegacyKeyMappings.LEGACY_TO_CURRENT_KEYS.getOrDefault(value, InputConstants.UNKNOWN.getValue()));
+    }
+
+    private static int toLegacyKeyValue(boolean isKey, int value) {
+        if (!isKey) {
+            // GLFW supports up to 16 mouse buttons; buttons outside that range have no legacy value.
+            return switch (value) {
+                case InputConstants.MOUSE_BUTTON_LEFT -> 0;
+                case InputConstants.MOUSE_BUTTON_RIGHT -> 1;
+                case InputConstants.MOUSE_BUTTON_MIDDLE -> 2;
+                default -> value >= 4 && value <= 16 ? value - 1 : LEGACY_UNKNOWN_KEY;
+            };
+        }
+
+        return LegacyKeyMappings.CURRENT_TO_LEGACY_KEYS.getOrDefault(value, LEGACY_UNKNOWN_KEY);
+    }
+
+    private static EnumSet<Modifier> fromLegacyModifiers(int modifiers) {
+        EnumSet<Modifier> result = EnumSet.noneOf(Modifier.class);
+        if ((modifiers & LEGACY_MOD_SHIFT) != 0) result.add(Modifier.SHIFT);
+        if ((modifiers & LEGACY_MOD_CONTROL) != 0) result.add(Modifier.CONTROL);
+        if ((modifiers & LEGACY_MOD_ALT) != 0) result.add(Modifier.ALT);
+        if ((modifiers & LEGACY_MOD_SUPER) != 0) result.add(Modifier.SUPER);
+        if ((modifiers & LEGACY_MOD_CAPS_LOCK) != 0) result.add(Modifier.CAPS_LOCK);
+        if ((modifiers & LEGACY_MOD_NUM_LOCK) != 0) result.add(Modifier.NUM_LOCK);
+        return result;
+    }
+
+    private int toLegacyModifiers() {
+        int result = 0;
+        if (modifiers.contains(Modifier.SHIFT)) result |= LEGACY_MOD_SHIFT;
+        if (modifiers.contains(Modifier.CONTROL)) result |= LEGACY_MOD_CONTROL;
+        if (modifiers.contains(Modifier.ALT)) result |= LEGACY_MOD_ALT;
+        if (modifiers.contains(Modifier.SUPER)) result |= LEGACY_MOD_SUPER;
+        if (modifiers.contains(Modifier.CAPS_LOCK)) result |= LEGACY_MOD_CAPS_LOCK;
+        if (modifiers.contains(Modifier.NUM_LOCK)) result |= LEGACY_MOD_NUM_LOCK;
+        return result;
     }
 
     private static InputConstants.Key keyboard(int key) {
