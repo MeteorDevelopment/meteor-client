@@ -106,7 +106,7 @@ public class WDoubleEdit extends WHorizontalList {
             validate = false;
         } else if (c == '.' && !text.contains(".")) {
             good = true;
-            if (text.isEmpty()) validate = false;
+            if (text.isEmpty() || text.equals("-")) validate = false;
         } else good = Character.isDigit(c);
 
         if (good && validate) {
