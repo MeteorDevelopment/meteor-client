@@ -26,8 +26,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ArrowItem;
 import net.minecraft.world.item.BowItem;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.Vec2;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.Set;
 

@@ -83,24 +83,12 @@ public class Rotations {
         rotate(new Rotation(entity, priority, callback));
     }
 
-    public static void rotate(Entity entity, Runnable callback) {
-        rotate(new Rotation(entity, 0, callback));
-    }
-
     public static void rotate(Vec3 position, int priority, Runnable callback) {
         rotate(new Rotation(position, priority, callback));
     }
 
-    public static void rotate(Vec3 position, Runnable callback) {
-        rotate(new Rotation(position, 0, callback));
-    }
-
     public static void rotate(BlockPos blockPos, int priority, Runnable callback) {
         rotate(new Rotation(Vec3.atCenterOf(blockPos), priority, callback));
-    }
-
-    public static void rotate(BlockPos blockPos, Runnable callback) {
-        rotate(new Rotation(Vec3.atCenterOf(blockPos), 0, callback));
     }
 
     public static void rotate(int priority, Supplier<Vec2> calculate, Runnable callback) {

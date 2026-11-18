@@ -245,11 +245,11 @@ public class Freecam extends Module {
 
         if (rotate.get()) {
             if (mc.hitResult instanceof EntityHitResult entityHitResult) {
-                Rotations.rotate(entityHitResult.getEntity(), null);
+                Rotations.rotate(entityHitResult.getEntity(), 0, null);
             } else {
                 BlockPos crossHairBlockPos = ((BlockHitResult) mc.hitResult).getBlockPos();
                 if (!mc.level.getBlockState(crossHairBlockPos).isAir()) {
-                    Rotations.rotate(mc.hitResult.getLocation(), null);
+                    Rotations.rotate(mc.hitResult.getLocation(), 0, null);
                 }
             }
         }

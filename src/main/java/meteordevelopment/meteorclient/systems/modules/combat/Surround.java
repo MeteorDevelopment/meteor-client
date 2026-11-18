@@ -393,7 +393,7 @@ public class Surround extends Module {
 
             for (Entity crystal : mc.level.getEntities((Entity) null, box, entityPredicate)) {
                 if (rotate.get()) {
-                    Rotations.rotate(crystal, () -> {
+                    Rotations.rotate(crystal, 60, () -> {
                         mc.player.connection.send(new ServerboundAttackPacket(crystal.getId()));
                     });
                 } else {

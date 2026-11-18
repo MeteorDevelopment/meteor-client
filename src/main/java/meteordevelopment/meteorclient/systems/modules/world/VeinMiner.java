@@ -226,7 +226,7 @@ public class VeinMiner extends Module {
                 mining = true;
             }
             if (rotate.get())
-                Rotations.rotate(blockPos, this::updateBlockBreakingProgress);
+                Rotations.rotate(blockPos, 0, this::updateBlockBreakingProgress);
             else updateBlockBreakingProgress();
         }
 
