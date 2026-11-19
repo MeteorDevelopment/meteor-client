@@ -267,8 +267,9 @@ public class Keybind implements ISerializable<Keybind>, ICopyable<Keybind> {
                 reset();
             } else {
                 boolean isKey = isKeyOpt.get();
-                Int2IntMap mapper = isKey ? LegacyMappings.KEY : LegacyMappings.MOUSE;
-                int value = mapper.get(valueOpt.get().intValue());
+                int value = isKey
+                    ? LegacyMappings.KEY.get(valueOpt.get().intValue())
+                    : LegacyMappings.translateMouse(valueOpt.get());
 
                 int mods = tag.getIntOr("modifiers", 0);
                 set(isKey ? keyboard(value) : mouse(value), isKey ? Modifier.fromRawValue(LegacyMappings.translateModifiers(mods)) : Set.of());
@@ -288,11 +289,9 @@ public class Keybind implements ISerializable<Keybind>, ICopyable<Keybind> {
 
     private static class LegacyMappings {
         private static final Int2IntMap KEY = new Int2IntOpenHashMap();
-        private static final Int2IntMap MOUSE = new Int2IntOpenHashMap();
 
         static {
             KEY.defaultReturnValue(InputConstants.UNKNOWN.getValue());
-            MOUSE.defaultReturnValue(InputConstants.UNKNOWN.getValue());
 
             KEY.put(32, InputConstants.KEY_SPACE);
             KEY.put(39, InputConstants.KEY_APOSTROPHE);
@@ -414,15 +413,15 @@ public class Keybind implements ISerializable<Keybind>, ICopyable<Keybind> {
             KEY.put(346, InputConstants.KEY_RALT);
             KEY.put(347, InputConstants.KEY_RGUI);
             KEY.put(348, SDLScancode.SDL_SCANCODE_APPLICATION); // MENU is the context-menu key, not 26.3's key.keyboard.menu (118)
+        }
 
-            KEY.put(0, InputConstants.MOUSE_BUTTON_LEFT);
-            KEY.put(1, InputConstants.MOUSE_BUTTON_RIGHT);
-            KEY.put(2, InputConstants.MOUSE_BUTTON_MIDDLE);
-            KEY.put(3, InputConstants.MOUSE_BUTTON_4);
-            KEY.put(4, InputConstants.MOUSE_BUTTON_5);
-            KEY.put(5, InputConstants.MOUSE_BUTTON_6);
-            KEY.put(6, InputConstants.MOUSE_BUTTON_7);
-            KEY.put(7, InputConstants.MOUSE_BUTTON_8);
+        private static int translateMouse(int glfwMouse) {
+            // SDLMouse defines up to 5
+            // InputConstants defines up to 8
+            // Windows & macOS support only 5
+            // some linux distros go up to 48
+            // i don't care
+            return glfwMouse + 1;
         }
 
         private static int translateModifiers(int glfwMods) {
