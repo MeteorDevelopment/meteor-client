@@ -90,6 +90,7 @@ public abstract class GameRendererMixin {
 
     @Inject(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;render3dHud(Lnet/minecraft/client/renderer/state/level/CameraRenderState;Lnet/minecraft/client/renderer/state/level/PlayerRenderState;Lnet/minecraft/client/renderer/state/OptionsRenderState;Z)V"))
     private void onRenderLevel(CallbackInfo ci, @Local(name = "projectionMatrix") Matrix4f projectionMatrix, @Local(name = "cameraState") CameraRenderState cameraState, @Local(name = "worldPartialTicks") float worldPartialTicks, @Local(name = "bobStack") PoseStack bobStack) {
+        Modules.get().updateModuleSubscriptions();
         if (!Utils.canUpdate()) return;
 
         Profiler.get().push(MeteorClient.MOD_ID + "_render");
@@ -139,6 +140,7 @@ public abstract class GameRendererMixin {
 
     @Inject(method = "renderLevel", at = @At("TAIL"))
     private void onRenderLevelTail(CallbackInfo ci) {
+        Modules.get().updateModuleSubscriptions();
         MeteorClient.EVENT_BUS.post(RenderAfterWorldEvent.get());
     }
 

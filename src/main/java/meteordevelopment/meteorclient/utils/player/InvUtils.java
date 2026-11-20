@@ -104,12 +104,10 @@ public class InvUtils {
     }
 
     public static FindItemResult find(Predicate<ItemStack> isGood) {
-        if (mc.player == null) return new FindItemResult(0, 0);
         return find(isGood, 0, mc.player.getInventory().getContainerSize());
     }
 
     public static FindItemResult find(Predicate<ItemStack> isGood, int start, int end) {
-        if (mc.player == null) return new FindItemResult(0, 0);
 
         int slot = -1, count = 0;
 
