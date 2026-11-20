@@ -559,19 +559,28 @@ public abstract class WTextBox extends WWidget {
     public boolean onCharTyped(CharacterEvent input) {
         if (!focused) return false;
 
-        if (filter.filter(text, input.codepoint())) {
-            clearSelection();
+        int start = Math.min(selectionStart, selectionEnd);
+        int end = Math.max(selectionStart, selectionEnd);
 
-            text = text.substring(0, cursor) + input.codepointAsString() + text.substring(cursor);
-
-            cursor++;
-            resetSelection();
-
-            runAction();
-            return true;
+        String newText = text;
+        if (start != end) {
+            newText = text.substring(0, start) + text.substring(end);
         }
 
-        return false;
+        if (!filter.filter(newText, input.codepoint())) return false;
+
+        String inserted = input.codepointAsString();
+
+        text = newText.substring(0, start)
+            + inserted
+            + newText.substring(start);
+
+        cursor = start + inserted.length();
+
+        resetSelection();
+        runAction();
+
+        return true;
     }
 
     @Override
