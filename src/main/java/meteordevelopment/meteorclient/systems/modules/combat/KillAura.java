@@ -459,7 +459,7 @@ public class KillAura extends Module {
             } else return true;
         } else return mc.player.getAttackStrengthScale(delay) >= 1;
     }
-    
+
     private void attackTargets() {
         if (!delayCheck()) return;
 
