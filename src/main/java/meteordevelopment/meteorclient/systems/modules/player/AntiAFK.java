@@ -11,6 +11,7 @@ import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
+import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.player.Rotations;
 import meteordevelopment.meteorclient.utils.player.SwingMode;
 import meteordevelopment.orbit.EventHandler;
@@ -104,6 +105,31 @@ public class AntiAFK extends Module {
         .build()
     );
 
+    private final Setting<Boolean> switchHotbar = sgActions.add(new BoolSetting.Builder()
+        .name("switch-hotbar")
+        .description("Randomly switches active hotbar slots to avoid AFK detection.")
+        .defaultValue(false)
+        .build()
+    );
+
+    private final Setting<Integer> switchDelay = sgActions.add(new IntSetting.Builder()
+        .name("switch-delay")
+        .description("The delay between hotbar switches in seconds.")
+        .defaultValue(5)
+        .min(1)
+        .sliderMax(30)
+        .visible(switchHotbar::get)
+        .build()
+    );
+
+    private final Setting<Boolean> randomHotbarSlot = sgActions.add(new BoolSetting.Builder()
+        .name("random-slot")
+        .description("Switches to a completely random slot instead of sequential.")
+        .defaultValue(true)
+        .visible(switchHotbar::get)
+        .build()
+    );
+
 
     // Messages
 
@@ -152,6 +178,7 @@ public class AntiAFK extends Module {
     private int messageI = 0;
     private int sneakTimer = 0;
     private int strafeTimer = 0;
+    private int hotbarTimer = 0;
     private boolean direction = false;
     private float lastYaw;
 
@@ -164,6 +191,7 @@ public class AntiAFK extends Module {
 
         lastYaw = mc.player.getYRot();
         messageTimer = delay.get() * 20;
+        hotbarTimer = switchDelay.get() * 20;
     }
 
     @Override
@@ -212,6 +240,23 @@ public class AntiAFK extends Module {
                 case Client -> mc.player.setYRot(lastYaw);
                 case Server -> Rotations.rotate(lastYaw, pitch.get(), -15);
             }
+        }
+
+        // Switch Hotbar
+        if (switchHotbar.get() && hotbarTimer-- <= 0) {
+            int currentSlot = mc.player.getInventory().getSelectedSlot();
+            int nextSlot;
+
+            if (randomHotbarSlot.get()) {
+                do {
+                    nextSlot = random.nextInt(9);
+                } while (nextSlot == currentSlot);
+            } else {
+                nextSlot = (currentSlot + 1) % 9;
+            }
+
+            InvUtils.swap(nextSlot, false);
+            hotbarTimer = switchDelay.get() * 20;
         }
 
         // Messages
