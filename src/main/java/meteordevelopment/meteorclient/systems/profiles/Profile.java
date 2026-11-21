@@ -71,6 +71,7 @@ public class Profile implements ISerializable<Profile> {
     );
 
     public Profile() {
+        settings.assignOwner("profile");
     }
 
     public Profile(Tag tag) {

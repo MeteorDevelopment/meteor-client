@@ -283,7 +283,7 @@ public class ProfilesTab extends Tab {
 
         private WCheckbox addBool(WContainer container, Setting<Boolean> setting) {
             WHorizontalList boolList = container.add(theme.horizontalList()).expandX().widget();
-            boolList.add(theme.label(setting.title)).widget().tooltip = setting.description;
+            boolList.add(theme.label(setting.title())).widget().tooltip = setting.description();
 
             WCheckbox c = theme.checkbox(setting.get());
             boolList.add(c).expandCellX().right();

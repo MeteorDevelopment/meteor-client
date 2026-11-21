@@ -91,6 +91,7 @@ public class Proxy implements ISerializable<Proxy> {
     //     the only complication would be that some ips seem to be valid for both 4 and 5
 
     private Proxy() {
+        settings.assignOwner("proxy");
     }
 
     public Proxy(Tag tag) {

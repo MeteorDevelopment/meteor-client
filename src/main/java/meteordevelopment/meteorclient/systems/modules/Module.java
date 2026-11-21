@@ -12,6 +12,9 @@ import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.settings.Settings;
 import meteordevelopment.meteorclient.systems.config.Config;
+import meteordevelopment.meteorclient.addons.AddonManager;
+import meteordevelopment.meteorclient.translation.TranslationKey;
+import meteordevelopment.meteorclient.translation.TranslationManager;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.ISerializable;
 import meteordevelopment.meteorclient.utils.misc.Keybind;
@@ -31,10 +34,30 @@ public abstract class Module implements ISerializable<Module>, Comparable<Module
 
     public final Category category;
     public final String name;
+
+    /**
+     * Legacy untranslated title, kept for source compatibility with addons that read the
+     * field directly. Use {@link #title()} for the translated title.
+     *
+     * @deprecated use {@link #title()}
+     */
+    @Deprecated
     public final String title;
+
+    /**
+     * Legacy untranslated description, kept for source compatibility with addons that read
+     * the field directly. Use {@link #description()} for the translated description.
+     *
+     * @deprecated use {@link #description()}
+     */
+    @Deprecated
     public final String description;
+
     public final String[] aliases;
     public final Color color;
+
+    private final TranslationKey nameKey;
+    private final TranslationKey descriptionKey;
 
     public final MeteorAddon addon;
     public final Settings settings = new Settings();
@@ -59,8 +82,13 @@ public abstract class Module implements ISerializable<Module>, Comparable<Module
         this.name = name;
         this.title = Utils.nameToTitle(name);
         this.description = description;
+        String ns = AddonManager.namespaceOf(getClass());
+        this.nameKey = TranslationKey.of(TranslationManager.moduleNameKey(ns, name));
+        this.descriptionKey = TranslationKey.of(TranslationManager.moduleDescriptionKey(ns, name));
         this.aliases = aliases;
         this.color = Color.fromHsv(Utils.random(0.0, 360.0), 0.35, 1);
+
+        settings.assignOwner(ns, name);
 
         String classname = this.getClass().getName();
         for (MeteorAddon addon : AddonManager.ADDONS) {
@@ -75,6 +103,29 @@ public abstract class Module implements ISerializable<Module>, Comparable<Module
 
     public Module(Category category, String name, String desc) {
         this(category, name, desc, new String[0]);
+    }
+
+    /**
+     * The display title in the current language. Resolved lazily on every call so
+     * runtime language switches are reflected without rebuilding the module.
+     */
+    public String title() {
+        return nameKey.get();
+    }
+
+    /** The description in the current language. Resolved lazily. */
+    public String description() {
+        return descriptionKey.get();
+    }
+
+    /** The raw translation key backing {@link #title()}. */
+    public TranslationKey nameKey() {
+        return nameKey;
+    }
+
+    /** The raw translation key backing {@link #description()}. */
+    public TranslationKey descriptionKey() {
+        return descriptionKey;
     }
 
     public WWidget getWidget(GuiTheme theme) {
@@ -120,28 +171,28 @@ public abstract class Module implements ISerializable<Module>, Comparable<Module
     public void sendToggledMsg() {
         if (Config.get().chatFeedback.get() && chatFeedback) {
             ChatUtils.forceNextPrefixClass(getClass());
-            ChatUtils.sendMsg(this.hashCode(), ChatFormatting.GRAY, "Toggled (highlight)%s(default) %s(default).", title, isActive() ? ChatFormatting.GREEN + "on" : ChatFormatting.RED + "off");
+            ChatUtils.sendMsg(this.hashCode(), ChatFormatting.GRAY, "Toggled (highlight)%s(default) %s(default).", title(), isActive() ? ChatFormatting.GREEN + "on" : ChatFormatting.RED + "off");
         }
     }
 
     public void info(Component message) {
         ChatUtils.forceNextPrefixClass(getClass());
-        ChatUtils.sendMsg(title, message);
+        ChatUtils.sendMsg(title(), message);
     }
 
     public void info(String message, Object... args) {
         ChatUtils.forceNextPrefixClass(getClass());
-        ChatUtils.infoPrefix(title, message, args);
+        ChatUtils.infoPrefix(title(), message, args);
     }
 
     public void warning(String message, Object... args) {
         ChatUtils.forceNextPrefixClass(getClass());
-        ChatUtils.warningPrefix(title, message, args);
+        ChatUtils.warningPrefix(title(), message, args);
     }
 
     public void error(String message, Object... args) {
         ChatUtils.forceNextPrefixClass(getClass());
-        ChatUtils.errorPrefix(title, message, args);
+        ChatUtils.errorPrefix(title(), message, args);
     }
 
     public boolean isActive() {

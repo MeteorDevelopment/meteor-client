@@ -8,8 +8,15 @@ package meteordevelopment.meteorclient.addons;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 
 public abstract class MeteorAddon {
-    /** This field is automatically assigned from fabric.mod.json file. */
+    /** This field is automatically assigned from fabric.mod.json file (the display name). */
     public String name;
+
+    /**
+     * This field is automatically assigned from fabric.mod.json file.
+     * It is the actual mod id, which is also the translation namespace and the
+     * {@code assets/<modId>/lang} directory name.
+     */
+    public String modId;
 
     /** This field is automatically assigned from fabric.mod.json file. */
     public String[] authors;

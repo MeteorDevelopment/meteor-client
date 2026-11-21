@@ -50,6 +50,7 @@ public class Macro implements ISerializable<Macro> {
     private boolean dirty;
 
     public Macro() {
+        settings.assignOwner("macro");
     }
 
     public Macro(Tag tag) {

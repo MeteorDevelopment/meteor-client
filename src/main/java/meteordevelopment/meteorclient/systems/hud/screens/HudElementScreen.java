@@ -31,11 +31,12 @@ public class HudElementScreen extends WindowScreen {
     private final Settings settings;
 
     public HudElementScreen(GuiTheme theme, HudElement element) {
-        super(theme, element.info.title);
+        super(theme, element.info.title());
 
         this.element = element;
 
         settings = new Settings();
+        settings.assignOwner("hud-editor");
         SettingGroup sg = settings.createGroup("Anchors");
         sg.add(new BoolSetting.Builder()
             .name("auto-anchors")
@@ -71,7 +72,7 @@ public class HudElementScreen extends WindowScreen {
     @Override
     public void initWidgets() {
         // Description
-        add(theme.label(element.info.description, getWindowWidth() / 2.0));
+        add(theme.label(element.info.description(), getWindowWidth() / 2.0));
 
         // Settings
         if (element.settings.sizeGroups() > 0) {

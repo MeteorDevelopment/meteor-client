@@ -23,7 +23,7 @@ public class HudElementPresetsScreen extends WindowScreen {
     private HudElementInfo<?>.@Nullable Preset firstPreset;
 
     public HudElementPresetsScreen(GuiTheme theme, HudElementInfo<?> info, int x, int y) {
-        super(theme, "Select preset for " + info.title);
+        super(theme, "Select preset for " + info.title());
 
         this.info = info;
         this.x = x + 9;
