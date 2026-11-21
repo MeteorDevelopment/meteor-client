@@ -48,7 +48,7 @@ public class Rotations {
     }
 
     // Rotation Setup
-    
+
     private static void rotate(Rotation rotation) {
         int i = 0;
         for (; i < queue.size(); i++) {
@@ -242,13 +242,25 @@ public class Rotations {
         return getPitch(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5);
     }
 
-    /**
-    * setCorrectedPlayerInput and getInputFromRelativeYaw are derived from Lambda Client.
-    * @see https://github.com/lambda-client/lambda/blob/1.21.11/src/main/kotlin/com/lambda/util/player/RotationUtils.kt
-    * @author dinosaurwizard
-    *
-    * Implementation of Grim movefix logic.
-    **/
+    /*
+     * setCorrectedPlayerInput and getInputFromRelativeYaw are derived from Lambda Client.
+     * @see https://github.com/lambda-client/lambda/blob/1.21.11/src/main/kotlin/com/lambda/util/player/RotationUtils.kt
+     * @author dinosaurwizard
+     *
+     * This is implementation of Grim movefix logic.
+     * MoveFix is applied through the following mixins:
+     * 
+     * EntityMixin#fixMovementYaw
+     * FireworkRocketEntityMixin#fixRocketBoostDirection
+     * ItemMixin#fixRotation
+     * LivingEntityMixin#modifyGetYaw
+     * LivingEntityMixin#fixFallFlyingLookAngle
+     * LivingEntityMixin#fixFallFlyingYawPitch
+     * LocalPlayerMixin#fixPlayerInput
+     * MultiPlayerGameModeMixin#fixItemRotation
+     * PlayerMixin#fixAttackYaw
+     * PlayerMixin#fixSwimmingYaw
+     */
 
     public static boolean shouldCorrectPlayerInput() {
         return rotating && Config.get().rotationMovementCorrection.get();
