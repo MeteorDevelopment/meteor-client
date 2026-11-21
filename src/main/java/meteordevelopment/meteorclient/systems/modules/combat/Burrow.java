@@ -166,7 +166,7 @@ public class Burrow extends Module {
 
         if (shouldBurrow) {
             if (rotate.get())
-                Rotations.rotate(Rotations.getYaw(mc.player.blockPosition()), Rotations.getPitch(mc.player.blockPosition()), 50, this::burrow);
+                Rotations.rotate(mc.player.blockPosition(), 50, this::burrow);
             else burrow();
 
             toggle();

@@ -8,6 +8,7 @@ package meteordevelopment.meteorclient.mixin;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import com.llamalad7.mixinextras.sugar.Local;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.entity.DropItemsEvent;
 import meteordevelopment.meteorclient.events.entity.player.*;
@@ -15,6 +16,7 @@ import meteordevelopment.meteorclient.mixininterface.IMultiPlayerGameMode;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.player.BreakDelay;
 import meteordevelopment.meteorclient.systems.modules.player.SpeedMine;
+import meteordevelopment.meteorclient.utils.player.Rotations;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;
@@ -23,6 +25,7 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
+import net.minecraft.network.protocol.game.ServerboundUseItemPacket;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
@@ -151,6 +154,12 @@ public abstract class MultiPlayerGameModeMixin implements IMultiPlayerGameMode {
     private void onUseItem(Player player, InteractionHand hand, CallbackInfoReturnable<InteractionResult> cir) {
         InteractItemEvent event = MeteorClient.EVENT_BUS.post(InteractItemEvent.get(hand));
         if (event.toReturn != null) cir.setReturnValue(event.toReturn);
+    }
+
+    @WrapOperation(method = "lambda$useItem$0", at = @At(value = "NEW", target = "(Lnet/minecraft/world/InteractionHand;IFF)Lnet/minecraft/network/protocol/game/ServerboundUseItemPacket;"))
+    private ServerboundUseItemPacket fixItemRotation(InteractionHand hand, int sequence, float yaw, float pitch, Operation<ServerboundUseItemPacket> original, @Local(argsOnly = true) Player player) {
+        if (player == mc.player && Rotations.rotating) return original.call(hand, sequence, Rotations.serverYaw, Rotations.serverPitch);
+        return original.call(hand, sequence, yaw, pitch);
     }
 
     @Inject(method = "stopDestroyBlock", at = @At("HEAD"), cancellable = true)
