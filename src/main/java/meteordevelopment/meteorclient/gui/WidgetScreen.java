@@ -103,8 +103,9 @@ public abstract class WidgetScreen extends Screen {
         closed = false;
 
         if (firstInit) {
-            firstInit = false;
+            clear();
             initWidgets();
+            firstInit = false;
         }
 
         mc.textInputManager().startTextInput(this);
