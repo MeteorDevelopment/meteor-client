@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.systems.modules.movement;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import meteordevelopment.meteorclient.events.meteor.KeyInputEvent;
 import meteordevelopment.meteorclient.events.meteor.MouseClickEvent;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
@@ -130,15 +131,15 @@ public class GUIMove extends Module {
 
     @EventHandler
     private void onKey(KeyInputEvent event) {
-        onInput(event.key(), event.action);
+        onInput(InputConstants.getKey(event.input), event.action);
     }
 
     @EventHandler
     private void onButton(MouseClickEvent event) {
-        onInput(event.button(), event.action);
+        onInput(InputConstants.Type.MOUSE.getOrCreate(event.button()), event.action);
     }
 
-    private void onInput(int key, KeyAction action) {
+    private void onInput(InputConstants.Key key, KeyAction action) {
         if (checkSkip()) return;
 
         pass(mc.options.keyUp, key, action);
@@ -186,8 +187,8 @@ public class GUIMove extends Module {
         }
     }
 
-    private void pass(KeyMapping bind, int key, KeyAction action) {
-        if (Input.getKey(bind) != key) return;
+    private void pass(KeyMapping bind, InputConstants.Key key, KeyAction action) {
+        if (!Input.matches(bind, key)) return;
         if (action == KeyAction.Press) bind.setDown(true);
         if (action == KeyAction.Release) bind.setDown(false);
     }
