@@ -26,6 +26,8 @@ public class MixinPlugin implements IMixinConfigPlugin {
     private static boolean isBaritonePresent;
     private static boolean isMetallumPresent;
 
+    private static boolean isModernSodium;
+
     @Override
     public void onLoad(String mixinPackage) {
         if (loaded) return;
@@ -38,7 +40,55 @@ public class MixinPlugin implements IMixinConfigPlugin {
         isBaritonePresent = FabricLoader.getInstance().isModLoaded("baritone") || FabricLoader.getInstance().isModLoaded("baritone-meteor");
         isMetallumPresent = FabricLoader.getInstance().isModLoaded("metallum");
 
+        isModernSodium = detectModernSodium();
+
         loaded = true;
+    }
+
+    private static boolean detectModernSodium() {
+        var sodium = FabricLoader.getInstance().getModContainer("sodium");
+        if (sodium.isEmpty()) {
+            return false;
+        }
+
+        String version = sodium.get().getMetadata().getVersion().getFriendlyString();
+
+        String versionMatch = version.replaceFirst(".*?(0\\.\\d+\\.\\d+).*", "$1");
+
+        if (versionMatch.isEmpty() || versionMatch.equals(version)) {
+            String normalized = version.toLowerCase();
+            int idx = normalized.indexOf("0.");
+            if (idx >= 0) {
+                versionMatch = normalized.substring(idx);
+                int end = versionMatch.indexOf('-');
+                if (end >= 0) versionMatch = versionMatch.substring(0, end);
+            }
+        }
+
+        if (versionMatch.isEmpty()) {
+            return false;
+        }
+
+        String[] parts = versionMatch.split("\\.");
+        if (parts.length < 2) {
+            return false;
+        }
+
+        try {
+            int major = Integer.parseInt(parts[0]);
+            int minor = Integer.parseInt(parts[1]);
+            int patch = parts.length > 2 ? Integer.parseInt(parts[2]) : 0;
+
+            // 0.9.2 and below -> old
+            // 0.9.3 and above -> new
+            if (major == 0 && minor == 9) {
+                return patch >= 3;
+            }
+
+            return major > 0 || minor > 9;
+        } catch (NumberFormatException e) {
+            return false;
+        }
     }
 
     @Override
@@ -53,7 +103,17 @@ public class MixinPlugin implements IMixinConfigPlugin {
         } else if (mixinClassName.endsWith("PlayerEntityRendererMixin")) {
             return !isOriginsPresent;
         } else if (mixinClassName.startsWith(mixinPackage + ".sodium")) {
-            return isSodiumPresent;
+            if (!isSodiumPresent) return false;
+
+            if (mixinClassName.endsWith("SodiumDefaultFluidRendererOldMixin")) {
+                return !isModernSodium;
+            }
+
+            if (mixinClassName.endsWith("SodiumDefaultFluidRendererNewMixin")) {
+                return isModernSodium;
+            }
+
+            return true;
         } else if (mixinClassName.startsWith(mixinPackage + ".indigo")) {
             return isIndigoPresent;
         } else if (mixinClassName.startsWith(mixinPackage + ".lithium")) {
@@ -63,7 +123,6 @@ public class MixinPlugin implements IMixinConfigPlugin {
         } else if (mixinClassName.startsWith(mixinPackage + ".metallum")) {
             return isMetallumPresent;
         }
-
 
         return true;
     }
