@@ -123,6 +123,12 @@ public abstract class PlayerMixin extends LivingEntity {
         return original;
     }
 
+    @ModifyExpressionValue(method = "travel", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;getLookAngle()Lnet/minecraft/world/phys/Vec3;"))
+    private Vec3 fixSwimmingYaw(Vec3 original) {
+        if ((Object) this == mc.player && Rotations.shouldCorrectPlayerInput()) return Rotations.getServerDirection();
+        return original;
+    }
+
     @ModifyReturnValue(method = "blockInteractionRange", at = @At("RETURN"))
     private double modifyBlockInteractionRange(double original) {
         return Math.max(0, original + Modules.get().get(Reach.class).blockReach());
