@@ -175,8 +175,8 @@ public class BlockUtils {
             BlockPos neighbor = blockPos.relative(side);
             BlockState state = mc.level.getBlockState(neighbor);
 
-            // Check if neighbour isn't empty
-            if (state.isAir() || isClickable(state.getBlock())) continue;
+            // Check if neighbour isn't replaceable
+            if (state.canBeReplaced() || isClickable(state.getBlock())) continue;
 
             // Check if neighbour is a fluid
             if (!state.getFluidState().isEmpty()) continue;
