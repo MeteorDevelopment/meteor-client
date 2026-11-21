@@ -66,24 +66,19 @@ public class FontFaceSetting extends Setting<FontFace> {
     @Override
     protected FontFace load(CompoundTag tag) {
         String family = tag.getStringOr("family", "");
-        FontInfo.Type type;
+        FontInfo.Type type = FontInfo.Type.fromString(tag.getStringOr("type", ""));
 
-        try {
-            type = FontInfo.Type.valueOf(tag.getStringOr("type", ""));
-        } catch (IllegalArgumentException _) {
-            set(Fonts.DEFAULT_FONT);
-            return get();
-        }
-
-        boolean changed = false;
         for (FontFamily fontFamily : Fonts.FONT_FAMILIES) {
-            if (fontFamily.getName().equals(family)) {
-                set(fontFamily.get(type));
-                changed = true;
+            if (!fontFamily.getName().equals(family)) continue;
+
+            FontFace face = fontFamily.get(type);
+            if (face != null) {
+                set(face);
+                return get();
             }
         }
-        if (!changed) set(Fonts.DEFAULT_FONT);
 
+        set(Fonts.DEFAULT_FONT);
         return get();
     }
 
