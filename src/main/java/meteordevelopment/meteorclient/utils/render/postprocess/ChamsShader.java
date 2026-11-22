@@ -24,6 +24,7 @@ import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.renderer.DynamicGpuDataStorage;
 import net.minecraft.client.renderer.DynamicGpuDataStorageMapped;
 import net.minecraft.server.packs.resources.Resource;
+import net.minecraft.util.PngInfo;
 import net.minecraft.world.entity.Entity;
 import org.jspecify.annotations.NonNull;
 import org.lwjgl.stb.STBImage;
@@ -56,13 +57,16 @@ public class ChamsShader extends EntityShader {
                 if (optional.isEmpty()) continue;
 
                 try (var input = optional.get().open()) {
-                    data = TextureUtil.readResource(input);
+                    data = TextureUtil.readResource(input).rewind();
+
+                    if (fileFormat.equals("png")) {
+                        PngInfo.validateHeader(data);
+                        data.rewind();
+                    }
                 }
                 break;
             }
             if (data == null) return;
-
-            data.rewind();
 
             try (MemoryStack stack = MemoryStack.stackPush()) {
                 IntBuffer width = stack.mallocInt(1);
