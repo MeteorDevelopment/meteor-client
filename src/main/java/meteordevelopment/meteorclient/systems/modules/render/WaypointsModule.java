@@ -265,7 +265,7 @@ public class WaypointsModule extends Module {
 
                     String command = String.format(
                         "/execute in %s run tp %d %d %d",
-                        waypoint.dimension.toString(),
+                        waypoint.dimension.get().toIdentifier(),
                         pos.getX(),
                         pos.getY(),
                         pos.getZ()

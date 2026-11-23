@@ -302,6 +302,7 @@ public class AnchorAura extends Module {
 
         // Find best positions to place new anchors or break existing anchors
         int iteratorRange = (int) Math.ceil(Math.max(placeRange.get(), breakRange.get()));
+        if (place.get()) BlockIterator.iCareAboutAirBlocks();
         BlockIterator.register(iteratorRange, iteratorRange, (blockPos, blockState) -> {
             boolean isPlacing = blockState.getBlock() != Blocks.RESPAWN_ANCHOR;
 

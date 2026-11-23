@@ -18,7 +18,7 @@ public enum Dimension {
         };
     }
 
-    public String toString() {
+    public String toIdentifier() {
         return switch (this) {
             case Nether -> "minecraft:the_nether";
             case End -> "minecraft:the_end";
