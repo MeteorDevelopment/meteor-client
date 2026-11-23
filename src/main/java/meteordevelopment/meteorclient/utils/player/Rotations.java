@@ -95,14 +95,6 @@ public class Rotations {
         rotate(new Rotation(priority, calculate, callback));
     }
 
-    public static void rotate(Supplier<Vec2> calculate, Runnable callback) {
-        rotate(new Rotation(0, calculate, callback));
-    }
-
-    public static void rotate(Supplier<Vec2> calculate) {
-        rotate(new Rotation(0, calculate, null));
-    }
-
     // Rotation Execution
 
     private static void setPreRotation() {
