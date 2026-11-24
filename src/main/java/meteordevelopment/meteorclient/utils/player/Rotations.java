@@ -335,19 +335,19 @@ public class Rotations {
         }
 
         public Rotation(Vec3 position, int priority, Runnable callback) {
-            this(priority, () -> new Vec2((float) getYaw(position), (float) getPitch(position)), callback);
+            this(priority, () -> new Vec2((float) getPitch(position), (float) getYaw(position)), callback);
         }
 
         public Rotation(Entity entity, int priority, Runnable callback) {
-            this(priority, () -> new Vec2((float) getYaw(entity), (float) getPitch(entity)), callback);
+            this(priority, () -> new Vec2((float) getPitch(entity), (float) getYaw(entity)), callback);
         }
 
         public void recalculate() {
             if (calculate != null) {
                 Vec2 result = calculate.get();
                 if (result != null) {
-                    this.yaw = result.x;
-                    this.pitch = result.y;
+                    this.yaw = result.y;
+                    this.pitch = result.x;
                 }
             }
         }

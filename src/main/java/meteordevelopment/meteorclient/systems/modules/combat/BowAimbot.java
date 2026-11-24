@@ -157,9 +157,9 @@ public class BowAimbot extends Module {
 
         // Set player rotation
         if (Float.isNaN(pitch)) {
-            return new Vec2((float) Rotations.getYaw(target), (float) Rotations.getPitch(target));
+            return new Vec2((float) Rotations.getPitch(target), (float) Rotations.getYaw(target));
         } else {
-            return new Vec2((float) Rotations.getYaw(target), pitch);
+            return new Vec2(pitch, (float) Rotations.getYaw(target));
         }
     }
 
