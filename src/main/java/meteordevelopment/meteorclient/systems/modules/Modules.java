@@ -326,7 +326,7 @@ public class Modules extends System<Modules> {
         }
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.LOW)
     private void onGameLeft(GameLeftEvent event) {
         synchronized (active) {
             // Deactivating certain modules can enable other modules.
