@@ -329,9 +329,11 @@ public class Modules extends System<Modules> {
     @EventHandler
     private void onGameLeft(GameLeftEvent event) {
         synchronized (active) {
+            // Deactivating certain modules can enable other modules.
+            // Those modules must be found after the first unsubscription iteration and then unsubscribed to prevent leaks into the main menu.
             Set<Module> disabled = new HashSet<>();
             boolean finished = false;
-            while(!finished) {
+            while (!finished) {
                 finished = true;
                 for (Module module : getAll()) {
                     if (module.isActive() && !module.runInMainMenu && !disabled.contains(module)) {
