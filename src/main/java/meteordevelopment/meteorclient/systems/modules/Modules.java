@@ -64,6 +64,7 @@ public class Modules extends System<Modules> {
     private final Set<Module> active = new ReferenceOpenHashSet<>();
     private @Nullable Module moduleToBind;
     private boolean awaitingKeyRelease = false;
+    private boolean leavingGame = false;
 
     public Modules() {
         super("modules");
@@ -147,6 +148,10 @@ public class Modules extends System<Modules> {
 
     public int getCount() {
         return moduleInstances.size();
+    }
+
+    public boolean isLeavingGame() {
+        return leavingGame;
     }
 
     public Collection<Module> getActive() {
@@ -329,21 +334,14 @@ public class Modules extends System<Modules> {
     @EventHandler(priority = EventPriority.LOW)
     private void onGameLeft(GameLeftEvent event) {
         synchronized (active) {
-            // Deactivating certain modules can enable other modules.
-            // Those modules must be found after the first unsubscription iteration and then unsubscribed to prevent leaks into the main menu.
-            Set<Module> disabled = new HashSet<>();
-            boolean finished = false;
-            while (!finished) {
-                finished = true;
-                for (Module module : getAll()) {
-                    if (module.isActive() && !module.runInMainMenu && !disabled.contains(module)) {
-                        MeteorClient.EVENT_BUS.unsubscribe(module);
-                        module.onDeactivate();
-                        disabled.add(module);
-                        finished = false;
-                    }
+            leavingGame = true;
+            for (Module module : getAll()) {
+                if (module.isActive() && !module.runInMainMenu) {
+                    MeteorClient.EVENT_BUS.unsubscribe(module);
+                    module.onDeactivate();
                 }
             }
+            leavingGame = false;
         }
     }
 
