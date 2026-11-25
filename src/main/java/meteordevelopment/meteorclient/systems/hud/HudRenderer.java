@@ -47,7 +47,6 @@ public class HudRenderer {
 
     private final Int2ObjectMap<FontHolder> fontsInUse = new Int2ObjectOpenHashMap<>();
     private final LoadingCache<Integer, FontHolder> fontCache = CacheBuilder.newBuilder()
-        .maximumSize(4)
         .expireAfterAccess(Duration.ofMinutes(10))
         .removalListener(notification -> {
             if (notification.wasEvicted())
