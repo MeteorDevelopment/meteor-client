@@ -101,8 +101,9 @@ public abstract class Module implements ISerializable<Module>, Comparable<Module
                 onActivate();
             }
         } else {
+            if (autoSubscribe) MeteorClient.EVENT_BUS.unsubscribe(this);
+
             if (runInMainMenu || Utils.canUpdate()) {
-                if (autoSubscribe) MeteorClient.EVENT_BUS.unsubscribe(this);
                 onDeactivate();
             }
 
