@@ -329,10 +329,17 @@ public class Modules extends System<Modules> {
     @EventHandler
     private void onGameLeft(GameLeftEvent event) {
         synchronized (active) {
-            for (Module module : getAll()) {
-                if (module.isActive() && !module.runInMainMenu) {
-                    MeteorClient.EVENT_BUS.unsubscribe(module);
-                    module.onDeactivate();
+            Set<Module> disabled = new HashSet<>();
+            boolean finished = false;
+            while(!finished) {
+                finished = true;
+                for (Module module : getAll()) {
+                    if (module.isActive() && !module.runInMainMenu && !disabled.contains(module)) {
+                        MeteorClient.EVENT_BUS.unsubscribe(module);
+                        module.onDeactivate();
+                        disabled.add(module);
+                        finished = false;
+                    }
                 }
             }
         }
