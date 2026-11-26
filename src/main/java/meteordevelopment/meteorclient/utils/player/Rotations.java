@@ -187,17 +187,17 @@ public class Rotations {
     // Utilities
 
     public static double getYaw(double x, double z) {
-        return Mth.wrapDegrees((float) Math.toDegrees(Math.atan2(z - mc.player.getZ(), x - mc.player.getX())) - 90f);
+        float targetYaw = (float) Math.toDegrees(Math.atan2(z - mc.player.getZ(), x - mc.player.getX())) - 90f;
+        return mc.player.getYRot() + Mth.wrapDegrees(targetYaw - mc.player.getYRot());
     }
 
     public static double getPitch(double x, double y, double z) {
         double diffX = x - mc.player.getX();
         double diffY = y - mc.player.getEyeY();
         double diffZ = z - mc.player.getZ();
-
         double diffXZ = Math.hypot(diffX, diffZ);
-
-        return Mth.wrapDegrees((float) -Math.toDegrees(Math.atan2(diffY, diffXZ)));
+        float targetPitch = (float) -Math.toDegrees(Math.atan2(diffY, diffXZ));
+        return mc.player.getXRot() + Mth.wrapDegrees(targetPitch - mc.player.getXRot());
     }
 
     public static double getYaw(Vec3 pos) {
