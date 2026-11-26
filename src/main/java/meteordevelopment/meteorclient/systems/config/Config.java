@@ -29,6 +29,7 @@ public class Config extends System<Config> {
     private final SettingGroup sgVisual = settings.createGroup("Visual");
     private final SettingGroup sgModules = settings.createGroup("Modules");
     private final SettingGroup sgChat = settings.createGroup("Chat");
+    private final SettingGroup sgRotations = settings.createGroup("Rotations");
     private final SettingGroup sgMisc = settings.createGroup("Misc");
 
     // Visual
@@ -178,21 +179,23 @@ public class Config extends System<Config> {
         .build()
     );
 
-    // Misc
+    // Rotations
 
-    public final Setting<Integer> rotationHoldTicks = sgMisc.add(new IntSetting.Builder()
+    public final Setting<Integer> rotationHoldTicks = sgRotations.add(new IntSetting.Builder()
         .name("rotation-hold")
         .description("Hold long to hold server side rotation when not sending any packets.")
         .defaultValue(2)
         .build()
     );
 
-    public final Setting<Boolean> rotationMovementCorrection = sgMisc.add(new BoolSetting.Builder()
-        .name("rotation-movement-correction")
-        .description("Adjust player movement depending on server side rotation (Grim movefix).")
+    public final Setting<Boolean> movementCorrection = sgRotations.add(new BoolSetting.Builder()
+        .name("movement-correction")
+        .description("Adjust player movement depending on server side rotation.")
         .defaultValue(true)
         .build()
     );
+
+    // Misc
 
     public final Setting<Boolean> useTeamColor = sgMisc.add(new BoolSetting.Builder()
         .name("use-team-color")

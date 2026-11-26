@@ -142,7 +142,7 @@ public class Rotations {
         if (rotations.isEmpty()) return;
 
         // Recalculate yaw and pitch due to entities moving around.
-        if (!Config.get().rotationMovementCorrection.get()) {
+        if (!Config.get().movementCorrection.get()) {
             rotations.forEach(Rotation::recalculate);
         }
 
@@ -255,7 +255,7 @@ public class Rotations {
      */
 
     public static boolean shouldCorrectPlayerInput() {
-        return rotating && Config.get().rotationMovementCorrection.get();
+        return rotating && Config.get().movementCorrection.get();
     }
 
     public static Vec3 getServerDirection() {
