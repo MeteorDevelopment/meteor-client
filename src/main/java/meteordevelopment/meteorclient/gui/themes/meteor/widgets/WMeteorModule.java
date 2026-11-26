@@ -8,10 +8,9 @@ package meteordevelopment.meteorclient.gui.themes.meteor.widgets;
 import meteordevelopment.meteorclient.gui.renderer.GuiRenderer;
 import meteordevelopment.meteorclient.gui.themes.meteor.MeteorGuiTheme;
 import meteordevelopment.meteorclient.gui.themes.meteor.MeteorWidget;
-import meteordevelopment.meteorclient.gui.utils.AlignmentX;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WPressable;
 import meteordevelopment.meteorclient.systems.modules.Module;
-import net.minecraft.util.Mth;
+import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 
 import static com.mojang.blaze3d.platform.InputConstants.MOUSE_BUTTON_LEFT;
 import static com.mojang.blaze3d.platform.InputConstants.MOUSE_BUTTON_RIGHT;
@@ -21,39 +20,29 @@ public class WMeteorModule extends WPressable implements MeteorWidget {
     private final Module module;
     private final String title;
 
-    private double titleWidth;
-
-    private double animationProgress1;
-
-    private double animationProgress2;
+    private double activeProgress;
+    private double hoverProgress;
 
     public WMeteorModule(Module module, String title) {
         this.module = module;
         this.title = title;
         this.tooltip = module.description;
 
-        if (module.isActive()) {
-            animationProgress1 = 1;
-            animationProgress2 = 1;
-        } else {
-            animationProgress1 = 0;
-            animationProgress2 = 0;
-        }
+        activeProgress = module.isActive() ? 1 : 0;
     }
 
     @Override
     public double pad() {
-        return theme.scale(4);
+        return theme.scale(10);
     }
 
     @Override
     protected void onCalculateSize() {
         double pad = pad();
+        double descriptionHeight = module.description.isBlank() ? 0 : theme.textHeight() + theme.scale(3);
 
-        if (titleWidth == 0) titleWidth = theme.textWidth(title);
-
-        width = pad + titleWidth + pad;
-        height = pad + theme.textHeight() + pad;
+        width = theme.scale(240);
+        height = Math.max(theme.scale(54), pad + theme.textHeight() + descriptionHeight + pad);
     }
 
     @Override
@@ -66,29 +55,94 @@ public class WMeteorModule extends WPressable implements MeteorWidget {
     protected void onRender(GuiRenderer renderer, double mouseX, double mouseY, double delta) {
         MeteorGuiTheme theme = theme();
         double pad = pad();
+        double border = theme.scale(1);
+        double radius = theme.scale(theme.smallCornerRadius.get());
 
-        animationProgress1 += delta * 4 * ((module.isActive() || mouseOver) ? 1 : -1);
-        animationProgress1 = Mth.clamp(animationProgress1, 0, 1);
+        activeProgress = approach(activeProgress, module.isActive() ? 1 : 0, delta, 4.0);
+        hoverProgress = approach(hoverProgress, mouseOver ? 1 : 0, delta, 4.8);
+        double activeEase = easeOutQuart(activeProgress);
+        double hoverEase = easeOutQuart(hoverProgress);
 
-        animationProgress2 += delta * 6 * (module.isActive() ? 1 : -1);
-        animationProgress2 = Mth.clamp(animationProgress2, 0, 1);
+        double glassOpacity = MeteorGuiTheme.GLASS_OPACITY;
+        SettingColor outline = new SettingColor(theme.outlineColor.get(false, mouseOver));
+        liftColor(outline, 0.08);
+        outline.a = (int) (outline.a * (0.82 + 0.45 * hoverEase) * glassOpacity);
 
-        if (animationProgress1 > 0) {
-            renderer.quad(x, y, width * animationProgress1, height, theme.moduleBackground.get());
+        SettingColor background = new SettingColor(
+            module.isActive() ? theme.moduleBackground.get() : theme.backgroundColor.get(false, mouseOver)
+        );
+        liftColor(background, 0.12);
+        double opacity = module.isActive()
+            ? 0.72 + 0.10 * hoverEase
+            : 0.54 + 0.12 * hoverEase;
+        background.a = (int) (background.a * opacity * glassOpacity);
+
+        drawRoundedRect(renderer, x, y, width, height, radius, outline);
+        drawRoundedRect(renderer, x + border, y + border, width - border * 2, height - border * 2,
+            Math.max(0, radius - border), background);
+
+        if (activeEase > 0.01) {
+            SettingColor activeColor = new SettingColor(theme.accentColor.get());
+            activeColor.a = (int) (85 * activeEase * glassOpacity);
+            renderer.quad(
+                x + border,
+                y + radius,
+                theme.scale(2) * activeEase,
+                height - radius * 2,
+                activeColor
+            );
         }
-        if (animationProgress2 > 0) {
-            renderer.quad(x, y + height * (1 - animationProgress2), theme.scale(2), height * animationProgress2, theme.accentColor.get());
+
+        double textX = x + pad + theme.scale(3);
+        double titleY = y + pad;
+        double maxTextWidth = Math.max(theme.scale(20), width - pad * 2 - theme.scale(6));
+
+        renderer.text(fitText(title, maxTextWidth), textX, titleY,
+            module.isActive() ? theme.accentColor.get() : theme.textColor.get(), false);
+
+        if (!module.description.isBlank()) {
+            double descriptionY = titleY + theme.textHeight() + theme.scale(3);
+            renderer.text(fitText(module.description, maxTextWidth), textX, descriptionY,
+                theme.textSecondaryColor.get(), false);
+        }
+    }
+
+    private double approach(double value, double target, double delta, double speed) {
+        return value + (target - value) * Math.min(1, Math.max(0, delta * speed));
+    }
+
+    private double easeOutQuart(double value) {
+        double t = Math.max(0, Math.min(1, value));
+        return 1 - Math.pow(1 - t, 4);
+    }
+
+    private void liftColor(SettingColor color, double amount) {
+        color.r = (int) (color.r + (126 - color.r) * amount);
+        color.g = (int) (color.g + (112 - color.g) * amount);
+        color.b = (int) (color.b + (148 - color.b) * amount);
+    }
+
+    private String fitText(String value, double maxWidth) {
+        if (theme.textWidth(value) <= maxWidth) return value;
+
+        String ellipsis = "...";
+        int length = value.length();
+        while (length > 0 && theme.textWidth(value.substring(0, length) + ellipsis) > maxWidth) length--;
+        return length == 0 ? "" : value.substring(0, length) + ellipsis;
+    }
+
+    private void drawRoundedRect(GuiRenderer renderer, double x, double y, double width, double height, double radius, meteordevelopment.meteorclient.utils.render.color.Color color) {
+        double diameter = radius * 2;
+        if (radius <= 0 || width <= diameter || height <= diameter) {
+            renderer.quad(x, y, width, height, color);
+            return;
         }
 
-        double x = this.x + pad;
-        double w = width - pad * 2;
-
-        if (theme.moduleAlignment.get() == AlignmentX.Center) {
-            x += w / 2 - titleWidth / 2;
-        } else if (theme.moduleAlignment.get() == AlignmentX.Right) {
-            x += w - titleWidth;
-        }
-
-        renderer.text(title, x, y + pad, theme.textColor.get(), false);
+        renderer.quad(x + radius, y, width - diameter, height, color);
+        renderer.quad(x, y + radius, width, height - diameter, color);
+        renderer.quad(x, y, diameter, diameter, GuiRenderer.CIRCLE, color);
+        renderer.quad(x + width - diameter, y, diameter, diameter, GuiRenderer.CIRCLE, color);
+        renderer.quad(x, y + height - diameter, diameter, diameter, GuiRenderer.CIRCLE, color);
+        renderer.quad(x + width - diameter, y + height - diameter, diameter, diameter, GuiRenderer.CIRCLE, color);
     }
 }

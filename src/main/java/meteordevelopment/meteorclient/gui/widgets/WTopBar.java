@@ -9,6 +9,8 @@ import meteordevelopment.meteorclient.gui.renderer.GuiRenderer;
 import meteordevelopment.meteorclient.gui.tabs.Tab;
 import meteordevelopment.meteorclient.gui.tabs.TabScreen;
 import meteordevelopment.meteorclient.gui.tabs.Tabs;
+import meteordevelopment.meteorclient.gui.tabs.builtin.HudTab;
+import meteordevelopment.meteorclient.gui.tabs.builtin.ProfilesTab;
 import meteordevelopment.meteorclient.gui.widgets.containers.WHorizontalList;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WPressable;
 import meteordevelopment.meteorclient.utils.render.color.Color;
@@ -29,6 +31,7 @@ public abstract class WTopBar extends WHorizontalList {
     @Override
     public void init() {
         for (Tab tab : Tabs.get()) {
+            if (tab instanceof HudTab || tab instanceof ProfilesTab) continue;
             add(new WTopBarButton(tab));
         }
     }

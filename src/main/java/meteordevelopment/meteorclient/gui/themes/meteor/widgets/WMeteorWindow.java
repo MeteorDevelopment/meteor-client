@@ -6,6 +6,7 @@
 package meteordevelopment.meteorclient.gui.themes.meteor.widgets;
 
 import meteordevelopment.meteorclient.gui.renderer.GuiRenderer;
+import meteordevelopment.meteorclient.gui.themes.meteor.MeteorGuiTheme;
 import meteordevelopment.meteorclient.gui.themes.meteor.MeteorWidget;
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.gui.widgets.containers.WWindow;
@@ -34,7 +35,10 @@ public class WMeteorWindow extends WWindow implements MeteorWidget {
 
         @Override
         protected void onRender(GuiRenderer renderer, double mouseX, double mouseY, double delta) {
-            renderer.quad(this, theme().accentColor.get());
+            renderer.quad(this, theme().backgroundColor.get(false, mouseOver));
+            renderer.quad(x, y + height - theme().scale(1), width, theme().scale(1),
+                new meteordevelopment.meteorclient.utils.render.color.SettingColor(48, 38, 62,
+                    (int) (112 * MeteorGuiTheme.GLASS_OPACITY)));
         }
     }
 }
