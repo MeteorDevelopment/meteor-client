@@ -117,6 +117,21 @@ public class Flight extends Module {
             flip = !flip;
         }
         lastYaw = currentYaw;
+
+        // Set velocity before the player tick processes movement.
+        if (mode.get() == Mode.Velocity) {
+            mc.player.getAbilities().flying = false;
+            mc.player.setDeltaMovement(0, 0, 0);
+            Vec3 playerVelocity = mc.player.getDeltaMovement();
+            if (mc.options.keyJump.isDown())
+                playerVelocity = playerVelocity.add(0, speed.get() * (verticalSpeedMatch.get() ? 10f : 5f), 0);
+            if (mc.options.keyShift.isDown())
+                playerVelocity = playerVelocity.subtract(0, speed.get() * (verticalSpeedMatch.get() ? 10f : 5f), 0);
+            mc.player.setDeltaMovement(playerVelocity);
+            if (noSneak.get()) {
+                mc.player.setOnGround(false);
+            }
+        }
     }
 
     @EventHandler
@@ -151,27 +166,12 @@ public class Flight extends Module {
 
         if (mc.player.getYRot() != lastYaw) mc.player.setYRot(lastYaw);
 
-        switch (mode.get()) {
-            case Velocity -> {
-                mc.player.getAbilities().flying = false;
-                mc.player.setDeltaMovement(0, 0, 0);
-                Vec3 playerVelocity = mc.player.getDeltaMovement();
-                if (mc.options.keyJump.isDown())
-                    playerVelocity = playerVelocity.add(0, speed.get() * (verticalSpeedMatch.get() ? 10f : 5f), 0);
-                if (mc.options.keyShift.isDown())
-                    playerVelocity = playerVelocity.subtract(0, speed.get() * (verticalSpeedMatch.get() ? 10f : 5f), 0);
-                mc.player.setDeltaMovement(playerVelocity);
-                if (noSneak.get()) {
-                    mc.player.setOnGround(false);
-                }
-            }
-            case Abilities -> {
-                if (mc.player.isSpectator()) return;
-                mc.player.getAbilities().setFlyingSpeed(speed.get().floatValue());
-                mc.player.getAbilities().flying = true;
-                if (mc.player.getAbilities().instabuild) return;
-                mc.player.getAbilities().mayfly = true;
-            }
+        if (mode.get() == Mode.Abilities) {
+            if (mc.player.isSpectator()) return;
+            mc.player.getAbilities().setFlyingSpeed(speed.get().floatValue());
+            mc.player.getAbilities().flying = true;
+            if (mc.player.getAbilities().instabuild) return;
+            mc.player.getAbilities().mayfly = true;
         }
     }
 
