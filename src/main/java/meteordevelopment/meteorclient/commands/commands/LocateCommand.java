@@ -10,11 +10,13 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.commands.Command;
 import meteordevelopment.meteorclient.events.entity.EntityRemovedEvent;
+import meteordevelopment.meteorclient.events.game.GameLeftEvent;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
+import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.pathing.BaritoneUtils;
-import meteordevelopment.meteorclient.pathing.PathManagers;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
+import meteordevelopment.meteorclient.utils.world.StrongholdLocator;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.multiplayer.ClientSuggestionProvider;
 import net.minecraft.core.BlockPos;
@@ -23,6 +25,7 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
+import net.minecraft.network.protocol.game.ServerboundUseItemPacket;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.projectile.EyeOfEnder;
 import net.minecraft.world.item.ItemStack;
@@ -38,8 +41,18 @@ import org.jspecify.annotations.Nullable;
 import java.util.List;
 
 public class LocateCommand extends Command {
-    private Vec3 firstStart, firstEnd;
-    private Vec3 secondStart, secondEnd;
+    private static final int EYE_TRAJECTORY_SAMPLE_TICKS = 80;
+    private static final int MIN_EYE_TRAJECTORY_TICKS = 20;
+
+    private boolean awaitingEyeUse;
+    private boolean awaitingEyeSpawn;
+    private boolean trackingEye;
+    private int trackedEyeEntityId = -1;
+    private int eyeTrackingTicks;
+    private boolean eyeBearingReady;
+    private Vec3 firstEyePosition;
+    private Vec3 secondEyePosition;
+    private Vec3 pendingEyePosition;
 
     private final List<Block> netherFortressBlocks = List.of(
         Blocks.NETHER_BRICKS,
@@ -183,13 +196,10 @@ public class LocateCommand extends Command {
             boolean foundEye = InvUtils.testInHotbar(Items.ENDER_EYE);
 
             if (foundEye) {
-                if (BaritoneUtils.IS_AVAILABLE) PathManagers.get().follow(EyeOfEnder.class::isInstance);
-                firstStart = null;
-                firstEnd = null;
-                secondStart = null;
-                secondEnd = null;
+                resetTracking();
+                awaitingEyeUse = true;
                 MeteorClient.EVENT_BUS.subscribe(this);
-                info("Please throw the first Eye of Ender");
+                info("Throw one Eye of Ender. Its flight path will be sampled for about 4 seconds.");
             } else if (BaritoneUtils.IS_AVAILABLE) {
                 Vec3 coords = findByBlockList(strongholdBlocks);
                 if (coords == null) {
@@ -297,7 +307,21 @@ public class LocateCommand extends Command {
 
     private void cancel() {
         warning("Locate canceled");
+        resetTracking();
         MeteorClient.EVENT_BUS.unsubscribe(this);
+    }
+
+    // Reset the Eye tracking state before another lookup.
+    private void resetTracking() {
+        awaitingEyeUse = false;
+        awaitingEyeSpawn = false;
+        trackingEye = false;
+        trackedEyeEntityId = -1;
+        eyeTrackingTicks = 0;
+        eyeBearingReady = false;
+        firstEyePosition = null;
+        secondEyePosition = null;
+        pendingEyePosition = null;
     }
 
     private @Nullable Vec3 findByBlockList(List<Block> blockList) {
@@ -312,77 +336,133 @@ public class LocateCommand extends Command {
     }
 
     @EventHandler
-    private void onReadPacket(PacketEvent.Receive event) {
-        if (event.packet instanceof ClientboundAddEntityPacket packet && packet.getType() == EntityTypes.EYE_OF_ENDER) {
-            firstPosition(packet.getX(), packet.getY(), packet.getZ());
+    private void onGameLeft(GameLeftEvent event) {
+        resetTracking();
+        MeteorClient.EVENT_BUS.unsubscribe(this);
+    }
+
+    // Save the throw origin when the use packet is sent.
+    @EventHandler
+    private void onSendPacket(PacketEvent.Send event) {
+        if (!awaitingEyeUse || mc.player == null) return;
+
+        if (event.packet instanceof ServerboundUseItemPacket && mc.player.getMainHandItem().is(Items.ENDER_EYE)) {
+            pendingEyePosition = mc.player.position();
+            awaitingEyeSpawn = true;
         }
     }
 
+    // Ignore Eyes that did not come from the pending throw.
+    @EventHandler
+    private void onReadPacket(PacketEvent.Receive event) {
+        if (!awaitingEyeSpawn || pendingEyePosition == null) return;
+
+        if (event.packet instanceof ClientboundAddEntityPacket packet && packet.getType() == EntityTypes.EYE_OF_ENDER) {
+            double dx = packet.getX() - pendingEyePosition.x;
+            double dz = packet.getZ() - pendingEyePosition.z;
+
+            if (dx * dx + dz * dz > 16.0) return;
+
+            awaitingEyeUse = false;
+            awaitingEyeSpawn = false;
+            trackingEye = true;
+            trackedEyeEntityId = packet.getId();
+            firstEyePosition = new Vec3(packet.getX(), packet.getY(), packet.getZ());
+            eyeTrackingTicks = 0;
+            eyeBearingReady = false;
+            info("Eye detected. Measuring its trajectory (about 4 seconds).");
+        }
+    }
+
+    // Sample the Eye after it has travelled far enough.
+    @EventHandler
+    private void onTick(TickEvent.Post event) {
+        if (!trackingEye || mc.level == null || eyeBearingReady) return;
+        if (!(mc.level.getEntity(trackedEyeEntityId) instanceof EyeOfEnder eye)) return;
+
+        eyeTrackingTicks++;
+        if (eyeTrackingTicks >= EYE_TRAJECTORY_SAMPLE_TICKS) {
+            captureEyeBearing(eye.position());
+            if (eyeBearingReady) {
+                info("Eye trajectory sampled. Waiting for it to disappear...");
+            }
+        }
+    }
+
+    // Reject samples that do not provide a stable direction.
+    private void captureEyeBearing(Vec3 secondEyePosition) {
+        if (firstEyePosition == null) return;
+
+        double dx = secondEyePosition.x - firstEyePosition.x;
+        double dz = secondEyePosition.z - firstEyePosition.z;
+        if (!Double.isFinite(dx) || !Double.isFinite(dz) || dx * dx + dz * dz < 4.0) return;
+
+        this.secondEyePosition = secondEyePosition;
+        eyeBearingReady = true;
+    }
+
+    // Use the last position when the Eye disappears before the scheduled sample.
     @EventHandler
     private void onRemoveEntity(EntityRemovedEvent event) {
-        if (event.entity instanceof EyeOfEnder eye) {
-            lastPosition(eye.getX(), eye.getY(), eye.getZ());
-        }
-    }
+        if (!trackingEye || !(event.entity instanceof EyeOfEnder eye) || eye.getId() != trackedEyeEntityId) return;
 
-    private void firstPosition(double x, double y, double z) {
-        Vec3 pos = new Vec3(x, y, z);
-        if (this.firstStart == null) {
-            this.firstStart = pos;
-        } else {
-            this.secondStart = pos;
-        }
-    }
-
-    private void lastPosition(double x, double y, double z) {
-        info("%s Eye of Ender's trajectory saved.", (this.firstEnd == null) ? "First" : "Second");
-        Vec3 pos = new Vec3(x, y, z);
-        if (this.firstEnd == null) {
-            this.firstEnd = pos;
-            info("Please throw the second Eye Of Ender from a different location.");
-        } else {
-            this.secondEnd = pos;
-            findStronghold();
-        }
-    }
-
-    private void findStronghold() {
-        PathManagers.get().stop();
-
-        if (this.firstStart == null || this.firstEnd == null || this.secondStart == null || this.secondEnd == null) {
-            error("Missing position data");
-            cancel();
-            return;
+        if (!eyeBearingReady && eyeTrackingTicks >= MIN_EYE_TRAJECTORY_TICKS) {
+            captureEyeBearing(eye.position());
         }
 
-        final double[] start = new double[]{this.secondStart.x, this.secondStart.z, this.secondEnd.x, this.secondEnd.z};
-        final double[] end = new double[]{this.firstStart.x, this.firstStart.z, this.firstEnd.x, this.firstEnd.z};
-        final double[] intersection = calcIntersection(start, end);
-        if (Double.isNaN(intersection[0]) || Double.isNaN(intersection[1]) || Double.isInfinite(intersection[0]) || Double.isInfinite(intersection[1])) {
-            error("Unable to calculate intersection.");
-            cancel();
-            return;
-        }
-
+        trackingEye = false;
         MeteorClient.EVENT_BUS.unsubscribe(this);
-        Vec3 coords = new Vec3(intersection[0], 0, intersection[1]);
-        MutableComponent text = Component.literal("Stronghold roughly located at ");
-        text.append(ChatUtils.formatCoords(coords));
-        text.append(".");
+
+        if (mc.player == null) {
+            resetTracking();
+            return;
+        }
+
+        if (!eyeBearingReady) {
+            resetTracking();
+            error("The Eye disappeared before enough of its flight path was measured. Try again.");
+            return;
+        }
+
+        Vec3 eyeStart = firstEyePosition;
+        Vec3 eyeEnd = secondEyePosition;
+        resetTracking();
+
+        if (eyeStart == null || eyeEnd == null) {
+            error("Could not read the Eye's flight path. Try throwing another Eye.");
+            return;
+        }
+
+        // Use the trajectory matcher for the primary result.
+        List<StrongholdLocator.TrajectoryPrediction> trajectoryPredictions = StrongholdLocator.predictFromTrajectory(
+            eyeStart.x,
+            eyeStart.z,
+            eyeEnd.x,
+            eyeEnd.z,
+            3
+        );
+
+        if (trajectoryPredictions.isEmpty()) {
+            error("No stronghold candidate matched the Eye's trajectory and ring. Try another throw.");
+            return;
+        }
+
+        StrongholdLocator.TrajectoryPrediction best = trajectoryPredictions.getFirst();
+        MutableComponent text = Component.literal("Stronghold at ");
+        text.append(ChatUtils.formatCoords(new Vec3(best.blockX(), 0, best.blockZ())));
+        text.append(Component.literal(" (grid fit: " + formatAccuracy(best.accuracy()) + ")"));
         info(text);
+
+        for (int i = 1; i < trajectoryPredictions.size(); i++) {
+            StrongholdLocator.TrajectoryPrediction alternative = trajectoryPredictions.get(i);
+            MutableComponent alternativeText = Component.literal("Alternative " + (i + 1) + ": ");
+            alternativeText.append(ChatUtils.formatCoords(new Vec3(alternative.blockX(), 0, alternative.blockZ())));
+            alternativeText.append(Component.literal(" (grid fit: " + formatAccuracy(alternative.accuracy()) + ")"));
+            info(alternativeText);
+        }
     }
 
-    private double[] calcIntersection(double[] line, double[] line2) {
-        final double a1 = line[3] - line[1];
-        final double b1 = line[0] - line[2];
-        final double c1 = a1 * line[0] + b1 * line[1];
-
-        final double a2 = line2[3] - line2[1];
-        final double b2 = line2[0] - line2[2];
-        final double c2 = a2 * line2[0] + b2 * line2[1];
-
-        final double delta = a1 * b2 - a2 * b1;
-
-        return new double[]{(b2 * c1 - b1 * c2) / delta, (a1 * c2 - a2 * c1) / delta};
+    private static String formatAccuracy(long accuracy) {
+        return accuracy == Long.MAX_VALUE ? "exact" : Long.toString(accuracy);
     }
 }
