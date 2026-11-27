@@ -61,12 +61,12 @@ public class AddHudElementScreen extends WindowScreen {
         for (HudElementInfo<?> info : hud.infos.values()) {
             if (info.hasPresets() && !searchBar.get().isEmpty()) {
                 for (HudElementInfo<?>.Preset preset : info.presets) {
-                    String title = info.title + "  -  " + preset.title;
+                    String title = info.title() + "  -  " + preset.title;
                     if (Utils.searchTextDefault(title, searchBar.get(), false))
-                        grouped.computeIfAbsent(info.group, _ -> new ArrayList<>()).add(new Item(title, info.description, preset));
+                        grouped.computeIfAbsent(info.group, _ -> new ArrayList<>()).add(new Item(title, info.description(), preset));
                 }
-            } else if (Utils.searchTextDefault(info.title, searchBar.get(), false))
-                grouped.computeIfAbsent(info.group, _ -> new ArrayList<>()).add(new Item(info.title, info.description, info));
+            } else if (Utils.searchTextDefault(info.title(), searchBar.get(), false))
+                grouped.computeIfAbsent(info.group, _ -> new ArrayList<>()).add(new Item(info.title(), info.description(), info));
         }
 
         // Create widgets

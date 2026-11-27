@@ -62,7 +62,7 @@ public class SettingCommand extends Command {
                         // Get setting value
                         Setting<?> setting = SettingArgumentType.get(context, Config.get().settings);
 
-                        ChatUtils.infoPrefix("Config", "Setting (highlight)%s(default) is (highlight)%s(default).", setting.title, setting.get());
+                        ChatUtils.infoPrefix("Config", "Setting (highlight)%s(default) is (highlight)%s(default).", setting.title(), setting.get());
 
                         return SINGLE_SUCCESS;
                     }).suggests((_, suggestionsBuilder) ->
@@ -76,7 +76,7 @@ public class SettingCommand extends Command {
                                 String value = SettingValueArgumentType.get(context);
 
                                 if (setting.parse(value)) {
-                                    ChatUtils.infoPrefix("Config", "Setting (highlight)%s(default) changed to (highlight)%s(default).", setting.title, value);
+                                    ChatUtils.infoPrefix("Config", "Setting (highlight)%s(default) changed to (highlight)%s(default).", setting.title(), value);
                                 }
 
                                 return SINGLE_SUCCESS;
@@ -110,7 +110,7 @@ public class SettingCommand extends Command {
                             // Get setting value
                             Setting<?> setting = SettingArgumentType.get(context);
 
-                            ModuleArgumentType.get(context).info("Setting (highlight)%s(default) is (highlight)%s(default).", setting.title, setting.get());
+                            ModuleArgumentType.get(context).info("Setting (highlight)%s(default) is (highlight)%s(default).", setting.title(), setting.get());
 
                             return SINGLE_SUCCESS;
                         })
@@ -122,7 +122,7 @@ public class SettingCommand extends Command {
                                     String value = SettingValueArgumentType.get(context);
 
                                     if (setting.parse(value)) {
-                                        ModuleArgumentType.get(context).info("Setting (highlight)%s(default) changed to (highlight)%s(default).", setting.title, value);
+                                        ModuleArgumentType.get(context).info("Setting (highlight)%s(default) changed to (highlight)%s(default).", setting.title(), value);
                                     }
 
                                     return SINGLE_SUCCESS;

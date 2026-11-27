@@ -8,6 +8,7 @@ package meteordevelopment.meteorclient.settings;
 import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.widgets.containers.WContainer;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.translation.TranslationManager;
 import meteordevelopment.meteorclient.utils.misc.ISerializable;
 import meteordevelopment.meteorclient.utils.render.color.RainbowColors;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
@@ -67,6 +68,20 @@ public class Settings implements ISerializable<Settings>, Iterable<SettingGroup>
         invalidate();
     }
 
+    /** Assign the translation namespace and owner id to every setting in this collection. */
+    public void assignOwner(String namespace, String ownerId) {
+        for (SettingGroup group : groups) {
+            for (Setting<?> setting : group) {
+                setting.assignOwner(namespace, ownerId);
+            }
+        }
+    }
+
+    /** Assign the owner id to every setting, keeping the meteor-client namespace. */
+    public void assignOwner(String ownerId) {
+        assignOwner(TranslationManager.METEOR_MOD_ID, ownerId);
+    }
+
     public void invalidate() {
         invalidate = true;
     }
@@ -103,7 +118,6 @@ public class Settings implements ISerializable<Settings>, Iterable<SettingGroup>
         for (SettingGroup group : this) {
             for (Setting<?> setting : group) {
                 setting.module = module;
-
                 if (setting instanceof ColorSetting) {
                     RainbowColors.addSetting((Setting<SettingColor>) setting);
                 } else if (setting instanceof ColorListSetting) {

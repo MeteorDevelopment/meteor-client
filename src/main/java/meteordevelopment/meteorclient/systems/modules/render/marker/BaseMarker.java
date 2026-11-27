@@ -48,6 +48,7 @@ public abstract class BaseMarker implements ISerializable<BaseMarker> {
     );
 
     public BaseMarker(String name) {
+        settings.assignOwner("marker");
         this.name.set(name);
 
         dimension.set(PlayerUtils.getDimension());
