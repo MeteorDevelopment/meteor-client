@@ -175,7 +175,7 @@ public class HudRenderer {
 
         if (hud.hasCustomFont()) {
             double width = getFont(scale).getWidth(text, text.length());
-            return (width + (shadow ? 1 : 0)) * (scale == -1 ? hud.getTextScale() : scale) + (shadow ? 1 : 0);
+            return width * (scale == -1 ? hud.getTextScale() : scale) + (shadow ? 1 : 0);
         }
 
         VanillaTextRenderer.INSTANCE.scale = (scale == -1 ? hud.getTextScale() : scale) * 2;
