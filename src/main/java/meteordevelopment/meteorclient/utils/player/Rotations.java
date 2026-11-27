@@ -7,6 +7,7 @@ package meteordevelopment.meteorclient.utils.player;
 
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.entity.player.SendMovementPacketsEvent;
+import meteordevelopment.meteorclient.events.game.GameLeftEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.utils.PreInit;
@@ -45,6 +46,15 @@ public class Rotations {
     @PreInit
     public static void init() {
         MeteorClient.EVENT_BUS.subscribe(Rotations.class);
+    }
+
+    @EventHandler(priority = EventPriority.LOW - 50)
+    private static void onGameLeft(GameLeftEvent event) {
+        queue.clear();
+        rotations.clear();
+        lastRotation = null;
+        lastRotationTimer = 0;
+        rotating = false;
     }
 
     // Rotation Setup
@@ -146,7 +156,7 @@ public class Rotations {
             rotations.forEach(Rotation::recalculate);
         }
 
-        // The first rotation is sent within our normal movement packets
+        // The first rotation is sent within our normal movement packets.
         Rotation first = rotations.get(0);
         setPreRotation();
         setServerRotation(first.yaw, first.pitch);
@@ -156,6 +166,18 @@ public class Rotations {
     @EventHandler
     private static void onSendMovementPacketsPost(SendMovementPacketsEvent.Post event) {
         if (rotations.isEmpty()) return;
+
+        setClientRotation(preYaw, prePitch);
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST + 50)
+    private static void onTickNext(TickEvent.Pre event) {
+        if (rotations.isEmpty()) return;
+
+        // The rotation from last tick carries over into the next tick.
+        // Callbacks are done in the beginning of a tick to follow vanilla's packet ordering.
+
+        setPreRotation();
 
         // First rotation packet was already sent to server naturally.
         Rotation first = rotations.get(0);
@@ -237,7 +259,6 @@ public class Rotations {
     /*
      * setCorrectedPlayerInput and getInputFromRelativeYaw are derived from Lambda Client.
      * @see https://github.com/lambda-client/lambda/blob/1.21.11/src/main/kotlin/com/lambda/util/player/RotationUtils.kt
-     * @author dinosaurwizard
      *
      * This is implementation of Grim movefix logic.
      * MoveFix is applied through the following mixins:
