@@ -20,9 +20,12 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Objects;
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLSocketFactory;
 
 public class Proxy implements ISerializable<Proxy> {
     public final Settings settings = new Settings();
@@ -39,7 +42,14 @@ public class Proxy implements ISerializable<Proxy> {
     public Setting<ProxyType> type = sgGeneral.add(new EnumSetting.Builder<ProxyType>()
         .name("type")
         .description("The type of proxy.")
-        .defaultValue(ProxyType.Socks5)
+        .defaultValue(ProxyType.SOCKS5)
+        .build()
+    );
+
+    public Setting<Boolean> secure = sgGeneral.add(new BoolSetting.Builder()
+        .name("secure")
+        .description("Whether the proxy is secure.")
+        .defaultValue(false)
         .build()
     );
 
@@ -78,7 +88,7 @@ public class Proxy implements ISerializable<Proxy> {
     public Setting<String> password = sgOptional.add(new StringSetting.Builder()
         .name("password")
         .description("The password of the proxy.")
-        .visible(() -> type.get().equals(ProxyType.Socks5))
+        .visible(() -> !type.get().equals(ProxyType.SOCKS4))
         .build()
     );
 
@@ -138,8 +148,30 @@ public class Proxy implements ISerializable<Proxy> {
         } catch (IOException _) {
         }
 
+        try {
+            Instant before = Instant.now();
+            if (isHttp()) {
+                status = Status.ALIVE;
+                latency = Duration.between(before, Instant.now()).toMillis();
+                return 1;
+            }
+        }
+        catch (SocketTimeoutException e) {
+            timeout = true;
+        }
+        catch (IOException ignored) {}
+
         status = Status.DEAD;
         return timeout ? 3 : 2;
+    }
+
+    private boolean isHttp() throws IOException {
+        String request = "CONNECT 0.0.0.0:80 HTTP/1.1\r\nHost: 0.0.0.0:80\r\n\r\n";
+
+        byte[] data = sendData(request.getBytes(StandardCharsets.UTF_8), 12);
+
+        if (data.length < 12) return false;
+        return data[0] == 'H' && data[1] == 'T' && data[2] == 'T' && data[3] == 'P' && data[4] == '/';
     }
 
     private boolean isSocks4() throws IOException {
@@ -191,19 +223,34 @@ public class Proxy implements ISerializable<Proxy> {
     }
 
     private byte[] sendData(byte[] data, int read) throws IOException {
-        try (Socket s = new Socket()) {
-            s.setSoTimeout(Proxies.get().timeout.get());
-            s.connect(new InetSocketAddress(address.get(), port.get()), Proxies.get().timeout.get());
-            OutputStream out = s.getOutputStream();
+        if (secure.get()) {
+            SSLSocketFactory factory = (SSLSocketFactory)SSLSocketFactory.getDefault();
+            try (SSLSocket s = (SSLSocket)factory.createSocket()) {
+                s.setSoTimeout(Proxies.get().timeout.get());
+                s.connect(new InetSocketAddress(address.get(), port.get()), Proxies.get().timeout.get());
+                s.startHandshake();
 
-            out.write(data);
+                OutputStream out = s.getOutputStream();
+                out.write(data);
 
-            return s.getInputStream().readNBytes(read);
+                return s.getInputStream().readNBytes(read);
+            }
+        } else {
+            try (Socket s = new Socket()) {
+                s.setSoTimeout(Proxies.get().timeout.get());
+                s.connect(new InetSocketAddress(address.get(), port.get()), Proxies.get().timeout.get());
+
+                OutputStream out = s.getOutputStream();
+                out.write(data);
+
+                return s.getInputStream().readNBytes(read);
+            }
         }
     }
 
     public static class Builder {
-        protected ProxyType type = ProxyType.Socks5;
+        protected ProxyType type = ProxyType.SOCKS5;
+        protected boolean secure = false;
         protected String address = "";
         protected int port = 0;
         protected String name = "";
@@ -213,6 +260,11 @@ public class Proxy implements ISerializable<Proxy> {
 
         public Builder type(ProxyType type) {
             this.type = type;
+            return this;
+        }
+
+        public Builder secure(boolean secure) {
+            this.secure = secure;
             return this;
         }
 
@@ -250,6 +302,7 @@ public class Proxy implements ISerializable<Proxy> {
             Proxy proxy = new Proxy();
 
             if (!type.equals(proxy.type.getDefaultValue())) proxy.type.set(type);
+            if (secure != proxy.secure.getDefaultValue()) proxy.secure.set(secure);
             if (!address.equals(proxy.address.getDefaultValue())) proxy.address.set(address);
             if (port != proxy.port.getDefaultValue()) proxy.port.set(port);
             if (!name.equals(proxy.name.getDefaultValue())) proxy.name.set(name);
