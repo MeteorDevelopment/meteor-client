@@ -1,9 +1,10 @@
 package meteordevelopment.meteorclient.utils.render.postprocess;
 
 import meteordevelopment.meteorclient.MeteorClient;
-import meteordevelopment.meteorclient.events.render.Render2DEvent;
+import meteordevelopment.meteorclient.events.render.RenderAfterWorldEvent;
 import meteordevelopment.meteorclient.utils.PreInit;
 import meteordevelopment.orbit.EventHandler;
+import meteordevelopment.orbit.EventPriority;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
@@ -34,8 +35,8 @@ public class PostProcessShaders {
         ENTITY_OUTLINE.submitVertices();
     }
 
-    @EventHandler
-    private static void onRender(Render2DEvent event) {
+    @EventHandler(priority = EventPriority.LOWEST - 100)
+    private static void onRender(RenderAfterWorldEvent event) {
         CHAMS.render();
         ENTITY_OUTLINE.render();
     }
