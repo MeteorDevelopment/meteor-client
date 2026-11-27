@@ -433,36 +433,32 @@ public class LocateCommand extends Command {
             return;
         }
 
-        info("Eye path: %.1f / %.1f -> %.1f / %.1f", eyeStart.x, eyeStart.z, eyeEnd.x, eyeEnd.z);
-
-        // Match the measured path against the valid stronghold rings.
-        List<StrongholdLocator.TrajectoryPrediction> predictions = StrongholdLocator.predictFromTrajectory(
+        // Use the trajectory matcher for the primary result.
+        List<StrongholdLocator.TrajectoryPrediction> trajectoryPredictions = StrongholdLocator.predictFromTrajectory(
             eyeStart.x,
             eyeStart.z,
             eyeEnd.x,
             eyeEnd.z,
-            5
+            3
         );
 
-        if (predictions.isEmpty()) {
+        if (trajectoryPredictions.isEmpty()) {
             error("No stronghold candidate matched the Eye's trajectory and ring. Try another throw.");
             return;
         }
 
-        StrongholdLocator.TrajectoryPrediction best = predictions.getFirst();
-        MutableComponent text = Component.literal("Best trajectory match: ");
+        StrongholdLocator.TrajectoryPrediction best = trajectoryPredictions.getFirst();
+        MutableComponent text = Component.literal("Stronghold at ");
         text.append(ChatUtils.formatCoords(new Vec3(best.blockX(), 0, best.blockZ())));
         text.append(Component.literal(" (grid fit: " + formatAccuracy(best.accuracy()) + ")"));
         info(text);
 
-        for (int i = 1; i < predictions.size(); i++) {
-            StrongholdLocator.TrajectoryPrediction alternative = predictions.get(i);
-            info("Alternative %d: %d / %d (grid fit: %s)",
-                i + 1,
-                alternative.blockX(),
-                alternative.blockZ(),
-                formatAccuracy(alternative.accuracy())
-            );
+        for (int i = 1; i < trajectoryPredictions.size(); i++) {
+            StrongholdLocator.TrajectoryPrediction alternative = trajectoryPredictions.get(i);
+            MutableComponent alternativeText = Component.literal("Alternative " + (i + 1) + ": ");
+            alternativeText.append(ChatUtils.formatCoords(new Vec3(alternative.blockX(), 0, alternative.blockZ())));
+            alternativeText.append(Component.literal(" (grid fit: " + formatAccuracy(alternative.accuracy()) + ")"));
+            info(alternativeText);
         }
     }
 
