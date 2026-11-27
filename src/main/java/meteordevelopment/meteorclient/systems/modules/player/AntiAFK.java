@@ -18,6 +18,7 @@ import meteordevelopment.orbit.EventHandler;
 
 import java.util.List;
 import java.util.Random;
+private int jumpCooldown = 0;
 
 public class AntiAFK extends Module {
     private final SettingGroup sgActions = settings.createGroup("Actions");
@@ -205,12 +206,23 @@ public class AntiAFK extends Module {
     @EventHandler
     private void onTick(TickEvent.Pre event) {
         if (!Utils.canUpdate()) return;
-
+        
         // Jump
         if (jump.get()) {
-            if (mc.options.keyJump.isDown()) mc.options.keyJump.setDown(false);
-            else if (random.nextInt(99) == 0) mc.options.keyJump.setDown(true);
+            if (jumpCooldown > 0) {
+                jumpCooldown--;
+            }  
+            else {
+                if (mc.options.keyJump.isDown()) {
+                    mc.options.keyJump.setDown(false);
+                }
+                else if (random.nextInt(99) == 0) { 
+                    mc.options.keyJump.setDown(true);
+                    jumpCooldown = 20; 
+                }
+            }
         }
+        
 
         // Swing
         if (swing.get() && random.nextInt(99) == 0) {
