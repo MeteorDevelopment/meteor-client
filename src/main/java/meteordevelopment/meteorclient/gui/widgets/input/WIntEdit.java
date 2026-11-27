@@ -78,11 +78,17 @@ public class WIntEdit extends WHorizontalList {
         }
     }
 
+    private String insertAtCursor(String text, char c) {
+        int cursor = Math.min(textBox.selectionStart, textBox.selectionEnd);
+        cursor = Math.clamp(cursor, 0, text.length());
+        return text.substring(0, cursor) + c + text.substring(cursor);
+    }
+
     private boolean filter(String text, char c) {
         boolean good;
         boolean validate = true;
 
-        if (c == '-' && !text.contains("-") && textBox.cursor == 0) {
+        if (c == '-' && !text.contains("-") && Math.min(textBox.selectionStart, textBox.selectionEnd) == 0) {
             good = true;
             validate = false;
         }
@@ -90,7 +96,7 @@ public class WIntEdit extends WHorizontalList {
 
         if (good && validate) {
             try {
-                Integer.parseInt(text + c);
+                Integer.parseInt(insertAtCursor(text, c));
             } catch (NumberFormatException _) {
                 good = false;
             }
