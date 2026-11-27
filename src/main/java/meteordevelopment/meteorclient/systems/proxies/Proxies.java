@@ -26,8 +26,8 @@ public class Proxies extends System<Proxies> implements Iterable<Proxy> {
         .name("threads")
         .description("The number of concurrent threads to check proxies with.")
         .defaultValue(8)
-        .min(0)
-        .sliderRange(0, 32)
+        .min(1)
+        .sliderRange(1, 32)
         .build()
     );
 
@@ -150,12 +150,7 @@ public class Proxies extends System<Proxies> implements Iterable<Proxy> {
 
             try (ExecutorService executor = Executors.newFixedThreadPool(threads.get())) {
                 for (int i = 0; i < threads.get(); i++) {
-                    executor.execute(() -> {
-                        try {
-                            check(toCheck, checked);
-                        } catch (InterruptedException _) {
-                        }
-                    });
+                    executor.execute(() -> check(toCheck, checked));
                 }
 
                 try {
@@ -164,18 +159,19 @@ public class Proxies extends System<Proxies> implements Iterable<Proxy> {
                     executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
                 } catch (InterruptedException _) {
                 }
-
+            } finally {
                 refreshing = false;
             }
         });
     }
 
-    private void check(BlockingQueue<Proxy> queue, ConcurrentHashMap<Proxy, Integer> checks) throws InterruptedException {
-        while (!queue.isEmpty()) {
-            Proxy proxy = queue.take();
+    private void check(BlockingQueue<Proxy> queue, ConcurrentHashMap<Proxy, Integer> checks) {
+        Proxy proxy;
+
+        while ((proxy = queue.poll()) != null) {
             if (proxy.checkStatus() == 3 && checks.get(proxy) <= tries.get()) {
                 checks.put(proxy, checks.get(proxy) + 1);
-                queue.put(proxy);
+                queue.offer(proxy);
             }
         }
     }
