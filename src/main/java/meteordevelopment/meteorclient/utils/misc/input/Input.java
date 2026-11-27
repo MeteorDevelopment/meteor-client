@@ -38,24 +38,34 @@ public class Input {
         return ((KeyMappingAccessor) bind).meteor$getKey().getValue();
     }
 
+    public static boolean matches(KeyMapping bind, InputConstants.Key key) {
+        // SDL keyboard scancodes and mouse buttons can have the same numeric value.
+        return ((KeyMappingAccessor) bind).meteor$getKey().equals(key);
+    }
+
     public static void setKeyState(KeyMapping bind, boolean pressed) {
-        setKeyState(getKey(bind), pressed);
+        InputConstants.Key key = ((KeyMappingAccessor) bind).meteor$getKey();
+        if (key.getType() == InputConstants.Type.MOUSE) setButtonState(key.getValue(), pressed);
+        else setKeyState(key.getValue(), pressed);
     }
 
     public static boolean isPressed(KeyMapping bind) {
-        return isKeyPressed(getKey(bind)) || isButtonPressed(getKey(bind));
+        InputConstants.Key key = ((KeyMappingAccessor) bind).meteor$getKey();
+        return key.getType() == InputConstants.Type.MOUSE
+            ? isButtonPressed(key.getValue())
+            : isKeyPressed(key.getValue());
     }
 
     public static boolean isKeyPressed(int key) {
         if (!GuiKeyEvents.canUseKeys) return false;
 
         if (key == InputConstants.UNKNOWN.getValue()) return false;
-        return key < keys.length && keys[key];
+        return key >= 0 && key < keys.length && keys[key];
     }
 
     public static boolean isButtonPressed(int button) {
         if (button == -1) return false;
-        return button < buttons.length && buttons[button];
+        return button >= 0 && button < buttons.length && buttons[button];
     }
 
     public static void setCursorStyle(CursorType style) {
