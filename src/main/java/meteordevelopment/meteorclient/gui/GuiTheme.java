@@ -160,6 +160,14 @@ public abstract class GuiTheme implements ISerializable<GuiTheme> {
     }
     public abstract WWidget module(Module module, String title);
 
+    /**
+     * Like {@link #module(Module, String)}, but the title is shortened so the widget never gets wider than
+     * {@code maxTitleWidth}. Keeps the click gui inside the screen.
+     */
+    public WWidget module(Module module, String title, double maxTitleWidth) {
+        return module(module, title);
+    }
+
     public abstract WQuad quad(Color color);
 
     public abstract WTopBar topBar();

@@ -22,14 +22,17 @@ public class WMeteorModule extends WPressable implements MeteorWidget {
     private final String title;
 
     private double titleWidth;
+    private final double maxTitleWidth;
+    private String displayTitle;
 
     private double animationProgress1;
 
     private double animationProgress2;
 
-    public WMeteorModule(Module module, String title) {
+    public WMeteorModule(Module module, String title, double maxTitleWidth) {
         this.module = module;
         this.title = title;
+        this.maxTitleWidth = maxTitleWidth;
         this.tooltip = module.description;
 
         if (module.isActive()) {
@@ -50,10 +53,28 @@ public class WMeteorModule extends WPressable implements MeteorWidget {
     protected void onCalculateSize() {
         double pad = pad();
 
-        if (titleWidth == 0) titleWidth = theme.textWidth(title);
+        if (titleWidth == 0) {
+            titleWidth = theme.textWidth(title);
+
+            // Fenster sollen auf jeden Bildschirm passen, lieber ein gekürzter Titel als ein abgeschnittener
+            if (maxTitleWidth > 0 && titleWidth > maxTitleWidth) {
+                displayTitle = truncate(title, maxTitleWidth);
+                titleWidth = theme.textWidth(displayTitle);
+            }
+        }
 
         width = pad + titleWidth + pad;
         height = pad + theme.textHeight() + pad;
+    }
+
+    private String truncate(String text, double maxWidth) {
+        for (int length = text.length() - 1; length > 0; length--) {
+            if (theme.textWidth(text, length, false) + theme.textWidth("…") <= maxWidth) {
+                return text.substring(0, length).stripTrailing() + "…";
+            }
+        }
+
+        return "…";
     }
 
     @Override
@@ -90,6 +111,6 @@ public class WMeteorModule extends WPressable implements MeteorWidget {
             x += w - titleWidth;
         }
 
-        renderer.text(title, x, y + pad, theme.textColor.get(), false);
+        renderer.text(displayTitle == null ? title : displayTitle, x, y + pad, theme.textColor.get(), false);
     }
 }
