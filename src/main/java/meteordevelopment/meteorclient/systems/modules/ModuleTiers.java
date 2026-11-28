@@ -84,7 +84,7 @@ public final class ModuleTiers {
             // information about things you are not supposed to see, or that vanilla would not show at all
             "ESP", "Nametags", "Xray",
             "BlockESP", "Chams", "CityESP", "EntityOwner", "HoleESP", "LogoutSpots", "StorageESP",
-            "TunnelESP", "VoidESP", "WallHack"
+            "Tracers", "TunnelESP", "VoidESP", "WallHack"
         );
         borderline(
             // information the server sends anyway, just rendered better
