@@ -66,12 +66,12 @@ public final class ModuleTiers {
         cheat(
             "AirJump", "AntiVoid", "AutoWasp", "Blink", "ClickTP", "ElytraBoost", "ElytraFly",
             "EntityControl", "FastClimb", "Flight", "GUIMove", "HighJump", "Jesus", "LongJump", "NoFall",
-            "NoSlow", "ReverseStep", "Scaffold", "Slippy", "Speed", "Spider", "Step",
-            "TridentBoost", "Velocity"
+            "NoSlow", "Parkour", "ReverseStep", "SafeWalk", "Scaffold", "Slippy", "Speed",
+            "Spider", "Step", "TridentBoost", "Velocity"
         );
         borderline(
             // things vanilla already does (auto jump) or that only stop your own input
-            "Anchor", "AutoJump", "AutoWalk", "Parkour", "SafeWalk"
+            "Anchor", "AutoJump", "AutoWalk"
         );
         legit(
             "Sneak", "Sprint"
@@ -113,7 +113,7 @@ public final class ModuleTiers {
 
         // ---------------------------------------------------------------- Misc
         borderline(
-            "BetterBeacons", "BookBot", "MessageAura", "Notebot", "PacketCanceller", "Spam",
+            "BookBot", "MessageAura", "Notebot", "PacketCanceller", "Spam",
             "Swarm"
         );
         legit(
@@ -121,7 +121,7 @@ public final class ModuleTiers {
             "Notifier", "PacketLogger", "ServerSpoof", "SoundBlocker"
         );
         cheat(
-            "OffhandCrash"
+            "BetterBeacons", "OffhandCrash"
         );
     }
 
