@@ -95,7 +95,7 @@ public abstract class Module implements ISerializable<Module>, Comparable<Module
             settings.onActivated();
 
             if (runInMainMenu || Utils.canUpdate()) {
-                if (autoSubscribe && (!Modules.get().isLeavingGame() || runInMainMenu)) {
+                if (autoSubscribe && (!Modules.get().isDeactivating() || runInMainMenu)) {
                     MeteorClient.EVENT_BUS.subscribe(this);
                 }
                 onActivate();

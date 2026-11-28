@@ -64,7 +64,7 @@ public class Modules extends System<Modules> {
     private final Set<Module> active = new ReferenceOpenHashSet<>();
     private @Nullable Module moduleToBind;
     private boolean awaitingKeyRelease = false;
-    private boolean leavingGame = false;
+    private boolean deactivating = false;
 
     public Modules() {
         super("modules");
@@ -150,8 +150,8 @@ public class Modules extends System<Modules> {
         return moduleInstances.size();
     }
 
-    public boolean isLeavingGame() {
-        return leavingGame;
+    public boolean isDeactivating() {
+        return deactivating;
     }
 
     public Collection<Module> getActive() {
@@ -334,14 +334,14 @@ public class Modules extends System<Modules> {
     @EventHandler(priority = EventPriority.LOW)
     private void onGameLeft(GameLeftEvent event) {
         synchronized (active) {
-            leavingGame = true;
+            deactivating = true;
             for (Module module : getAll()) {
                 if (module.isActive() && !module.runInMainMenu) {
                     MeteorClient.EVENT_BUS.unsubscribe(module);
                     module.onDeactivate();
                 }
             }
-            leavingGame = false;
+            deactivating = false;
         }
     }
 
