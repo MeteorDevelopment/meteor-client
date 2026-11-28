@@ -64,3 +64,4 @@ jobs:
         env:
           SERVER_TOKEN: ${{ secrets.SERVER_TOKEN }}
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+          
