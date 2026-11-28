@@ -14,7 +14,7 @@ import meteordevelopment.meteorclient.systems.Systems;
 import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.client.network.PlayerListEntry;
+import net.minecraft.client.multiplayer.PlayerInfo;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -60,7 +60,7 @@ public class CheatGate extends System<CheatGate> {
     }
 
     public static boolean inMultiplayer() {
-        return mc != null && mc.getNetworkHandler() != null && !mc.isInSingleplayer();
+        return mc != null && mc.getConnection() != null && !mc.isLocalServer();
     }
 
     /**
@@ -80,7 +80,7 @@ public class CheatGate extends System<CheatGate> {
      * Tells the player why a module just did nothing.
      */
     public void reportBlocked(Module module) {
-        if (mc.world == null || !enabled() || !inMultiplayer() || unlocked) return;
+        if (mc.level == null || !enabled() || !inMultiplayer() || unlocked) return;
 
         ChatUtils.warning(
             "%s is a cheat and hidden in multiplayer. All %d players online have to type \"%s\" in chat to unlock cheats.",
@@ -243,9 +243,9 @@ public class CheatGate extends System<CheatGate> {
     private Set<String> onlinePlayerNames() {
         Set<String> names = new HashSet<>();
 
-        if (mc == null || mc.getNetworkHandler() == null) return names;
+        if (mc == null || mc.getConnection() == null) return names;
 
-        for (PlayerListEntry info : mc.getNetworkHandler().getPlayerList()) {
+        for (PlayerInfo info : mc.getConnection().getOnlinePlayers()) {
             names.add(info.getProfile().name());
         }
 

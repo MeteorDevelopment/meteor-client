@@ -79,19 +79,21 @@ public final class ModuleTiers {
         // ---------------------------------------------------------------- Render
         cheat(
             // the camera and your player are two different things, nobody else sees where you look
-            "Freecam"
+            "Freecam",
+            // information about things you are not supposed to see, or that vanilla would not show at all
+            "ESP", "Nametags", "Xray"
         );
         borderline(
             // information the server sends anyway, just rendered better
             "BlockESP", "Chams", "CityESP", "EntityOwner", "ESP", "HoleESP", "LightOverlay",
-            "LogoutSpots", "Nametags", "PopChams", "StorageESP", "Tracers", "Trajectories",
-            "TunnelESP", "VoidESP", "WallHack", "Xray"
+            "LogoutSpots", "PopChams", "StorageESP", "Tracers", "Trajectories", "TunnelESP",
+            "VoidESP", "WallHack"
         );
         legit(
             "BetterTab", "BetterTooltips", "BlockSelection", "Blur", "BossStack", "Breadcrumbs",
             "BreakIndicators", "CameraTweaks", "FreeLook", "Fullbright", "HandView",
             "ItemHighlight", "ItemPhysics", "Marker", "NoRender", "Trail", "WaypointsModule",
-            "TimeChanger", "Zoom"
+            "TimeChanger", "WeatherChanger", "Zoom"
         );
 
         // ---------------------------------------------------------------- World
