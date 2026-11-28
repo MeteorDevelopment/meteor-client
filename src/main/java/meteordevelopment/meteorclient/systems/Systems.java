@@ -13,6 +13,7 @@ import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.systems.hud.Hud;
 import meteordevelopment.meteorclient.systems.macros.Macros;
+import meteordevelopment.meteorclient.systems.modules.CheatGate;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.profiles.Profiles;
 import meteordevelopment.meteorclient.systems.proxies.Proxies;
@@ -36,6 +37,9 @@ public class Systems {
     public static void init() {
         // Has to be loaded first so the hidden modules list in config tab can load modules
         add(new Modules());
+
+        // Cheats are hidden on servers until every player agreed to them
+        add(new CheatGate());
 
         Config config = new Config();
         System<?> configSystem = add(config);
