@@ -529,10 +529,8 @@ public class Notebot extends Module {
         }
 
         if (!uniqueNotesToUse.isEmpty()) {
-            for (Note note : uniqueNotesToUse) {
-                warning("Missing note: " + note.getInstrument() + ", " + note.getNoteLevel());
-            }
             warning(uniqueNotesToUse.size() + " missing notes!");
+            NotebotUtils.getRequirementString(uniqueNotesToUse).forEach(this::warning);
         }
     }
 
@@ -666,6 +664,26 @@ public class Notebot extends Module {
     public void disableNotebot() {
         resetVariables();
         enable();
+    }
+
+    /**
+     * Prints the note blocks required to play a song.
+     *
+     * @param file Song supported by one of {@link SongDecoder}
+     */
+    public void getRequirements(File file) {
+        if (song != null || stage != Stage.None) {
+            error("Stop the current song first.");
+            return;
+        }
+
+        try {
+            Song requirements = SongDecoders.parse(file);
+            NotebotUtils.getRequirementString(requirements.getRequirements()).forEach(this::info);
+        } catch (Exception e) {
+            error("Failed to decode song.");
+            MeteorClient.LOG.error("Failed to decode song requirements", e);
+        }
     }
 
     /**
