@@ -88,6 +88,7 @@ public class LightOverlay extends Module {
         crossPool.freeAll(crosses);
         crosses.clear();
 
+        BlockIterator.iCareAboutAirBlocks();
         BlockIterator.register(horizontalRange.get(), verticalRange.get(), (blockPos, blockState) -> {
             switch (BlockUtils.isValidMobSpawn(blockPos, blockState, lightLevel.get())) {
                 case Potential -> crosses.add(crossPool.get().set(blockPos, true));

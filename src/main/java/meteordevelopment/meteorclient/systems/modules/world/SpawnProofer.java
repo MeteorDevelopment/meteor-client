@@ -118,6 +118,7 @@ public class SpawnProofer extends Module {
         spawnPool.freeAll(spawns);
         spawns.clear();
 
+        BlockIterator.iCareAboutAirBlocks();
         BlockIterator.register((int) Math.ceil(placeRange.get()), (int) Math.ceil(placeRange.get()), (blockPos, blockState) -> {
             BlockUtils.MobSpawn spawn = BlockUtils.isValidMobSpawn(blockPos, blockState, lightLevel.get());
 

@@ -12,6 +12,7 @@ import com.mojang.renderpearl.api.GpuFormat;
 import com.mojang.renderpearl.api.textures.AddressMode;
 import com.mojang.renderpearl.api.textures.FilterMode;
 import net.minecraft.client.renderer.texture.AbstractTexture;
+import net.minecraft.util.PngInfo;
 import org.jspecify.annotations.NonNull;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.stb.STBImage;
@@ -70,6 +71,9 @@ public class Texture extends AbstractTexture {
             if (in == null) return null;
 
             var data = TextureUtil.readResource(in).rewind();
+
+            PngInfo.validateHeader(data);
+            data.rewind();
 
             try (MemoryStack stack = MemoryStack.stackPush()) {
                 IntBuffer width = stack.mallocInt(1);
