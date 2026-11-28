@@ -48,12 +48,13 @@ public final class ModuleTiers {
         // ---------------------------------------------------------------- Player
         cheat(
             "AirPlace", "AutoClicker", "AutoGap", "BreakDelay", "FastUse", "GhostHand",
-            "InstantRebreak", "LiquidInteract", "NoMiningTrace", "Reach", "SpeedMine"
+            "InstantRebreak", "LiquidInteract", "NoMiningTrace", "Reach", "SpeedMine",
+            "AntiHunger", "AutoMend", "AutoTool", "Multitask"
         );
         borderline(
             // automates something you would do by hand anyway
-            "AntiAFK", "AntiHunger", "AutoEat", "AutoFish", "AutoMend", "AutoReplenish",
-            "AutoTool", "ChestSwap", "EXPThrower", "MiddleClickExtra", "Multitask",
+            "AntiAFK", "AutoEat", "AutoFish", "AutoReplenish", "ChestSwap", "EXPThrower",
+            "MiddleClickExtra",
             // packet tricks the server can not tell apart from a normal client
             "NoRotate", "PotionSaver", "Rotation"
         );
@@ -64,7 +65,7 @@ public final class ModuleTiers {
         // ---------------------------------------------------------------- Movement
         cheat(
             "AirJump", "AntiVoid", "AutoWasp", "Blink", "ClickTP", "ElytraBoost", "ElytraFly",
-            "EntityControl", "FastClimb", "Flight", "HighJump", "Jesus", "LongJump", "NoFall",
+            "EntityControl", "FastClimb", "Flight", "GUIMove", "HighJump", "Jesus", "LongJump", "NoFall",
             "NoSlow", "ReverseStep", "Scaffold", "Slippy", "Speed", "Spider", "Step",
             "TridentBoost", "Velocity"
         );
@@ -73,7 +74,7 @@ public final class ModuleTiers {
             "Anchor", "AutoJump", "AutoWalk", "Parkour", "SafeWalk"
         );
         legit(
-            "GUIMove", "Sneak", "Sprint"
+            "Sneak", "Sprint"
         );
 
         // ---------------------------------------------------------------- Render
@@ -81,13 +82,13 @@ public final class ModuleTiers {
             // the camera and your player are two different things, nobody else sees where you look
             "Freecam",
             // information about things you are not supposed to see, or that vanilla would not show at all
-            "ESP", "Nametags", "Xray"
+            "ESP", "Nametags", "Xray",
+            "BlockESP", "Chams", "CityESP", "EntityOwner", "HoleESP", "LogoutSpots", "StorageESP",
+            "TunnelESP", "VoidESP", "WallHack"
         );
         borderline(
             // information the server sends anyway, just rendered better
-            "BlockESP", "Chams", "CityESP", "EntityOwner", "ESP", "HoleESP", "LightOverlay",
-            "LogoutSpots", "PopChams", "StorageESP", "Tracers", "Trajectories", "TunnelESP",
-            "VoidESP", "WallHack"
+            "LightOverlay", "PopChams", "Trajectories"
         );
         legit(
             "BetterTab", "BetterTooltips", "BlockSelection", "Blur", "BossStack", "Breadcrumbs",
@@ -100,11 +101,11 @@ public final class ModuleTiers {
         cheat(
             "BuildHeight", "EChestFarmer", "Excavator", "Flamethrower", "HighwayBuilder",
             "InfinityMiner", "LiquidFiller", "Nuker", "PacketMine", "SpawnProofer", "Timer",
-            "VeinMiner"
+            "VeinMiner", "StashFinder"
         );
         borderline(
             "AutoBreed", "AutoBrewer", "AutoMount", "AutoNametag", "AutoShearer", "AutoSign",
-            "AutoSmelter", "Collisions", "EndermanLook", "StashFinder", "MountBypass"
+            "AutoSmelter", "Collisions", "EndermanLook", "MountBypass"
         );
         legit(
             "Ambience", "NoGhostBlocks"
@@ -112,12 +113,15 @@ public final class ModuleTiers {
 
         // ---------------------------------------------------------------- Misc
         borderline(
-            "BetterBeacons", "BookBot", "MessageAura", "Notebot", "OffhandCrash", "PacketCanceller",
-            "Spam", "Swarm"
+            "BetterBeacons", "BookBot", "MessageAura", "Notebot", "PacketCanceller", "Spam",
+            "Swarm"
         );
         legit(
             "AntiPacketKick", "AutoReconnect", "BetterChat", "DiscordPresence", "InventoryTweaks",
             "Notifier", "PacketLogger", "ServerSpoof", "SoundBlocker"
+        );
+        cheat(
+            "OffhandCrash"
         );
     }
 
