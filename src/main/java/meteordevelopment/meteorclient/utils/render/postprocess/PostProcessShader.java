@@ -1,66 +1,104 @@
 package meteordevelopment.meteorclient.utils.render.postprocess;
 
-import meteordevelopment.meteorclient.renderer.GL;
-import meteordevelopment.meteorclient.renderer.PostProcessRenderer;
-import meteordevelopment.meteorclient.renderer.Shader;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gl.Framebuffer;
-import net.minecraft.client.gl.SimpleFramebuffer;
-import net.minecraft.client.render.OutlineVertexConsumerProvider;
-import net.minecraft.entity.Entity;
+import com.mojang.blaze3d.Blaze3D;
+import com.mojang.blaze3d.buffers.Std140Builder;
+import com.mojang.blaze3d.buffers.Std140SizeCalculator;
+import com.mojang.blaze3d.pipeline.RenderTarget;
+import com.mojang.blaze3d.pipeline.TextureTarget;
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.renderpearl.api.GpuFormat;
+import com.mojang.renderpearl.api.buffers.GpuBuffer;
+import com.mojang.renderpearl.api.pipeline.RenderPipeline;
+import com.mojang.renderpearl.api.textures.FilterMode;
+import meteordevelopment.meteorclient.MeteorClient;
+import meteordevelopment.meteorclient.renderer.MeshRenderer;
+import net.minecraft.client.gui.render.GuiRenderer;
+import net.minecraft.client.renderer.DynamicGpuDataStorage;
+import net.minecraft.client.renderer.DynamicGpuDataStorageMapped;
+import org.jspecify.annotations.NonNull;
+
+import java.nio.ByteBuffer;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
-import static org.lwjgl.glfw.GLFW.glfwGetTime;
 
 public abstract class PostProcessShader {
-    public OutlineVertexConsumerProvider vertexConsumerProvider;
-    public Framebuffer framebuffer;
-    protected Shader shader;
+    protected final RenderPipeline pipeline;
+    public final RenderTarget framebuffer;
 
-    public void init(String frag) {
-        vertexConsumerProvider = new OutlineVertexConsumerProvider(mc.getBufferBuilders().getEntityVertexConsumers());
-        framebuffer = new SimpleFramebuffer(mc.getWindow().getFramebufferWidth(), mc.getWindow().getFramebufferHeight(), false, MinecraftClient.IS_SYSTEM_MAC);
-        shader = new Shader("post-process/base.vert", "post-process/" + frag + ".frag");
+    protected PostProcessShader(RenderPipeline pipeline) {
+        this.pipeline = pipeline;
+        this.framebuffer = new TextureTarget(MeteorClient.NAME + " PostProcessShader " + this.getClass().getSimpleName(), mc.getWindow().getWidth(), mc.getWindow().getHeight(),
+            GpuFormat.RGBA8_UNORM, GpuFormat.D32_FLOAT);
     }
 
     protected abstract boolean shouldDraw();
-    public abstract boolean shouldDraw(Entity entity);
 
-    protected void preDraw() {}
-    protected void postDraw() {}
-
-    protected abstract void setUniforms();
-
-    public void beginRender() {
-        if (!shouldDraw()) return;
-
-        framebuffer.clear(MinecraftClient.IS_SYSTEM_MAC);
-        mc.getFramebuffer().beginWrite(false);
+    protected void preDraw() {
     }
 
-    public void endRender(Runnable draw) {
+    protected void postDraw() {
+    }
+
+    protected abstract void setupPass(MeshRenderer renderer);
+
+    public void clearTexture() {
+        if (this.shouldDraw()) {
+            RenderSystem.getDevice().createCommandEncoder().clearColorTexture(framebuffer.getColorTexture(),
+                GuiRenderer.CLEAR_COLOR);
+        }
+    }
+
+    public void submitVertices(Runnable draw) {
         if (!shouldDraw()) return;
 
         preDraw();
         draw.run();
         postDraw();
+    }
 
-        mc.getFramebuffer().beginWrite(false);
+    public void render() {
+        if (!shouldDraw()) return;
 
-        GL.bindTexture(framebuffer.getColorAttachment(), 0);
+        var renderer = MeshRenderer.begin()
+            .attachments(mc.gameRenderer.mainRenderTarget())
+            .pipeline(pipeline)
+            .fullscreen()
+            .uniform("PostData", UNIFORM_STORAGE.writeData(new UniformData(
+                (float) mc.getWindow().getWidth(), (float) mc.getWindow().getHeight(),
+                (float) Blaze3D.getTime()
+            )))
+            .sampler("u_Texture", framebuffer.getColorTextureView(), RenderSystem.getSamplerCache().getClampToEdge(FilterMode.NEAREST));
 
-        shader.bind();
+        setupPass(renderer);
 
-        shader.set("u_Size", mc.getWindow().getFramebufferWidth(), mc.getWindow().getFramebufferHeight());
-        shader.set("u_Texture", 0);
-        shader.set("u_Time", glfwGetTime());
-        setUniforms();
-
-        PostProcessRenderer.render();
+        renderer.end();
     }
 
     public void onResized(int width, int height) {
         if (framebuffer == null) return;
-        framebuffer.resize(width, height, MinecraftClient.IS_SYSTEM_MAC);
+        framebuffer.resize(width, height);
+    }
+
+    // Uniforms
+
+    private static final int UNIFORM_SIZE = new Std140SizeCalculator()
+        .putVec2()
+        .putFloat()
+        .get();
+
+    // todo what should usage be? not just here but everywhere else also
+    private static final DynamicGpuDataStorage<UniformData> UNIFORM_STORAGE = new DynamicGpuDataStorageMapped<>("Meteor - Post UBO", UNIFORM_SIZE, GpuBuffer.USAGE_UNIFORM, 16);
+
+    public static void flipFrame() {
+        UNIFORM_STORAGE.endFrame();
+    }
+
+    private record UniformData(float sizeX, float sizeY, float time) implements DynamicGpuDataStorage.DynamicGpuData {
+        @Override
+        public void write(@NonNull ByteBuffer buffer) {
+            Std140Builder.intoBuffer(buffer)
+                .putVec2(sizeX, sizeY)
+                .putFloat(time);
+        }
     }
 }

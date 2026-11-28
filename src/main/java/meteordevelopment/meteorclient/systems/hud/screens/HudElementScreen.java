@@ -21,8 +21,6 @@ import meteordevelopment.meteorclient.systems.hud.HudElement;
 import meteordevelopment.meteorclient.systems.hud.XAnchor;
 import meteordevelopment.meteorclient.systems.hud.YAnchor;
 import meteordevelopment.meteorclient.utils.misc.NbtUtils;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.nbt.NbtCompound;
 
 import static meteordevelopment.meteorclient.utils.Utils.getWindowWidth;
 
@@ -114,7 +112,7 @@ public class HudElementScreen extends WindowScreen {
         WMinus remove = bottomList.add(theme.minus()).expandCellX().right().widget();
         remove.action = () -> {
             element.remove();
-            close();
+            onClose();
         };
     }
 
@@ -130,25 +128,13 @@ public class HudElementScreen extends WindowScreen {
     }
 
     @Override
-    protected void onRenderBefore(DrawContext drawContext, float delta) {
-        HudEditorScreen.renderElements(drawContext);
-    }
-
-    @Override
     public boolean toClipboard() {
-        return NbtUtils.toClipboard(element.info.title, element.toTag());
+        return NbtUtils.toClipboard(element);
     }
 
     @Override
     public boolean fromClipboard() {
-        NbtCompound clipboard = NbtUtils.fromClipboard(element.toTag());
-
-        if (clipboard != null) {
-            element.fromTag(clipboard);
-            return true;
-        }
-
-        return false;
+        return NbtUtils.fromClipboard(element);
     }
 
 }

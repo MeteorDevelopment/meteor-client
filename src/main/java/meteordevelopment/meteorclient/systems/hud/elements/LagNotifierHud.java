@@ -58,18 +58,11 @@ public class LagNotifierHud extends HudElement {
         .build()
     );
 
-    private final Setting<Integer> border = sgGeneral.add(new IntSetting.Builder()
-        .name("border")
-        .description("How much space to add around the element.")
-        .defaultValue(0)
-        .build()
-    );
-
     // Scale
 
     private final Setting<Boolean> customScale = sgScale.add(new BoolSetting.Builder()
         .name("custom-scale")
-        .description("Applies custom text scale rather than the global one.")
+        .description("Applies a custom scale to this hud element.")
         .defaultValue(false)
         .build()
     );
@@ -106,38 +99,23 @@ public class LagNotifierHud extends HudElement {
     }
 
     @Override
-    public void setSize(double width, double height) {
-        super.setSize(width + border.get() * 2, height + border.get() * 2);
-    }
-
-    @Override
     public void render(HudRenderer renderer) {
+        float timeSinceLastTick = TickRate.INSTANCE.getTimeSinceLastTick();
+        if (timeSinceLastTick < 1.1f && !isInEditor()) return;
+
+        Color color = isInEditor() || timeSinceLastTick > 10f ? color3.get()
+            : timeSinceLastTick > 3f ? color2.get()
+            : color1.get();
+
+        String info = isInEditor() ? "10.2" : String.format("%.1f", timeSinceLastTick);
+
+        render(renderer, info, color);
         if (background.get()) {
             renderer.quad(this.x, this.y, getWidth(), getHeight(), backgroundColor.get());
-        }
-
-        if (isInEditor()) {
-            render(renderer, "4.3", color3.get());
-            return;
-        }
-
-        float timeSinceLastTick = TickRate.INSTANCE.getTimeSinceLastTick();
-
-        if (timeSinceLastTick >= 1f) {
-            Color color;
-
-            if (timeSinceLastTick > 10) color = color3.get();
-            else if (timeSinceLastTick > 3) color = color2.get();
-            else color = color1.get();
-
-            render(renderer, String.format("%.1f", timeSinceLastTick), color);
         }
     }
 
     private void render(HudRenderer renderer, String right, Color rightColor) {
-        double x = this.x + border.get();
-        double y = this.y + border.get();
-
         double x2 = renderer.text("Time since last tick ", x, y, textColor.get(), shadow.get(), getScale());
         x2 = renderer.text(right, x2, y, rightColor, shadow.get(), getScale());
 
@@ -145,6 +123,6 @@ public class LagNotifierHud extends HudElement {
     }
 
     private double getScale() {
-        return customScale.get() ? scale.get() : -1;
+        return customScale.get() ? scale.get() : Hud.get().getTextScale();
     }
 }

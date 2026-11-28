@@ -17,7 +17,7 @@ import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.Mth;
 
 public class Zoom extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -52,10 +52,18 @@ public class Zoom extends Module {
         .build()
     );
 
+    private final Setting<Boolean> hideHud = sgGeneral.add(new BoolSetting.Builder()
+        .name("hide-HUD")
+        .description("Whether or not to hide the Minecraft HUD.")
+        .defaultValue(false)
+        .build()
+    );
+
     private final Setting<Boolean> renderHands = sgGeneral.add(new BoolSetting.Builder()
         .name("show-hands")
         .description("Whether or not to render your hands.")
         .defaultValue(false)
+        .visible(() -> !hideHud.get())
         .build()
     );
 
@@ -63,7 +71,6 @@ public class Zoom extends Module {
     private boolean preCinematic;
     private double preMouseSensitivity;
     private double value;
-    private double lastFov;
     private double time;
 
     public Zoom() {
@@ -73,31 +80,28 @@ public class Zoom extends Module {
 
     @Override
     public void onActivate() {
-        if (!enabled) {
-            preCinematic = mc.options.smoothCameraEnabled;
-            preMouseSensitivity = mc.options.getMouseSensitivity().getValue();
-            value = zoom.get();
-            lastFov = mc.options.getFov().getValue();
-            time = 0.001;
+        if (enabled) return;
 
-            MeteorClient.EVENT_BUS.subscribe(this);
-            enabled = true;
-        }
+        preCinematic = mc.options.smoothCamera;
+        preMouseSensitivity = mc.options.sensitivity().get();
+        value = zoom.get();
+        time = 0.001;
+
+        MeteorClient.EVENT_BUS.subscribe(this);
+        enabled = true;
     }
 
     public void onStop() {
-        mc.options.smoothCameraEnabled = preCinematic;
-        mc.options.getMouseSensitivity().setValue(preMouseSensitivity);
-
-        mc.worldRenderer.scheduleTerrainUpdate();
+        mc.options.smoothCamera = preCinematic;
+        mc.options.sensitivity().set(preMouseSensitivity);
     }
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
-        mc.options.smoothCameraEnabled = cinematic.get();
+        mc.options.smoothCamera = cinematic.get();
 
         if (!cinematic.get()) {
-            mc.options.getMouseSensitivity().setValue(preMouseSensitivity / Math.max(value() * 0.5, 1));
+            mc.options.sensitivity().set(preMouseSensitivity / Math.max(getScaling() * 0.5, 1));
         }
 
         if (time == 0) {
@@ -110,10 +114,11 @@ public class Zoom extends Module {
 
     @EventHandler
     private void onMouseScroll(MouseScrollEvent event) {
+        if (mc.gui.screen() != null) return;
+
         if (scrollSensitivity.get() > 0 && isActive()) {
             value += event.value * 0.25 * (scrollSensitivity.get() * value);
-            if (value < 1) value = 1;
-
+            value = Math.max(value, 1);
             event.cancel();
         }
     }
@@ -128,23 +133,24 @@ public class Zoom extends Module {
         if (isActive()) time += event.frameTime * 5;
         else time -= event.frameTime * 5;
 
-        time = MathHelper.clamp(time, 0, 1);
+        time = Mth.clamp(time, 0, 1);
     }
 
     @EventHandler
     private void onGetFov(GetFovEvent event) {
-        event.fov /= value();
-
-        if (lastFov != event.fov) mc.worldRenderer.scheduleTerrainUpdate();
-        lastFov = event.fov;
+        event.fov /= (float) getScaling();
     }
 
-    private double value() {
+    public double getScaling() {
         double delta = time < 0.5 ? 4 * time * time * time : 1 - Math.pow(-2 * time + 2, 3) / 2; // Ease in out cubic
-        return MathHelper.lerp(delta, 1, value);
+        return Mth.lerp(delta, 1, value);
     }
 
     public boolean renderHands() {
         return !isActive() || renderHands.get();
+    }
+
+    public boolean shouldHideHud() {
+        return isActive() && hideHud.get();
     }
 }

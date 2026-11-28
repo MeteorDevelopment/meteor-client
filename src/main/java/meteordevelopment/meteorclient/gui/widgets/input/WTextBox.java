@@ -13,16 +13,19 @@ import meteordevelopment.meteorclient.gui.utils.Cell;
 import meteordevelopment.meteorclient.gui.utils.CharFilter;
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.gui.widgets.containers.WContainer;
+import meteordevelopment.meteorclient.utils.misc.input.Input;
 import meteordevelopment.meteorclient.utils.render.color.Color;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.client.input.CharacterEvent;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.util.Mth;
 import org.apache.commons.lang3.SystemUtils;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
+import static com.mojang.blaze3d.platform.InputConstants.*;
 import static meteordevelopment.meteorclient.MeteorClient.mc;
-import static org.lwjgl.glfw.GLFW.*;
 
 public abstract class WTextBox extends WWidget {
     private static final Renderer DEFAULT_RENDERER = (renderer, x, y, text, color) -> renderer.text(text, x, y, color, false);
@@ -36,13 +39,12 @@ public abstract class WTextBox extends WWidget {
 
     protected final Renderer renderer;
 
-    protected boolean focused;
     protected DoubleList textWidths = new DoubleArrayList();
 
     protected int cursor;
     protected double textStart;
 
-    protected boolean selecting;
+    protected boolean selecting, doubleClick;
     protected int selectionStart, selectionEnd;
     private int preSelectionCursor;
 
@@ -61,7 +63,8 @@ public abstract class WTextBox extends WWidget {
 
         try {
             this.renderer = renderer != null ? renderer.getDeclaredConstructor().newInstance() : DEFAULT_RENDERER;
-        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
+                 NoSuchMethodException e) {
             throw new RuntimeException(e);
         }
     }
@@ -105,9 +108,9 @@ public abstract class WTextBox extends WWidget {
     }
 
     @Override
-    public boolean onMouseClicked(double mouseX, double mouseY, int button, boolean used) {
-        if (mouseOver && !used) {
-            if (button == GLFW_MOUSE_BUTTON_RIGHT) {
+    public boolean onMouseClicked(MouseButtonEvent click, boolean doubled) {
+        if (mouseOver) {
+            if (click.button() == MOUSE_BUTTON_RIGHT) {
                 if (!text.isEmpty()) {
                     text = "";
                     cursor = 0;
@@ -116,12 +119,11 @@ public abstract class WTextBox extends WWidget {
 
                     runAction();
                 }
-            }
-            else if (button == GLFW_MOUSE_BUTTON_LEFT) {
+            } else if (click.button() == MOUSE_BUTTON_LEFT) {
                 selecting = true;
 
                 double overflowWidth = getOverflowWidthForRender();
-                double relativeMouseX = mouseX - x + overflowWidth;
+                double relativeMouseX = click.x() - x + overflowWidth;
                 double pad = pad();
 
                 double smallestDifference = Double.MAX_VALUE;
@@ -135,6 +137,16 @@ public abstract class WTextBox extends WWidget {
                         smallestDifference = difference;
                         cursor = i;
                     }
+                }
+
+                if (doubled && cursor == preSelectionCursor) {
+                    doubleClick = true;
+                    resetSelection();
+
+                    selectionStart = (cursor - countToNextSpace(true));
+                    selectionEnd = cursor = (cursor + countToNextSpace(false));
+
+                    return true;
                 }
 
                 preSelectionCursor = cursor;
@@ -161,35 +173,63 @@ public abstract class WTextBox extends WWidget {
 
         double smallestDifference = Double.MAX_VALUE;
 
+        int best = 0;
         for (int i = 0; i < textWidths.size(); i++) {
             double difference = Math.abs(textWidths.getDouble(i) + pad - relativeMouseX);
 
             if (difference < smallestDifference) {
+                best = i;
                 smallestDifference = difference;
-                if (i < preSelectionCursor) {
-                    selectionStart = i;
-                    cursor = i;
+                if (!doubleClick) {
+                    if (i < preSelectionCursor) {
+                        selectionStart = i;
+                        cursor = i;
+                    } else if (i > preSelectionCursor) {
+                        selectionEnd = i;
+                        cursor = i;
+                    } else {
+                        cursor = preSelectionCursor;
+                        resetSelection();
+                    }
                 }
-                else if (i > preSelectionCursor) {
-                    selectionEnd = i;
-                    cursor = i;
-                }
-                else {
-                    cursor = preSelectionCursor;
-                    resetSelection();
+            }
+        }
+
+        // double click selection will select by whole words
+        if (doubleClick) {
+            if (best < selectionStart) {
+                selectionStart = best - countToNextSpace(true, best);
+                cursor = selectionStart;
+            } else if (best > selectionEnd) {
+                selectionEnd = best + countToNextSpace(false, best);
+                cursor = selectionEnd;
+            } else {
+                if (cursor == selectionStart) {
+                    int nextRight = countToNextSpace(false);
+                    if (best > cursor + nextRight) {
+                        selectionStart = cursor = cursor + nextRight + 1;
+                        if (selectionStart <= preSelectionCursor && selectionStart + countToNextSpace(false) >= preSelectionCursor) {
+                            cursor = selectionEnd;
+                        }
+                    }
+                } else if (cursor == selectionEnd) {
+                    int nextLeft = countToNextSpace(true);
+                    if (best < cursor - nextLeft) {
+                        selectionEnd = cursor = cursor - nextLeft - 1;
+                    }
                 }
             }
         }
     }
 
     @Override
-    public boolean onMouseReleased(double mouseX, double mouseY, int button) {
+    public boolean onMouseReleased(MouseButtonEvent click) {
         selecting = false;
+        doubleClick = false;
 
         if (selectionStart < preSelectionCursor && preSelectionCursor == selectionEnd) {
             cursor = selectionStart;
-        }
-        else if (selectionEnd > preSelectionCursor && preSelectionCursor == selectionStart) {
+        } else if (selectionEnd > preSelectionCursor && preSelectionCursor == selectionStart) {
             cursor = selectionEnd;
         }
 
@@ -197,40 +237,41 @@ public abstract class WTextBox extends WWidget {
     }
 
     @Override
-    public boolean onKeyPressed(int key, int mods) {
+    public boolean onKeyPressed(KeyEvent input) {
         if (!focused) return false;
 
-        boolean control = MinecraftClient.IS_SYSTEM_MAC ? mods == GLFW_MOD_SUPER : mods == GLFW_MOD_CONTROL;
+        boolean ctrl = SystemUtils.IS_OS_MAC
+            ? Input.modsMatch(input.modifiers(), MOD_SUPER)
+            : Input.modsMatch(input.modifiers(), MOD_CONTROL);
 
-        if (control && key == GLFW_KEY_C) {
+        boolean ctrlShift = SystemUtils.IS_OS_MAC
+            ? Input.modsMatch(input.modifiers(), MOD_SUPER, MOD_SHIFT)
+            : Input.modsMatch(input.modifiers(), MOD_CONTROL, MOD_SHIFT);
+
+        if (ctrl && input.key() == KEY_C) {
             if (cursor != selectionStart || cursor != selectionEnd) {
-                mc.keyboard.setClipboard(text.substring(selectionStart, selectionEnd));
+                mc.keyboardHandler.setClipboard(text.substring(selectionStart, selectionEnd));
             }
             return true;
-        }
-        else if (control && key == GLFW_KEY_X) {
+        } else if (ctrl && input.key() == KEY_X) {
             if (cursor != selectionStart || cursor != selectionEnd) {
-                mc.keyboard.setClipboard(text.substring(selectionStart, selectionEnd));
+                mc.keyboardHandler.setClipboard(text.substring(selectionStart, selectionEnd));
                 clearSelection();
             }
 
             return true;
-        }
-        else if (control && key == GLFW_KEY_A) {
+        } else if (ctrl && input.key() == KEY_A) {
             cursor = text.length();
             selectionStart = 0;
             selectionEnd = cursor;
-        }
-        else if (mods == ((MinecraftClient.IS_SYSTEM_MAC ? GLFW_MOD_SUPER : GLFW_MOD_CONTROL) | GLFW_MOD_SHIFT) && key == GLFW_KEY_A) {
+        } else if (ctrlShift && input.key() == KEY_A) {
             resetSelection();
-        }
-        else if (key == GLFW_KEY_ENTER || key == GLFW_KEY_KP_ENTER) {
+        } else if (input.key() == KEY_RETURN || input.key() == KEY_NUMPADENTER) {
             setFocused(false);
 
             if (actionOnUnfocused != null) actionOnUnfocused.run();
             return true;
-        }
-        else if (key == GLFW_KEY_TAB && completionsW != null) {
+        } else if (input.key() == KEY_TAB && completionsW != null) {
             String completion = ((ICompletionItem) completionsW.cells.get(getSelectedCompletion()).widget()).getCompletion();
 
             StringBuilder sb = new StringBuilder(text.length() + completion.length() + 1);
@@ -257,37 +298,46 @@ public abstract class WTextBox extends WWidget {
             return true;
         }
 
-        return onKeyRepeated(key, mods);
+        return onKeyRepeated(input);
     }
 
     @Override
-    public boolean onKeyRepeated(int key, int mods) {
+    public boolean onKeyRepeated(KeyEvent input) {
         if (!focused) return false;
 
-        boolean control = MinecraftClient.IS_SYSTEM_MAC ? mods == GLFW_MOD_SUPER : mods == GLFW_MOD_CONTROL;
-        boolean shift = mods == GLFW_MOD_SHIFT;
-        boolean controlShift = mods == ((SystemUtils.IS_OS_WINDOWS ? GLFW_MOD_ALT : MinecraftClient.IS_SYSTEM_MAC ? GLFW_MOD_SUPER : GLFW_MOD_CONTROL) | GLFW_MOD_SHIFT);
-        boolean altShift = mods == ((SystemUtils.IS_OS_WINDOWS ? GLFW_MOD_CONTROL : GLFW_MOD_ALT) | GLFW_MOD_SHIFT);
+        boolean ctrl = SystemUtils.IS_OS_MAC
+            ? Input.modsMatch(input.modifiers(), MOD_SUPER)
+            : Input.modsMatch(input.modifiers(), MOD_CONTROL);
 
-        if (control && key == GLFW_KEY_V) {
+        boolean shift = Input.modsMatch(input.modifiers(), MOD_SHIFT);
+
+        // modifier for jumping to the start/end of the text box, and the one for jumping by word
+        int lineMod = SystemUtils.IS_OS_WINDOWS ? MOD_ALT : SystemUtils.IS_OS_MAC ? MOD_SUPER : MOD_CONTROL;
+        int wordMod = SystemUtils.IS_OS_WINDOWS ? MOD_CONTROL : MOD_ALT;
+
+        boolean line = Input.modsMatch(input.modifiers(), lineMod);
+        boolean word = Input.modsMatch(input.modifiers(), wordMod);
+        boolean ctrlShift = Input.modsMatch(input.modifiers(), lineMod, MOD_SHIFT);
+        boolean altShift = Input.modsMatch(input.modifiers(), wordMod, MOD_SHIFT);
+        boolean noMods = Input.modsMatch(input.modifiers());
+
+        if (ctrl && input.key() == KEY_V) {
             clearSelection();
 
             String preText = text;
-            String clipboard = mc.keyboard.getClipboard();
+            String clipboard = mc.keyboardHandler.getClipboard();
             int addedChars = 0;
 
             StringBuilder sb = new StringBuilder(text.length() + clipboard.length());
-            sb.append(text, 0, cursor);
+            sb.append(text);
 
             for (int i = 0; i < clipboard.length(); i++) {
                 char c = clipboard.charAt(i);
-                if (filter.filter(text, c)) {
-                    sb.append(c);
+                if (filter.filter(sb.toString(), c)) {
+                    sb.insert(cursor + addedChars, c);
                     addedChars++;
                 }
             }
-
-            sb.append(text, cursor, text.length());
 
             text = sb.toString();
             cursor += addedChars;
@@ -295,72 +345,73 @@ public abstract class WTextBox extends WWidget {
 
             if (!text.equals(preText)) runAction();
             return true;
-        }
-        else if (key == GLFW_KEY_BACKSPACE) {
+        } else if (input.key() == KEY_BACKSPACE) {
             if (cursor > 0 && cursor == selectionStart && cursor == selectionEnd) {
                 String preText = text;
 
-                int count = (mods == (SystemUtils.IS_OS_WINDOWS ? GLFW_MOD_ALT : MinecraftClient.IS_SYSTEM_MAC ? GLFW_MOD_SUPER : GLFW_MOD_CONTROL))
+                int count = line
                     ? cursor
-                    : (mods == (SystemUtils.IS_OS_WINDOWS ? GLFW_MOD_CONTROL : GLFW_MOD_ALT))
-                    ? countToNextSpace(true)
-                    : 1;
+                    : word
+                      ? countToNextSpace(true)
+                      : 1;
 
                 text = text.substring(0, cursor - count) + text.substring(cursor);
                 cursor -= count;
                 resetSelection();
 
                 if (!text.equals(preText)) runAction();
-            }
-            else if (cursor != selectionStart || cursor != selectionEnd) {
+            } else if (cursor != selectionStart || cursor != selectionEnd) {
                 clearSelection();
             }
 
             return true;
-        }
-        else if (key == GLFW_KEY_DELETE) {
-            if (cursor < text.length()) {
-                if (cursor == selectionStart && cursor == selectionEnd) {
+        } else if (input.key() == KEY_DELETE) {
+            if (cursor == selectionStart && cursor == selectionEnd) {
+                if (cursor < text.length()) {
                     String preText = text;
 
-                    int count = mods == (SystemUtils.IS_OS_WINDOWS ? GLFW_MOD_ALT : MinecraftClient.IS_SYSTEM_MAC ? GLFW_MOD_SUPER : GLFW_MOD_CONTROL)
+                    int count = line
                         ? text.length() - cursor
-                        : (mods == (SystemUtils.IS_OS_WINDOWS ? GLFW_MOD_CONTROL : GLFW_MOD_ALT))
-                        ? countToNextSpace(false)
-                        : 1;
+                        : word
+                          ? countToNextSpace(false)
+                          : 1;
 
                     text = text.substring(0, cursor) + text.substring(cursor + count);
 
                     if (!text.equals(preText)) runAction();
                 }
-                else {
-                    clearSelection();
-                }
+            } else {
+                clearSelection();
             }
-
             return true;
-        }
-        else if (key == GLFW_KEY_LEFT) {
+        } else if (input.key() == KEY_LEFT) {
             if (cursor > 0) {
-                if (mods == (SystemUtils.IS_OS_WINDOWS ? GLFW_MOD_CONTROL : GLFW_MOD_ALT)) {
+                // sets the cursor to just after the next leftmost space
+                if (word) {
                     cursor -= countToNextSpace(true);
                     resetSelection();
                 }
-                else if (mods == (SystemUtils.IS_OS_WINDOWS ? GLFW_MOD_ALT : MinecraftClient.IS_SYSTEM_MAC ? GLFW_MOD_SUPER : GLFW_MOD_CONTROL)) {
+                // sets the cursor to the beginning of the text box
+                else if (line) {
                     cursor = 0;
                     resetSelection();
                 }
+                // sets the selection to just after the next leftmost space
                 else if (altShift) {
                     if (cursor == selectionEnd && cursor != selectionStart) {
                         cursor -= countToNextSpace(true);
-                        selectionEnd = cursor;
-                    }
-                    else {
+                        if (cursor >= selectionStart) selectionEnd = cursor;
+                        else {
+                            selectionEnd = selectionStart;
+                            selectionStart = cursor;
+                        }
+                    } else {
                         cursor -= countToNextSpace(true);
                         selectionStart = cursor;
                     }
                 }
-                else if (controlShift) {
+                // sets the selection to the beginning of the text box
+                else if (ctrlShift) {
                     if (cursor == selectionEnd && cursor != selectionStart) {
                         selectionEnd = selectionStart;
                     }
@@ -368,21 +419,21 @@ public abstract class WTextBox extends WWidget {
 
                     cursor = 0;
                 }
+                // moves the selection one character to the left
                 else if (shift) {
                     if (cursor == selectionEnd && cursor != selectionStart) {
                         selectionEnd = cursor - 1;
-                    }
-                    else {
+                    } else {
                         selectionStart = cursor - 1;
                     }
 
                     cursor--;
                 }
+                // moves the cursor one character to the left
                 else {
                     if (cursor == selectionEnd && cursor != selectionStart) {
                         cursor = selectionStart;
-                    }
-                    else {
+                    } else if (!(cursor == selectionStart && cursor != selectionEnd)) {
                         cursor--;
                     }
 
@@ -390,57 +441,62 @@ public abstract class WTextBox extends WWidget {
                 }
 
                 cursorChanged();
-            }
-            else if (selectionStart != selectionEnd && selectionStart == 0 && mods == 0) {
+            } else if (selectionStart != selectionEnd && selectionStart == 0 && noMods) {
                 cursor = 0;
                 resetSelection();
                 cursorChanged();
             }
 
             return true;
-        }
-        else if (key == GLFW_KEY_RIGHT) {
+        } else if (input.key() == KEY_RIGHT) {
             if (cursor < text.length()) {
-                if (mods == (SystemUtils.IS_OS_WINDOWS ? GLFW_MOD_CONTROL : GLFW_MOD_ALT)) {
+                // sets the cursor to just before the next rightmost space
+                if (word) {
                     cursor += countToNextSpace(false);
                     resetSelection();
                 }
-                else if (mods == (SystemUtils.IS_OS_WINDOWS ? GLFW_MOD_ALT : MinecraftClient.IS_SYSTEM_MAC ? GLFW_MOD_SUPER : GLFW_MOD_CONTROL)) {
+                // sets the cursor to the end of the text box
+                else if (line) {
                     cursor = text.length();
                     resetSelection();
                 }
+                // sets the selection to just before the next rightmost space
                 else if (altShift) {
                     if (cursor == selectionStart && cursor != selectionEnd) {
                         cursor += countToNextSpace(false);
-                        selectionStart = cursor;
-                    }
-                    else {
+                        if (cursor <= selectionEnd) selectionStart = cursor;
+                        else {
+                            selectionStart = selectionEnd;
+                            selectionEnd = cursor;
+                        }
+                    } else {
                         cursor += countToNextSpace(false);
                         selectionEnd = cursor;
                     }
                 }
-                else if (controlShift) {
+                // sets the selection to the end of the text box
+                else if (ctrlShift) {
                     if (cursor == selectionStart && cursor != selectionEnd) {
                         selectionStart = selectionEnd;
                     }
                     cursor = text.length();
                     selectionEnd = cursor;
                 }
+                // moves the selection one character to the right
                 else if (shift) {
                     if (cursor == selectionStart && cursor != selectionEnd) {
                         selectionStart = cursor + 1;
-                    }
-                    else {
+                    } else {
                         selectionEnd = cursor + 1;
                     }
 
                     cursor++;
                 }
+                // moves the cursor one character to the right
                 else {
                     if (cursor == selectionStart && cursor != selectionEnd) {
                         cursor = selectionEnd;
-                    }
-                    else {
+                    } else if (!(cursor == selectionEnd && cursor != selectionStart)) {
                         cursor++;
                     }
 
@@ -448,16 +504,14 @@ public abstract class WTextBox extends WWidget {
                 }
 
                 cursorChanged();
-            }
-            else if (selectionStart != selectionEnd && selectionEnd == text.length() && mods == 0) {
+            } else if (selectionStart != selectionEnd && selectionEnd == text.length() && noMods) {
                 cursor = text.length();
                 resetSelection();
                 cursorChanged();
             }
 
             return true;
-        }
-        else if (key == GLFW_KEY_DOWN && completionsW != null) {
+        } else if (input.key() == KEY_DOWN && completionsW != null) {
             int currentI = getSelectedCompletion();
 
             if (currentI == Math.min(5, completions.size() - 1)) {
@@ -465,15 +519,13 @@ public abstract class WTextBox extends WWidget {
                     completionsStart++;
                     createCompletions(completionsStart + currentI);
                 }
-            }
-            else {
+            } else {
                 ((ICompletionItem) completionsW.cells.get(currentI).widget()).setSelected(false);
                 ((ICompletionItem) completionsW.cells.get(currentI + 1).widget()).setSelected(true);
             }
 
             return true;
-        }
-        else if (key == GLFW_KEY_UP && completionsW != null) {
+        } else if (input.key() == KEY_UP && completionsW != null) {
             int currentI = getSelectedCompletion();
 
             if (currentI == 0) {
@@ -481,8 +533,7 @@ public abstract class WTextBox extends WWidget {
                     completionsStart--;
                     createCompletions(completionsStart + currentI);
                 }
-            }
-            else {
+            } else {
                 ((ICompletionItem) completionsW.cells.get(currentI).widget()).setSelected(false);
                 ((ICompletionItem) completionsW.cells.get(currentI - 1).widget()).setSelected(true);
             }
@@ -505,13 +556,13 @@ public abstract class WTextBox extends WWidget {
     }
 
     @Override
-    public boolean onCharTyped(char c) {
+    public boolean onCharTyped(CharacterEvent input) {
         if (!focused) return false;
 
-        if (filter.filter(text, c)) {
+        if (filter.filter(text, input.codepoint())) {
             clearSelection();
 
-            text = text.substring(0, cursor) + c + text.substring(cursor);
+            text = text.substring(0, cursor) + input.codepointAsString() + text.substring(cursor);
 
             cursor++;
             resetSelection();
@@ -557,10 +608,14 @@ public abstract class WTextBox extends WWidget {
     }
 
     private int countToNextSpace(boolean toLeft) {
+        return countToNextSpace(toLeft, cursor);
+    }
+
+    private int countToNextSpace(boolean toLeft, int startPos) {
         int count = 0;
         boolean hadNonSpace = false;
 
-        for (int i = cursor; toLeft ? i >= 0 : i < text.length(); i += toLeft ? -1 : 1) {
+        for (int i = startPos; toLeft ? i >= 0 : i < text.length(); i += toLeft ? -1 : 1) {
             int j = i;
             if (toLeft) j--;
 
@@ -606,7 +661,7 @@ public abstract class WTextBox extends WWidget {
             textStart += cursor - (textStart + maxTextWidth());
         }
 
-        textStart = MathHelper.clamp(textStart, 0, Math.max(textWidth() - maxTextWidth(), 0));
+        textStart = Mth.clamp(textStart, 0, Math.max(textWidth() - maxTextWidth(), 0));
 
         onCursorChanged();
 
@@ -614,9 +669,11 @@ public abstract class WTextBox extends WWidget {
         completions = renderer.getCompletions(text, this.cursor);
         completionsStart = 0;
         completionsW = null;
-        if (completions != null && completions.size() > 0) createCompletions(0);
+        if (completions != null && !completions.isEmpty()) createCompletions(0);
     }
-    protected void onCursorChanged() {}
+
+    protected void onCursorChanged() {
+    }
 
     private void createCompletions(int selected) {
         completionsW = createCompletionsRootWidget();
@@ -632,7 +689,7 @@ public abstract class WTextBox extends WWidget {
         }
 
         completionsW.calculateSize();
-        completionsW.x = Math.min(Math.max(x - pad() * 2 + getTextWidth(cursor) - getOverflowWidthForRender(), x), x + width - completionsW.width);
+        completionsW.x = Math.clamp(x - pad() * 2 + getTextWidth(cursor) - getOverflowWidthForRender(), x, x + width - completionsW.width);
         completionsW.y = y + height;
         completionsW.calculateWidgetPositions();
     }
@@ -661,7 +718,7 @@ public abstract class WTextBox extends WWidget {
     public void set(String text) {
         this.text = text;
 
-        cursor = MathHelper.clamp(cursor, 0, text.length());
+        cursor = Mth.clamp(cursor, 0, text.length());
         selectionStart = cursor;
         selectionEnd = cursor;
 
@@ -669,10 +726,7 @@ public abstract class WTextBox extends WWidget {
         cursorChanged();
     }
 
-    public boolean isFocused() {
-        return focused;
-    }
-
+    @Override
     public void setFocused(boolean focused) {
         if (this.focused && !focused && actionOnUnfocused != null) actionOnUnfocused.run();
 

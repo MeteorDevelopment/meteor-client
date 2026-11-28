@@ -5,14 +5,13 @@
 
 package meteordevelopment.meteorclient.settings;
 
-import com.google.common.collect.ImmutableList;
-import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.CompoundTag;
 
 import java.util.List;
 import java.util.function.Consumer;
 
 public class BoolSetting extends Setting<Boolean> {
-    private static final List<String> SUGGESTIONS = ImmutableList.of("true", "false", "toggle");
+    private static final List<String> SUGGESTIONS = List.of("true", "false", "toggle");
 
     private BoolSetting(String name, String description, Boolean defaultValue, Consumer<Boolean> onChanged, Consumer<Setting<Boolean>> onModuleActivated, IVisible visible) {
         super(name, description, defaultValue, onChanged, onModuleActivated, visible);
@@ -32,20 +31,20 @@ public class BoolSetting extends Setting<Boolean> {
     }
 
     @Override
-    public List<String> getSuggestions() {
+    public Iterable<String> getSuggestions() {
         return SUGGESTIONS;
     }
 
     @Override
-    public NbtCompound save(NbtCompound tag) {
+    public CompoundTag save(CompoundTag tag) {
         tag.putBoolean("value", get());
 
         return tag;
     }
 
     @Override
-    public Boolean load(NbtCompound tag) {
-        set(tag.getBoolean("value"));
+    public Boolean load(CompoundTag tag) {
+        set(tag.getBooleanOr("value", false));
 
         return get();
     }

@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.gui.screens;
 
+import com.mojang.datafixers.util.Pair;
 import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.tabs.TabScreen;
 import meteordevelopment.meteorclient.gui.tabs.Tabs;
@@ -19,20 +20,28 @@ import meteordevelopment.meteorclient.systems.modules.Category;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.utils.misc.NbtUtils;
-import net.minecraft.item.Items;
+import meteordevelopment.meteorclient.utils.misc.input.Input;
+import meteordevelopment.meteorclient.utils.render.DisplayItemUtils;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.world.item.Items;
+import org.apache.commons.lang3.SystemUtils;
+import org.jspecify.annotations.NonNull;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import static com.mojang.blaze3d.platform.InputConstants.*;
 import static meteordevelopment.meteorclient.utils.Utils.getWindowHeight;
 import static meteordevelopment.meteorclient.utils.Utils.getWindowWidth;
 
 public class ModulesScreen extends TabScreen {
     private WCategoryController controller;
+    private WWindow searchWindow;
+    private WTextBox searchTextBox;
 
     public ModulesScreen(GuiTheme theme) {
-        super(theme, Tabs.get().get(0));
+        super(theme, Tabs.get().getFirst());
     }
 
     @Override
@@ -40,9 +49,11 @@ public class ModulesScreen extends TabScreen {
         controller = add(new WCategoryController()).widget();
 
         // Help
-        WVerticalList help = add(theme.verticalList()).pad(4).bottom().widget();
-        help.add(theme.label("Left click - Toggle module"));
-        help.add(theme.label("Right click - Open module settings"));
+        if (theme.modulesHelpText()) {
+            WVerticalList help = add(theme.verticalList()).pad(4).bottom().widget();
+            help.add(theme.label("Left click - Toggle module"));
+            help.add(theme.label("Right click - Open module settings"));
+        }
     }
 
     @Override
@@ -53,14 +64,14 @@ public class ModulesScreen extends TabScreen {
 
     // Category
 
-    protected WWindow createCategory(WContainer c, Category category) {
+    protected WWindow createCategory(WContainer c, Category category, List<Module> moduleList) {
         WWindow w = theme.window(category.name);
         w.id = category.name;
         w.padding = 0;
         w.spacing = 0;
 
         if (theme.categoryIcons()) {
-            w.beforeHeaderInit = wContainer -> wContainer.add(theme.item(category.icon)).pad(2);
+            w.beforeHeaderInit = wContainer -> wContainer.add(theme.item(category.icon.get())).pad(2);
         }
 
         c.add(w);
@@ -68,7 +79,7 @@ public class ModulesScreen extends TabScreen {
         w.view.hasScrollBar = false;
         w.view.spacing = 0;
 
-        for (Module module : Modules.get().getGroup(category)) {
+        for (Module module : moduleList) {
             w.add(theme.module(module)).expandX();
         }
 
@@ -80,30 +91,30 @@ public class ModulesScreen extends TabScreen {
     protected void createSearchW(WContainer w, String text) {
         if (!text.isEmpty()) {
             // Titles
-            Set<Module> modules = Modules.get().searchTitles(text);
+            List<Pair<Module, String>> modules = Modules.get().searchTitles(text);
 
-            if (modules.size() > 0) {
+            if (!modules.isEmpty()) {
                 WSection section = w.add(theme.section("Modules")).expandX().widget();
                 section.spacing = 0;
 
                 int count = 0;
-                for (Module module : modules) {
+                for (Pair<Module, String> p : modules) {
                     if (count >= Config.get().moduleSearchCount.get() || count >= modules.size()) break;
-                    section.add(theme.module(module)).expandX();
+                    section.add(theme.module(p.getFirst(), p.getSecond())).expandX();
                     count++;
                 }
             }
 
             // Settings
-            modules = Modules.get().searchSettingTitles(text);
+            Set<Module> settings = Modules.get().searchSettingTitles(text);
 
-            if (modules.size() > 0) {
+            if (!settings.isEmpty()) {
                 WSection section = w.add(theme.section("Settings")).expandX().widget();
                 section.spacing = 0;
 
                 int count = 0;
-                for (Module module : modules) {
-                    if (count >= Config.get().moduleSearchCount.get() || count >= modules.size()) break;
+                for (Module module : settings) {
+                    if (count >= Config.get().moduleSearchCount.get() || count >= settings.size()) break;
                     section.add(theme.module(module)).expandX();
                     count++;
                 }
@@ -114,9 +125,10 @@ public class ModulesScreen extends TabScreen {
     protected WWindow createSearch(WContainer c) {
         WWindow w = theme.window("Search");
         w.id = "search";
+        searchWindow = w;
 
         if (theme.categoryIcons()) {
-            w.beforeHeaderInit = wContainer -> wContainer.add(theme.item(Items.COMPASS.getDefaultStack())).pad(2);
+            w.beforeHeaderInit = wContainer -> wContainer.add(theme.item(DisplayItemUtils.toStack(Items.COMPASS))).pad(2);
         }
 
         c.add(w);
@@ -128,6 +140,7 @@ public class ModulesScreen extends TabScreen {
 
         WTextBox text = w.add(theme.textBox("")).minWidth(140).expandX().widget();
         text.setFocused(true);
+        searchTextBox = text;
         text.action = () -> {
             l.clear();
             createSearchW(l, text.get());
@@ -137,6 +150,27 @@ public class ModulesScreen extends TabScreen {
         createSearchW(l, text.get());
 
         return w;
+    }
+
+    @Override
+    public boolean keyPressed(@NonNull KeyEvent input) {
+        if (locked) return false;
+
+        boolean ctrl = SystemUtils.IS_OS_MAC
+            ? Input.modsMatch(input.modifiers(), MOD_SUPER)
+            : Input.modsMatch(input.modifiers(), MOD_CONTROL);
+
+        if (ctrl && input.key() == KEY_F) {
+            if (searchWindow != null) searchWindow.setExpanded(true);
+            if (searchTextBox != null) {
+                searchTextBox.setFocused(true);
+                searchTextBox.setCursorMax();
+            }
+
+            return true;
+        }
+
+        return super.keyPressed(input);
     }
 
     // Favorites
@@ -151,7 +185,7 @@ public class ModulesScreen extends TabScreen {
         w.spacing = 0;
 
         if (theme.categoryIcons()) {
-            w.beforeHeaderInit = wContainer -> wContainer.add(theme.item(Items.NETHER_STAR.getDefaultStack())).pad(2);
+            w.beforeHeaderInit = wContainer -> wContainer.add(theme.item(DisplayItemUtils.toStack(Items.NETHER_STAR))).pad(2);
         }
 
         Cell<WWindow> cell = c.add(w);
@@ -164,16 +198,21 @@ public class ModulesScreen extends TabScreen {
     }
 
     protected boolean createFavoritesW(WWindow w) {
-        boolean hasFavorites = false;
+        List<Module> modules = new ArrayList<>();
 
         for (Module module : Modules.get().getAll()) {
             if (module.favorite) {
-                w.add(theme.module(module)).expandX();
-                hasFavorites = true;
+                modules.add(module);
             }
         }
 
-        return hasFavorites;
+        modules.sort((o1, o2) -> String.CASE_INSENSITIVE_ORDER.compare(o1.name, o2.name));
+
+        for (Module module : modules) {
+            w.add(theme.module(module)).expandX();
+        }
+
+        return !modules.isEmpty();
     }
 
     @Override
@@ -187,7 +226,8 @@ public class ModulesScreen extends TabScreen {
     }
 
     @Override
-    public void reload() {}
+    public void reload() {
+    }
 
     // Stuff
 
@@ -197,8 +237,19 @@ public class ModulesScreen extends TabScreen {
 
         @Override
         public void init() {
+            List<Module> moduleList = new ArrayList<>();
             for (Category category : Modules.loopCategories()) {
-                windows.add(createCategory(this, category));
+                for (Module module : Modules.get().getGroup(category)) {
+                    if (!Config.get().hiddenModules.get().contains(module)) {
+                        moduleList.add(module);
+                    }
+                }
+
+                // Ensure empty categories are not shown
+                if (!moduleList.isEmpty()) {
+                    windows.add(createCategory(this, category, moduleList));
+                    moduleList.clear();
+                }
             }
 
             windows.add(createSearch(this));
@@ -210,8 +261,7 @@ public class ModulesScreen extends TabScreen {
             if (favorites == null) {
                 favorites = createFavorites(this);
                 if (favorites != null) windows.add(favorites.widget());
-            }
-            else {
+            } else {
                 favorites.widget().clear();
 
                 if (!createFavoritesW(favorites.widget())) {

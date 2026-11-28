@@ -8,12 +8,9 @@ package meteordevelopment.meteorclient.commands.commands;
 import com.mojang.brigadier.arguments.DoubleArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import meteordevelopment.meteorclient.commands.Command;
-import net.minecraft.command.CommandSource;
-import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
-import net.minecraft.network.packet.c2s.play.VehicleMoveC2SPacket;
-
-import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
-import static meteordevelopment.meteorclient.MeteorClient.mc;
+import net.minecraft.client.multiplayer.ClientSuggestionProvider;
+import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
+import net.minecraft.network.protocol.game.ServerboundMoveVehiclePacket;
 
 public class VClipCommand extends Command {
     public VClipCommand() {
@@ -21,7 +18,7 @@ public class VClipCommand extends Command {
     }
 
     @Override
-    public void build(LiteralArgumentBuilder<CommandSource> builder) {
+    public void build(LiteralArgumentBuilder<ClientSuggestionProvider> builder) {
         builder.then(argument("blocks", DoubleArgumentType.doubleArg()).executes(context -> {
 
             double blocks = context.getArgument("blocks", Double.class);
@@ -31,24 +28,32 @@ public class VClipCommand extends Command {
             // Paper allows you to teleport 10 blocks for each move packet you send in that tick
             // Video explanation by LiveOverflow: https://www.youtube.com/watch?v=3HSnDsfkJT8
             int packetsRequired = (int) Math.ceil(Math.abs(blocks / 10));
-            if (mc.player.hasVehicle()) {
+
+            if (packetsRequired > 20) {
+                // Wouldn't work on paper anyway.
+                // Some servers don't have a vertical limit, so if it is more than 200 blocks, just use a "normal" tp
+                // This makes it, so you don't get kicked for sending too many packets
+                packetsRequired = 1;
+            }
+
+            if (mc.player.isPassenger()) {
                 // Vehicle version
                 // For each 10 blocks, send a vehicle move packet with no delta
                 for (int packetNumber = 0; packetNumber < (packetsRequired - 1); packetNumber++) {
-                    mc.player.networkHandler.sendPacket(new VehicleMoveC2SPacket(mc.player.getVehicle()));
+                    mc.player.connection.send(ServerboundMoveVehiclePacket.fromEntity(mc.player.getVehicle()));
                 }
                 // Now send the final vehicle move packet
-                mc.player.getVehicle().setPosition(mc.player.getVehicle().getX(), mc.player.getVehicle().getY() + blocks, mc.player.getVehicle().getZ());
-                mc.player.networkHandler.sendPacket(new VehicleMoveC2SPacket(mc.player.getVehicle()));
+                mc.player.getVehicle().setPos(mc.player.getVehicle().getX(), mc.player.getVehicle().getY() + blocks, mc.player.getVehicle().getZ());
+                mc.player.connection.send(ServerboundMoveVehiclePacket.fromEntity(mc.player.getVehicle()));
             } else {
                 // No vehicle version
                 // For each 10 blocks, send a player move packet with no delta
                 for (int packetNumber = 0; packetNumber < (packetsRequired - 1); packetNumber++) {
-                    mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(true));
+                    mc.player.connection.send(new ServerboundMovePlayerPacket.StatusOnly(true, mc.player.horizontalCollision));
                 }
                 // Now send the final player move packet
-                mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(mc.player.getX(), mc.player.getY() + blocks, mc.player.getZ(), true));
-                mc.player.setPosition(mc.player.getX(), mc.player.getY() + blocks, mc.player.getZ());
+                mc.player.connection.send(new ServerboundMovePlayerPacket.Pos(mc.player.getX(), mc.player.getY() + blocks, mc.player.getZ(), true, mc.player.horizontalCollision));
+                mc.player.setPos(mc.player.getX(), mc.player.getY() + blocks, mc.player.getZ());
             }
 
             return SINGLE_SUCCESS;

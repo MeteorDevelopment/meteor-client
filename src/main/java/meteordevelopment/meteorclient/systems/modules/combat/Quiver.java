@@ -5,42 +5,48 @@
 
 package meteordevelopment.meteorclient.systems.modules.combat;
 
+import it.unimi.dsi.fastutil.ints.IntArrayList;
+import it.unimi.dsi.fastutil.ints.IntList;
 import meteordevelopment.meteorclient.events.world.TickEvent;
-import meteordevelopment.meteorclient.mixin.AbstractBlockAccessor;
+import meteordevelopment.meteorclient.mixin.BlockBehaviourAccessor;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
+import meteordevelopment.meteorclient.utils.player.SlotUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.entity.effect.StatusEffect;
-import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.BowItem;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
-import net.minecraft.potion.PotionUtil;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.BowItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.alchemy.PotionContents;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 
-import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 public class Quiver extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgSafety = settings.createGroup("Safety");
 
 
-    private final Setting<List<StatusEffect>> effects = sgGeneral.add(new StatusEffectListSetting.Builder()
+    private final Setting<List<MobEffect>> effects = sgGeneral.add(new StatusEffectListSetting.Builder()
         .name("effects")
         .description("Which effects to shoot you with.")
-        .defaultValue(StatusEffects.STRENGTH)
+        .defaultValue(MobEffects.STRENGTH.value())
         .build()
     );
 
@@ -48,8 +54,8 @@ public class Quiver extends Module {
         .name("cooldown")
         .description("How many ticks between shooting effects (19 minimum for NCP).")
         .defaultValue(10)
-        .range(0,40)
-        .sliderRange(0,40)
+        .range(0, 40)
+        .sliderRange(0, 40)
         .build()
     );
 
@@ -94,16 +100,16 @@ public class Quiver extends Module {
         .name("min-health")
         .description("How much health you must have to quiver.")
         .defaultValue(10)
-        .range(0,36)
-        .sliderRange(0,36)
+        .range(0, 36)
+        .sliderRange(0, 36)
         .build()
     );
 
-    private final List<Integer> arrowSlots = new ArrayList<>();
+    private final IntList arrowSlots = new IntArrayList();
     private FindItemResult bow;
     private boolean wasMainhand, wasHotbar;
     private int timer, prevSlot;
-    private final BlockPos.Mutable testPos = new BlockPos.Mutable();
+    private final BlockPos.MutableBlockPos testPos = new BlockPos.MutableBlockPos();
 
     public Quiver() {
         super(Categories.Combat, "quiver", "Shoots arrows at yourself.");
@@ -111,36 +117,41 @@ public class Quiver extends Module {
 
     @Override
     public void onActivate() {
+        wasMainhand = true;
+        wasHotbar = false;
+        prevSlot = -1;
+
         bow = InvUtils.find(Items.BOW);
         if (!shouldQuiver()) return;
 
-        mc.options.useKey.setPressed(false);
-        mc.interactionManager.stopUsingItem(mc.player);
+        mc.options.keyUse.setDown(false);
+        mc.gameMode.releaseUsingItem(mc.player);
 
         prevSlot = bow.slot();
         wasHotbar = bow.isHotbar();
         timer = 0;
 
         if (!bow.isMainHand()) {
+            wasMainhand = false;
             if (wasHotbar) InvUtils.swap(bow.slot(), true);
-            else InvUtils.move().from(mc.player.getInventory().selectedSlot).to(prevSlot);
-        } else wasMainhand = true;
+            else InvUtils.move().from(mc.player.getInventory().getSelectedSlot()).to(prevSlot);
+        }
 
         arrowSlots.clear();
-        List<StatusEffect> usedEffects = new ArrayList<>();
+        Set<MobEffect> usedEffects = new HashSet<>();
 
-        for (int i = mc.player.getInventory().size(); i > 0; i--) {
-            if (i == mc.player.getInventory().selectedSlot) continue;
+        for (int i = SlotUtils.OFFHAND; i >= SlotUtils.HOTBAR_START; i--) {
+            if (SlotUtils.isArmor(i) || i == mc.player.getInventory().getSelectedSlot()) continue;
 
-            ItemStack item = mc.player.getInventory().getStack(i);
+            ItemStack item = mc.player.getInventory().getItem(i);
 
-            if (item.getItem() != Items.TIPPED_ARROW)  continue;
+            if (item.getItem() != Items.TIPPED_ARROW) continue;
 
-            List<StatusEffectInstance> effects = PotionUtil.getPotionEffects(item);
+            Iterator<MobEffectInstance> effects = item.getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY).getAllEffects().iterator();
 
-            if (effects.isEmpty()) continue;
+            if (!effects.hasNext()) continue;
 
-            StatusEffect effect = effects.get(0).getEffectType();
+            MobEffect effect = effects.next().getEffect().value();
 
             if (this.effects.get().contains(effect)
                 && !usedEffects.contains(effect)
@@ -153,9 +164,11 @@ public class Quiver extends Module {
 
     @Override
     public void onDeactivate() {
+        mc.options.keyUse.setDown(false);
+
         if (!wasMainhand) {
             if (wasHotbar) InvUtils.swapBack();
-            else InvUtils.move().from(mc.player.getInventory().selectedSlot).to(prevSlot);
+            else if (prevSlot != -1) InvUtils.move().from(mc.player.getInventory().getSelectedSlot()).to(prevSlot);
         }
     }
 
@@ -173,19 +186,18 @@ public class Quiver extends Module {
             return;
         }
 
-        boolean charging = mc.options.useKey.isPressed();
+        boolean charging = mc.options.keyUse.isDown();
 
         if (!charging) {
-            InvUtils.move().from(arrowSlots.get(0)).to(9);
-            mc.options.useKey.setPressed(true);
+            if (arrowSlots.getInt(0) != 9) InvUtils.move().from(arrowSlots.getInt(0)).to(9);
+            mc.options.keyUse.setDown(true);
         } else {
-            if (BowItem.getPullProgress(mc.player.getItemUseTime()) >= 0.12) {
-                int targetSlot = arrowSlots.get(0);
-                arrowSlots.remove(0);
+            if (BowItem.getPowerForTime(mc.player.getTicksUsingItem()) >= 0.12) {
+                int targetSlot = arrowSlots.removeInt(0);
 
-                mc.getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.LookAndOnGround(mc.player.getYaw(), -90, mc.player.isOnGround()));
-                mc.options.useKey.setPressed(false);
-                mc.interactionManager.stopUsingItem(mc.player);
+                mc.getConnection().send(new ServerboundMovePlayerPacket.Rot(mc.player.getYRot(), -90, mc.player.onGround(), mc.player.horizontalCollision));
+                mc.options.keyUse.setDown(false);
+                mc.gameMode.releaseUsingItem(mc.player);
                 if (targetSlot != 9) InvUtils.move().from(9).to(targetSlot);
 
                 timer = cooldown.get();
@@ -212,7 +224,7 @@ public class Quiver extends Module {
             return false;
         }
 
-        if (onlyOnGround.get() && !mc.player.isOnGround()) {
+        if (onlyOnGround.get() && !mc.player.onGround()) {
             if (chatInfo.get()) error("You are not on the ground, disabling.");
             toggle();
             return false;
@@ -228,29 +240,29 @@ public class Quiver extends Module {
     }
 
     private boolean headIsOpen() {
-        testPos.set(mc.player.getBlockPos().add(0, 1, 0));
-        BlockState pos1 = mc.world.getBlockState(testPos);
-        if (((AbstractBlockAccessor) pos1.getBlock()).isCollidable())  return false;
+        testPos.setWithOffset(mc.player.blockPosition(), 0, 1, 0);
+        BlockState pos1 = mc.level.getBlockState(testPos);
+        if (((BlockBehaviourAccessor) pos1.getBlock()).meteor$isHasCollision()) return false;
 
-        testPos.add(0, 1, 0);
-        BlockState pos2 = mc.world.getBlockState(testPos);
-        return !((AbstractBlockAccessor) pos2.getBlock()).isCollidable();
+        testPos.move(0, 1, 0);
+        BlockState pos2 = mc.level.getBlockState(testPos);
+        return !((BlockBehaviourAccessor) pos2.getBlock()).meteor$isHasCollision();
     }
 
-    private boolean hasEffect(StatusEffect effect) {
-        for (StatusEffectInstance statusEffect : mc.player.getStatusEffects()) {
-            if (statusEffect.getEffectType() == effect) return true;
+    private boolean hasEffect(MobEffect effect) {
+        for (MobEffectInstance statusEffect : mc.player.getActiveEffects()) {
+            if (statusEffect.getEffect().value().equals(effect)) return true;
         }
 
         return false;
     }
 
-    private boolean isSurrounded(PlayerEntity target) {
+    private boolean isSurrounded(Player target) {
         for (Direction dir : Direction.values()) {
             if (dir == Direction.UP || dir == Direction.DOWN) continue;
 
-            testPos.set(target.getBlockPos()).offset(dir);
-            Block block = mc.world.getBlockState(testPos).getBlock();
+            testPos.setWithOffset(target.blockPosition(), dir);
+            Block block = mc.level.getBlockState(testPos).getBlock();
 
             if (block != Blocks.OBSIDIAN && block != Blocks.BEDROCK && block != Blocks.RESPAWN_ANCHOR
                 && block != Blocks.CRYING_OBSIDIAN && block != Blocks.NETHERITE_BLOCK) {

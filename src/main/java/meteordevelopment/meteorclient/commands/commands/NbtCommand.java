@@ -5,151 +5,204 @@
 
 package meteordevelopment.meteorclient.commands.commands;
 
-import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
+import com.mojang.serialization.DataResult;
 import meteordevelopment.meteorclient.commands.Command;
-import meteordevelopment.meteorclient.commands.arguments.CompoundNbtTagArgumentType;
-import meteordevelopment.meteorclient.systems.config.Config;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.argument.NbtPathArgumentType;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtHelper;
-import net.minecraft.network.packet.c2s.play.CreativeInventoryActionC2SPacket;
-import net.minecraft.text.ClickEvent;
-import net.minecraft.text.HoverEvent;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
+import meteordevelopment.meteorclient.commands.arguments.ComponentMapArgumentType;
+import meteordevelopment.meteorclient.utils.misc.text.MeteorClickEvent;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.multiplayer.ClientSuggestionProvider;
+import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.commands.arguments.NbtPathArgument;
+import net.minecraft.commands.arguments.ResourceKeyArgument;
+import net.minecraft.core.component.*;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.nbt.NbtUtils;
+import net.minecraft.nbt.Tag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
+import net.minecraft.network.protocol.game.ServerboundSetCreativeModeSlotPacket;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.commands.data.DataAccessor;
+import net.minecraft.server.commands.data.EntityDataAccessor;
+import net.minecraft.world.item.ItemStack;
 
-import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
-import static meteordevelopment.meteorclient.MeteorClient.mc;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Set;
 
 public class NbtCommand extends Command {
+    private static final DynamicCommandExceptionType MALFORMED_ITEM_EXCEPTION = new DynamicCommandExceptionType(
+        error -> Component.translatableEscape("arguments.item.malformed", error)
+    );
+    private final MutableComponent copyButton = Component.literal("NBT").setStyle(Style.EMPTY
+        .applyFormat(ChatFormatting.UNDERLINE)
+        .withClickEvent(new MeteorClickEvent(
+            this.toString("copy")
+        ))
+        .withHoverEvent(new HoverEvent.ShowText(
+            Component.literal("Copy the NBT data to your clipboard.")
+        )));
+
     public NbtCommand() {
         super("nbt", "Modifies NBT data for an item, example: .nbt add {display:{Name:'{\"text\":\"$cRed Name\"}'}}");
     }
 
     @Override
-    public void build(LiteralArgumentBuilder<CommandSource> builder) {
-        builder.then(literal("add").then(argument("nbt", CompoundNbtTagArgumentType.create()).executes(s -> {
-            ItemStack stack = mc.player.getInventory().getMainHandStack();
+    public void build(LiteralArgumentBuilder<ClientSuggestionProvider> builder) {
+        builder.then(literal("add").then(argument("component", ComponentMapArgumentType.componentMap(REGISTRY_ACCESS)).executes(ctx -> {
+            ItemStack stack = mc.player.getInventory().getSelectedItem();
 
             if (validBasic(stack)) {
-                NbtCompound tag = CompoundNbtTagArgumentType.get(s);
-                NbtCompound source = stack.getOrCreateNbt();
+                DataComponentMap itemComponents = stack.getComponents();
+                DataComponentMap newComponents = ComponentMapArgumentType.getComponentMap(ctx, "component");
 
-                if (tag != null) {
-                    source.copyFrom(tag);
-                    setStack(stack);
-                } else {
-                    error("Some of the NBT data could not be found, try using: " + Config.get().prefix.get() + "nbt set {nbt}");
+                DataComponentMap testComponents = DataComponentMap.composite(itemComponents, newComponents);
+                ItemStack testStack = stack.copy();
+                testStack.applyComponents(testComponents);
+                DataResult<ItemStack> dataResult = ItemStack.validateStrict(testStack);
+                dataResult.getOrThrow(MALFORMED_ITEM_EXCEPTION::create);
+
+                stack.applyComponents(testComponents);
+
+                setStack(stack);
+            }
+
+            return SINGLE_SUCCESS;
+        })));
+
+        builder.then(literal("set").then(argument("component", ComponentMapArgumentType.componentMap(REGISTRY_ACCESS)).executes(ctx -> {
+            ItemStack stack = mc.player.getInventory().getSelectedItem();
+
+            if (validBasic(stack)) {
+                DataComponentMap components = ComponentMapArgumentType.getComponentMap(ctx, "component");
+                PatchedDataComponentMap stackComponents = (PatchedDataComponentMap) stack.getComponents();
+
+                ItemStack testStack = stack.copy();
+                testStack.applyComponents(components);
+                DataResult<ItemStack> dataResult = ItemStack.validateStrict(testStack);
+                dataResult.getOrThrow(MALFORMED_ITEM_EXCEPTION::create);
+
+                DataComponentPatch.Builder changesBuilder = DataComponentPatch.builder();
+                Set<DataComponentType<?>> types = new HashSet<>(stackComponents.keySet());
+
+                //set changes
+                for (TypedDataComponent<?> entry : components) {
+                    changesBuilder.set(entry);
+                    types.remove(entry.type());
                 }
-            }
 
-            return SINGLE_SUCCESS;
-        })));
+                //remove the rest
+                for (DataComponentType<?> type : types) {
+                    changesBuilder.remove(type);
+                }
 
-        builder.then(literal("set").then(argument("nbt", CompoundNbtTagArgumentType.create()).executes(context -> {
-            ItemStack stack = mc.player.getInventory().getMainHandStack();
+                stackComponents.applyPatch(changesBuilder.build());
 
-            if (validBasic(stack)) {
-                stack.setNbt(CompoundNbtTagArgumentType.get(context));
                 setStack(stack);
             }
 
             return SINGLE_SUCCESS;
         })));
 
-        builder.then(literal("remove").then(argument("nbt_path", NbtPathArgumentType.nbtPath()).executes(context -> {
-            ItemStack stack = mc.player.getInventory().getMainHandStack();
+        builder.then(literal("remove").then(argument("component", ResourceKeyArgument.key(Registries.DATA_COMPONENT_TYPE)).executes(ctx -> {
+            ItemStack stack = mc.player.getInventory().getSelectedItem();
 
             if (validBasic(stack)) {
-                NbtPathArgumentType.NbtPath path = context.getArgument("nbt_path", NbtPathArgumentType.NbtPath.class);
-                path.remove(stack.getNbt());
-            }
+                @SuppressWarnings("unchecked")
+                ResourceKey<DataComponentType<?>> componentTypeKey = (ResourceKey<DataComponentType<?>>) ctx.getArgument("component", ResourceKey.class);
 
-            return SINGLE_SUCCESS;
-        })));
+                DataComponentType<?> componentType = BuiltInRegistries.DATA_COMPONENT_TYPE.getValue(componentTypeKey);
 
-        builder.then(literal("get").executes(context -> {
-            ItemStack stack = mc.player.getInventory().getMainHandStack();
+                PatchedDataComponentMap components = (PatchedDataComponentMap) stack.getComponents();
+                components.applyPatch(DataComponentPatch.builder().remove(componentType).build());
 
-            if (stack == null) {
-                error("You must hold an item in your main hand.");
-            } else {
-                NbtCompound tag = stack.getNbt();
-
-                MutableText copyButton = Text.literal("NBT");
-                copyButton.setStyle(copyButton.getStyle()
-                        .withFormatting(Formatting.UNDERLINE)
-                        .withClickEvent(new ClickEvent(
-                                ClickEvent.Action.RUN_COMMAND,
-                                this.toString("copy")
-                        ))
-                        .withHoverEvent(new HoverEvent(
-                                HoverEvent.Action.SHOW_TEXT,
-                                Text.literal("Copy the NBT data to your clipboard.")
-                        )));
-
-                MutableText text = Text.literal("");
-                text.append(copyButton);
-
-                if (tag == null) text.append("{}");
-                else text.append(" ").append(NbtHelper.toPrettyPrintedText(tag));
-
-                info(text);
-            }
-
-            return SINGLE_SUCCESS;
-        }));
-
-        builder.then(literal("copy").executes(context -> {
-            ItemStack stack = mc.player.getInventory().getMainHandStack();
-
-            if (stack == null) {
-                error("You must hold an item in your main hand.");
-            } else {
-                NbtCompound tag = stack.getOrCreateNbt();
-                mc.keyboard.setClipboard(tag.toString());
-                MutableText nbt = Text.literal("NBT");
-                nbt.setStyle(nbt.getStyle()
-                        .withFormatting(Formatting.UNDERLINE)
-                        .withHoverEvent(new HoverEvent(
-                                HoverEvent.Action.SHOW_TEXT,
-                                NbtHelper.toPrettyPrintedText(tag)
-                        )));
-
-                MutableText text = Text.literal("");
-                text.append(nbt);
-                text.append(Text.literal(" data copied!"));
-
-                info(text);
-            }
-
-            return SINGLE_SUCCESS;
-        }));
-
-        builder.then(literal("paste").executes(context -> {
-            ItemStack stack = mc.player.getInventory().getMainHandStack();
-
-            if (validBasic(stack)) {
-                stack.setNbt(new CompoundNbtTagArgumentType().parse(new StringReader(mc.keyboard.getClipboard())));
                 setStack(stack);
             }
+
+            return SINGLE_SUCCESS;
+        }).suggests((_, suggestionsBuilder) -> {
+            ItemStack stack = mc.player.getInventory().getSelectedItem();
+            if (stack != ItemStack.EMPTY) {
+                DataComponentMap components = stack.getComponents();
+                String remaining = suggestionsBuilder.getRemaining().toLowerCase(Locale.ROOT);
+
+                SharedSuggestionProvider.filterResources(components.keySet().stream().map(BuiltInRegistries.DATA_COMPONENT_TYPE::wrapAsHolder).toList(), remaining, entry -> {
+                    if (entry.unwrapKey().isPresent()) return entry.unwrapKey().get().identifier();
+                    return null;
+                }, entry -> {
+                    DataComponentType<?> dataComponentType = entry.value();
+                    if (dataComponentType.codec() != null) {
+                        if (entry.unwrapKey().isPresent()) {
+                            suggestionsBuilder.suggest(entry.unwrapKey().get().identifier().toString());
+                        }
+                    }
+                });
+            }
+
+            return suggestionsBuilder.buildFuture();
+        })));
+
+        builder.then(literal("get").executes(_ -> {
+            DataAccessor dataCommandObject = new EntityDataAccessor(mc.player);
+            NbtPathArgument.NbtPath handPath = NbtPathArgument.NbtPath.of("SelectedItem");
+
+            MutableComponent text = Component.empty().append(copyButton);
+
+            try {
+                List<Tag> nbtElement = handPath.get(dataCommandObject.getData());
+                if (!nbtElement.isEmpty()) {
+                    text.append(" ").append(NbtUtils.toPrettyComponent(nbtElement.getFirst()));
+                }
+            } catch (CommandSyntaxException _) {
+                text.append("{}");
+            }
+
+            info(text);
+
+            return SINGLE_SUCCESS;
+        }));
+
+        builder.then(literal("copy").executes(_ -> {
+            DataAccessor dataCommandObject = new EntityDataAccessor(mc.player);
+            NbtPathArgument.NbtPath handPath = NbtPathArgument.NbtPath.of("SelectedItem");
+
+            MutableComponent text = Component.empty().append(copyButton);
+            String nbt = "{}";
+
+            try {
+                List<Tag> nbtElement = handPath.get(dataCommandObject.getData());
+                if (!nbtElement.isEmpty()) {
+                    text.append(" ").append(NbtUtils.toPrettyComponent(nbtElement.getFirst()));
+                    nbt = nbtElement.getFirst().toString();
+                }
+            } catch (CommandSyntaxException _) {
+                text.append("{}");
+            }
+
+            mc.keyboardHandler.setClipboard(nbt);
+
+            text.append(" data copied!");
+            info(text);
 
             return SINGLE_SUCCESS;
         }));
 
         builder.then(literal("count").then(argument("count", IntegerArgumentType.integer(-127, 127)).executes(context -> {
-            ItemStack stack = mc.player.getInventory().getMainHandStack();
+            ItemStack stack = mc.player.getInventory().getSelectedItem();
 
             if (validBasic(stack)) {
                 int count = IntegerArgumentType.getInteger(context, "count");
                 stack.setCount(count);
                 setStack(stack);
-                info("Set mainhand stack count to %s.",count);
+                info("Set mainhand stack count to %s.", count);
             }
 
             return SINGLE_SUCCESS;
@@ -157,16 +210,16 @@ public class NbtCommand extends Command {
     }
 
     private void setStack(ItemStack stack) {
-        mc.player.networkHandler.sendPacket(new CreativeInventoryActionC2SPacket(36 + mc.player.getInventory().selectedSlot, stack));
+        mc.player.connection.send(new ServerboundSetCreativeModeSlotPacket(36 + mc.player.getInventory().getSelectedSlot(), stack));
     }
 
     private boolean validBasic(ItemStack stack) {
-        if (!mc.player.getAbilities().creativeMode) {
+        if (!mc.player.getAbilities().instabuild) {
             error("Creative mode only.");
             return false;
         }
 
-        if (stack == null) {
+        if (stack == ItemStack.EMPTY) {
             error("You must hold an item in your main hand.");
             return false;
         }

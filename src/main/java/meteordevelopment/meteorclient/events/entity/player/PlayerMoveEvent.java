@@ -5,16 +5,16 @@
 
 package meteordevelopment.meteorclient.events.entity.player;
 
-import net.minecraft.entity.MovementType;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.entity.MoverType;
+import net.minecraft.world.phys.Vec3;
 
 public class PlayerMoveEvent {
     private static final PlayerMoveEvent INSTANCE = new PlayerMoveEvent();
 
-    public MovementType type;
-    public Vec3d movement;
+    public MoverType type;
+    public Vec3 movement;
 
-    public static PlayerMoveEvent get(MovementType type, Vec3d movement) {
+    public static PlayerMoveEvent get(MoverType type, Vec3 movement) {
         INSTANCE.type = type;
         INSTANCE.movement = movement;
         return INSTANCE;

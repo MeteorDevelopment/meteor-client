@@ -11,12 +11,12 @@ import meteordevelopment.meteorclient.systems.hud.*;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
-import net.minecraft.client.network.AbstractClientPlayerEntity;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.client.player.AbstractClientPlayer;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
@@ -91,7 +91,7 @@ public class PlayerRadarHud extends HudElement {
 
     private final Setting<Boolean> customScale = sgScale.add(new BoolSetting.Builder()
         .name("custom-scale")
-        .description("Applies custom text scale rather than the global one.")
+        .description("Applies a custom scale to this hud element.")
         .defaultValue(false)
         .build()
     );
@@ -123,7 +123,7 @@ public class PlayerRadarHud extends HudElement {
         .build()
     );
 
-    private final List<AbstractClientPlayerEntity> players = new ArrayList<>();
+    private final List<AbstractClientPlayer> players = new ArrayList<>();
 
     public PlayerRadarHud() {
         super(INFO);
@@ -144,16 +144,16 @@ public class PlayerRadarHud extends HudElement {
         double width = renderer.textWidth("Players:", shadow.get(), getScale());
         double height = renderer.textHeight(shadow.get(), getScale());
 
-        if (mc.world == null) {
+        if (mc.level == null || mc.getCameraEntity() == null) {
             setSize(width, height);
             return;
         }
 
-        for (PlayerEntity entity : getPlayers()) {
+        for (AbstractClientPlayer entity : getPlayers()) {
             if (entity.equals(mc.player)) continue;
             if (!friends.get() && Friends.get().isFriend(entity)) continue;
 
-            String text = entity.getEntityName();
+            String text = entity.getName().getString();
             if (distance.get()) text += String.format("(%sm)", Math.round(mc.getCameraEntity().distanceTo(entity)));
 
             width = Math.max(width, renderer.textWidth(text, shadow.get(), getScale()));
@@ -173,14 +173,14 @@ public class PlayerRadarHud extends HudElement {
 
         renderer.text("Players:", x + border.get() + alignX(renderer.textWidth("Players:", shadow.get(), getScale()), alignment.get()), y, secondaryColor.get(), shadow.get(), getScale());
 
-        if (mc.world == null) return;
+        if (mc.level == null || mc.getCameraEntity() == null) return;
         double spaceWidth = renderer.textWidth(" ", shadow.get(), getScale());
 
-        for (PlayerEntity entity : getPlayers()) {
+        for (AbstractClientPlayer entity : getPlayers()) {
             if (entity.equals(mc.player)) continue;
             if (!friends.get() && Friends.get().isFriend(entity)) continue;
 
-            String text = entity.getEntityName();
+            String text = entity.getName().getString();
             Color color = PlayerUtils.getPlayerColor(entity, primaryColor.get());
             String distanceText = null;
 
@@ -196,20 +196,22 @@ public class PlayerRadarHud extends HudElement {
             y += renderer.textHeight(shadow.get(), getScale()) + 2;
 
             x = renderer.text(text, x, y, color, shadow.get());
-            if (distance.get()) renderer.text(distanceText, x + spaceWidth, y, secondaryColor.get(), shadow.get(), getScale());
+            if (distance.get())
+                renderer.text(distanceText, x + spaceWidth, y, secondaryColor.get(), shadow.get(), getScale());
         }
     }
 
-    private List<AbstractClientPlayerEntity> getPlayers() {
+    private List<AbstractClientPlayer> getPlayers() {
         players.clear();
-        players.addAll(mc.world.getPlayers());
+        players.addAll(mc.level.players());
+        players.removeIf(Objects::isNull);
         if (players.size() > limit.get()) players.subList(limit.get() - 1, players.size() - 1).clear();
-        players.sort(Comparator.comparingDouble(e -> e.squaredDistanceTo(mc.getCameraEntity())));
+        players.sort(Comparator.comparingDouble(e -> e.distanceToSqr(mc.getCameraEntity())));
 
         return players;
     }
 
     private double getScale() {
-        return customScale.get() ? scale.get() : -1;
+        return customScale.get() ? scale.get() : Hud.get().getTextScale();
     }
 }

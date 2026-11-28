@@ -12,46 +12,71 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.misc.Pool;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
+import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.world.BlockIterator;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.*;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.level.block.*;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public class SpawnProofer extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-    private final Setting<Integer> range = sgGeneral.add(new IntSetting.Builder()
-        .name("range")
-        .description("Range for block placement and rendering")
-        .defaultValue(3)
+    private final Setting<Integer> placeDelay = sgGeneral.add(new IntSetting.Builder()
+        .name("place-delay")
+        .description("The tick delay between placing blocks.")
+        .defaultValue(1)
+        .range(0, 10)
+        .build()
+    );
+
+    private final Setting<Double> placeRange = sgGeneral.add(new DoubleSetting.Builder()
+        .name("place-range")
+        .description("How far away from the player you can place a block.")
+        .defaultValue(4.5)
         .min(0)
+        .sliderMax(6)
+        .build()
+    );
+
+    private final Setting<Double> wallsRange = sgGeneral.add(new DoubleSetting.Builder()
+        .name("walls-range")
+        .description("How far away from the player you can place a block behind walls.")
+        .defaultValue(4.5)
+        .min(0)
+        .sliderMax(6)
+        .build()
+    );
+
+    private final Setting<Integer> blocksPerTick = sgGeneral.add(new IntSetting.Builder()
+        .name("blocks-per-tick")
+        .description("How many blocks to place in one tick.")
+        .defaultValue(1)
+        .min(1)
+        .build()
+    );
+
+    private final Setting<Integer> lightLevel = sgGeneral.add(new IntSetting.Builder()
+        .name("light-level")
+        .description("Light levels to spawn proof. Old spawning light: 7.")
+        .defaultValue(0)
+        .min(0)
+        .sliderMax(15)
         .build()
     );
 
     private final Setting<List<Block>> blocks = sgGeneral.add(new BlockListSetting.Builder()
         .name("blocks")
-        .description("Block to use for spawn proofing")
+        .description("Block to use for spawn proofing.")
         .defaultValue(Blocks.TORCH, Blocks.STONE_BUTTON, Blocks.STONE_SLAB)
         .filter(this::filterBlocks)
-        .build()
-    );
-
-    private final Setting<Integer> delay = sgGeneral.add(new IntSetting.Builder()
-        .name("delay")
-        .description("Delay in ticks between placing blocks")
-        .defaultValue(0)
-        .min(0)
-        .build()
-    );
-
-    private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
-        .name("rotate")
-        .description("Rotates towards the blocks being placed.")
-        .defaultValue(true)
         .build()
     );
 
@@ -62,17 +87,16 @@ public class SpawnProofer extends Module {
         .build()
     );
 
-    private final Setting<Boolean> newMobSpawnLightLevel = sgGeneral.add(new BoolSetting.Builder()
-        .name("new-mob-spawn-light-level")
-        .description("Use the new (1.18+) mob spawn behavior")
+    private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
+        .name("rotate")
+        .description("Rotates towards the blocks being placed.")
         .defaultValue(true)
         .build()
     );
 
-
-    private final Pool<BlockPos.Mutable> spawnPool = new Pool<>(BlockPos.Mutable::new);
-    private final List<BlockPos.Mutable> spawns = new ArrayList<>();
-    private int ticksWaited;
+    private final Pool<BlockPos.MutableBlockPos> spawnPool = new Pool<>(BlockPos.MutableBlockPos::new);
+    private final List<BlockPos.MutableBlockPos> spawns = new ArrayList<>();
+    private int timer;
 
     public SpawnProofer() {
         super(Categories.World, "spawn-proofer", "Automatically spawnproofs unlit areas.");
@@ -80,27 +104,31 @@ public class SpawnProofer extends Module {
 
     @EventHandler
     private void onTickPre(TickEvent.Pre event) {
-        // Delay
-        if (delay.get() != 0 && ticksWaited < delay.get() - 1) {
-            return;
-        }
+        if (timer < placeDelay.get()) return;
 
         // Find slot
-        boolean foundBlock = InvUtils.testInHotbar(itemStack -> blocks.get().contains(Block.getBlockFromItem(itemStack.getItem())));
+        boolean foundBlock = InvUtils.testInHotbar(itemStack -> blocks.get().contains(Block.byItem(itemStack.getItem())));
         if (!foundBlock) {
-            error("Found none of the chosen blocks in hotbar");
+            error("Found none of the chosen blocks in hotbar.");
             toggle();
             return;
         }
 
         // Find spawn locations
-        for (BlockPos.Mutable blockPos : spawns) spawnPool.free(blockPos);
+        spawnPool.freeAll(spawns);
         spawns.clear();
-        BlockIterator.register(range.get(), range.get(), (blockPos, blockState) -> {
-            BlockUtils.MobSpawn spawn = BlockUtils.isValidMobSpawn(blockPos, newMobSpawnLightLevel.get());
+
+        BlockIterator.iCareAboutAirBlocks();
+        BlockIterator.register((int) Math.ceil(placeRange.get()), (int) Math.ceil(placeRange.get()), (blockPos, blockState) -> {
+            BlockUtils.MobSpawn spawn = BlockUtils.isValidMobSpawn(blockPos, blockState, lightLevel.get());
 
             if ((spawn == BlockUtils.MobSpawn.Always && (mode.get() == Mode.Always || mode.get() == Mode.Both)) ||
-                    spawn == BlockUtils.MobSpawn.Potential && (mode.get() == Mode.Potential || mode.get() == Mode.Both)) {
+                spawn == BlockUtils.MobSpawn.Potential && (mode.get() == Mode.Potential || mode.get() == Mode.Both)) {
+
+                if (!BlockUtils.canPlace(blockPos)) return;
+
+                // Check range and raycast
+                if (isOutOfRange(blockPos)) return;
 
                 spawns.add(spawnPool.get().set(blockPos));
             }
@@ -110,49 +138,48 @@ public class SpawnProofer extends Module {
     @EventHandler
     private void onTickPost(TickEvent.Post event) {
         // Delay
-        if (delay.get() != 0 && ticksWaited < delay.get() - 1) {
-            ticksWaited++;
-            return;
-        }
+        if (timer++ < placeDelay.get()) return;
 
         if (spawns.isEmpty()) return;
 
         // Find slot
-        FindItemResult block = InvUtils.findInHotbar(itemStack -> blocks.get().contains(Block.getBlockFromItem(itemStack.getItem())));
+        FindItemResult block = InvUtils.findInHotbar(itemStack -> blocks.get().contains(Block.byItem(itemStack.getItem())));
         if (!block.found()) {
-            error("Found none of the chosen blocks in hotbar");
+            error("Found none of the chosen blocks in hotbar.");
             toggle();
             return;
         }
 
-        // Place blocks
-        if (delay.get() == 0) {
-            for (BlockPos blockPos : spawns) BlockUtils.place(blockPos, block, rotate.get(), -50, false);
+        int placedCount = 0;
+
+        // Sort blocks to use the lowest light level spawns first
+        if (isLightSource(Block.byItem(mc.player.getInventory().getItem(block.slot()).getItem()))) {
+            spawns.sort(Comparator.comparingInt(blockPos -> mc.level.getMaxLocalRawBrightness(blockPos)));
+            placedCount = blocksPerTick.get() - 1; // Force only one light source per tick to stop unnecessary placements
         }
-        else {
-            // Check if light source
-            if (isLightSource(Block.getBlockFromItem(mc.player.getInventory().getStack(block.slot()).getItem()))) {
 
-                // Find lowest light level
-                int lowestLightLevel = 16;
-                BlockPos.Mutable selectedBlockPos = spawns.get(0);
+        // Place blocks!
+        for (BlockPos blockPos : spawns) {
+            if (placedCount >= blocksPerTick.get()) continue;
 
-                for (BlockPos blockPos : spawns) {
-                    int lightLevel = mc.world.getLightLevel(blockPos);
-                    if (lightLevel < lowestLightLevel) {
-                        lowestLightLevel = lightLevel;
-                        selectedBlockPos.set(blockPos);
-                    }
-                }
-
-                BlockUtils.place(selectedBlockPos, block, rotate.get(), -50, false);
-            }
-            else {
-                BlockUtils.place(spawns.get(0), block, rotate.get(), -50, false);
+            if (BlockUtils.place(blockPos, block, rotate.get(), -50, false)) {
+                placedCount++;
             }
         }
 
-        ticksWaited = 0;
+        timer = 0;
+    }
+
+    private boolean isOutOfRange(BlockPos blockPos) {
+        Vec3 pos = Vec3.atCenterOf(blockPos);
+        if (!PlayerUtils.isWithin(pos, placeRange.get())) return true;
+
+        ClipContext raycastContext = new ClipContext(mc.player.getEyePosition(), pos, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, mc.player);
+        BlockHitResult result = mc.level.clip(raycastContext);
+        if (result == null || !result.getBlockPos().equals(blockPos))
+            return !PlayerUtils.isWithin(pos, wallsRange.get());
+
+        return false;
     }
 
     private boolean filterBlocks(Block block) {
@@ -162,20 +189,22 @@ public class SpawnProofer extends Module {
     private boolean isNonOpaqueBlock(Block block) {
         return block instanceof ButtonBlock ||
             block instanceof SlabBlock ||
-            block instanceof AbstractPressurePlateBlock ||
+            block instanceof BasePressurePlateBlock ||
             block instanceof TransparentBlock ||
-            block instanceof TripwireBlock ||
-            block instanceof CarpetBlock;
+            block instanceof TripWireBlock ||
+            block instanceof CarpetBlock ||
+            block instanceof LeverBlock ||
+            block instanceof DiodeBlock ||
+            block instanceof BaseRailBlock;
     }
 
     private boolean isLightSource(Block block) {
-        return block.getDefaultState().getLuminance() > 0;
+        return block.defaultBlockState().getLightEmission() > 0;
     }
 
     public enum Mode {
         Always,
         Potential,
-        Both,
-        None
+        Both
     }
 }

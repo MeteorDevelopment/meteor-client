@@ -16,16 +16,21 @@ import meteordevelopment.meteorclient.systems.modules.player.ChestSwap;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.enchantment.Enchantments;
-import net.minecraft.item.ArmorItem;
-import net.minecraft.item.ElytraItem;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
+import net.minecraft.core.Holder;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.ItemAttributeModifiers;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.Enchantments;
 
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.List;
+import java.util.Set;
 
 public class AutoArmor extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -46,7 +51,7 @@ public class AutoArmor extends Module {
         .build()
     );
 
-    private final Setting<List<Enchantment>> avoidedEnchantments = sgGeneral.add(new EnchantmentListSetting.Builder()
+    private final Setting<Set<ResourceKey<Enchantment>>> avoidedEnchantments = sgGeneral.add(new EnchantmentListSetting.Builder()
         .name("avoided-enchantments")
         .description("Enchantments that should be avoided.")
         .defaultValue(Enchantments.BINDING_CURSE, Enchantments.FROST_WALKER)
@@ -74,12 +79,12 @@ public class AutoArmor extends Module {
         .build()
     );
 
-    private final Object2IntMap<Enchantment> enchantments = new Object2IntOpenHashMap<>();
+    private final Object2IntMap<Holder<Enchantment>> enchantments = new Object2IntOpenHashMap<>();
     private final ArmorPiece[] armorPieces = new ArmorPiece[4];
-    private final ArmorPiece helmet = new ArmorPiece(3);
-    private final ArmorPiece chestplate = new ArmorPiece(2);
-    private final ArmorPiece leggings = new ArmorPiece(1);
-    private final ArmorPiece boots = new ArmorPiece(0);
+    private final ArmorPiece helmet = new ArmorPiece(EquipmentSlot.HEAD);
+    private final ArmorPiece chestplate = new ArmorPiece(EquipmentSlot.CHEST);
+    private final ArmorPiece leggings = new ArmorPiece(EquipmentSlot.LEGS);
+    private final ArmorPiece boots = new ArmorPiece(EquipmentSlot.FEET);
     private int timer;
 
     public AutoArmor() {
@@ -108,12 +113,12 @@ public class AutoArmor extends Module {
         for (ArmorPiece armorPiece : armorPieces) armorPiece.reset();
 
         // Loop through items in inventory
-        for (int i = 0; i < mc.player.getInventory().main.size(); i++) {
-            ItemStack itemStack = mc.player.getInventory().getStack(i);
-            if (itemStack.isEmpty() || !(itemStack.getItem() instanceof ArmorItem)) continue;
+        for (int i = 0; i < mc.player.getInventory().getNonEquipmentItems().size(); i++) {
+            ItemStack itemStack = mc.player.getInventory().getItem(i);
+            if (itemStack.isEmpty() || !isArmor(itemStack)) continue;
 
             // Check for durability if anti break is enabled
-            if (antiBreak.get() && itemStack.isDamageable() && itemStack.getMaxDamage() - itemStack.getDamage() <= 10) {
+            if (antiBreak.get() && itemStack.isDamageableItem() && itemStack.getMaxDamage() - itemStack.getDamageValue() <= 10) {
                 continue;
             }
 
@@ -139,16 +144,18 @@ public class AutoArmor extends Module {
     }
 
     private boolean hasAvoidedEnchantment() {
-        for (Enchantment enchantment : avoidedEnchantments.get()) {
-            if (enchantments.containsKey(enchantment)) return true;
+        for (Holder<Enchantment> enchantment : enchantments.keySet()) {
+            if (enchantment.is(avoidedEnchantments.get()::contains)) {
+                return true;
+            }
         }
 
         return false;
     }
 
     private int getItemSlotId(ItemStack itemStack) {
-        if (itemStack.getItem() instanceof ElytraItem) return 2;
-        return ((ArmorItem) itemStack.getItem()).getSlotType().getEntitySlotId();
+        if (itemStack.has(DataComponents.GLIDER)) return 2;
+        return itemStack.get(DataComponents.EQUIPPABLE).slot().getIndex();
     }
 
     private int getScore(ItemStack itemStack) {
@@ -158,20 +165,33 @@ public class AutoArmor extends Module {
         int score = 0;
 
         // Prefer blast protection on leggings if enabled
-        Enchantment protection = preferredProtection.get().enchantment;
-        if (itemStack.getItem() instanceof ArmorItem && blastLeggings.get() && getItemSlotId(itemStack) == 1) {
+        ResourceKey<Enchantment> protection = preferredProtection.get().enchantment;
+        if (isArmor(itemStack) && blastLeggings.get() && getItemSlotId(itemStack) == 1) {
             protection = Enchantments.BLAST_PROTECTION;
         }
 
-        score += 3 * enchantments.getInt(protection);
-        score += enchantments.getInt(Enchantments.PROTECTION);
-        score += enchantments.getInt(Enchantments.BLAST_PROTECTION);
-        score += enchantments.getInt(Enchantments.FIRE_PROTECTION);
-        score += enchantments.getInt(Enchantments.PROJECTILE_PROTECTION);
-        score += enchantments.getInt(Enchantments.UNBREAKING);
-        score += 2 * enchantments.getInt(Enchantments.MENDING);
-        score += itemStack.getItem() instanceof ArmorItem ? ((ArmorItem) itemStack.getItem()).getProtection() : 0;
-        score += itemStack.getItem() instanceof ArmorItem ? ((ArmorItem) itemStack.getItem()).getToughness() : 0;
+        score += 3 * Utils.getEnchantmentLevel(enchantments, protection);
+        score += Utils.getEnchantmentLevel(enchantments, Enchantments.PROTECTION);
+        score += Utils.getEnchantmentLevel(enchantments, Enchantments.BLAST_PROTECTION);
+        score += Utils.getEnchantmentLevel(enchantments, Enchantments.FIRE_PROTECTION);
+        score += Utils.getEnchantmentLevel(enchantments, Enchantments.PROJECTILE_PROTECTION);
+        score += Utils.getEnchantmentLevel(enchantments, Enchantments.UNBREAKING);
+        score += 2 * Utils.getEnchantmentLevel(enchantments, Enchantments.MENDING);
+
+        if (itemStack.has(DataComponents.ATTRIBUTE_MODIFIERS)) {
+            ItemAttributeModifiers component = itemStack.get(DataComponents.ATTRIBUTE_MODIFIERS);
+            for (ItemAttributeModifiers.Entry modifier : component.modifiers()) {
+                if (modifier.attribute() == Attributes.ARMOR || modifier.attribute() == Attributes.ARMOR_TOUGHNESS) {
+                    double e = modifier.modifier().amount();
+
+                    score += (int) switch (modifier.modifier().operation()) {
+                        case ADD_VALUE -> e;
+                        case ADD_MULTIPLIED_BASE -> e * mc.player.getAttributeBaseValue(modifier.attribute());
+                        case ADD_MULTIPLIED_TOTAL -> e * score;
+                    };
+                }
+            }
+        }
 
         return score;
     }
@@ -188,8 +208,8 @@ public class AutoArmor extends Module {
     }
 
     private void moveToEmpty(int armorSlotId) {
-        for (int i = 0; i < mc.player.getInventory().main.size(); i++) {
-            if (mc.player.getInventory().getStack(i).isEmpty()) {
+        for (int i = 0; i < mc.player.getInventory().getNonEquipmentItems().size(); i++) {
+            if (mc.player.getInventory().getItem(i).isEmpty()) {
                 InvUtils.move().fromArmor(armorSlotId).to(i);
 
                 // Apply delay
@@ -200,21 +220,25 @@ public class AutoArmor extends Module {
         }
     }
 
+    private boolean isArmor(ItemStack itemStack) {
+        return itemStack.is(ItemTags.FOOT_ARMOR) || itemStack.is(ItemTags.LEG_ARMOR) || itemStack.is(ItemTags.CHEST_ARMOR) || itemStack.is(ItemTags.HEAD_ARMOR);
+    }
+
     public enum Protection {
         Protection(Enchantments.PROTECTION),
         BlastProtection(Enchantments.BLAST_PROTECTION),
         FireProtection(Enchantments.FIRE_PROTECTION),
         ProjectileProtection(Enchantments.PROJECTILE_PROTECTION);
 
-        private final Enchantment enchantment;
+        private final ResourceKey<Enchantment> enchantment;
 
-        Protection(Enchantment enchantment) {
+        Protection(ResourceKey<Enchantment> enchantment) {
             this.enchantment = enchantment;
         }
     }
 
     private class ArmorPiece {
-        private final int id;
+        private final EquipmentSlot slot;
 
         private int bestSlot;
         private int bestScore;
@@ -222,8 +246,8 @@ public class AutoArmor extends Module {
         private int score;
         private int durability;
 
-        public ArmorPiece(int id) {
-            this.id = id;
+        public ArmorPiece(EquipmentSlot slot) {
+            this.slot = slot;
         }
 
         public void reset() {
@@ -246,7 +270,7 @@ public class AutoArmor extends Module {
         public void calculate() {
             if (cannotSwap()) return;
 
-            ItemStack itemStack = mc.player.getInventory().getArmorStack(id);
+            ItemStack itemStack = mc.player.getItemBySlot(slot);
 
             // Check if the item is an elytra
             if ((ignoreElytra.get() || Modules.get().isActive(ChestSwap.class)) && itemStack.getItem() == Items.ELYTRA) {
@@ -257,7 +281,7 @@ public class AutoArmor extends Module {
             Utils.getEnchantments(itemStack, enchantments);
 
             // Return if current armor piece has Curse of Binding
-            if (enchantments.containsKey(Enchantments.BINDING_CURSE)) {
+            if (enchantments.keySet().stream().anyMatch(e -> e.is(Enchantments.BINDING_CURSE))) {
                 score = Integer.MAX_VALUE; // Setting score to Integer.MAX_VALUE so its now swapped later
                 return;
             }
@@ -269,7 +293,7 @@ public class AutoArmor extends Module {
 
             // Calculate durability
             if (!itemStack.isEmpty()) {
-                durability = itemStack.getMaxDamage() - itemStack.getDamage();
+                durability = itemStack.getMaxDamage() - itemStack.getDamageValue();
             }
         }
 
@@ -283,23 +307,23 @@ public class AutoArmor extends Module {
             if (cannotSwap() || score == Integer.MAX_VALUE) return;
 
             // Check if new score is better and swap if it is
-            if (bestScore > score) swap(bestSlot, id);
+            if (bestScore > score) swap(bestSlot, slot.getIndex());
             else if (antiBreak.get() && durability <= 10) {
                 // If no better piece has been found but current piece is broken find an empty slot and move it there
-                moveToEmpty(id);
+                moveToEmpty(slot.getIndex());
             }
         }
 
         private int decreaseScoreByAvoidedEnchantments(int score) {
-            for (Enchantment enchantment : avoidedEnchantments.get()) {
-                score -= 2 * enchantments.getInt(enchantment);
+            for (ResourceKey<Enchantment> enchantment : avoidedEnchantments.get()) {
+                score -= 2 * Utils.getEnchantmentLevel(enchantments, enchantment);
             }
 
             return score;
         }
 
         private int applyAntiBreakScore(int score, ItemStack itemStack) {
-            if (antiBreak.get() && itemStack.isDamageable() && itemStack.getMaxDamage() - itemStack.getDamage() <= 10) {
+            if (antiBreak.get() && itemStack.isDamageableItem() && itemStack.getMaxDamage() - itemStack.getDamageValue() <= 10) {
                 return -1;
             }
 

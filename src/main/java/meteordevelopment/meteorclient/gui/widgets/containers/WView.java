@@ -8,9 +8,10 @@ package meteordevelopment.meteorclient.gui.widgets.containers;
 import meteordevelopment.meteorclient.gui.renderer.GuiRenderer;
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.utils.Utils;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.util.Mth;
 
-import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_LEFT;
+import static com.mojang.blaze3d.platform.InputConstants.MOUSE_BUTTON_LEFT;
 
 public abstract class WView extends WVerticalList {
     public double maxHeight = Double.MAX_VALUE;
@@ -25,7 +26,6 @@ public abstract class WView extends WVerticalList {
     private boolean moveAfterPositionWidgets;
 
     protected boolean handleMouseOver;
-    protected boolean handlePressed;
 
     @Override
     public void init() {
@@ -51,8 +51,7 @@ public abstract class WView extends WVerticalList {
             }
 
             if (couldScroll) moveAfterPositionWidgets = true;
-        }
-        else {
+        } else {
             actualHeight = height;
             scroll = 0;
             targetScroll = 0;
@@ -64,7 +63,7 @@ public abstract class WView extends WVerticalList {
         super.onCalculateWidgetPositions();
 
         if (moveAfterPositionWidgets) {
-            scroll = MathHelper.clamp(scroll, 0, actualHeight - height);
+            scroll = Mth.clamp(scroll, 0, actualHeight - height);
             targetScroll = scroll;
 
             moveCells(0, -scroll);
@@ -74,9 +73,9 @@ public abstract class WView extends WVerticalList {
     }
 
     @Override
-    public boolean onMouseClicked(double mouseX, double mouseY, int button, boolean used) {
-        if (handleMouseOver && button == GLFW_MOUSE_BUTTON_LEFT && !used) {
-            handlePressed = true;
+    public boolean onMouseClicked(MouseButtonEvent click, boolean doubled) {
+        if (handleMouseOver && click.button() == MOUSE_BUTTON_LEFT && !doubled) {
+            setFocused(true);
             return true;
         }
 
@@ -84,8 +83,8 @@ public abstract class WView extends WVerticalList {
     }
 
     @Override
-    public boolean onMouseReleased(double mouseX, double mouseY, int button) {
-        if (handlePressed) handlePressed = false;
+    public boolean onMouseReleased(MouseButtonEvent click) {
+        if (focused) setFocused(false);
 
         return false;
     }
@@ -103,14 +102,14 @@ public abstract class WView extends WVerticalList {
             }
         }
 
-        if (handlePressed) {
+        if (focused) {
             double preScroll = scroll;
             double mouseDelta = mouseY - lastMouseY;
 
             //scroll += Math.round(theme.scale(mouseDelta + mouseDelta * ((height / actualHeight) * 0.7627725)));
             //scroll += Math.round(theme.scale(mouseDelta * (1 / (height / actualHeight))));
-            scroll += Math.round(mouseDelta * ((actualHeight - handleHeight() / 2) / height)); // TODO: Someone improve this
-            scroll = MathHelper.clamp(scroll, 0, actualHeight - height);
+            scroll += Math.round(mouseDelta * ((actualHeight - handleHeight() / 2) / height));
+            scroll = Mth.clamp(scroll, 0, actualHeight - height);
 
             targetScroll = scroll;
 
@@ -122,9 +121,13 @@ public abstract class WView extends WVerticalList {
     @Override
     public boolean onMouseScrolled(double amount) {
         if (!scrollOnlyWhenMouseOver || mouseOver) {
+            double max = actualHeight - height;
+
             targetScroll -= Math.round(theme.scale(amount * 40));
-            targetScroll = MathHelper.clamp(targetScroll, 0, actualHeight - height);
-            return true;
+            targetScroll = Mth.clamp(targetScroll, 0, max);
+
+            // Only consume the event if the view actually scrolled, otherwise propagate to parent.
+            return targetScroll > 0 && targetScroll < max;
         }
 
         return false;
@@ -149,13 +152,12 @@ public abstract class WView extends WVerticalList {
         else if (targetScroll > scroll) {
             scroll += Math.round(theme.scale(delta * 300 + delta * 100 * (Math.abs(targetScroll - scroll) / 10)));
             if (scroll > targetScroll) scroll = targetScroll;
-        }
-        else if (targetScroll < scroll) {
+        } else if (targetScroll < scroll) {
             scroll -= Math.round(theme.scale(delta * 300 + delta * 100 * (Math.abs(targetScroll - scroll) / 10)));
             if (scroll < targetScroll) scroll = targetScroll;
         }
 
-        scroll = MathHelper.clamp(scroll, 0, max);
+        scroll = Mth.clamp(scroll, 0, max);
 
         double change = scroll - preScroll;
         if (change != 0) moveCells(0, -change);
@@ -163,7 +165,13 @@ public abstract class WView extends WVerticalList {
 
     @Override
     protected boolean propagateEvents(WWidget widget) {
-        return ((widget.y >= y && widget.y <= y + height) || (widget.y + widget.height >= y && widget.y + widget.height <= y + height)) || ((y >= widget.y && y <= widget.y + widget.height) || (y + height >= widget.y && y + height <= widget.y + widget.height));
+        if (widget.isFocused()) return true;
+
+        // Propagate to any visible view, to allow inputs even when not hovered
+        if (widget instanceof WView) return isWidgetInView(widget);
+
+        // Propagate to any visible widget while the view is hovered
+        return mouseOver && isWidgetInView(widget);
     }
 
     protected double handleWidth() {
@@ -180,5 +188,9 @@ public abstract class WView extends WVerticalList {
 
     protected double handleY() {
         return y + (height - handleHeight()) * (scroll / (actualHeight - height));
+    }
+
+    public boolean isWidgetInView(WWidget widget) {
+        return widget.y < y + height && widget.y + widget.height > y;
     }
 }

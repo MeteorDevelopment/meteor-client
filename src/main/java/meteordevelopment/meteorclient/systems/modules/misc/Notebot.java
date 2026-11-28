@@ -28,27 +28,28 @@ import meteordevelopment.meteorclient.utils.notebot.instrumentdetect.InstrumentD
 import meteordevelopment.meteorclient.utils.notebot.song.Note;
 import meteordevelopment.meteorclient.utils.notebot.song.Song;
 import meteordevelopment.meteorclient.utils.player.Rotations;
+import meteordevelopment.meteorclient.utils.player.SwingMode;
 import meteordevelopment.meteorclient.utils.render.NametagUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.NoteBlock;
-import net.minecraft.block.enums.Instrument;
-import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
-import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket;
-import net.minecraft.server.network.ServerPlayNetworkHandler;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.util.Hand;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
+import net.minecraft.network.protocol.game.ServerboundUseItemOnPacket;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.Util;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.NoteBlock;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 import org.apache.commons.io.FilenameUtils;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3d;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.io.File;
 import java.util.*;
@@ -85,56 +86,56 @@ public class Notebot extends Module {
 
     public final Setting<NotebotUtils.NotebotMode> mode = sgGeneral.add(new EnumSetting.Builder<NotebotUtils.NotebotMode>()
         .name("mode")
-        .description("Select mode of notebot.")
+        .description("Select mode of notebot")
         .defaultValue(NotebotUtils.NotebotMode.ExactInstruments)
         .build()
     );
 
     public final Setting<InstrumentDetectMode> instrumentDetectMode = sgGeneral.add(new EnumSetting.Builder<InstrumentDetectMode>()
         .name("instrument-detect-mode")
-        .description("Select an instrument detect mode. Can be useful when server has a plugin that modifies noteblock state (e.g ItemsAdder) but noteblock can still play the right note.")
+        .description("Select an instrument detect mode. Can be useful when server has a plugin that modifies noteblock state (e.g ItemsAdder) but noteblock can still play the right note")
         .defaultValue(InstrumentDetectMode.BlockState)
         .build()
     );
 
     public final Setting<Boolean> polyphonic = sgGeneral.add(new BoolSetting.Builder()
         .name("polyphonic")
-        .description("Whether or not to allow multiple notes to be played at the same time.")
+        .description("Whether or not to allow multiple notes to be played at the same time")
         .defaultValue(true)
         .build()
     );
 
     public final Setting<Boolean> autoRotate = sgGeneral.add(new BoolSetting.Builder()
         .name("auto-rotate")
-        .description("Should client look at note block when it wants to hit it.")
+        .description("Should client look at note block when it wants to hit it")
         .defaultValue(true)
         .build()
     );
 
     public final Setting<Boolean> autoPlay = sgGeneral.add(new BoolSetting.Builder()
         .name("auto-play")
-        .description("Auto plays random songs.")
+        .description("Auto plays random songs")
         .defaultValue(false)
         .build()
     );
 
-    public final Setting<Boolean> roundOutOfRange = sgGeneral.add(new BoolSetting.Builder()
-        .name("round-out-of-range")
-        .description("Rounds out of range notes.")
+    public final Setting<Boolean> transposeOutOfRange = sgGeneral.add(new BoolSetting.Builder()
+        .name("transpose-out-of-range")
+        .description("Transposes out of range notes")
         .defaultValue(false)
         .build()
     );
 
     public final Setting<Boolean> swingArm = sgGeneral.add(new BoolSetting.Builder()
         .name("swing-arm")
-        .description("Should swing arm on hit.")
+        .description("Should swing arm on hit")
         .defaultValue(true)
         .build()
     );
 
     public final Setting<Integer> checkNoteblocksAgainDelay = sgGeneral.add(new IntSetting.Builder()
         .name("check-noteblocks-again-delay")
-        .description("How much delay should be between end of tuning and checking again.")
+        .description("How much delay should be between end of tuning and checking again")
         .defaultValue(10)
         .min(1)
         .sliderRange(1, 20)
@@ -228,7 +229,7 @@ public class Notebot extends Module {
 
     public final Setting<Boolean> showScannedNoteblocks = sgRender.add(new BoolSetting.Builder()
         .name("show-scanned-noteblocks")
-        .description("Show scanned Noteblocks.")
+        .description("Show scanned Noteblocks")
         .defaultValue(false)
         .build()
     );
@@ -238,7 +239,7 @@ public class Notebot extends Module {
     private Song song; // Loaded song
     private final Map<Note, BlockPos> noteBlockPositions = new HashMap<>(); // Currently used noteblocks by the song
     private final Multimap<Note, BlockPos> scannedNoteblocks = MultimapBuilder.linkedHashKeys().arrayListValues().build(); // Found noteblocks
-    private final List<BlockPos> clickedBlocks = new ArrayList<>();
+    private final Set<BlockPos> clickedBlocks = new HashSet<>();
     private Stage stage = Stage.None;
     private PlayingMode playingMode = PlayingMode.None;
     private boolean isPlaying = false;
@@ -255,7 +256,7 @@ public class Notebot extends Module {
     public Notebot() {
         super(Categories.Misc, "notebot", "Plays noteblock nicely");
 
-        for (Instrument inst : Instrument.values()) {
+        for (NoteBlockInstrument inst : NoteBlockInstrument.values()) {
             NotebotUtils.OptionalInstrument optionalInstrument = NotebotUtils.OptionalInstrument.fromMinecraftInstrument(inst);
             if (optionalInstrument != null) {
                 sgNoteMap.add(new EnumSetting.Builder<NotebotUtils.OptionalInstrument>()
@@ -303,7 +304,8 @@ public class Notebot extends Module {
     private void onRender3D(Render3DEvent event) {
         if (!renderBoxes.get()) return;
 
-        if (stage != Stage.SetUp && stage != Stage.Tune && stage != Stage.WaitingToCheckNoteblocks && !isPlaying) return;
+        if (stage != Stage.SetUp && stage != Stage.Tune && stage != Stage.WaitingToCheckNoteblocks && !isPlaying)
+            return;
 
         if (showScannedNoteblocks.get()) {
             for (BlockPos blockPos : scannedNoteblocks.values()) {
@@ -321,10 +323,10 @@ public class Notebot extends Module {
                 Note note = entry.getKey();
                 BlockPos blockPos = entry.getValue();
 
-                BlockState state = mc.world.getBlockState(blockPos);
+                BlockState state = mc.level.getBlockState(blockPos);
                 if (state.getBlock() != Blocks.NOTE_BLOCK) continue;
 
-                int level = state.get(NoteBlock.NOTE);
+                int level = state.getValue(NoteBlock.NOTE);
 
                 double x1 = blockPos.getX();
                 double y1 = blockPos.getY();
@@ -359,12 +361,13 @@ public class Notebot extends Module {
     private void onRender2D(Render2DEvent event) {
         if (!renderText.get()) return;
 
-        if (stage != Stage.SetUp && stage != Stage.Tune && stage != Stage.WaitingToCheckNoteblocks && !isPlaying) return;
+        if (stage != Stage.SetUp && stage != Stage.Tune && stage != Stage.WaitingToCheckNoteblocks && !isPlaying)
+            return;
 
         Vector3d pos = new Vector3d();
 
         for (BlockPos blockPos : noteBlockPositions.values()) {
-            BlockState state = mc.world.getBlockState(blockPos);
+            BlockState state = mc.level.getBlockState(blockPos);
             if (state.getBlock() != Blocks.NOTE_BLOCK) continue;
 
             double x = blockPos.getX() + 0.5;
@@ -375,7 +378,7 @@ public class Notebot extends Module {
 
             // Render level text logic
 
-            String levelText = String.valueOf(state.get(NoteBlock.NOTE));
+            String levelText = String.valueOf(state.getValue(NoteBlock.NOTE));
             String tuneHitsText = null;
             if (tuneHits.containsKey(blockPos)) {
                 tuneHitsText = " -" + tuneHits.get(blockPos);
@@ -387,8 +390,8 @@ public class Notebot extends Module {
 
             TextRenderer text = TextRenderer.get();
 
-            NametagUtils.begin(pos);
-            text.beginBig();
+            NametagUtils.begin(pos, event.graphics);
+            text.beginBig(event.graphics);
 
             double xScreen = text.getWidth(levelText) / 2.0;
             if (tuneHitsText != null) {
@@ -401,7 +404,7 @@ public class Notebot extends Module {
             }
             text.end();
 
-            NametagUtils.end();
+            NametagUtils.end(event.graphics);
         }
     }
 
@@ -419,12 +422,10 @@ public class Notebot extends Module {
                 setupTuneHitsMap();
                 stage = Stage.Tune;
             }
-        }
-        else if (stage == Stage.SetUp) {
+        } else if (stage == Stage.SetUp) {
             scanForNoteblocks();
             if (scannedNoteblocks.isEmpty()) {
                 error("Can't find any nearby noteblock!");
-                NotebotUtils.getRequirementString(song.getRequirements());
                 stop();
                 return;
             }
@@ -437,11 +438,9 @@ public class Notebot extends Module {
             }
             setupTuneHitsMap();
             stage = Stage.Tune;
-        }
-        else if (stage == Stage.Tune) {
+        } else if (stage == Stage.Tune) {
             tune();
-        }
-        else if (stage == Stage.Playing) {
+        } else if (stage == Stage.Playing) {
             if (!isPlaying) return;
 
             if (mc.player == null || currentTick > song.getLastTick()) {
@@ -452,12 +451,11 @@ public class Notebot extends Module {
 
             if (song.getNotesMap().containsKey(currentTick)) {
                 if (playingMode == PlayingMode.Preview) onTickPreview();
-                else if (mc.player.getAbilities().creativeMode) {
+                else if (mc.player.getAbilities().instabuild) {
                     error("You need to be in survival mode.");
                     stop();
                     return;
-                }
-                else onTickPlay();
+                } else onTickPlay();
             }
 
             currentTick++;
@@ -475,7 +473,7 @@ public class Notebot extends Module {
         // Modifiable list of unique notes
         List<Note> uniqueNotesToUse = new ArrayList<>(song.getRequirements());
         // A map with noteblocks that have incorrect note level
-        Map<Instrument, List<BlockPos>> incorrectNoteBlocks = new HashMap<>();
+        Map<NoteBlockInstrument, List<BlockPos>> incorrectNoteBlocks = new HashMap<>();
 
         // Check if there are already tuned noteblocks
         for (var entry : scannedNoteblocks.asMap().entrySet()) {
@@ -484,7 +482,7 @@ public class Notebot extends Module {
 
             if (uniqueNotesToUse.contains(note)) {
                 // Add correct noteblock position to a noteBlockPositions
-                noteBlockPositions.put(note, noteblocks.remove(0));
+                noteBlockPositions.put(note, noteblocks.removeFirst());
                 uniqueNotesToUse.remove(note);
             }
 
@@ -504,7 +502,7 @@ public class Notebot extends Module {
             List<BlockPos> positions = entry.getValue();
 
             if (mode.get() == NotebotUtils.NotebotMode.ExactInstruments) {
-                Instrument inst = entry.getKey();
+                NoteBlockInstrument inst = entry.getKey();
 
                 List<Note> foundNotes = uniqueNotesToUse.stream()
                     .filter(note -> note.getInstrument() == inst)
@@ -515,7 +513,7 @@ public class Notebot extends Module {
                 for (BlockPos pos : positions) {
                     if (foundNotes.isEmpty()) break;
 
-                    Note note = foundNotes.remove(0);
+                    Note note = foundNotes.removeFirst();
                     noteBlockPositions.put(note, pos);
 
                     uniqueNotesToUse.remove(note);
@@ -524,14 +522,16 @@ public class Notebot extends Module {
                 for (BlockPos pos : positions) {
                     if (uniqueNotesToUse.isEmpty()) break;
 
-                    Note note = uniqueNotesToUse.remove(0);
+                    Note note = uniqueNotesToUse.removeFirst();
                     noteBlockPositions.put(note, pos);
                 }
             }
         }
 
-        if (!uniqueNotesToUse.isEmpty()) warning("Missing note: ");
-        NotebotUtils.getRequirementString(uniqueNotesToUse).forEach(this::warning);
+        if (!uniqueNotesToUse.isEmpty()) {
+            warning(uniqueNotesToUse.size() + " missing notes!");
+            NotebotUtils.getRequirementString(uniqueNotesToUse).forEach(this::warning);
+        }
     }
 
     /**
@@ -545,8 +545,10 @@ public class Notebot extends Module {
             int targetLevel = entry.getKey().getNoteLevel();
             BlockPos blockPos = entry.getValue();
 
-            BlockState blockState = mc.world.getBlockState(blockPos);
-            int currentLevel = blockState.get(NoteBlock.NOTE);
+            BlockState blockState = mc.level.getBlockState(blockPos);
+            if (blockState.getBlock() != Blocks.NOTE_BLOCK) continue;
+
+            int currentLevel = blockState.getValue(NoteBlock.NOTE);
 
             if (targetLevel != currentLevel) {
                 tuneHits.put(blockPos, calcNumberOfHits(currentLevel, targetLevel));
@@ -560,7 +562,7 @@ public class Notebot extends Module {
 
         // Open Song GUI
         WButton openSongGUI = table.add(theme.button("Open Song GUI")).expandX().minWidth(100).widget();
-        openSongGUI.action = () -> mc.setScreen(theme.notebotSongs());
+        openSongGUI.action = () -> mc.gui.setScreen(theme.notebotSongs());
 
         table.row();
 
@@ -568,7 +570,8 @@ public class Notebot extends Module {
         WButton alignCenter = table.add(theme.button("Align Center")).expandX().minWidth(100).widget();
         alignCenter.action = () -> {
             if (mc.player == null) return;
-            mc.player.setPosition(Vec3d.ofBottomCenter(mc.player.getBlockPos()));
+            Vec3 pos = Vec3.atBottomCenterOf(mc.player.blockPosition());
+            mc.player.setPos(pos.x, mc.player.getY(), pos.z);
         };
 
         table.row();
@@ -601,7 +604,8 @@ public class Notebot extends Module {
         if (song == null) return "No song loaded.";
         if (isPlaying) return String.format("Playing song. %d/%d", currentTick, song.getLastTick());
         if (stage == Stage.Playing) return "Ready to play.";
-        if (stage == Stage.SetUp || stage == Stage.Tune || stage == Stage.WaitingToCheckNoteblocks) return "Setting up the noteblocks.";
+        if (stage == Stage.SetUp || stage == Stage.Tune || stage == Stage.WaitingToCheckNoteblocks)
+            return "Setting up the noteblocks.";
         else return String.format("Stage: %s.", stage.toString());
     }
 
@@ -610,7 +614,7 @@ public class Notebot extends Module {
      */
     public void play() {
         if (mc.player == null) return;
-        if (mc.player.getAbilities().creativeMode && playingMode != PlayingMode.Preview) {
+        if (mc.player.getAbilities().instabuild && playingMode != PlayingMode.Preview) {
             error("You need to be in survival mode.");
         } else if (stage == Stage.Playing) {
             isPlaying = true;
@@ -621,7 +625,7 @@ public class Notebot extends Module {
     }
 
     public void pause() {
-        if (!isActive()) toggle();
+        enable();
         if (isPlaying) {
             info("Pausing.");
             isPlaying = false;
@@ -633,7 +637,7 @@ public class Notebot extends Module {
 
     public void stop() {
         info("Stopping.");
-        disable();
+        disableNotebot();
         updateStatus();
     }
 
@@ -657,20 +661,28 @@ public class Notebot extends Module {
         }
     }
 
-    public void disable() {
+    public void disableNotebot() {
         resetVariables();
-        if (!isActive()) toggle();
+        enable();
     }
 
+    /**
+     * Prints the note blocks required to play a song.
+     *
+     * @param file Song supported by one of {@link SongDecoder}
+     */
     public void getRequirements(File file) {
+        if (song != null || stage != Stage.None) {
+            error("Stop the current song first.");
+            return;
+        }
+
         try {
-            if (song != null || stage != Stage.None) return;
-            song = SongDecoders.parse(file);
-            scanForNoteblocks();
-            setupNoteblocksMap();
-            song = null;
+            Song requirements = SongDecoders.parse(file);
+            NotebotUtils.getRequirementString(requirements.getRequirements()).forEach(this::info);
         } catch (Exception e) {
-            error("Invalid song.");
+            error("Failed to decode song.");
+            MeteorClient.LOG.error("Failed to decode song requirements", e);
         }
     }
 
@@ -680,7 +692,7 @@ public class Notebot extends Module {
      * @param file Song supported by one of {@link SongDecoder}
      */
     public void loadSong(File file) {
-        if (!isActive()) toggle();
+        enable();
         resetVariables();
 
         this.playingMode = PlayingMode.Noteblocks;
@@ -697,7 +709,7 @@ public class Notebot extends Module {
      * @param file Song supported by one of {@link SongDecoder}
      */
     public void previewSong(File file) {
-        if (!isActive()) toggle();
+        enable();
         resetVariables();
 
         this.playingMode = PlayingMode.Preview;
@@ -711,7 +723,7 @@ public class Notebot extends Module {
     /**
      * Loads and plays song directly
      *
-     * @param file Song supported by one of {@link SongDecoder}
+     * @param file     Song supported by one of {@link SongDecoder}
      * @param callback Callback that is run when song has been loaded
      * @return Success
      */
@@ -735,16 +747,17 @@ public class Notebot extends Module {
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
-        });
+        }, Util.nonCriticalIoPool());
         loadingSongFuture.completeOnTimeout(null, 60, TimeUnit.SECONDS);
 
         stage = Stage.LoadingSong;
         long time1 = System.currentTimeMillis();
-        loadingSongFuture.whenComplete((song ,ex) -> {
+        loadingSongFuture.whenCompleteAsync((song, ex) -> {
+            String baseName = FilenameUtils.getBaseName(file.getName());
             if (ex == null) {
                 // Song is null only when it times out
                 if (song == null) {
-                    error("Loading song '" + FilenameUtils.getBaseName(file.getName()) + "' timed out.");
+                    error("Loading song '" + baseName + "' timed out.");
                     onSongEnd();
                     return;
                 }
@@ -753,18 +766,18 @@ public class Notebot extends Module {
                 long time2 = System.currentTimeMillis();
                 long diff = time2 - time1;
 
-                info("Song '" + FilenameUtils.getBaseName(file.getName()) + "' has been loaded to the memory! Took "+diff+"ms");
+                info("Song '" + baseName + "' has been loaded to the memory! Took " + diff + "ms");
                 callback.run();
             } else {
                 if (ex instanceof CancellationException) {
-                    error("Loading song '" + FilenameUtils.getBaseName(file.getName()) + "' was cancelled.");
+                    error("Loading song '" + baseName + "' was cancelled.");
                 } else {
-                    error("An error occurred while loading song '" + FilenameUtils.getBaseName(file.getName()) + "'. See the logs for more details");
-                    MeteorClient.LOG.error("An error occurred while loading song '" + FilenameUtils.getBaseName(file.getName()) + "'", ex);
+                    error("An error occurred while loading song '" + baseName + "'. See the logs for more details");
+                    MeteorClient.LOG.error("An error occurred while loading song '{}'", baseName, ex);
                     onSongEnd();
                 }
             }
-        });
+        }, mc);
         return true;
     }
 
@@ -772,25 +785,23 @@ public class Notebot extends Module {
      * Scans noteblocks nearby and adds them to the map
      */
     private void scanForNoteblocks() {
-        if (mc.interactionManager == null || mc.world == null || mc.player == null) return;
+        if (mc.gameMode == null || mc.level == null || mc.player == null) return;
         scannedNoteblocks.clear();
-        int min = (int) (-mc.interactionManager.getReachDistance()) - 2;
-        int max = (int) mc.interactionManager.getReachDistance() + 2;
+        int min = (int) (-mc.player.blockInteractionRange()) - 2;
+        int max = (int) mc.player.blockInteractionRange() + 2;
 
         // Scan for noteblocks horizontally
         // 6^3 kek
         for (int y = min; y < max; y++) {
             for (int x = min; x < max; x++) {
                 for (int z = min; z < max; z++) {
-                    BlockPos pos = mc.player.getBlockPos().add(x, y + 1, z);
+                    BlockPos pos = mc.player.blockPosition().offset(x, y + 1, z);
 
-                    BlockState blockState = mc.world.getBlockState(pos);
+                    BlockState blockState = mc.level.getBlockState(pos);
                     if (blockState.getBlock() != Blocks.NOTE_BLOCK) continue;
 
                     // Copied from ServerPlayNetworkHandler#onPlayerInteractBlock
-                    Vec3d vec3d2 = Vec3d.ofCenter(pos);
-                    double sqDist = mc.player.getEyePos().squaredDistanceTo(vec3d2);
-                    if (sqDist > ServerPlayNetworkHandler.MAX_BREAK_SQUARED_DISTANCE) continue;
+                    if (!mc.player.isWithinBlockInteractionRange(pos, 1)) continue;
 
                     if (!isValidScanSpot(pos)) continue;
 
@@ -798,16 +809,15 @@ public class Notebot extends Module {
                     scannedNoteblocks.put(note, pos);
                 }
             }
-
         }
     }
 
     private void onTickPreview() {
         for (Note note : song.getNotesMap().get(currentTick)) {
             if (mode.get() == NotebotUtils.NotebotMode.ExactInstruments) {
-                mc.player.playSound(note.getInstrument().getSound().value(), 2f, (float) Math.pow(2.0D, (note.getNoteLevel() - 12) / 12.0D));
+                mc.player.playSound(note.getInstrument().getSoundEvent().value(), 2f, (float) Math.pow(2.0D, (note.getNoteLevel() - 12) / 12.0D));
             } else {
-                mc.player.playSound(SoundEvents.BLOCK_NOTE_BLOCK_HARP.value(), 2f, (float) Math.pow(2.0D, (note.getNoteLevel() - 12) / 12.0D));
+                mc.player.playSound(SoundEvents.NOTE_BLOCK_HARP.value(), 2f, (float) Math.pow(2.0D, (note.getNoteLevel() - 12) / 12.0D));
             }
         }
     }
@@ -840,19 +850,19 @@ public class Notebot extends Module {
     }
 
     private void tuneBlocks() {
-        if (mc.world == null || mc.player == null) {
-            disable();
+        if (mc.level == null || mc.player == null) {
+            disableNotebot();
         }
 
         if (swingArm.get()) {
-            mc.player.swingHand(Hand.MAIN_HAND);
+            SwingMode.Both.interactSwing(InteractionHand.MAIN_HAND);
         }
 
         int iterations = 0;
         var iterator = tuneHits.entrySet().iterator();
 
         // Concurrent tuning :o
-        while (iterator.hasNext()){
+        while (iterator.hasNext()) {
             var entry = iterator.next();
             BlockPos pos = entry.getKey();
             int hitsNumber = entry.getValue();
@@ -880,7 +890,7 @@ public class Notebot extends Module {
 
     private void tuneNoteblockWithPackets(BlockPos pos) {
         // We don't need to raycast here. Server handles this packet fine
-        mc.player.networkHandler.sendPacket(new PlayerInteractBlockC2SPacket(Hand.MAIN_HAND, new BlockHitResult(Vec3d.ofCenter(pos), Direction.DOWN, pos, false), 0));
+        mc.gameMode.startPrediction(mc.level, sequence -> new ServerboundUseItemOnPacket(InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atCenterOf(pos), Direction.DOWN, pos, false), sequence));
 
         anyNoteblockTuned = true;
     }
@@ -915,7 +925,7 @@ public class Notebot extends Module {
 
             // Swing arm
             if (swingArm.get()) {
-                mc.player.swingHand(Hand.MAIN_HAND);
+                SwingMode.Both.attackSwing(InteractionHand.MAIN_HAND);
             }
 
             // Play notes
@@ -935,26 +945,26 @@ public class Notebot extends Module {
     }
 
     private void playRotate(BlockPos pos) {
-        if (mc.interactionManager == null) return;
+        if (mc.gameMode == null) return;
         try {
-            mc.player.networkHandler.sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, pos, Direction.DOWN, 0));
-        } catch (NullPointerException ignored) {
+            mc.gameMode.startPrediction(mc.level, sequence -> new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK, pos, Direction.DOWN, sequence));
+        } catch (NullPointerException _) {
         }
     }
 
     private boolean isValidScanSpot(BlockPos pos) {
-        if (mc.world.getBlockState(pos).getBlock() != Blocks.NOTE_BLOCK) return false;
-        return mc.world.getBlockState(pos.up()).isAir();
+        if (mc.level.getBlockState(pos).getBlock() != Blocks.NOTE_BLOCK) return false;
+        return mc.level.getBlockState(pos.above()).isAir();
     }
 
     /**
-     * Gets an Instrument from Note Map
+     * Gets an NoteBlockInstrument from Note Map
      *
      * @param inst An instrument
      * @return A new instrument mapped by instrument given in parameters
      */
     @Nullable
-    public Instrument getMappedInstrument(@NotNull Instrument inst) {
+    public NoteBlockInstrument getMappedInstrument(@NonNull NoteBlockInstrument inst) {
         if (mode.get() == NotebotUtils.NotebotMode.ExactInstruments) {
             NotebotUtils.OptionalInstrument optionalInstrument = (NotebotUtils.OptionalInstrument) sgNoteMap.getByIndex(inst.ordinal()).get();
             return optionalInstrument.toMinecraftInstrument();

@@ -5,18 +5,19 @@
 
 package meteordevelopment.meteorclient.utils.misc;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.Entity;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.block.state.BlockState;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class MBlockPos {
-    private static final BlockPos.Mutable POS = new BlockPos.Mutable();
+    private static final BlockPos.MutableBlockPos POS = new BlockPos.MutableBlockPos();
 
     public int x, y, z;
 
-    public MBlockPos() {}
+    public MBlockPos() {
+    }
 
     public MBlockPos(Entity entity) {
         set(entity);
@@ -28,11 +29,17 @@ public class MBlockPos {
         this.z = z;
         return this;
     }
+
     public MBlockPos set(MBlockPos pos) {
         return set(pos.x, pos.y, pos.z);
     }
+
     public MBlockPos set(Entity entity) {
         return set(entity.getBlockX(), entity.getBlockY(), entity.getBlockZ());
+    }
+
+    public MBlockPos coerceBlockLevel(Entity entity) {
+        return set(entity.getBlockX(), (int) Math.round(entity.getY()), entity.getBlockZ());
     }
 
     public MBlockPos offset(HorizontalDirection dir, int amount) {
@@ -40,6 +47,7 @@ public class MBlockPos {
         z += dir.offsetZ * amount;
         return this;
     }
+
     public MBlockPos offset(HorizontalDirection dir) {
         return offset(dir, 1);
     }
@@ -51,12 +59,12 @@ public class MBlockPos {
         return this;
     }
 
-    public BlockPos getMcPos() {
+    public BlockPos getBlockPos() {
         return POS.set(x, y, z);
     }
 
     public BlockState getState() {
-        return mc.world.getBlockState(getMcPos());
+        return mc.level.getBlockState(getBlockPos());
     }
 
     @Override
@@ -77,5 +85,10 @@ public class MBlockPos {
         result = 31 * result + y;
         result = 31 * result + z;
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return this.x + ", " + this.y + ", " + this.z;
     }
 }

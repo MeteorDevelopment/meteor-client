@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.systems.modules.misc.swarm;
 
+import com.mojang.blaze3d.Blaze3D;
 import meteordevelopment.meteorclient.events.game.GameJoinedEvent;
 import meteordevelopment.meteorclient.events.game.GameLeftEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
@@ -17,7 +18,8 @@ import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.util.Util;
+
+import java.net.URI;
 
 public class Swarm extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -72,7 +74,7 @@ public class Swarm extends Module {
         stop.action = this::close;
 
         WButton guide = list.add(theme.button("Guide")).expandX().widget();
-        guide.action = () -> Util.getOperatingSystem().open("https://github.com/MeteorDevelopment/meteor-client/wiki/Swarm-Guide");
+        guide.action = () -> Blaze3D.openUri(URI.create("https://github.com/MeteorDevelopment/meteor-client/wiki/Swarm-Guide"));
 
         return list;
     }
@@ -102,7 +104,8 @@ public class Swarm extends Module {
                 worker.disconnect();
                 worker = null;
             }
-        } catch (Exception ignored) {}
+        } catch (Exception _) {
+        }
     }
 
     @EventHandler

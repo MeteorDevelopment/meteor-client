@@ -9,41 +9,59 @@ import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.utils.Utils;
+import meteordevelopment.meteorclient.utils.misc.ListMode;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
+import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.world.BlockIterator;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.item.BlockItem;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public class LiquidFiller extends Module {
-    private final SettingGroup sgGeneral  = settings.getDefaultGroup();
+    private final SettingGroup sgGeneral = settings.getDefaultGroup();
+    private final SettingGroup sgWhitelist = settings.createGroup("Whitelist");
 
     private final Setting<PlaceIn> placeInLiquids = sgGeneral.add(new EnumSetting.Builder<PlaceIn>()
         .name("place-in")
         .description("What type of liquids to place in.")
-        .defaultValue(PlaceIn.Lava)
+        .defaultValue(PlaceIn.Both)
         .build()
     );
 
-    private final Setting<Integer> horizontalRadius = sgGeneral.add(new IntSetting.Builder()
-        .name("horizontal-radius")
-        .description("Horizontal radius in which to search for liquids.")
-        .defaultValue(4)
+    private final Setting<Shape> shape = sgGeneral.add(new EnumSetting.Builder<Shape>()
+        .name("shape")
+        .description("The shape of placing algorithm.")
+        .defaultValue(Shape.Sphere)
+        .build()
+    );
+
+    private final Setting<Double> placeRange = sgGeneral.add(new DoubleSetting.Builder()
+        .name("place-range")
+        .description("The range at which blocks can be placed.")
+        .defaultValue(4.5)
         .min(0)
         .sliderMax(6)
         .build()
     );
 
-    private final Setting<Integer> verticalRadius = sgGeneral.add(new IntSetting.Builder()
-        .name("vertical-radius")
-        .description("Vertical radius in which to search for liquids.")
-        .defaultValue(4)
+    private final Setting<Double> placeWallsRange = sgGeneral.add(new DoubleSetting.Builder()
+        .name("walls-range")
+        .description("Range in which to place when behind blocks.")
+        .defaultValue(4.5)
         .min(0)
         .sliderMax(6)
         .build()
@@ -52,23 +70,24 @@ public class LiquidFiller extends Module {
     private final Setting<Integer> delay = sgGeneral.add(new IntSetting.Builder()
         .name("delay")
         .description("Delay between actions in ticks.")
-        .defaultValue(1)
+        .defaultValue(0)
         .min(0)
         .build()
     );
 
-    private final Setting<List<Block>> whitelist = sgGeneral.add(new BlockListSetting.Builder()
-        .name("block-whitelist")
-        .description("The allowed blocks that it will use to fill up the liquid.")
-        .defaultValue(
-            Blocks.DIRT,
-            Blocks.COBBLESTONE,
-            Blocks.STONE,
-            Blocks.NETHERRACK,
-            Blocks.DIORITE,
-            Blocks.GRANITE,
-            Blocks.ANDESITE
-        )
+    private final Setting<Integer> maxBlocksPerTick = sgGeneral.add(new IntSetting.Builder()
+        .name("max-blocks-per-tick")
+        .description("Maximum blocks to try to place per tick.")
+        .defaultValue(1)
+        .min(1)
+        .sliderRange(1, 10)
+        .build()
+    );
+
+    private final Setting<SortMode> sortMode = sgGeneral.add(new EnumSetting.Builder<SortMode>()
+        .name("sort-mode")
+        .description("The blocks you want to place first.")
+        .defaultValue(SortMode.Furthest)
         .build()
     );
 
@@ -79,9 +98,43 @@ public class LiquidFiller extends Module {
         .build()
     );
 
+    // Whitelist and blacklist
+
+    private final Setting<ListMode> listMode = sgWhitelist.add(new EnumSetting.Builder<ListMode>()
+        .name("list-mode")
+        .description("Selection mode.")
+        .defaultValue(ListMode.Whitelist)
+        .build()
+    );
+
+    private final Setting<List<Block>> whitelist = sgWhitelist.add(new BlockListSetting.Builder()
+        .name("whitelist")
+        .description("The allowed blocks that it will use to fill up the liquid.")
+        .defaultValue(
+            Blocks.DIRT,
+            Blocks.COBBLESTONE,
+            Blocks.STONE,
+            Blocks.NETHERRACK,
+            Blocks.DIORITE,
+            Blocks.GRANITE,
+            Blocks.ANDESITE
+        )
+        .visible(() -> listMode.get() == ListMode.Whitelist)
+        .build()
+    );
+
+    private final Setting<List<Block>> blacklist = sgWhitelist.add(new BlockListSetting.Builder()
+        .name("blacklist")
+        .description("The denied blocks that it not will use to fill up the liquid.")
+        .visible(() -> listMode.get() == ListMode.Blacklist)
+        .build()
+    );
+
+    private final List<BlockPos.MutableBlockPos> blocks = new ArrayList<>();
+
     private int timer;
 
-    public LiquidFiller(){
+    public LiquidFiller() {
         super(Categories.World, "liquid-filler", "Places blocks inside of liquid source blocks within range of you.");
     }
 
@@ -100,33 +153,101 @@ public class LiquidFiller extends Module {
             timer = 0;
         }
 
+        // Calculate some stuff
+        double pX = mc.player.getX();
+        double pY = mc.player.getY();
+        double pZ = mc.player.getZ();
+
         // Find slot with a block
-        FindItemResult item = InvUtils.findInHotbar(itemStack -> itemStack.getItem() instanceof BlockItem && whitelist.get().contains(Block.getBlockFromItem(itemStack.getItem())));
+        FindItemResult item;
+        item = InvUtils.findInHotbar(itemStack -> {
+            if (!(itemStack.getItem() instanceof BlockItem)) return false;
+
+            boolean itemInList = (listMode.get() == ListMode.Whitelist ? whitelist.get() : blacklist.get()).contains(Block.byItem(itemStack.getItem()));
+            return listMode.get().allows(itemInList);
+        });
         if (!item.found()) return;
 
         // Loop blocks around the player
-        BlockIterator.register(horizontalRadius.get(), verticalRadius.get(), (blockPos, blockState) -> {
-            // Check if the block a source liquid block
-            if (isSource(blockState)) {
-                Block liquid = blockState.getBlock();
+        BlockIterator.register((int) Math.ceil(placeRange.get() + 1), (int) Math.ceil(placeRange.get()), (blockPos, blockState) -> {
 
-                PlaceIn placeIn = placeInLiquids.get();
-                if (placeIn == PlaceIn.Both || (placeIn == PlaceIn.Lava && liquid == Blocks.LAVA) || (placeIn == PlaceIn.Water && liquid == Blocks.WATER)) {
-                    if (BlockUtils.place(blockPos, item, rotate.get(), 0, true)) {
-                        BlockIterator.disableCurrent();
-                    }
-                }
+            // Check raycast and range
+            if (isOutOfRange(blockPos)) return;
+
+            // Check if the block is a source block and set to be filled
+            Fluid fluid = blockState.getFluidState().getType();
+            if ((placeInLiquids.get() == PlaceIn.Both && (fluid != Fluids.WATER && fluid != Fluids.LAVA))
+                || (placeInLiquids.get() == PlaceIn.Water && fluid != Fluids.WATER)
+                || (placeInLiquids.get() == PlaceIn.Lava && fluid != Fluids.LAVA))
+                return;
+
+            // Check if the player can place at pos
+            if (!BlockUtils.canPlace(blockPos)) return;
+
+            // Add block
+            blocks.add(blockPos.mutable());
+        });
+
+        BlockIterator.after(() -> {
+            // Sort blocks
+            if (sortMode.get() == SortMode.TopDown || sortMode.get() == SortMode.BottomUp)
+                blocks.sort(Comparator.comparingDouble(value -> value.getY() * (sortMode.get() == SortMode.BottomUp ? 1 : -1)));
+            else if (sortMode.get() != SortMode.None)
+                blocks.sort(Comparator.comparingDouble(value -> Utils.squaredDistance(pX, pY, pZ, value.getX() + 0.5, value.getY() + 0.5, value.getZ() + 0.5) * (sortMode.get() == SortMode.Closest ? 1 : -1)));
+
+            // Place and clear place positions
+            int count = 0;
+            for (BlockPos pos : blocks) {
+                if (count >= maxBlocksPerTick.get()) break;
+                BlockUtils.place(pos, item, rotate.get(), 0, true);
+                count++;
             }
+            blocks.clear();
         });
     }
 
-    private boolean isSource(BlockState blockState) {
-        return blockState.getFluidState().getLevel() == 8 && blockState.getFluidState().isStill();
+    public enum PlaceIn {
+        Both,
+        Water,
+        Lava
     }
 
-    public enum PlaceIn {
-        Lava,
-        Water,
-        Both
+    public enum SortMode {
+        None,
+        Closest,
+        Furthest,
+        TopDown,
+        BottomUp
+    }
+
+    public enum Shape {
+        Sphere,
+        UniformCube
+    }
+
+    private boolean isOutOfRange(BlockPos blockPos) {
+        if (!isWithinShape(blockPos, placeRange.get())) return true;
+
+        ClipContext clipContext = new ClipContext(mc.player.getEyePosition(), Vec3.atCenterOf(blockPos), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, mc.player);
+        BlockHitResult result = mc.level.clip(clipContext);
+        if (result == null || !result.getBlockPos().equals(blockPos))
+            return !isWithinShape(blockPos, placeWallsRange.get());
+
+        return false;
+    }
+
+    private boolean isWithinShape(BlockPos blockPos, double range) {
+        // Cube shape
+        if (shape.get() == Shape.UniformCube) {
+            BlockPos playerBlockPos = mc.player.blockPosition();
+            double dX = Math.abs(blockPos.getX() - playerBlockPos.getX());
+            double dY = Math.abs(blockPos.getY() - playerBlockPos.getY());
+            double dZ = Math.abs(blockPos.getZ() - playerBlockPos.getZ());
+            double maxDist = Math.max(Math.max(dX, dY), dZ);
+            return maxDist <= Math.floor(range);
+        }
+
+        // Spherical shape
+        return PlayerUtils.isWithin(Vec3.atCenterOf(blockPos), range);
     }
 }

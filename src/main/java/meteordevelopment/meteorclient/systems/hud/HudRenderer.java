@@ -20,17 +20,22 @@ import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.render.RenderUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.Identifier;
-import org.lwjgl.BufferUtils;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ItemStack;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class HudRenderer {
     public static final HudRenderer INSTANCE = new HudRenderer();
@@ -42,35 +47,38 @@ public class HudRenderer {
 
     private final Int2ObjectMap<FontHolder> fontsInUse = new Int2ObjectOpenHashMap<>();
     private final LoadingCache<Integer, FontHolder> fontCache = CacheBuilder.newBuilder()
-        .maximumSize(4)
         .expireAfterAccess(Duration.ofMinutes(10))
         .removalListener(notification -> {
-            if (notification.wasEvicted()) //noinspection ConstantConditions
+            if (notification.wasEvicted())
                 ((FontHolder) notification.getValue()).destroy();
         })
         .build(CacheLoader.from(HudRenderer::loadFont));
 
-    public DrawContext drawContext;
+    public GuiGraphicsExtractor graphics;
     public double delta;
 
     private HudRenderer() {
         MeteorClient.EVENT_BUS.subscribe(this);
     }
 
-    public void begin(DrawContext drawContext) {
+    public void begin(GuiGraphicsExtractor graphics) {
         Renderer2D.COLOR.begin();
 
-        this.drawContext = drawContext;
+        this.graphics = graphics;
         this.delta = Utils.frameTime;
 
+        graphics.nextStratum();
+
+        graphics.pose().pushMatrix();
+        graphics.pose().scale(1.0f / mc.getWindow().getGuiScale());
+
         if (!hud.hasCustomFont()) {
-            VanillaTextRenderer.INSTANCE.scaleIndividually = true;
-            VanillaTextRenderer.INSTANCE.begin();
+            VanillaTextRenderer.INSTANCE.begin(graphics);
         }
     }
 
     public void end() {
-        Renderer2D.COLOR.render(new MatrixStack());
+        Renderer2D.COLOR.render();
 
         if (hud.hasCustomFont()) {
             // Render fonts that were visited this frame and move to cache which weren't visited
@@ -78,18 +86,20 @@ public class HudRenderer {
                 FontHolder fontHolder = it.next();
 
                 if (fontHolder.visited) {
-                    GL.bindTexture(fontHolder.font.texture.getGlId());
-                    fontHolder.getMesh().render(null);
-                }
-                else {
+                    MeshRenderer.begin()
+                        .attachments(mc.gameRenderer.mainRenderTarget())
+                        .pipeline(MeteorRenderPipelines.UI_TEXT)
+                        .mesh(fontHolder.getMesh())
+                        .sampler("u_Texture", fontHolder.font.texture.getTextureView(), fontHolder.font.texture.getSampler())
+                        .end();
+                } else {
                     it.remove();
                     fontCache.put(fontHolder.font.getHeight(), fontHolder);
                 }
 
                 fontHolder.visited = false;
             }
-        }
-        else {
+        } else {
             VanillaTextRenderer.INSTANCE.end();
             VanillaTextRenderer.INSTANCE.scaleIndividually = false;
         }
@@ -97,7 +107,11 @@ public class HudRenderer {
         for (Runnable task : postTasks) task.run();
         postTasks.clear();
 
-        this.drawContext = null;
+        graphics.pose().popMatrix();
+
+        graphics.nextStratum();
+
+        graphics = null;
     }
 
     public void line(double x1, double y1, double x2, double y2, Color color) {
@@ -117,11 +131,9 @@ public class HudRenderer {
     }
 
     public void texture(Identifier id, double x, double y, double width, double height, Color color) {
-        GL.bindTexture(id);
-
         Renderer2D.TEXTURE.begin();
         Renderer2D.TEXTURE.texQuad(x, y, width, height, color);
-        Renderer2D.TEXTURE.render(null);
+        Renderer2D.TEXTURE.render(mc.getTextureManager().getTexture(id).getTextureView(), mc.getTextureManager().getTexture(id).getSampler());
     }
 
     public double text(String text, double x, double y, Color color, boolean shadow, double scale) {
@@ -135,7 +147,7 @@ public class HudRenderer {
         FontHolder fontHolder = getFontHolder(scale, true);
 
         Font font = fontHolder.font;
-        Mesh mesh = fontHolder.getMesh();
+        MeshBuilder mesh = fontHolder.getMesh();
 
         double width;
 
@@ -147,13 +159,13 @@ public class HudRenderer {
             font.render(mesh, text, x, y, color, scale);
 
             CustomTextRenderer.SHADOW_COLOR.a = preShadowA;
-        }
-        else {
+        } else {
             width = font.render(mesh, text, x, y, color, scale);
         }
 
         return width;
     }
+
     public double text(String text, double x, double y, Color color, boolean shadow) {
         return text(text, x, y, color, shadow, -1);
     }
@@ -169,12 +181,15 @@ public class HudRenderer {
         VanillaTextRenderer.INSTANCE.scale = (scale == -1 ? hud.getTextScale() : scale) * 2;
         return VanillaTextRenderer.INSTANCE.getWidth(text, shadow);
     }
+
     public double textWidth(String text, boolean shadow) {
         return textWidth(text, shadow, -1);
     }
+
     public double textWidth(String text, double scale) {
         return textWidth(text, false, scale);
     }
+
     public double textWidth(String text) {
         return textWidth(text, false, -1);
     }
@@ -188,9 +203,11 @@ public class HudRenderer {
         VanillaTextRenderer.INSTANCE.scale = (scale == -1 ? hud.getTextScale() : scale) * 2;
         return VanillaTextRenderer.INSTANCE.getHeight(shadow);
     }
+
     public double textHeight(boolean shadow) {
         return textHeight(shadow, -1);
     }
+
     public double textHeight() {
         return textHeight(false, -1);
     }
@@ -200,11 +217,47 @@ public class HudRenderer {
     }
 
     public void item(ItemStack itemStack, int x, int y, float scale, boolean overlay, String countOverlay) {
-        RenderUtils.drawItem(drawContext, itemStack, x, y, scale, overlay, countOverlay);
+        RenderUtils.drawItem(graphics, itemStack, x, y, scale, overlay, countOverlay, false);
     }
 
     public void item(ItemStack itemStack, int x, int y, float scale, boolean overlay) {
-        RenderUtils.drawItem(drawContext, itemStack, x, y, scale, overlay);
+        RenderUtils.drawItem(graphics, itemStack, x, y, scale, overlay, null, false);
+    }
+
+    public void entity(LivingEntity entity, int x, int y, int width, int height, float yaw, float pitch) {
+        float previousBodyYaw = entity.yBodyRot;
+        float previousYaw = entity.getYRot();
+        float previousPitch = entity.getXRot();
+        float lastLastHeadYaw = entity.yHeadRotO;
+        float lastHeadYaw = entity.yHeadRot;
+
+        float tanYaw = (float) Math.atan((yaw) / 40.0f);
+        float tanPitch = (float) Math.atan((pitch) / 40.0f);
+        entity.yBodyRot = 180.0f + tanYaw * 20.0f;
+        entity.setYRot(180.0f + tanYaw * 40.0f);
+        entity.setXRot(-tanPitch * 20.0f);
+        entity.yHeadRot = entity.getYRot();
+        entity.yHeadRotO = entity.getYRot();
+
+        var state = (LivingEntityRenderState) mc.getEntityRenderDispatcher().getRenderer(entity).createRenderState(entity, 1);
+
+        entity.yBodyRot = previousBodyYaw;
+        entity.setYRot(previousYaw);
+        entity.setXRot(previousPitch);
+        entity.yHeadRot = lastHeadYaw;
+        entity.yHeadRotO = lastLastHeadYaw;
+
+        float s = 1.0f / mc.getWindow().getGuiScale();
+        int x1 = (int) (x * s);
+        int y1 = (int) (y * s);
+        int x2 = (int) ((x + width) * s);
+        int y2 = (int) ((y + height) * s);
+
+        float scale = Math.max(width, height) * s / 2f;
+        Vector3f translation = new Vector3f(0, 1f, 0);
+        Quaternionf rotation = new Quaternionf().rotateZ((float) Math.PI);
+
+        graphics.entity(state, scale, translation, rotation, null, x1, y1, x2, y2);
     }
 
     private FontHolder getFontHolder(double scale, boolean render) {
@@ -251,31 +304,32 @@ public class HudRenderer {
     }
 
     private static FontHolder loadFont(int height) {
-        byte[] data = Utils.readBytes(Fonts.RENDERER.fontFace.toStream());
-        ByteBuffer buffer = BufferUtils.createByteBuffer(data.length).put(data).flip();
-
-        return new FontHolder(new Font(buffer, height));
+        try {
+            ByteBuffer buffer = Fonts.RENDERER.fontFace.readToDirectByteBuffer();
+            return new FontHolder(new Font(buffer, height));
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to load font: " + Fonts.RENDERER.fontFace, e);
+        }
     }
 
     private static class FontHolder {
         public final Font font;
         public boolean visited;
 
-        private Mesh mesh;
+        private MeshBuilder mesh;
 
         public FontHolder(Font font) {
             this.font = font;
         }
 
-        public Mesh getMesh() {
-            if (mesh == null) mesh = new ShaderMesh(Shaders.TEXT, DrawMode.Triangles, Mesh.Attrib.Vec2, Mesh.Attrib.Vec2, Mesh.Attrib.Color);
+        public MeshBuilder getMesh() {
+            if (mesh == null) mesh = new MeshBuilder(MeteorRenderPipelines.UI_TEXT);
             if (!mesh.isBuilding()) mesh.begin();
             return mesh;
         }
 
         public void destroy() {
-            font.texture.clearGlId();
-            if (mesh != null) mesh.destroy();
+            font.texture.close();
         }
     }
 }

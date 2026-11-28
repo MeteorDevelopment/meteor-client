@@ -10,7 +10,7 @@ import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.utils.misc.UnorderedArrayList;
 import meteordevelopment.meteorclient.utils.render.RenderUtils;
-import net.minecraft.block.Block;
+import net.minecraft.world.level.block.Block;
 
 import java.util.ArrayDeque;
 import java.util.Queue;
@@ -73,11 +73,12 @@ public class ESPGroup {
         Set<ESPBlock> remainingBlocks = new ObjectOpenHashSet<>(blocks);
         Queue<ESPBlock> blocksToCheck = new ArrayDeque<>();
 
-        blocksToCheck.offer(blocks.get(0));
-        remainingBlocks.remove(blocks.get(0));
-        neighbours.remove(blocks.get(0));
+        blocksToCheck.offer(blocks.getFirst());
+        remainingBlocks.remove(blocks.getFirst());
+        neighbours.remove(blocks.getFirst());
 
-        loop: {
+        loop:
+        {
             while (!blocksToCheck.isEmpty()) {
                 ESPBlock b = blocksToCheck.poll();
 
@@ -96,7 +97,7 @@ public class ESPGroup {
             }
         }
 
-        if (neighbours.size() > 0) {
+        if (!neighbours.isEmpty()) {
             ESPGroup group = blockEsp.newGroup(this.block);
             group.blocks.ensureCapacity(remainingBlocks.size());
 

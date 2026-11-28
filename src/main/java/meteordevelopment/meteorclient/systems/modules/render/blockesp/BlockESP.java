@@ -7,6 +7,7 @@ package meteordevelopment.meteorclient.systems.modules.render.blockesp;
 
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.events.world.BlockUpdateEvent;
 import meteordevelopment.meteorclient.events.world.ChunkDataEvent;
@@ -16,21 +17,21 @@ import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
-import meteordevelopment.meteorclient.utils.misc.UnorderedArrayList;
-import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
-import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.render.color.RainbowColors;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
-import meteordevelopment.meteorclient.utils.world.Dimension;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.Block;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.world.chunk.Chunk;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.dimension.DimensionType;
 
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class BlockESP extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -40,7 +41,7 @@ public class BlockESP extends Module {
     private final Setting<List<Block>> blocks = sgGeneral.add(new BlockListSetting.Builder()
         .name("blocks")
         .description("Blocks to search for.")
-        .onChanged(blocks1 -> {
+        .onChanged(_ -> {
             if (isActive() && Utils.canUpdate()) onActivate();
         })
         .build()
@@ -75,15 +76,20 @@ public class BlockESP extends Module {
         .build()
     );
 
-    private final BlockPos.Mutable blockPos = new BlockPos.Mutable();
+    private final BlockPos.MutableBlockPos blockPos = new BlockPos.MutableBlockPos();
 
     private final Long2ObjectMap<ESPChunk> chunks = new Long2ObjectOpenHashMap<>();
-    private final List<ESPGroup> groups = new UnorderedArrayList<>();
+    private final Set<ESPGroup> groups = new ReferenceOpenHashSet<>();
+    private final ExecutorService workerThread = Executors.newSingleThreadExecutor(task -> {
+        Thread t = new Thread(task);
+        t.setDaemon(true);
+        return t;
+    });
 
-    private Dimension lastDimension;
+    private DimensionType lastDimension;
 
     public BlockESP() {
-        super(Categories.Render, "block-esp", "Renders specified blocks through walls.");
+        super(Categories.Render, "block-esp", "Renders specified blocks through walls.", "search");
 
         RainbowColors.register(this::onTickRainbow);
     }
@@ -95,11 +101,11 @@ public class BlockESP extends Module {
             groups.clear();
         }
 
-        for (Chunk chunk : Utils.chunks()) {
-            searchChunk(chunk, null);
+        for (ChunkAccess chunk : Utils.chunks()) {
+            searchChunk(chunk);
         }
 
-        lastDimension = PlayerUtils.getDimension();
+        lastDimension = mc.level.dimensionType();
     }
 
     @Override
@@ -123,17 +129,17 @@ public class BlockESP extends Module {
     }
 
     private void updateChunk(int x, int z) {
-        ESPChunk chunk = chunks.get(ChunkPos.toLong(x, z));
+        ESPChunk chunk = chunks.get(ChunkPos.pack(x, z));
         if (chunk != null) chunk.update();
     }
 
     private void updateBlock(int x, int y, int z) {
-        ESPChunk chunk = chunks.get(ChunkPos.toLong(x >> 4, z >> 4));
+        ESPChunk chunk = chunks.get(ChunkPos.pack(x >> 4, z >> 4));
         if (chunk != null) chunk.update(x, y, z);
     }
 
     public ESPBlock getBlock(int x, int y, int z) {
-        ESPChunk chunk = chunks.get(ChunkPos.toLong(x >> 4, z >> 4));
+        ESPChunk chunk = chunks.get(ChunkPos.pack(x >> 4, z >> 4));
         return chunk == null ? null : chunk.get(x, y, z);
     }
 
@@ -153,28 +159,26 @@ public class BlockESP extends Module {
 
     @EventHandler
     private void onChunkData(ChunkDataEvent event) {
-        searchChunk(event.chunk, event);
+        searchChunk(event.chunk());
     }
 
-    private void searchChunk(Chunk chunk, ChunkDataEvent event) {
-        MeteorExecutor.execute(() -> {
+    private void searchChunk(ChunkAccess chunk) {
+        workerThread.submit(() -> {
             if (!isActive()) return;
             ESPChunk schunk = ESPChunk.searchChunk(chunk, blocks.get());
 
             if (schunk.size() > 0) {
                 synchronized (chunks) {
-                    chunks.put(chunk.getPos().toLong(), schunk);
+                    chunks.put(chunk.getPos().pack(), schunk);
                     schunk.update();
 
                     // Update neighbour chunks
-                    updateChunk(chunk.getPos().x - 1, chunk.getPos().z);
-                    updateChunk(chunk.getPos().x + 1, chunk.getPos().z);
-                    updateChunk(chunk.getPos().x, chunk.getPos().z - 1);
-                    updateChunk(chunk.getPos().x, chunk.getPos().z + 1);
+                    updateChunk(chunk.getPos().x() - 1, chunk.getPos().z());
+                    updateChunk(chunk.getPos().x() + 1, chunk.getPos().z());
+                    updateChunk(chunk.getPos().x(), chunk.getPos().z() - 1);
+                    updateChunk(chunk.getPos().x(), chunk.getPos().z() + 1);
                 }
             }
-
-            if (event != null) ChunkDataEvent.returnChunkDataEvent(event);
         });
     }
 
@@ -187,13 +191,13 @@ public class BlockESP extends Module {
 
         int chunkX = bx >> 4;
         int chunkZ = bz >> 4;
-        long key = ChunkPos.toLong(chunkX, chunkZ);
+        long key = ChunkPos.pack(chunkX, chunkZ);
 
         boolean added = blocks.get().contains(event.newState.getBlock()) && !blocks.get().contains(event.oldState.getBlock());
         boolean removed = !added && !blocks.get().contains(event.newState.getBlock()) && blocks.get().contains(event.oldState.getBlock());
 
         if (added || removed) {
-            MeteorExecutor.execute(() -> {
+            workerThread.submit(() -> {
                 synchronized (chunks) {
                     ESPChunk chunk = chunks.get(key);
 
@@ -226,21 +230,20 @@ public class BlockESP extends Module {
 
     @EventHandler
     private void onPostTick(TickEvent.Post event) {
-        Dimension dimension = PlayerUtils.getDimension();
+        DimensionType dimension = mc.level.dimensionType();
 
         if (lastDimension != dimension) onActivate();
-
         lastDimension = dimension;
     }
 
     @EventHandler
     private void onRender(Render3DEvent event) {
         synchronized (chunks) {
-            for (Iterator<ESPChunk> it = chunks.values().iterator(); it.hasNext();) {
+            for (Iterator<ESPChunk> it = chunks.values().iterator(); it.hasNext(); ) {
                 ESPChunk chunk = it.next();
 
                 if (chunk.shouldBeDeleted()) {
-                    MeteorExecutor.execute(() -> {
+                    workerThread.submit(() -> {
                         for (ESPBlock block : chunk.blocks.values()) {
                             block.group.remove(block, false);
                             block.loaded = false;
@@ -248,18 +251,19 @@ public class BlockESP extends Module {
                     });
 
                     it.remove();
-                }
-                else chunk.render(event);
+                } else chunk.render(event);
             }
 
             if (tracers.get()) {
-                for (Iterator<ESPGroup> it = groups.iterator(); it.hasNext();) {
-                    ESPGroup group = it.next();
-
-                    if (group.blocks.isEmpty()) it.remove();
-                    else group.render(event);
+                for (ESPGroup group : groups) {
+                    group.render(event);
                 }
             }
         }
+    }
+
+    @Override
+    public String getInfoString() {
+        return "%s groups".formatted(groups.size());
     }
 }

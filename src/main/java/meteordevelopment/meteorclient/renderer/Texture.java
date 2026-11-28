@@ -5,103 +5,94 @@
 
 package meteordevelopment.meteorclient.renderer;
 
+import com.mojang.blaze3d.platform.NativeImage;
+import com.mojang.blaze3d.platform.TextureUtil;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.renderpearl.api.GpuFormat;
+import com.mojang.renderpearl.api.textures.AddressMode;
+import com.mojang.renderpearl.api.textures.FilterMode;
+import net.minecraft.client.renderer.texture.AbstractTexture;
+import net.minecraft.util.PngInfo;
+import org.jspecify.annotations.NonNull;
 import org.lwjgl.BufferUtils;
+import org.lwjgl.stb.STBImage;
+import org.lwjgl.system.MemoryStack;
+import org.lwjgl.system.MemoryUtil;
 
-import java.nio.Buffer;
+import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.IntBuffer;
 
-import static org.lwjgl.opengl.GL11C.*;
-import static org.lwjgl.opengl.GL12C.GL_CLAMP_TO_EDGE;
+public class Texture extends AbstractTexture {
+    public Texture(int width, int height, GpuFormat format, FilterMode min, FilterMode mag) {
+        texture = RenderSystem.getDevice().createTexture("", 15, format, width, height, 1, 1);
+        sampler = RenderSystem.getSamplerCache().getSampler(AddressMode.REPEAT, AddressMode.REPEAT, min, mag, false);
 
-public class Texture {
-    public int width, height;
-    private int id;
-    private boolean valid;
-
-    public Texture(int width, int height, byte[] data, Format format, Filter filterMin, Filter filterMag) {
-        if (RenderSystem.isOnRenderThread()) {
-            upload(width, height, data, format, filterMin, filterMag);
-        }
-        else {
-            RenderSystem.recordRenderCall(() -> upload(width, height, data, format, filterMin, filterMag));
-        }
+        textureView = RenderSystem.getDevice().createTextureView(texture);
     }
 
-    public Texture() {}
-
-    protected void upload(int width, int height, byte[] data, Format format, Filter filterMin, Filter filterMag) {
-        ByteBuffer buffer = BufferUtils.createByteBuffer(data.length).put(data);
-
-        upload(width, height, buffer, format, filterMin, filterMag, false);
+    public int getWidth() {
+        return getTexture().getWidth(0);
     }
 
-    public void upload(int width, int height, ByteBuffer buffer, Format format, Filter filterMin, Filter filterMag, boolean wrapClamp) {
-        this.width = width;
-        this.height = height;
-
-        if (!valid) {
-            id = GL.genTexture();
-            valid = true;
-        }
-
-        bind();
-        GL.defaultPixelStore();
-
-        GL.textureParam(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrapClamp ? GL_CLAMP_TO_EDGE : GL_REPEAT);
-        GL.textureParam(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapClamp ? GL_CLAMP_TO_EDGE : GL_REPEAT);
-        GL.textureParam(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filterMin.toOpenGL());
-        GL.textureParam(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filterMag.toOpenGL());
-
-        ((Buffer) buffer).rewind();
-        GL.textureImage2D(GL_TEXTURE_2D, 0, format.toOpenGL(), width, height, 0, format.toOpenGL(), GL_UNSIGNED_BYTE, buffer);
-
-        if (filterMin == Filter.LinearMipmapLinear || filterMag == Filter.LinearMipmapLinear) {
-            GL.generateMipmap(GL_TEXTURE_2D);
-        }
+    public int getHeight() {
+        return getTexture().getHeight(0);
     }
 
-    public boolean isValid() {
-        return valid;
+    public void upload(byte[] bytes) {
+        upload(BufferUtils.createByteBuffer(bytes.length).put(bytes));
     }
 
-    public void bind(int slot) {
-        GL.bindTexture(id, slot);
-    }
-    public void bind() {
-        bind(0);
-    }
+    public void upload(ByteBuffer buffer) {
+        var image = getImage();
 
-    public void dispose() {
-        GL.deleteTexture(id);
-        valid = false;
-    }
+        buffer.rewind();
+        MemoryUtil.memCopy(MemoryUtil.memAddress(buffer), image.getPointer(), buffer.remaining());
 
-    public enum Format {
-        A,
-        RGB,
-        RGBA;
+        RenderSystem.getDevice().createCommandEncoder().writeToTexture(texture, image);
 
-        public int toOpenGL() {
-            return switch (this) {
-                case A -> GL_RED;
-                case RGB -> GL_RGB;
-                case RGBA -> GL_RGBA;
-            };
-        }
+        image.close();
     }
 
-    public enum Filter {
-        Nearest,
-        Linear,
-        LinearMipmapLinear;
+    private @NonNull NativeImage getImage() {
+        NativeImage.Format imageFormat = switch (texture.getFormat()) {
+            case RGBA8_UNORM -> NativeImage.Format.RGBA;
+            case R8_UNORM -> NativeImage.Format.LUMINANCE;
+            default -> throw new IllegalArgumentException("Unsupported texture format: " + texture.getFormat());
+        };
 
-        public int toOpenGL() {
-            return switch (this) {
-                case Nearest -> GL_NEAREST;
-                case Linear -> GL_LINEAR;
-                case LinearMipmapLinear -> GL_LINEAR_MIPMAP_LINEAR;
-            };
+        // Workaround for writeToTexture(IntBuffer) overload comparing width * height to the size of the int buffer.
+        // And since we are working with pixels which are only one byte in size, the sizes don't match
+        return new NativeImage(imageFormat, getWidth(), getHeight(), false);
+    }
+
+    public static Texture readResource(String path, boolean flipY, FilterMode filter) {
+        try (var in = Texture.class.getResourceAsStream(path)) {
+            if (in == null) return null;
+
+            var data = TextureUtil.readResource(in).rewind();
+
+            PngInfo.validateHeader(data);
+            data.rewind();
+
+            try (MemoryStack stack = MemoryStack.stackPush()) {
+                IntBuffer width = stack.mallocInt(1);
+                IntBuffer height = stack.mallocInt(1);
+                IntBuffer comp = stack.mallocInt(1);
+
+                STBImage.stbi_set_flip_vertically_on_load(flipY);
+                ByteBuffer image = STBImage.stbi_load_from_memory(data, width, height, comp, 4);
+
+                var texture = new Texture(width.get(0), height.get(0), GpuFormat.RGBA8_UNORM, filter, filter);
+                texture.upload(image);
+
+                STBImage.stbi_image_free(image);
+                STBImage.stbi_set_flip_vertically_on_load(false);
+
+                return texture;
+            }
+        } catch (IOException _) {
+            return null;
         }
     }
 }

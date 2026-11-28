@@ -5,47 +5,73 @@
 
 package meteordevelopment.meteorclient.utils.misc;
 
+import com.mojang.authlib.GameProfile;
 import meteordevelopment.meteorclient.MeteorClient;
-import meteordevelopment.meteorclient.events.game.GameJoinedEvent;
 import meteordevelopment.meteorclient.utils.PreInit;
-import meteordevelopment.orbit.EventHandler;
-import net.minecraft.client.network.ClientPlayNetworkHandler;
-import net.minecraft.client.network.OtherClientPlayerEntity;
-import net.minecraft.client.network.PlayerListEntry;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.network.ClientConnection;
-import net.minecraft.network.NetworkSide;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.client.multiplayer.CommonListenerCookie;
+import net.minecraft.client.multiplayer.PlayerInfo;
+import net.minecraft.client.player.RemotePlayer;
+import net.minecraft.network.Connection;
+import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.world.Difficulty;
+
+import java.util.UUID;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class FakeClientPlayer {
-    private static ClientWorld world;
-    private static PlayerEntity player;
-    private static PlayerListEntry playerListEntry;
+    private static ClientLevel world;
+    private static RemotePlayer player;
+    private static PlayerInfo playerListEntry;
 
-    private static String lastId;
+    private static UUID lastId;
     private static boolean needsNewEntry;
+
+    private FakeClientPlayer() {
+    }
 
     @PreInit
     public static void init() {
         MeteorClient.EVENT_BUS.subscribe(FakeClientPlayer.class);
     }
 
-    @EventHandler
-    private static void onGameJoined(GameJoinedEvent event) {
-    }
-
-    public static PlayerEntity getPlayer() {
-        String id = mc.getSession().getUuid();
+    public static RemotePlayer getPlayer() {
+        UUID id = mc.getUser().getProfileId();
 
         if (player == null || (!id.equals(lastId))) {
             if (world == null) {
-                world = new ClientWorld(new ClientPlayNetworkHandler(mc, null, new ClientConnection(NetworkSide.CLIENTBOUND), mc.getCurrentServerEntry(), mc.getSession().getProfile(), null), new ClientWorld.Properties(Difficulty.NORMAL, false, false), world.getRegistryKey(), world.getDimensionEntry(), 1, 1, mc::getProfiler, null, false, 0);
+                world = new ClientLevel(
+                    new ClientPacketListener(mc, new Connection(PacketFlow.CLIENTBOUND), new CommonListenerCookie(
+                        null,
+                        new GameProfile(mc.getUser().getProfileId(), mc.getUser().getName()),
+                        null,
+                        null,
+                        null,
+                        null,
+                        mc.getCurrentServer(),
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        false)
+                    ),
+                    new ClientLevel.ClientLevelData(Difficulty.NORMAL, false, false),
+                    world.dimension(),
+                    world.dimensionTypeRegistration(),
+                    1,
+                    1,
+                    null,
+                    false,
+                    0,
+                    world.getSeaLevel()
+                );
             }
 
-            player = new OtherClientPlayerEntity(world, mc.getSession().getProfile());
+            player = new RemotePlayer(world, new GameProfile(id, mc.getUser().getName()));
 
             lastId = id;
             needsNewEntry = true;
@@ -54,9 +80,9 @@ public class FakeClientPlayer {
         return player;
     }
 
-    public static PlayerListEntry getPlayerListEntry() {
+    public static PlayerInfo getPlayerListEntry() {
         if (playerListEntry == null || needsNewEntry) {
-            playerListEntry = new PlayerListEntry(mc.getSession().getProfile(), false);
+            playerListEntry = new PlayerInfo(new GameProfile(lastId, mc.getUser().getName()), false);
             needsNewEntry = false;
         }
 

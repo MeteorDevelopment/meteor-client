@@ -24,7 +24,7 @@ import java.util.List;
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class Fonts {
-    public static final String[] BUILTIN_FONTS = { "JetBrains Mono", "Comfortaa", "Tw Cen MT", "Pixelation" };
+    public static final String[] BUILTIN_FONTS = {"JetBrains Mono", "Comfortaa", "Tw Cen MT", "Pixelation"};
 
     public static String DEFAULT_FONT_FAMILY;
     public static FontFace DEFAULT_FONT;
@@ -32,7 +32,10 @@ public class Fonts {
     public static final List<FontFamily> FONT_FAMILIES = new ArrayList<>();
     public static CustomTextRenderer RENDERER;
 
-    @PreInit(dependencies = Shaders.class)
+    private Fonts() {
+    }
+
+    @PreInit
     public static void refresh() {
         FONT_FAMILIES.clear();
 
@@ -56,23 +59,25 @@ public class Fonts {
     }
 
     public static void load(FontFace fontFace) {
-        if (RENDERER != null && RENDERER.fontFace.equals(fontFace)) return;
+        if (RENDERER != null) {
+            if (RENDERER.fontFace.equals(fontFace)) return;
+            else RENDERER.destroy();
+        }
 
         try {
             RENDERER = new CustomTextRenderer(fontFace);
             MeteorClient.EVENT_BUS.post(CustomFontChangedEvent.get());
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             if (fontFace.equals(DEFAULT_FONT)) {
                 throw new RuntimeException("Failed to load default font: " + fontFace, e);
             }
 
-            MeteorClient.LOG.error("Failed to load font: " + fontFace, e);
+            MeteorClient.LOG.error("Failed to load font: {}", fontFace, e);
             load(Fonts.DEFAULT_FONT);
         }
 
-        if (mc.currentScreen instanceof WidgetScreen && Config.get().customFont.get()) {
-            ((WidgetScreen) mc.currentScreen).invalidate();
+        if (mc.gui.screen() instanceof WidgetScreen widgetScreen && Config.get().customFont.get()) {
+            widgetScreen.invalidate();
         }
     }
 

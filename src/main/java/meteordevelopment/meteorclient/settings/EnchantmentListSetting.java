@@ -5,60 +5,69 @@
 
 package meteordevelopment.meteorclient.settings;
 
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.nbt.NbtString;
-import net.minecraft.registry.Registries;
-import net.minecraft.util.Identifier;
+import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
+import net.minecraft.client.Minecraft;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.Enchantments;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.lang.reflect.AccessFlag;
+import java.util.*;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
-public class EnchantmentListSetting extends Setting<List<Enchantment>> {
-    public EnchantmentListSetting(String name, String description, List<Enchantment> defaultValue, Consumer<List<Enchantment>> onChanged, Consumer<Setting<List<Enchantment>>> onModuleActivated, IVisible visible) {
+public class EnchantmentListSetting extends Setting<Set<ResourceKey<Enchantment>>> {
+    public EnchantmentListSetting(String name, String description, Set<ResourceKey<Enchantment>> defaultValue, Consumer<Set<ResourceKey<Enchantment>>> onChanged, Consumer<Setting<Set<ResourceKey<Enchantment>>>> onModuleActivated, IVisible visible) {
         super(name, description, defaultValue, onChanged, onModuleActivated, visible);
     }
 
     @Override
     public void resetImpl() {
-        value = new ArrayList<>(defaultValue);
+        value = new ObjectOpenHashSet<>(defaultValue);
     }
 
     @Override
-    protected List<Enchantment> parseImpl(String str) {
+    protected Set<ResourceKey<Enchantment>> parseImpl(String str) {
         String[] values = str.split(",");
-        List<Enchantment> enchs = new ArrayList<>(values.length);
+        Set<ResourceKey<Enchantment>> enchs = new ObjectOpenHashSet<>(values.length);
 
-        try {
-            for (String value : values) {
-                Enchantment ench = parseId(Registries.ENCHANTMENT, value);
-                if (ench != null) enchs.add(ench);
-            }
-        } catch (Exception ignored) {}
+        for (String value : values) {
+            String name = value.trim();
+
+            Identifier id;
+            if (name.contains(":")) id = Identifier.parse(name);
+            else id = Identifier.withDefaultNamespace(name);
+
+            enchs.add(ResourceKey.create(Registries.ENCHANTMENT, id));
+        }
 
         return enchs;
     }
 
     @Override
-    protected boolean isValueValid(List<Enchantment> value) {
+    protected boolean isValueValid(Set<ResourceKey<Enchantment>> value) {
         return true;
     }
 
     @Override
     public Iterable<Identifier> getIdentifierSuggestions() {
-        return Registries.ENCHANTMENT.getIds();
+        return Optional.ofNullable(Minecraft.getInstance().getConnection())
+            .flatMap(networkHandler -> networkHandler.registryAccess().lookup(Registries.ENCHANTMENT))
+            .map(Registry::keySet).orElse(Set.of());
     }
 
     @Override
-    public NbtCompound save(NbtCompound tag) {
-        NbtList valueTag = new NbtList();
-        for (Enchantment ench : get()) {
-            Identifier id = Registries.ENCHANTMENT.getId(ench);
-            if (id != null) valueTag.add(NbtString.of(id.toString()));
+    public CompoundTag save(CompoundTag tag) {
+        ListTag valueTag = new ListTag();
+        for (ResourceKey<Enchantment> ench : get()) {
+            valueTag.add(StringTag.valueOf(ench.identifier().toString()));
         }
         tag.put("value", valueTag);
 
@@ -66,30 +75,52 @@ public class EnchantmentListSetting extends Setting<List<Enchantment>> {
     }
 
     @Override
-    public List<Enchantment> load(NbtCompound tag) {
+    public Set<ResourceKey<Enchantment>> load(CompoundTag tag) {
         get().clear();
 
-        NbtList valueTag = tag.getList("value", 8);
-        for (NbtElement tagI : valueTag) {
-            Enchantment enchantment = Registries.ENCHANTMENT.get(new Identifier(tagI.asString()));
-            if (enchantment != null) get().add(enchantment);
+        for (Tag tagI : tag.getListOrEmpty("value")) {
+            get().add(ResourceKey.create(Registries.ENCHANTMENT, Identifier.parse(tagI.asString().orElse(""))));
         }
 
         return get();
     }
 
-    public static class Builder extends SettingBuilder<Builder, List<Enchantment>, EnchantmentListSetting> {
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public static class Builder extends SettingBuilder<Builder, Set<ResourceKey<Enchantment>>, EnchantmentListSetting> {
+        private static final Set<ResourceKey<Enchantment>> VANILLA_DEFAULTS;
+
         public Builder() {
-            super(new ArrayList<>(0));
+            super(new ObjectOpenHashSet<>());
         }
 
-        public Builder defaultValue(Enchantment... defaults) {
-            return defaultValue(defaults != null ? Arrays.asList(defaults) : new ArrayList<>());
+        public Builder vanillaDefaults() {
+            return defaultValue(VANILLA_DEFAULTS);
+        }
+
+        @SafeVarargs
+        public final Builder defaultValue(ResourceKey<Enchantment>... defaults) {
+            return defaultValue(defaults != null ? new ObjectOpenHashSet<>(defaults) : new ObjectOpenHashSet<>());
         }
 
         @Override
         public EnchantmentListSetting build() {
             return new EnchantmentListSetting(name, description, defaultValue, onChanged, onModuleActivated, visible);
+        }
+
+        static {
+            VANILLA_DEFAULTS = (Set) Arrays.stream(Enchantments.class.getDeclaredFields())
+                .filter(field -> field.accessFlags().containsAll(List.of(AccessFlag.PUBLIC, AccessFlag.STATIC, AccessFlag.FINAL)))
+                .filter(field -> field.getType() == ResourceKey.class)
+                .map(field -> {
+                    try {
+                        return field.get(null);
+                    } catch (IllegalAccessException _) {
+                        return null;
+                    }
+                }).filter(Objects::nonNull)
+                .map(ResourceKey.class::cast)
+                .filter(registryKey -> registryKey.registryKey() == Registries.ENCHANTMENT)
+                .collect(Collectors.toSet());
         }
     }
 }

@@ -7,8 +7,7 @@ package meteordevelopment.meteorclient.systems.modules.combat;
 
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
-import meteordevelopment.meteorclient.mixin.AbstractBlockAccessor;
-import meteordevelopment.meteorclient.mixininterface.IBox;
+import meteordevelopment.meteorclient.mixin.DirectionAccessor;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.friends.Friends;
@@ -17,6 +16,7 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.misc.Keybind;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
+import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.meteorclient.utils.world.BlockIterator;
@@ -24,16 +24,15 @@ import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.meteorclient.utils.world.Dir;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.entity.TntEntity;
-import net.minecraft.entity.decoration.EndCrystalEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -68,6 +67,15 @@ public class HoleFiller extends Module {
     private final Setting<Double> placeRange = sgGeneral.add(new DoubleSetting.Builder()
         .name("place-range")
         .description("How far away from the player you can place a block.")
+        .defaultValue(4.5)
+        .min(0)
+        .sliderMax(6)
+        .build()
+    );
+
+    private final Setting<Double> placeWallsRange = sgGeneral.add(new DoubleSetting.Builder()
+        .name("walls-range")
+        .description("How far away from the player you can place a block behind walls.")
         .defaultValue(4.5)
         .min(0)
         .sliderMax(6)
@@ -121,11 +129,21 @@ public class HoleFiller extends Module {
         .build()
     );
 
-    private final Setting<Boolean> predict = sgSmart.add(new BoolSetting.Builder()
-        .name("predict")
+    private final Setting<Boolean> predictMovement = sgSmart.add(new BoolSetting.Builder()
+        .name("predict-movement")
         .description("Predict target movement to account for ping.")
         .defaultValue(true)
         .visible(smart::get)
+        .build()
+    );
+
+    private final Setting<Double> ticksToPredict = sgSmart.add(new DoubleSetting.Builder()
+        .name("ticks-to-predict")
+        .description("How many ticks ahead we should predict for.")
+        .defaultValue(10)
+        .min(1)
+        .sliderMax(30)
+        .visible(() -> smart.get() && predictMovement.get())
         .build()
     );
 
@@ -217,16 +235,13 @@ public class HoleFiller extends Module {
     private final Setting<SettingColor> nextLineColor = sgRender.add(new ColorSetting.Builder()
         .name("next-line-color")
         .description("The line color of the next block to be placed.")
-        .defaultValue(new SettingColor(227, 196, 245))
+        .defaultValue(new SettingColor(5, 139, 221))
         .visible(() -> render.get() && shapeMode.get().lines())
         .build()
     );
 
-    private final List<PlayerEntity> targets = new ArrayList<>();
+    private final List<Player> targets = new ArrayList<>();
     private final List<Hole> holes = new ArrayList<>();
-
-    private final BlockPos.Mutable testPos = new BlockPos.Mutable();
-    private final Box box = new Box(0, 0, 0, 0, 0, 0);
     private int timer;
 
     public HoleFiller() {
@@ -243,39 +258,39 @@ public class HoleFiller extends Module {
         if (smart.get()) setTargets();
         holes.clear();
 
-        FindItemResult block = InvUtils.findInHotbar(itemStack -> blocks.get().contains(Block.getBlockFromItem(itemStack.getItem())));
+        // Grab blocks from hotbar
+        FindItemResult block = InvUtils.findInHotbar(itemStack -> blocks.get().contains(Block.byItem(itemStack.getItem())));
         if (!block.found()) return;
 
-        BlockIterator.register(searchRadius.get(), searchRadius.get(), (blockPos, blockState) -> {
+        // Probe for holes
+        BlockIterator.register(searchRadius.get(), searchRadius.get(), (blockPos, _) -> {
             if (!validHole(blockPos)) return;
 
-            int bedrock = 0, obsidian = 0;
+            int surroundBlocks = 0;
             Direction air = null;
 
             for (Direction direction : Direction.values()) {
                 if (direction == Direction.UP) continue;
 
-                BlockState state = mc.world.getBlockState(blockPos.offset(direction));
+                BlockState state = mc.level.getBlockState(blockPos.relative(direction));
 
-                if (state.getBlock() == Blocks.BEDROCK) bedrock++;
-                else if (state.getBlock() == Blocks.OBSIDIAN) obsidian++;
+                if (state.getBlock().getExplosionResistance() >= 600) surroundBlocks++;
                 else if (direction == Direction.DOWN) return;
-                else if (validHole(blockPos.offset(direction)) && air == null) {
+                else if (validHole(blockPos.relative(direction)) && air == null) {
                     for (Direction dir : Direction.values()) {
                         if (dir == direction.getOpposite() || dir == Direction.UP) continue;
 
-                        BlockState blockState1 = mc.world.getBlockState(blockPos.offset(direction).offset(dir));
+                        BlockState state1 = mc.level.getBlockState(blockPos.relative(direction).relative(dir));
 
-                        if (blockState1.getBlock() == Blocks.BEDROCK) bedrock++;
-                        else if (blockState1.getBlock() == Blocks.OBSIDIAN) obsidian++;
+                        if (state1.getBlock().getExplosionResistance() >= 600) surroundBlocks++;
                         else return;
                     }
 
                     air = direction;
                 }
 
-                if (obsidian + bedrock == 5 && air == null) holes.add(new Hole(blockPos, (byte) 0));
-                else if (obsidian + bedrock == 8 && doubles.get() && air != null) {
+                if (surroundBlocks == 5 && air == null) holes.add(new Hole(blockPos, (byte) 0));
+                else if (surroundBlocks == 8 && doubles.get() && air != null) {
                     holes.add(new Hole(blockPos, Dir.get(air)));
                 }
             }
@@ -284,10 +299,11 @@ public class HoleFiller extends Module {
         BlockIterator.after(() -> {
             if (timer > 0 || holes.isEmpty()) return;
 
-            int bpt = 0;
+            // Fill holes!
+            int placedCount = 0;
             for (Hole hole : holes) {
-                if (bpt >= blocksPerTick.get()) continue;
-                if (BlockUtils.place(hole.blockPos, block, rotate.get(), 10, swing.get(), true)) bpt++;
+                if (placedCount >= blocksPerTick.get()) continue;
+                if (BlockUtils.place(hole.blockPos, block, rotate.get(), 10, swing.get(), true)) placedCount++;
             }
 
             timer = placeDelay.get();
@@ -300,99 +316,95 @@ public class HoleFiller extends Module {
     private void onRender(Render3DEvent event) {
         if (!render.get() || holes.isEmpty()) return;
 
-        for (Hole hole : holes) {
-            boolean isNext = false;
-            for (int i = 0; i < holes.size(); i++) {
-                if (!holes.get(i).equals(hole)) continue;
-                if (i < blocksPerTick.get()) isNext = true;
-            }
-
+        for (int i = 0; i < holes.size(); i++) {
+            boolean isNext = i < blocksPerTick.get();
             Color side = isNext ? nextSideColor.get() : sideColor.get();
             Color line = isNext ? nextLineColor.get() : lineColor.get();
 
+            Hole hole = holes.get(i);
             event.renderer.box(hole.blockPos, side, line, shapeMode.get(), hole.exclude);
         }
     }
 
-    private boolean validHole(BlockPos pos) {
-        testPos.set(pos);
+    private boolean validHole(BlockPos blockPos) {
+        // Check if the player can place at pos
+        if (!BlockUtils.canPlace(blockPos)) return false;
 
-        if (mc.player.getBlockPos().equals(testPos)) return false;
-        if (distance(mc.player, testPos, false) > placeRange.get()) return false;
-        if (mc.world.getBlockState(testPos).getBlock() == Blocks.COBWEB) return false;
+        // Hole must have air above it
+        if (!mc.level.getBlockState(blockPos.above()).canBeReplaced()) return false;
 
-        if (((AbstractBlockAccessor) mc.world.getBlockState(testPos).getBlock()).isCollidable()) return false;
-        testPos.add(0, 1, 0);
-        if (((AbstractBlockAccessor) mc.world.getBlockState(testPos).getBlock()).isCollidable()) return false;
-        testPos.add(0, -1, 0);
+        // Check raycast and range
+        if (isOutOfRange(blockPos)) return false;
 
-        ((IBox) box).set(pos);
-        if (!mc.world.getOtherEntities(null, box, entity
-            -> entity instanceof PlayerEntity
-            || entity instanceof TntEntity
-            || entity instanceof EndCrystalEntity).isEmpty()) return false;
-
+        // Check if we are allowed to force fill all nearby holes
         if (!smart.get() || forceFill.get().isPressed()) return true;
 
+        // Otherwise its valid if the target is close enough to the hole
         return targets.stream().anyMatch(target
-            -> target.getY() > testPos.getY()
-            && (distance(target, testPos, true) < feetRange.get()));
+            -> target.getY() > blockPos.getY()
+            && isCloseToHolePos(target, blockPos));
     }
 
     private void setTargets() {
         targets.clear();
 
-        for (PlayerEntity player : mc.world.getPlayers()) {
-            if (player.distanceTo(mc.player) > targetRange.get() ||
+        for (Player player : mc.level.players()) {
+            if (player.distanceToSqr(mc.player) > Math.pow(targetRange.get(), 2) ||
                 player.isCreative() ||
                 player == mc.player ||
-                player.isDead() ||
+                player.isDeadOrDying() ||
                 !Friends.get().shouldAttack(player) ||
                 (ignoreSafe.get() && isSurrounded(player)) ||
-                (onlyMoving.get() && (player.getX() - player.prevX != 0 || player.getY() - player.prevY != 0 || player.getZ() - player.prevZ != 0))
+                (onlyMoving.get() && (player.getX() - player.xo != 0 || player.getY() - player.yo != 0 || player.getZ() - player.zo != 0))
             ) continue;
 
             targets.add(player);
         }
     }
 
-    private boolean isSurrounded(PlayerEntity target) {
-        for (Direction dir : Direction.values()) {
-            if (dir == Direction.UP || dir == Direction.DOWN) continue;
-
-            testPos.set(target.getBlockPos().offset(dir));
-            Block block = mc.world.getBlockState(testPos).getBlock();
-            if (block != Blocks.OBSIDIAN &&
-                block != Blocks.BEDROCK &&
-                block != Blocks.RESPAWN_ANCHOR &&
-                block != Blocks.CRYING_OBSIDIAN &&
-                block != Blocks.NETHERITE_BLOCK) return false;
+    private boolean isSurrounded(Player target) {
+        for (Direction dir : DirectionAccessor.meteor$getHorizontal()) {
+            BlockPos blockPos = target.blockPosition().relative(dir);
+            Block block = mc.level.getBlockState(blockPos).getBlock();
+            if (block.getExplosionResistance() < 600) return false;
         }
 
         return true;
     }
 
-    private double distance(PlayerEntity player, BlockPos pos, boolean feet) {
-        Vec3d testVec = player.getPos();
-        if (!feet) testVec.add(0, player.getEyeHeight(mc.player.getPose()), 0);
+    private boolean isOutOfRange(BlockPos blockPos) {
+        Vec3 pos = Vec3.upFromBottomCenterOf(blockPos, 0.999); // Set to the top of the block as holes will be viewed from above
+        if (!PlayerUtils.isWithin(pos, placeRange.get())) return true;
 
-        else if (predict.get()) {
-            testVec.add(
-                player.getX() - player.prevX,
-                player.getY() - player.prevY,
-                player.getZ() - player.prevZ
-            );
+        ClipContext clipContext = new ClipContext(mc.player.getEyePosition(), pos, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, mc.player);
+        BlockHitResult result = mc.level.clip(clipContext);
+        if (result == null || !result.getBlockPos().equals(blockPos))
+            return !PlayerUtils.isWithin(pos, placeWallsRange.get());
+
+        return false;
+    }
+
+    private boolean isCloseToHolePos(Player target, BlockPos blockPos) {
+        Vec3 pos = target.position();
+
+        // Prediction mode via target's movement delta
+        if (predictMovement.get()) {
+            double dx = target.getX() - target.xo;
+            double dy = target.getY() - target.yo;
+            double dz = target.getZ() - target.zo;
+            pos = pos.add(dx * ticksToPredict.get(), dy * ticksToPredict.get(), dz * ticksToPredict.get());
         }
 
-        double i = testVec.x - (pos.getX() + 0.5);
-        double j = testVec.y - (pos.getY() + ((feet) ? 1 : 0.5));
-        double k = testVec.z - (pos.getZ() + 0.5);
+        double i = pos.x - (blockPos.getX() + 0.5);
+        double j = pos.y - (blockPos.getY() + 1.0);
+        double k = pos.z - (blockPos.getZ() + 0.5);
+        double distance = Math.sqrt(i * i + j * j + k * k);
 
-        return Math.sqrt(i * i + j * j + k * k);
+        return distance < feetRange.get();
     }
 
     private static class Hole {
-        private final BlockPos.Mutable blockPos = new BlockPos.Mutable();
+        private final BlockPos.MutableBlockPos blockPos = new BlockPos.MutableBlockPos();
         private final byte exclude;
 
         public Hole(BlockPos blockPos, byte exclude) {

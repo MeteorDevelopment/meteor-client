@@ -17,8 +17,8 @@ import meteordevelopment.meteorclient.systems.modules.movement.speed.modes.Vanil
 import meteordevelopment.meteorclient.systems.modules.world.Timer;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.entity.MovementType;
-import net.minecraft.network.packet.s2c.play.PlayerPositionLookS2CPacket;
+import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket;
+import net.minecraft.world.entity.MoverType;
 
 public class Speed extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -113,29 +113,25 @@ public class Speed extends Module {
 
     @EventHandler
     private void onPlayerMove(PlayerMoveEvent event) {
-        if (event.type != MovementType.SELF || mc.player.isFallFlying() || mc.player.isClimbing() || mc.player.getVehicle() != null) return;
-        if (!whenSneaking.get() && mc.player.isSneaking()) return;
-        if (vanillaOnGround.get() && !mc.player.isOnGround() && speedMode.get() == SpeedModes.Vanilla) return;
-        if (!inLiquids.get() && (mc.player.isTouchingWater() || mc.player.isInLava())) return;
+        if (event.type != MoverType.SELF || stopSpeed()) return;
 
-        Modules.get().get(Timer.class).setOverride(PlayerUtils.isMoving() ? timer.get() : Timer.OFF);
+        if (timer.get() != Timer.OFF) {
+            Modules.get().get(Timer.class).setOverride(PlayerUtils.isMoving() ? timer.get() : Timer.OFF);
+        }
 
         currentMode.onMove(event);
     }
 
     @EventHandler
     private void onPreTick(TickEvent.Pre event) {
-        if (mc.player.isFallFlying() || mc.player.isClimbing() || mc.player.getVehicle() != null) return;
-        if (!whenSneaking.get() && mc.player.isSneaking()) return;
-        if (vanillaOnGround.get() && !mc.player.isOnGround() && speedMode.get() == SpeedModes.Vanilla) return;
-        if (!inLiquids.get() && (mc.player.isTouchingWater() || mc.player.isInLava())) return;
+        if (stopSpeed()) return;
 
         currentMode.onTick();
     }
 
     @EventHandler
     private void onPacketReceive(PacketEvent.Receive event) {
-        if (event.packet instanceof PlayerPositionLookS2CPacket) currentMode.onRubberband();
+        if (event.packet instanceof ClientboundPlayerPositionPacket) currentMode.onRubberband();
     }
 
     private void onSpeedModeChanged(SpeedModes mode) {
@@ -143,6 +139,13 @@ public class Speed extends Module {
             case Vanilla -> currentMode = new Vanilla();
             case Strafe -> currentMode = new Strafe();
         }
+    }
+
+    private boolean stopSpeed() {
+        if (mc.player.isFallFlying() || mc.player.onClimbable() || mc.player.getVehicle() != null) return true;
+        if (!whenSneaking.get() && mc.player.isShiftKeyDown()) return true;
+        if (vanillaOnGround.get() && !mc.player.onGround() && speedMode.get() == SpeedModes.Vanilla) return true;
+        return !inLiquids.get() && (mc.player.isInWater() || mc.player.isInLava());
     }
 
     @Override

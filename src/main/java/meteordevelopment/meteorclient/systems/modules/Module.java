@@ -6,6 +6,8 @@
 package meteordevelopment.meteorclient.systems.modules;
 
 import meteordevelopment.meteorclient.MeteorClient;
+import meteordevelopment.meteorclient.addons.AddonManager;
+import meteordevelopment.meteorclient.addons.MeteorAddon;
 import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.settings.Settings;
@@ -15,24 +17,26 @@ import meteordevelopment.meteorclient.utils.misc.ISerializable;
 import meteordevelopment.meteorclient.utils.misc.Keybind;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import org.jetbrains.annotations.NotNull;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.network.chat.Component;
+import org.jspecify.annotations.NonNull;
 
 import java.util.Objects;
 
 public abstract class Module implements ISerializable<Module>, Comparable<Module> {
-    protected final MinecraftClient mc;
+    protected final Minecraft mc;
 
     public final Category category;
     public final String name;
     public final String title;
     public final String description;
+    public final String[] aliases;
     public final Color color;
 
+    public final MeteorAddon addon;
     public final Settings settings = new Settings();
 
     private boolean active;
@@ -46,21 +50,42 @@ public abstract class Module implements ISerializable<Module>, Comparable<Module
     public boolean chatFeedback = true;
     public boolean favorite = false;
 
-    public Module(Category category, String name, String description) {
-        this.mc = MinecraftClient.getInstance();
+    public Module(Category category, String name, String description, String... aliases) {
+        if (name.contains(" "))
+            MeteorClient.LOG.warn("Module '{}' contains invalid characters in its name making it incompatible with Meteor Client commands.", name);
+
+        this.mc = Minecraft.getInstance();
         this.category = category;
         this.name = name;
         this.title = Utils.nameToTitle(name);
         this.description = description;
+        this.aliases = aliases;
         this.color = Color.fromHsv(Utils.random(0.0, 360.0), 0.35, 1);
+
+        String classname = this.getClass().getName();
+        for (MeteorAddon addon : AddonManager.ADDONS) {
+            if (classname.startsWith(addon.getPackage())) {
+                this.addon = addon;
+                return;
+            }
+        }
+
+        this.addon = null;
+    }
+
+    public Module(Category category, String name, String desc) {
+        this(category, name, desc, new String[0]);
     }
 
     public WWidget getWidget(GuiTheme theme) {
         return null;
     }
 
-    public void onActivate() {}
-    public void onDeactivate() {}
+    public void onActivate() {
+    }
+
+    public void onDeactivate() {
+    }
 
     public void toggle() {
         if (!active) {
@@ -73,8 +98,7 @@ public abstract class Module implements ISerializable<Module>, Comparable<Module
                 if (autoSubscribe) MeteorClient.EVENT_BUS.subscribe(this);
                 onActivate();
             }
-        }
-        else {
+        } else {
             if (runInMainMenu || Utils.canUpdate()) {
                 if (autoSubscribe) MeteorClient.EVENT_BUS.unsubscribe(this);
                 onDeactivate();
@@ -85,14 +109,22 @@ public abstract class Module implements ISerializable<Module>, Comparable<Module
         }
     }
 
+    public void enable() {
+        if (!isActive()) toggle();
+    }
+
+    public void disable() {
+        if (isActive()) toggle();
+    }
+
     public void sendToggledMsg() {
         if (Config.get().chatFeedback.get() && chatFeedback) {
             ChatUtils.forceNextPrefixClass(getClass());
-            ChatUtils.sendMsg(this.hashCode(), Formatting.GRAY, "Toggled (highlight)%s(default) %s(default).", title, isActive() ? Formatting.GREEN + "on" : Formatting.RED + "off");
+            ChatUtils.sendMsg(this.hashCode(), ChatFormatting.GRAY, "Toggled (highlight)%s(default) %s(default).", title, isActive() ? ChatFormatting.GREEN + "on" : ChatFormatting.RED + "off");
         }
     }
 
-    public void info(Text message) {
+    public void info(Component message) {
         ChatUtils.forceNextPrefixClass(getClass());
         ChatUtils.sendMsg(title, message);
     }
@@ -121,9 +153,9 @@ public abstract class Module implements ISerializable<Module>, Comparable<Module
     }
 
     @Override
-    public NbtCompound toTag() {
+    public CompoundTag toTag() {
         if (!serialize) return null;
-        NbtCompound tag = new NbtCompound();
+        CompoundTag tag = new CompoundTag();
 
         tag.putString("name", name);
         tag.put("keybind", keybind.toTag());
@@ -131,27 +163,24 @@ public abstract class Module implements ISerializable<Module>, Comparable<Module
         tag.putBoolean("chatFeedback", chatFeedback);
         tag.putBoolean("favorite", favorite);
         tag.put("settings", settings.toTag());
-
         tag.putBoolean("active", active);
 
         return tag;
     }
 
     @Override
-    public Module fromTag(NbtCompound tag) {
+    public Module fromTag(CompoundTag tag) {
         // General
-        if (tag.contains("key")) keybind.set(true, tag.getInt("key"));
-        else keybind.fromTag(tag.getCompound("keybind"));
-
-        toggleOnBindRelease = tag.getBoolean("toggleOnKeyRelease");
-        chatFeedback = !tag.contains("chatFeedback") || tag.getBoolean("chatFeedback");
-        favorite = tag.getBoolean("favorite");
+        keybind.fromTag(tag.getCompoundOrEmpty("keybind"));
+        toggleOnBindRelease = tag.getBooleanOr("toggleOnKeyRelease", false);
+        chatFeedback = !tag.contains("chatFeedback") || tag.getBooleanOr("chatFeedback", false);
+        favorite = tag.getBooleanOr("favorite", false);
 
         // Settings
-        NbtElement settingsTag = tag.get("settings");
-        if (settingsTag instanceof NbtCompound) settings.fromTag((NbtCompound) settingsTag);
+        Tag settingsTag = tag.get("settings");
+        if (settingsTag instanceof CompoundTag compoundTag) settings.fromTag(compoundTag);
 
-        boolean active = tag.getBoolean("active");
+        boolean active = tag.getBooleanOr("active", false);
         if (active != isActive()) toggle();
 
         return this;
@@ -171,7 +200,7 @@ public abstract class Module implements ISerializable<Module>, Comparable<Module
     }
 
     @Override
-    public int compareTo(@NotNull Module o) {
+    public int compareTo(@NonNull Module o) {
         return name.compareTo(o.name);
     }
 }

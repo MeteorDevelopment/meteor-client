@@ -6,10 +6,8 @@
 package meteordevelopment.meteorclient.systems.modules.render;
 
 import meteordevelopment.meteorclient.events.render.Render2DEvent;
-import meteordevelopment.meteorclient.mixin.ProjectileEntityAccessor;
 import meteordevelopment.meteorclient.renderer.Renderer2D;
 import meteordevelopment.meteorclient.renderer.text.TextRenderer;
-import meteordevelopment.meteorclient.settings.BoolSetting;
 import meteordevelopment.meteorclient.settings.DoubleSetting;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
@@ -21,11 +19,14 @@ import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
 import meteordevelopment.meteorclient.utils.render.NametagUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.passive.AbstractHorseEntity;
-import net.minecraft.entity.passive.TameableEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.projectile.ProjectileEntity;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityReference;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.TamableAnimal;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.throwableitemprojectile.ThrownEnderpearl;
+
 import org.joml.Vector3d;
 
 import java.util.HashMap;
@@ -46,13 +47,6 @@ public class EntityOwner extends Module {
         .build()
     );
 
-    private final Setting<Boolean> projectiles = sgGeneral.add(new BoolSetting.Builder()
-        .name("projectiles")
-        .description("Display owner names of projectiles.")
-        .defaultValue(false)
-        .build()
-    );
-
     private final Vector3d pos = new Vector3d();
     private final Map<UUID, String> uuidToName = new HashMap<>();
 
@@ -67,30 +61,33 @@ public class EntityOwner extends Module {
 
     @EventHandler
     private void onRender2D(Render2DEvent event) {
-        for (Entity entity : mc.world.getEntities()) {
-            UUID ownerUuid;
+        for (Entity entity : mc.level.entitiesForRendering()) {
+            EntityReference<LivingEntity> owner;
 
-            if (entity instanceof TameableEntity tameable) ownerUuid = tameable.getOwnerUuid();
-            else if (entity instanceof AbstractHorseEntity horse) ownerUuid = horse.getOwnerUuid();
-            else if (entity instanceof ProjectileEntity && projectiles.get()) ownerUuid = ((ProjectileEntityAccessor) entity).getOwnerUuid();
-            else continue;
+            switch (entity) {
+                case TamableAnimal tameable -> owner = tameable.getOwnerReference();
+                case ThrownEnderpearl pearl -> owner = EntityReference.of((LivingEntity) pearl.getOwner());
+                default -> {
+                    continue;
+                }
+            }
 
-            if (ownerUuid != null) {
+            if (owner != null) {
                 Utils.set(pos, entity, event.tickDelta);
                 pos.add(0, entity.getEyeHeight(entity.getPose()) + 0.75, 0);
 
                 if (NametagUtils.to2D(pos, scale.get())) {
-                    renderNametag(getOwnerName(ownerUuid));
+                    renderNametag(event.graphics, getOwnerName(owner));
                 }
             }
         }
     }
 
-    private void renderNametag(String name) {
+    private void renderNametag(GuiGraphicsExtractor graphics, String name) {
         TextRenderer text = TextRenderer.get();
 
-        NametagUtils.begin(pos);
-        text.beginBig();
+        NametagUtils.begin(pos, graphics);
+        text.beginBig(graphics);
 
         double w = text.getWidth(name);
 
@@ -99,24 +96,26 @@ public class EntityOwner extends Module {
 
         Renderer2D.COLOR.begin();
         Renderer2D.COLOR.quad(x - 1, y - 1, w + 2, text.getHeight() + 2, BACKGROUND);
-        Renderer2D.COLOR.render(null);
+        Renderer2D.COLOR.render();
 
         text.render(name, x, y, TEXT);
 
         text.end();
-        NametagUtils.end();
+        NametagUtils.end(graphics);
     }
 
-    private String getOwnerName(UUID uuid) {
+    private String getOwnerName(EntityReference<LivingEntity> owner) {
         // Check if the player is online
-        PlayerEntity player = mc.world.getPlayerByUuid(uuid);
-        if (player != null) return player.getEntityName();
+        LivingEntity ownerEntity = EntityReference.get(owner, mc.level, LivingEntity.class);
+        if (ownerEntity instanceof Player playerEntity) return playerEntity.getName().getString();
+
+        UUID uuid = owner.getUUID();
 
         // Check cache
         String name = uuidToName.get(uuid);
         if (name != null) return name;
 
-        // Makes a HTTP request to Mojang API
+        // Makes an HTTP request to Mojang API
         MeteorExecutor.execute(() -> {
             if (isActive()) {
                 ProfileResponse res = Http.get("https://sessionserver.mojang.com/session/minecraft/profile/" + uuid.toString().replace("-", "")).sendJson(ProfileResponse.class);

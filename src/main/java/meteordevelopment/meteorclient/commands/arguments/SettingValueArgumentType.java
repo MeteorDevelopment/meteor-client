@@ -12,18 +12,25 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import meteordevelopment.meteorclient.settings.Setting;
-import net.minecraft.command.CommandSource;
-import net.minecraft.util.Identifier;
+import meteordevelopment.meteorclient.settings.Settings;
+import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.resources.Identifier;
+import org.jspecify.annotations.NonNull;
 
 import java.util.concurrent.CompletableFuture;
 
 public class SettingValueArgumentType implements ArgumentType<String> {
+    private static final SettingValueArgumentType INSTANCE = new SettingValueArgumentType();
+
     public static SettingValueArgumentType create() {
-        return new SettingValueArgumentType();
+        return INSTANCE;
     }
 
     public static String get(CommandContext<?> context) {
         return context.getArgument("value", String.class);
+    }
+
+    private SettingValueArgumentType() {
     }
 
     @Override
@@ -39,15 +46,31 @@ public class SettingValueArgumentType implements ArgumentType<String> {
 
         try {
             setting = SettingArgumentType.get(context);
-        } catch (CommandSyntaxException ignored) {
+        } catch (CommandSyntaxException _) {
             return Suggestions.empty();
         }
 
-        Iterable<Identifier> identifiers = setting.getIdentifierSuggestions();
-        if (identifiers != null) {
-            return CommandSource.suggestIdentifiers(identifiers, builder);
+        return suggest(builder, setting);
+    }
+
+    public static <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder, Settings settings) {
+        Setting<?> setting;
+
+        try {
+            setting = SettingArgumentType.get(context, settings);
+        } catch (CommandSyntaxException _) {
+            return Suggestions.empty();
         }
 
-        return CommandSource.suggestMatching(setting.getSuggestions(), builder);
+        return suggest(builder, setting);
+    }
+
+    public static CompletableFuture<Suggestions> suggest(SuggestionsBuilder builder, @NonNull Setting<?> setting) {
+        Iterable<Identifier> identifiers = setting.getIdentifierSuggestions();
+        if (identifiers != null) {
+            return SharedSuggestionProvider.suggestResource(identifiers, builder);
+        }
+
+        return SharedSuggestionProvider.suggest(setting.getSuggestions(), builder);
     }
 }

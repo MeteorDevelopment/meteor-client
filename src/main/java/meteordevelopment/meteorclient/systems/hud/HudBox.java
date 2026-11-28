@@ -7,7 +7,7 @@ package meteordevelopment.meteorclient.systems.hud;
 
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.ISerializable;
-import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.CompoundTag;
 
 public class HudBox implements ISerializable<HudBox> {
     private final HudElement element;
@@ -137,8 +137,8 @@ public class HudBox implements ISerializable<HudBox> {
     // Serialization
 
     @Override
-    public NbtCompound toTag() {
-        NbtCompound tag = new NbtCompound();
+    public CompoundTag toTag() {
+        CompoundTag tag = new CompoundTag();
 
         tag.putString("x-anchor", xAnchor.name());
         tag.putString("y-anchor", yAnchor.name());
@@ -149,11 +149,11 @@ public class HudBox implements ISerializable<HudBox> {
     }
 
     @Override
-    public HudBox fromTag(NbtCompound tag) {
-        if (tag.contains("x-anchor")) xAnchor = XAnchor.valueOf(tag.getString("x-anchor"));
-        if (tag.contains("y-anchor")) yAnchor = YAnchor.valueOf(tag.getString("y-anchor"));
-        if (tag.contains("x")) x = tag.getInt("x");
-        if (tag.contains("y")) y = tag.getInt("y");
+    public HudBox fromTag(CompoundTag tag) {
+        if (tag.getString("x-anchor").isPresent()) xAnchor = XAnchor.valueOf(tag.getString("x-anchor").get());
+        if (tag.getString("y-anchor").isPresent()) yAnchor = YAnchor.valueOf(tag.getString("y-anchor").get());
+        if (tag.getInt("x").isPresent()) x = tag.getInt("x").get();
+        if (tag.getInt("y").isPresent()) y = tag.getInt("y").get();
 
         return this;
     }

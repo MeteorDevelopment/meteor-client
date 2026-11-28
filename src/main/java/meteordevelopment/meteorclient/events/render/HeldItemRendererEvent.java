@@ -5,16 +5,16 @@
 
 package meteordevelopment.meteorclient.events.render;
 
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.Hand;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.world.InteractionHand;
 
 public class HeldItemRendererEvent {
     private static final HeldItemRendererEvent INSTANCE = new HeldItemRendererEvent();
 
-    public Hand hand;
-    public MatrixStack matrix;
+    public InteractionHand hand;
+    public PoseStack matrix;
 
-    public static HeldItemRendererEvent get(Hand hand, MatrixStack matrices) {
+    public static HeldItemRendererEvent get(InteractionHand hand, PoseStack matrices) {
         INSTANCE.hand = hand;
         INSTANCE.matrix = matrices;
         return INSTANCE;

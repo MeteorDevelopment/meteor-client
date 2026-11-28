@@ -16,11 +16,15 @@ public abstract class WButton extends WPressable {
     public WButton(String text, GuiTexture texture) {
         this.text = text;
         this.texture = texture;
+
+        if (text == null) instantTooltips = true;
     }
 
     @Override
     protected void onCalculateSize() {
         double pad = pad();
+
+        String text = getText();
 
         if (text != null) {
             textWidth = theme.textWidth(text);

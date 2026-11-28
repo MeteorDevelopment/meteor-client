@@ -6,22 +6,19 @@
 package meteordevelopment.meteorclient.events.render;
 
 import meteordevelopment.meteorclient.events.Cancellable;
-import net.minecraft.client.render.model.json.Transformation;
-import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.client.resources.model.cuboid.ItemTransform;
 
 public class ApplyTransformationEvent extends Cancellable {
     private static final ApplyTransformationEvent INSTANCE = new ApplyTransformationEvent();
 
-    public Transformation transformation;
+    public ItemTransform transformation;
     public boolean leftHanded;
-    public MatrixStack matrices;
 
-    public static ApplyTransformationEvent get(Transformation transformation, boolean leftHanded, MatrixStack matrices) {
+    public static ApplyTransformationEvent get(ItemTransform transformation, boolean leftHanded) {
         INSTANCE.setCancelled(false);
 
         INSTANCE.transformation = transformation;
         INSTANCE.leftHanded = leftHanded;
-        INSTANCE.matrices = matrices;
 
         return INSTANCE;
     }

@@ -7,24 +7,28 @@ package meteordevelopment.meteorclient.systems.modules.player;
 
 import meteordevelopment.meteorclient.events.entity.player.FinishUsingItemEvent;
 import meteordevelopment.meteorclient.events.entity.player.StoppedUsingItemEvent;
-import meteordevelopment.meteorclient.events.meteor.MouseButtonEvent;
+import meteordevelopment.meteorclient.events.meteor.MouseClickEvent;
+import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
-import meteordevelopment.meteorclient.settings.BoolSetting;
-import meteordevelopment.meteorclient.settings.EnumSetting;
-import meteordevelopment.meteorclient.settings.Setting;
-import meteordevelopment.meteorclient.settings.SettingGroup;
+import meteordevelopment.meteorclient.settings.*;
+import meteordevelopment.meteorclient.systems.friends.Friend;
+import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
+import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.item.BowItem;
-import net.minecraft.item.Item;
-import net.minecraft.item.Items;
-import net.minecraft.util.Hand;
+import net.minecraft.network.protocol.game.ServerboundSetCarriedItemPacket;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.BowItem;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.GameType;
 
-import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_MIDDLE;
+import static com.mojang.blaze3d.platform.InputConstants.MOUSE_BUTTON_MIDDLE;
 
 public class MiddleClickExtra extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -36,105 +40,191 @@ public class MiddleClickExtra extends Module {
         .build()
     );
 
-    private final Setting<Boolean> notify = sgGeneral.add(new BoolSetting.Builder()
-        .name("notify")
-        .description("Notifies you when you do not have the specified item in your hotbar.")
+    private final Setting<Boolean> message = sgGeneral.add(new BoolSetting.Builder()
+        .name("send-message")
+        .description("Sends a message when you add a player as a friend.")
+        .defaultValue(false)
+        .visible(() -> mode.get() == Mode.AddFriend)
+        .build()
+    );
+
+    private final Setting<String> friendMessage = sgGeneral.add(new StringSetting.Builder()
+        .name("message-to-send")
+        .description("Message to send when you add a player as a friend (use %player for the player's name)")
+        .defaultValue("/msg %player I just friended you on Meteor.")
+        .visible(() -> mode.get() == Mode.AddFriend)
+        .build()
+    );
+
+    private final Setting<Boolean> quickSwap = sgGeneral.add(new BoolSetting.Builder()
+        .name("quick-swap")
+        .description("Allows you to use items in your inventory by simulating hotbar key presses. May get flagged by anticheats.")
+        .defaultValue(false)
+        .visible(() -> mode.get() != Mode.AddFriend)
+        .build()
+    );
+
+    private final Setting<Boolean> swapBack = sgGeneral.add(new BoolSetting.Builder()
+        .name("swap-back")
+        .description("Swap back to your original slot when you finish using an item.")
+        .defaultValue(false)
+        .visible(() -> mode.get() != Mode.AddFriend && !quickSwap.get())
+        .build()
+    );
+
+    private final Setting<Boolean> disableInCreative = sgGeneral.add(new BoolSetting.Builder()
+        .name("disable-in-creative")
+        .description("Middle click action is disabled in Creative mode.")
         .defaultValue(true)
         .build()
     );
 
-    private boolean isUsing;
+    private final Setting<Boolean> notify = sgGeneral.add(new BoolSetting.Builder()
+        .name("notify")
+        .description("Notifies you when you do not have the specified item in your hotbar.")
+        .defaultValue(true)
+        .visible(() -> mode.get() != Mode.AddFriend)
+        .build()
+    );
 
     public MiddleClickExtra() {
-        super(Categories.Player, "middle-click-extra", "Lets you use items when you middle click.");
+        super(Categories.Player, "middle-click-extra", "Perform various actions when you middle click.");
     }
+
+    private boolean isUsing;
+    private boolean wasHeld;
+    private int itemSlot;
+    private int selectedSlot;
 
     @Override
     public void onDeactivate() {
-        stopIfUsing();
+        stopIfUsing(false);
     }
 
     @EventHandler
-    private void onMouseButton(MouseButtonEvent event) {
-        if (event.action != KeyAction.Press || event.button != GLFW_MOUSE_BUTTON_MIDDLE || mc.currentScreen != null) return;
+    private void onMouseClick(MouseClickEvent event) {
+        if (event.action != KeyAction.Press || event.button() != MOUSE_BUTTON_MIDDLE || mc.gui.screen() != null)
+            return;
 
-        FindItemResult result = InvUtils.findInHotbar(mode.get().item);
+        if (disabledByCreative()) return;
 
-        if (!result.found()) {
+        if (mode.get() == Mode.AddFriend) {
+            if (mc.crosshairPickEntity == null) return;
+            if (!(mc.crosshairPickEntity instanceof Player player)) return;
+
+            if (!Friends.get().isFriend(player)) {
+                Friends.get().add(new Friend(player));
+                info("Added %s to friends", player.getName().getString());
+                if (message.get()) {
+                    String messageNotify = friendMessage.get().replace("%player", player.getName().getString());
+                    ChatUtils.sendPlayerMsg(messageNotify);
+                }
+
+            } else {
+                Friends.get().remove(Friends.get().get(player));
+                info("Removed %s from friends", player.getName().getString());
+            }
+
+            return;
+        }
+
+        FindItemResult result = InvUtils.find(mode.get().item);
+        if (!result.found() || !result.isHotbar() && !quickSwap.get()) {
             if (notify.get()) warning("Unable to find specified item.");
             return;
         }
 
-        InvUtils.swap(result.slot(), true);
+        selectedSlot = mc.player.getInventory().getSelectedSlot();
+        itemSlot = result.slot();
+        wasHeld = result.isMainHand();
 
-        switch (mode.get().type) {
-            case Immediate -> {
-                mc.interactionManager.interactItem(mc.player, Hand.MAIN_HAND);
-                InvUtils.swapBack();
-            }
-            case LongerSingleClick -> mc.interactionManager.interactItem(mc.player, Hand.MAIN_HAND);
-            case Longer -> {
-                mc.options.useKey.setPressed(true);
-                isUsing = true;
-            }
+        if (!wasHeld) {
+            if (!quickSwap.get()) InvUtils.swap(result.slot(), swapBack.get());
+            else InvUtils.quickSwap().fromId(selectedSlot).to(itemSlot);
+        }
+
+        if (mode.get().immediate) {
+            mc.gameMode.useItem(mc.player, InteractionHand.MAIN_HAND);
+            swapBack(false);
+        } else {
+            mc.options.keyUse.setDown(true);
+            isUsing = true;
         }
     }
 
     @EventHandler
     private void onTick(TickEvent.Pre event) {
-        if (isUsing) {
-            boolean pressed = true;
+        if (!isUsing) return;
+        boolean pressed = true;
 
-            if (mc.player.getMainHandStack().getItem() instanceof BowItem) {
-                pressed = BowItem.getPullProgress(mc.player.getItemUseTime()) < 1;
-            }
-
-            mc.options.useKey.setPressed(pressed);
+        if (mc.player.getMainHandItem().getItem() instanceof BowItem) {
+            pressed = BowItem.getPowerForTime(mc.player.getTicksUsingItem()) < 1;
         }
+
+        mc.options.keyUse.setDown(pressed);
     }
 
     @EventHandler
-    private void onFinishUsingItem(FinishUsingItemEvent event) {
-        stopIfUsing();
+    private void onPacketSendEvent(PacketEvent.Send event) {
+        if (event.packet instanceof ServerboundSetCarriedItemPacket) {
+            stopIfUsing(true);
+        }
     }
 
     @EventHandler
     private void onStoppedUsingItem(StoppedUsingItemEvent event) {
-        stopIfUsing();
+        stopIfUsing(false);
     }
 
-    private void stopIfUsing() {
+    @EventHandler
+    private void onFinishUsingItem(FinishUsingItemEvent event) {
+        stopIfUsing(false);
+    }
+
+    private void stopIfUsing(boolean wasCancelled) {
         if (isUsing) {
-            mc.options.useKey.setPressed(false);
-            InvUtils.swapBack();
+            swapBack(wasCancelled);
+            mc.options.keyUse.setDown(false);
             isUsing = false;
         }
     }
 
-    public enum Mode {
-        Pearl(Items.ENDER_PEARL, Type.Immediate),
-        Rocket(Items.FIREWORK_ROCKET, Type.Immediate),
+    void swapBack(boolean wasCancelled) {
+        if (wasHeld) return;
 
-        Rod(Items.FISHING_ROD, Type.LongerSingleClick),
-
-        Bow(Items.BOW, Type.Longer),
-        Gap(Items.GOLDEN_APPLE, Type.Longer),
-        EGap(Items.ENCHANTED_GOLDEN_APPLE, Type.Longer),
-        Chorus(Items.CHORUS_FRUIT, Type.Longer),
-        XP(Items.EXPERIENCE_BOTTLE, Type.Immediate);
-
-        private final Item item;
-        private final Type type;
-
-        Mode(Item item, Type type) {
-            this.item = item;
-            this.type = type;
+        if (quickSwap.get()) {
+            InvUtils.quickSwap().fromId(selectedSlot).to(itemSlot);
+        } else {
+            if (!swapBack.get() || wasCancelled) return;
+            InvUtils.swapBack();
         }
     }
 
-    private enum Type {
-        Immediate,
-        LongerSingleClick,
-        Longer
+    private boolean disabledByCreative() {
+        if (mc.player == null) return false;
+
+        return disableInCreative.get() && mc.player.gameMode() == GameType.CREATIVE;
+    }
+
+    public enum Mode {
+        Pearl(Items.ENDER_PEARL, true),
+        XP(Items.EXPERIENCE_BOTTLE, true),
+        Rocket(Items.FIREWORK_ROCKET, true),
+        WindCharge(Items.WIND_CHARGE, true),
+
+        Bow(Items.BOW, false),
+        Gap(Items.GOLDEN_APPLE, false),
+        EGap(Items.ENCHANTED_GOLDEN_APPLE, false),
+        Chorus(Items.CHORUS_FRUIT, false),
+
+        AddFriend(null, true);
+
+        private final Item item;
+        private final boolean immediate;
+
+        Mode(Item item, boolean immediate) {
+            this.item = item;
+            this.immediate = immediate;
+        }
     }
 }

@@ -22,7 +22,7 @@ public class AntiVoid extends Module {
         .name("mode")
         .description("The method to prevent you from falling into the void.")
         .defaultValue(Mode.Jump)
-        .onChanged(a -> onActivate())
+        .onChanged(_ -> onActivate())
         .build()
     );
 
@@ -39,18 +39,18 @@ public class AntiVoid extends Module {
 
     @Override
     public void onDeactivate() {
-        if (!wasFlightEnabled && mode.get() == Mode.Flight && Utils.canUpdate() && Modules.get().isActive(Flight.class)) {
-            Modules.get().get(Flight.class).toggle();
+        if (!wasFlightEnabled && mode.get() == Mode.Flight && Utils.canUpdate()) {
+            Modules.get().get(Flight.class).disable();
         }
     }
 
     @EventHandler
     private void onPreTick(TickEvent.Pre event) {
-        int minY = mc.world.getBottomY();
+        int minY = mc.level.getMinY();
 
         if (mc.player.getY() > minY || mc.player.getY() < minY - 15) {
-            if (hasRun && mode.get() == Mode.Flight && Modules.get().isActive(Flight.class)) {
-                Modules.get().get(Flight.class).toggle();
+            if (hasRun && mode.get() == Mode.Flight) {
+                Modules.get().get(Flight.class).disable();
                 hasRun = false;
             }
             return;
@@ -58,10 +58,10 @@ public class AntiVoid extends Module {
 
         switch (mode.get()) {
             case Flight -> {
-                if (!Modules.get().isActive(Flight.class)) Modules.get().get(Flight.class).toggle();
+                Modules.get().get(Flight.class).enable();
                 hasRun = true;
             }
-            case Jump -> mc.player.jump();
+            case Jump -> mc.player.jumpFromGround();
         }
     }
 

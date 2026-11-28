@@ -5,21 +5,23 @@
 
 package meteordevelopment.meteorclient.systems.hud.screens;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.WidgetScreen;
 import meteordevelopment.meteorclient.gui.tabs.builtin.HudTab;
 import meteordevelopment.meteorclient.renderer.Renderer2D;
 import meteordevelopment.meteorclient.systems.hud.Hud;
 import meteordevelopment.meteorclient.systems.hud.HudElement;
-import meteordevelopment.meteorclient.systems.hud.HudRenderer;
 import meteordevelopment.meteorclient.utils.Utils;
+import meteordevelopment.meteorclient.utils.misc.input.Input;
 import meteordevelopment.meteorclient.utils.other.Snapper;
 import meteordevelopment.meteorclient.utils.render.color.Color;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.math.MathHelper;
-import org.lwjgl.glfw.GLFW;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.util.Mth;
+import org.jspecify.annotations.NonNull;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -62,16 +64,20 @@ public class HudEditorScreen extends WidgetScreen implements Snapper.Container {
     }
 
     @Override
-    public void initWidgets() {}
+    public void initWidgets() {
+    }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        double s = mc.getWindow().getScaleFactor();
+    public boolean mouseClicked(@NonNull MouseButtonEvent click, boolean doubled) {
+        double s = mc.getWindow().getGuiScale();
+
+        double mouseX = click.x();
+        double mouseY = click.y();
 
         mouseX *= s;
         mouseY *= s;
 
-        if (button == GLFW.GLFW_MOUSE_BUTTON_LEFT) {
+        if (click.button() == InputConstants.MOUSE_BUTTON_LEFT) {
             pressed = true;
             selectionSnapBox = null;
 
@@ -83,8 +89,7 @@ public class HudEditorScreen extends WidgetScreen implements Snapper.Container {
                     selection.add(hovered);
                     addedHoveredToSelectionWhenClickedElement = hovered;
                 }
-            }
-            else selection.clear();
+            } else selection.clear();
 
             clickX = (int) mouseX;
             clickY = (int) mouseY;
@@ -95,7 +100,7 @@ public class HudEditorScreen extends WidgetScreen implements Snapper.Container {
 
     @Override
     public void mouseMoved(double mouseX, double mouseY) {
-        double s = mc.getWindow().getScaleFactor();
+        double s = mc.getWindow().getGuiScale();
 
         mouseX *= s;
         mouseY *= s;
@@ -112,13 +117,16 @@ public class HudEditorScreen extends WidgetScreen implements Snapper.Container {
     }
 
     @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button) {
-        double s = mc.getWindow().getScaleFactor();
+    public boolean mouseReleased(@NonNull MouseButtonEvent click) {
+        double s = mc.getWindow().getGuiScale();
+
+        double mouseX = click.x();
+        double mouseY = click.y();
 
         mouseX *= s;
         mouseY *= s;
 
-        if (button == GLFW.GLFW_MOUSE_BUTTON_LEFT) pressed = false;
+        if (click.button() == InputConstants.MOUSE_BUTTON_LEFT) pressed = false;
 
         if (addedHoveredToSelectionWhenClickedElement != null) {
             selection.remove(addedHoveredToSelectionWhenClickedElement);
@@ -126,22 +134,20 @@ public class HudEditorScreen extends WidgetScreen implements Snapper.Container {
         }
 
         if (moved) {
-            if (button == GLFW.GLFW_MOUSE_BUTTON_LEFT && !dragging) fillSelection((int) mouseX, (int)mouseY);
-        }
-        else {
-            if (button == GLFW.GLFW_MOUSE_BUTTON_LEFT) {
+            if (click.button() == InputConstants.MOUSE_BUTTON_LEFT && !dragging) fillSelection((int) mouseX, (int) mouseY);
+        } else {
+            if (click.button() == InputConstants.MOUSE_BUTTON_LEFT) {
                 HudElement hovered = getHovered((int) mouseX, (int) mouseY);
                 if (hovered != null) hovered.toggle();
-            }
-            else if (button == GLFW.GLFW_MOUSE_BUTTON_RIGHT) {
+            } else if (click.button() == InputConstants.MOUSE_BUTTON_RIGHT) {
                 HudElement hovered = getHovered((int) mouseX, (int) mouseY);
 
-                if (hovered != null) mc.setScreen(new HudElementScreen(theme, hovered));
-                else mc.setScreen(new AddHudElementScreen(theme, lastMouseX, lastMouseY));
+                if (hovered != null) mc.gui.setScreen(new HudElementScreen(theme, hovered));
+                else mc.gui.setScreen(new AddHudElementScreen(theme, lastMouseX, lastMouseY));
             }
         }
 
-        if (button == GLFW.GLFW_MOUSE_BUTTON_LEFT) {
+        if (click.button() == InputConstants.MOUSE_BUTTON_LEFT) {
             snapper.unsnap();
             moved = dragging = false;
         }
@@ -150,13 +156,12 @@ public class HudEditorScreen extends WidgetScreen implements Snapper.Container {
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+    public boolean keyPressed(@NonNull KeyEvent input) {
         if (!pressed) {
-            if (keyCode == GLFW.GLFW_KEY_ENTER || keyCode == GLFW.GLFW_KEY_KP_ENTER) {
+            if (input.key() == InputConstants.KEY_RETURN || input.key() == InputConstants.KEY_NUMPADENTER) {
                 HudElement hovered = getHovered(lastMouseX, lastMouseY);
                 if (hovered != null) hovered.toggle();
-            }
-            else if (keyCode == GLFW.GLFW_KEY_DELETE) {
+            } else if (input.key() == InputConstants.KEY_DELETE) {
                 HudElement hovered = getHovered(lastMouseX, lastMouseY);
 
                 if (hovered != null) hovered.remove();
@@ -164,10 +169,25 @@ public class HudEditorScreen extends WidgetScreen implements Snapper.Container {
                     for (HudElement element : selection) element.remove();
                     selection.clear();
                 }
+            } else if (!selection.isEmpty()) {
+                int pixels = (Input.isKeyPressed(InputConstants.KEY_LCONTROL) || Input.isKeyPressed(InputConstants.KEY_RCONTROL)) ? 10 : 1;
+                int dx = 0, dy = 0;
+
+                switch (input.key()) {
+                    case InputConstants.KEY_UP -> dy = -pixels;
+                    case InputConstants.KEY_DOWN -> dy = pixels;
+                    case InputConstants.KEY_RIGHT -> dx = pixels;
+                    case InputConstants.KEY_LEFT -> dx = -pixels;
+                }
+
+                // manually move selection to bypass snapping
+                for (HudElement element : selection) {
+                    element.move(dx, dy);
+                }
             }
         }
 
-        return super.keyPressed(keyCode, scanCode, modifiers);
+        return super.keyPressed(input);
     }
 
     private void fillSelection(int mouseX, int mouseY) {
@@ -240,7 +260,8 @@ public class HudEditorScreen extends WidgetScreen implements Snapper.Container {
 
     private HudElement getHovered(int mouseX, int mouseY) {
         for (HudElement element : hud) {
-            if (mouseX >= element.x && mouseX <= element.x + element.getWidth() && mouseY >= element.y && mouseY <= element.y + element.getHeight()) return element;
+            if (mouseX >= element.x && mouseX <= element.x + element.getWidth() && mouseY >= element.y && mouseY <= element.y + element.getHeight())
+                return element;
         }
 
         return null;
@@ -260,50 +281,21 @@ public class HudEditorScreen extends WidgetScreen implements Snapper.Container {
     }
 
     @Override
-    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-        if (!Utils.canUpdate()) renderBackground(context);
-
-        double s = mc.getWindow().getScaleFactor();
-
-        mouseX *= s;
-        mouseY *= s;
-
-        Utils.unscaledProjection();
-
+    protected void onRenderBefore(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
         boolean renderSplitLines = pressed && !selection.isEmpty() && moved;
         if (renderSplitLines || splitLinesAnimation > 0) renderSplitLines(renderSplitLines, delta / 20);
-        renderElements(context);
 
         Renderer2D.COLOR.begin();
         onRender(mouseX, mouseY);
-        Renderer2D.COLOR.render(new MatrixStack());
+        Renderer2D.COLOR.render();
 
-        Utils.scaledProjection();
         runAfterRenderTasks();
-    }
-
-    public static void renderElements(DrawContext drawContext) {
-        Hud hud = Hud.get();
-        boolean inactiveOnly = Utils.canUpdate() && hud.active;
-
-        HudRenderer.INSTANCE.begin(drawContext);
-
-        for (HudElement element : hud) {
-            element.updatePos();
-
-            if (inactiveOnly) {
-                if (!element.isActive()) element.render(HudRenderer.INSTANCE);
-            }
-            else element.render(HudRenderer.INSTANCE);
-        }
-
-        HudRenderer.INSTANCE.end();
     }
 
     private void renderSplitLines(boolean increment, double delta) {
         if (increment) splitLinesAnimation += delta * 6;
         else splitLinesAnimation -= delta * 6;
-        splitLinesAnimation = MathHelper.clamp(splitLinesAnimation, 0, 1);
+        splitLinesAnimation = Mth.clamp(splitLinesAnimation, 0, 1);
 
         Renderer2D renderer = Renderer2D.COLOR;
         renderer.begin();
@@ -324,7 +316,7 @@ public class HudEditorScreen extends WidgetScreen implements Snapper.Container {
 
         SPLIT_LINES_COLOR.a = prevA;
 
-        renderer.render(new MatrixStack());
+        renderer.render();
     }
 
     private void renderSplitLine(Renderer2D renderer, double x, double y, double destX, double destY) {
@@ -340,11 +332,13 @@ public class HudEditorScreen extends WidgetScreen implements Snapper.Container {
             x += incX * 2;
             y += incY * 2;
 
-        } while (!(x >= destX) || !(y >= destY));
+        } while (x < destX || y < destY);
     }
 
     public static boolean isOpen() {
-        Screen s = mc.currentScreen;
+        if (!Utils.canUpdate()) return false;
+
+        Screen s = mc.gui.screen();
         return s instanceof HudEditorScreen || s instanceof AddHudElementScreen || s instanceof HudElementPresetsScreen || s instanceof HudElementScreen || s instanceof HudTab.HudScreen;
     }
 
@@ -409,14 +403,14 @@ public class HudEditorScreen extends WidgetScreen implements Snapper.Container {
 
         @Override
         public void move(int deltaX, int deltaY) {
-            int prevX = x;
-            int prevY = y;
+            int lastX = x;
+            int lastY = y;
 
             int border = Hud.get().border.get();
-            x = MathHelper.clamp(x + deltaX, border, Utils.getWindowWidth() - width - border);
-            y = MathHelper.clamp(y + deltaY, border, Utils.getWindowHeight() - height - border);
+            x = Mth.clamp(x + deltaX, border, Utils.getWindowWidth() - width - border);
+            y = Mth.clamp(y + deltaY, border, Utils.getWindowHeight() - height - border);
 
-            for (HudElement element : selection) element.move(x - prevX, y - prevY);
+            for (HudElement element : selection) element.move(x - lastX, y - lastY);
         }
     }
 }

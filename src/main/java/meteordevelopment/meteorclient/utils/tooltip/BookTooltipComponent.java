@@ -5,56 +5,55 @@
 
 package meteordevelopment.meteorclient.utils.tooltip;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.tooltip.TooltipComponent;
-import net.minecraft.client.render.GameRenderer;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.text.OrderedText;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
+import net.minecraft.util.FormattedCharSequence;
+import org.joml.Matrix3x2fStack;
+import org.jspecify.annotations.NonNull;
 
-public class BookTooltipComponent implements TooltipComponent, MeteorTooltipData {
-    private static final Identifier TEXTURE_BOOK_BACKGROUND = new Identifier("textures/gui/book.png");
+public class BookTooltipComponent implements ClientTooltipComponent, MeteorTooltipData {
+    private static final Identifier TEXTURE_BOOK_BACKGROUND = Identifier.parse("textures/gui/book.png");
 
-    private final Text page;
+    private final Component page;
 
-    public BookTooltipComponent(Text page) {
+    public BookTooltipComponent(Component page) {
         this.page = page;
     }
 
     @Override
-    public TooltipComponent getComponent() {
+    public ClientTooltipComponent getComponent() {
         return this;
     }
 
     @Override
-    public int getHeight() {
+    public int getHeight(@NonNull Font textRenderer) {
         return 134;
     }
 
     @Override
-    public int getWidth(TextRenderer textRenderer) {
+    public int getWidth(@NonNull Font textRenderer) {
         return 112;
     }
 
     @Override
-    public void drawItems(TextRenderer textRenderer, int x, int y, DrawContext context) {
+    public void extractImage(Font font, int x, int y, int width, int height, GuiGraphicsExtractor graphics) {
         // Background
-        RenderSystem.setShader(GameRenderer::getPositionTexProgram);
-        context.drawTexture(TEXTURE_BOOK_BACKGROUND, x, y, 0, 12, 0, 112, 134, 179, 179);
+        graphics.blit(RenderPipelines.GUI_TEXTURED, TEXTURE_BOOK_BACKGROUND, x - 10, y, 0, 0, 128, 128, 179, 179);
 
         // Content
-        MatrixStack matrices = context.getMatrices();
-        matrices.push();
-        matrices.translate(x + 16, y + 12, 1);
-        matrices.scale(0.7f, 0.7f, 1f);
+        Matrix3x2fStack matrices = graphics.pose();
+        matrices.pushMatrix();
+        matrices.translate(x + 16, y + 12);
+        matrices.scale(0.7f, 0.7f);
         int offset = 0;
-        for (OrderedText line : textRenderer.wrapLines(page, 112)) {
-            context.drawText(textRenderer, line, 0, offset, 0x000000, false);
+        for (FormattedCharSequence line : font.split(page, 112)) {
+            graphics.text(font, line, 0, offset, 0xFF000000, false);
             offset += 8;
         }
-        matrices.pop();
+        matrices.popMatrix();
     }
 }

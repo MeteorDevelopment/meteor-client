@@ -5,15 +5,14 @@
 
 package meteordevelopment.meteorclient.utils.network;
 
+import com.mojang.blaze3d.platform.NativeImage;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.utils.PreInit;
-import meteordevelopment.meteorclient.utils.misc.MeteorIdentifier;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.client.texture.NativeImage;
-import net.minecraft.client.texture.NativeImageBackedTexture;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.renderer.texture.DynamicTexture;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.entity.player.Player;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -34,6 +33,9 @@ public class Capes {
     private static final List<Cape> TO_RETRY = new ArrayList<>();
     private static final List<Cape> TO_REMOVE = new ArrayList<>();
 
+    private Capes() {
+    }
+
     @PreInit(dependencies = MeteorExecutor.class)
     public static void init() {
         OWNERS.clear();
@@ -45,15 +47,19 @@ public class Capes {
 
         MeteorExecutor.execute(() -> {
             // Cape owners
-            Stream<String> lines = Http.get(CAPE_OWNERS_URL).sendLines();
-            if (lines != null) lines.forEach(s -> {
-                String[] split = s.split(" ");
+            Stream<String> lines = Http.get(CAPE_OWNERS_URL)
+                .exceptionHandler(e -> MeteorClient.LOG.error("Could not load capes: {}", e.getMessage()))
+                .sendLines();
+            if (lines != null) {
+                lines.forEach(s -> {
+                    String[] split = s.split(" ");
 
-                if (split.length >= 2) {
-                    OWNERS.put(UUID.fromString(split[0]), split[1]);
-                    if (!TEXTURES.containsKey(split[1])) TEXTURES.put(split[1], new Cape(split[1]));
-                }
-            });
+                    if (split.length >= 2) {
+                        OWNERS.put(UUID.fromString(split[0]), split[1]);
+                        if (!TEXTURES.containsKey(split[1])) TEXTURES.put(split[1], new Cape(split[1]));
+                    }
+                });
+            } else return;
 
             // Capes
             lines = Http.get(CAPES_URL).sendLines();
@@ -92,13 +98,13 @@ public class Capes {
         }
     }
 
-    public static Identifier get(PlayerEntity player) {
-        String capeName = OWNERS.get(player.getUuid());
+    public static Identifier get(Player player) {
+        String capeName = OWNERS.get(player.getUUID());
         if (capeName != null) {
             Cape cape = TEXTURES.get(capeName);
             if (cape == null) return null;
 
-            if (cape.isDownloaded()) return cape;
+            if (cape.isDownloaded()) return cape.getIdentifier();
 
             cape.download();
             return null;
@@ -107,10 +113,11 @@ public class Capes {
         return null;
     }
 
-    private static class Cape extends MeteorIdentifier {
+    private static class Cape {
         private static int COUNT = 0;
 
         private final String name;
+        private final Identifier identifier;
 
         private boolean downloaded;
         private boolean downloading;
@@ -120,9 +127,12 @@ public class Capes {
         private int retryTimer;
 
         public Cape(String name) {
-            super("capes/" + COUNT++);
-
+            this.identifier = MeteorClient.identifier("capes/" + COUNT++);
             this.name = name;
+        }
+
+        public Identifier getIdentifier() {
+            return identifier;
         }
 
         public void download() {
@@ -133,7 +143,7 @@ public class Capes {
                 try {
                     String url = URLS.get(name);
                     if (url == null) {
-                        synchronized (TO_RETRY) {
+                        synchronized (TO_REMOVE) {
                             TO_REMOVE.add(this);
                             downloading = false;
                             return;
@@ -156,13 +166,13 @@ public class Capes {
                         TO_REGISTER.add(this);
                     }
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    MeteorClient.LOG.error("Failed to download cape '{}'", name, e);
                 }
             });
         }
 
         public void register() {
-            mc.getTextureManager().registerTexture(this, new NativeImageBackedTexture(img));
+            mc.getTextureManager().register(identifier, new DynamicTexture(null, img));
             img = null;
 
             downloading = false;

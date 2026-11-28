@@ -5,13 +5,23 @@
 
 package meteordevelopment.meteorclient.systems.proxies;
 
+import com.google.common.net.InetAddresses;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.ISerializable;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
+import meteordevelopment.meteorclient.utils.render.color.Color;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.net.SocketTimeoutException;
+import java.nio.ByteBuffer;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Objects;
 
 public class Proxy implements ISerializable<Proxy> {
@@ -23,7 +33,6 @@ public class Proxy implements ISerializable<Proxy> {
     public Setting<String> name = sgGeneral.add(new StringSetting.Builder()
         .name("name")
         .description("The name of the proxy.")
-        .defaultValue("")
         .build()
     );
 
@@ -37,7 +46,6 @@ public class Proxy implements ISerializable<Proxy> {
     public Setting<String> address = sgGeneral.add(new StringSetting.Builder()
         .name("address")
         .description("The ip address of the proxy.")
-        .defaultValue("")
         .filter(Utils::ipFilter)
         .build()
     );
@@ -64,30 +72,134 @@ public class Proxy implements ISerializable<Proxy> {
     public Setting<String> username = sgOptional.add(new StringSetting.Builder()
         .name("username")
         .description("The username of the proxy.")
-        .defaultValue("")
         .build()
     );
 
     public Setting<String> password = sgOptional.add(new StringSetting.Builder()
         .name("password")
         .description("The password of the proxy.")
-        .defaultValue("")
         .visible(() -> type.get().equals(ProxyType.Socks5))
         .build()
     );
 
-    private Proxy() {}
-    public Proxy(NbtElement tag) {
-        fromTag((NbtCompound) tag);
+    public Status status = Status.UNCHECKED;
+    public long latency;
+
+    // todo
+    //  - add more rigorous status checks - perhaps querying our 'mcauth.meteorclient.com' or ccbluex's 'ping.liquidproxy.net'
+    //  - the isSocks methods could be used to try and detect the version of added proxies when it's unclear -
+    //     the only complication would be that some ips seem to be valid for both 4 and 5
+
+    private Proxy() {
+    }
+
+    public Proxy(Tag tag) {
+        fromTag((CompoundTag) tag);
     }
 
     public boolean resolveAddress() {
-        int port = this.port.get();
-        String address = this.address.get();
+        return Utils.resolveAddress(this.address.get(), this.port.get());
+    }
 
-        if (port <= 0 || port > 65535 || address == null || address.isBlank()) return false;
-        InetSocketAddress socketAddress = new InetSocketAddress(address, port);
-        return !socketAddress.isUnresolved();
+    /**
+     * Return codes: <br>
+     * 0: In the process of checking <br>
+     * 1: The proxy is alive <br>
+     * 2: The proxy is dead <br>
+     * 3: The check timed out
+     */
+    public int checkStatus() {
+        if (status == Status.CHECKING) return 0;
+        status = Status.CHECKING;
+
+        boolean timeout = false;
+
+        try {
+            Instant before = Instant.now();
+            if (isSocks4()) {
+                status = Status.ALIVE;
+                latency = Duration.between(before, Instant.now()).toMillis();
+                return 1;
+            }
+        } catch (SocketTimeoutException _) {
+            timeout = true;
+        } catch (IOException _) {
+        }
+
+        try {
+            Instant before = Instant.now();
+            if (isSocks5()) {
+                status = Status.ALIVE;
+                latency = Duration.between(before, Instant.now()).toMillis();
+                return 1;
+            }
+        } catch (SocketTimeoutException _) {
+            timeout = true;
+        } catch (IOException _) {
+        }
+
+        status = Status.DEAD;
+        return timeout ? 3 : 2;
+    }
+
+    private boolean isSocks4() throws IOException {
+        ByteBuffer bb;
+        byte[] u = username.get().getBytes();
+
+        // SOCKS4
+        if (InetAddresses.isInetAddress(address.get())) {
+            bb = ByteBuffer.allocate(9 + u.length)
+                .put((byte) 4)
+                .put((byte) 1)
+                .putShort(port.get().shortValue())
+                .putInt(InetAddress.getByName(address.get()).hashCode()) // :clueless:
+                .put(u)
+                .put((byte) 0);
+        }
+
+        // SOCKS4a
+        else {
+            byte[] addr = address.get().getBytes();
+            bb = ByteBuffer.allocate(10 + u.length + addr.length)
+                .put((byte) 4)
+                .put((byte) 1)
+                .putShort(port.get().shortValue())
+                .put(new byte[]{0, 0, 0, 1})
+                .put(u)
+                .put((byte) 0)
+                .put(addr)
+                .put((byte) 0);
+        }
+
+        byte[] data = sendData(bb.array(), 8);
+
+        if (data.length < 2) return false;
+        return data[0] == 0 && data[1] == 90;
+    }
+
+    private boolean isSocks5() throws IOException {
+        ByteBuffer bb = ByteBuffer.allocate(4)
+            .put((byte) 5)
+            .put((byte) 2)
+            .put((byte) 0)
+            .put((byte) 2);
+
+        byte[] data = sendData(bb.array(), 2);
+
+        if (data.length < 2) return false;
+        return data[0] == 5 && (data[1] == 0 || data[1] == 2);
+    }
+
+    private byte[] sendData(byte[] data, int read) throws IOException {
+        try (Socket s = new Socket()) {
+            s.setSoTimeout(Proxies.get().timeout.get());
+            s.connect(new InetSocketAddress(address.get(), port.get()), Proxies.get().timeout.get());
+            OutputStream out = s.getOutputStream();
+
+            out.write(data);
+
+            return s.getInputStream().readNBytes(read);
+        }
     }
 
     public static class Builder {
@@ -96,6 +208,7 @@ public class Proxy implements ISerializable<Proxy> {
         protected int port = 0;
         protected String name = "";
         protected String username = "";
+        protected String password = "";
         protected boolean enabled = false;
 
         public Builder type(ProxyType type) {
@@ -123,6 +236,11 @@ public class Proxy implements ISerializable<Proxy> {
             return this;
         }
 
+        public Builder password(String password) {
+            this.password = password;
+            return this;
+        }
+
         public Builder enabled(boolean enabled) {
             this.enabled = enabled;
             return this;
@@ -136,6 +254,7 @@ public class Proxy implements ISerializable<Proxy> {
             if (port != proxy.port.getDefaultValue()) proxy.port.set(port);
             if (!name.equals(proxy.name.getDefaultValue())) proxy.name.set(name);
             if (!username.equals(proxy.username.getDefaultValue())) proxy.username.set(username);
+            if (!password.equals(proxy.password.getDefaultValue())) proxy.password.set(password);
             if (enabled != proxy.enabled.getDefaultValue()) proxy.enabled.set(enabled);
 
             return proxy;
@@ -143,8 +262,8 @@ public class Proxy implements ISerializable<Proxy> {
     }
 
     @Override
-    public NbtCompound toTag() {
-        NbtCompound tag = new NbtCompound();
+    public CompoundTag toTag() {
+        CompoundTag tag = new CompoundTag();
 
         tag.put("settings", settings.toTag());
 
@@ -152,10 +271,8 @@ public class Proxy implements ISerializable<Proxy> {
     }
 
     @Override
-    public Proxy fromTag(NbtCompound tag) {
-        if (tag.contains("settings")) {
-            settings.fromTag(tag.getCompound("settings"));
-        }
+    public Proxy fromTag(CompoundTag tag) {
+        tag.getCompound("settings").ifPresent(settings::fromTag);
 
         return this;
     }
@@ -166,5 +283,30 @@ public class Proxy implements ISerializable<Proxy> {
         if (o == null || getClass() != o.getClass()) return false;
         Proxy proxy = (Proxy) o;
         return Objects.equals(proxy.address.get(), this.address.get()) && Objects.equals(proxy.port.get(), this.port.get());
+    }
+
+    public enum Status {
+        UNCHECKED,
+        CHECKING,
+        DEAD,
+        ALIVE;
+
+        @Override
+        public String toString() {
+            return switch (this) {
+                case UNCHECKED -> "";
+                case CHECKING -> "...";
+                case DEAD -> "X";
+                case ALIVE -> "O";
+            };
+        }
+
+        public Color getColor() {
+            return switch (this) {
+                case UNCHECKED, CHECKING -> Color.GRAY;
+                case DEAD -> Color.RED;
+                case ALIVE -> Color.GREEN;
+            };
+        }
     }
 }

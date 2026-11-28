@@ -7,8 +7,8 @@ package meteordevelopment.meteorclient.settings;
 
 import meteordevelopment.meteorclient.utils.misc.NbtUtils;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,8 +21,16 @@ public class ColorListSetting extends Setting<List<SettingColor>> {
 
     @Override
     protected List<SettingColor> parseImpl(String str) {
-        // TODO: I cba to write a text parser for this
-        return new ArrayList<>();
+        List<SettingColor> colors = new ArrayList<>();
+        try {
+            String[] colorsStr = str.replaceAll("\\s+", "").split(";");
+            for (String colorStr : colorsStr) {
+                String[] strs = colorStr.split(",");
+                colors.add(new SettingColor(Integer.parseInt(strs[0]), Integer.parseInt(strs[1]), Integer.parseInt(strs[2]), Integer.parseInt(strs[3])));
+            }
+        } catch (IndexOutOfBoundsException | NumberFormatException _) {
+        }
+        return colors;
     }
 
     @Override
@@ -40,18 +48,18 @@ public class ColorListSetting extends Setting<List<SettingColor>> {
     }
 
     @Override
-    protected NbtCompound save(NbtCompound tag) {
+    protected CompoundTag save(CompoundTag tag) {
         tag.put("value", NbtUtils.listToTag(get()));
 
         return tag;
     }
 
     @Override
-    protected List<SettingColor> load(NbtCompound tag) {
+    protected List<SettingColor> load(CompoundTag tag) {
         get().clear();
 
-        for (NbtElement e : tag.getList("value", NbtElement.COMPOUND_TYPE)) {
-            get().add(new SettingColor().fromTag((NbtCompound) e));
+        for (Tag e : tag.getListOrEmpty("value")) {
+            get().add(new SettingColor().fromTag((CompoundTag) e));
         }
 
         return get();

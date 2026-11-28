@@ -5,8 +5,9 @@
 
 package meteordevelopment.meteorclient.systems.modules.movement.speed.modes;
 
+import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.entity.player.PlayerMoveEvent;
-import meteordevelopment.meteorclient.mixininterface.IVec3d;
+import meteordevelopment.meteorclient.mixininterface.IVec3;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.movement.Anchor;
 import meteordevelopment.meteorclient.systems.modules.movement.speed.SpeedMode;
@@ -25,25 +26,30 @@ public class Strafe extends SpeedMode {
     @Override
     public void onMove(PlayerMoveEvent event) {
         switch (stage) {
-            case 0: //Reset
+            case 0 -> { // Reset
                 if (PlayerUtils.isMoving()) {
-                    stage++;
+                    stage = 1;
                     speed = 1.18f * getDefaultSpeed() - 0.01;
                 }
-            case 1: //Jump
-                if (!PlayerUtils.isMoving() || !mc.player.isOnGround()) break;
+            }
+            case 1 -> { // Jump
+                if (!PlayerUtils.isMoving() || !mc.player.onGround()) break;
 
-                ((IVec3d) event.movement).setY(getHop(0.40123128));
+                ((IVec3) event.movement).meteor$setY(getHop(0.40123128));
                 speed *= settings.ncpSpeed.get();
-                stage++;
-                break;
-            case 2: speed = distance - 0.76 * (distance - getDefaultSpeed()); stage++; break; //Slowdown after jump
-            case 3: //Reset on collision or predict and update speed
-                if (!mc.world.isSpaceEmpty(mc.player.getBoundingBox().offset(0.0, mc.player.getVelocity().y, 0.0)) || mc.player.verticalCollision && stage > 0) {
+                stage = 2;
+            }
+            case 2 -> { // Slowdown after jump
+                speed = distance - 0.76 * (distance - getDefaultSpeed());
+                stage = 3;
+            }
+            case 3 -> { // Reset on collision or predict and update speed
+                if (!mc.level.noCollision(mc.player.getBoundingBox().move(0.0, mc.player.getDeltaMovement().y, 0.0))
+                    || mc.player.verticalCollision && stage > 0) {
                     stage = 0;
                 }
                 speed = distance - (distance / 159.0);
-                break;
+            }
         }
 
         speed = Math.max(speed, getDefaultSpeed());
@@ -58,54 +64,33 @@ public class Strafe extends SpeedMode {
 
         Vector2d change = transformStrafe(speed);
 
-        double velX = change.x;
-        double velZ = change.y;
-
         Anchor anchor = Modules.get().get(Anchor.class);
         if (anchor.isActive() && anchor.controlMovement) {
-            velX = anchor.deltaX;
-            velZ = anchor.deltaZ;
+            change.set(anchor.deltaX, anchor.deltaZ);
         }
 
-        ((IVec3d) event.movement).setXZ(velX, velZ);
+        ((IVec3) event.movement).meteor$setXZ(change.x, change.y);
     }
 
-    private Vector2d transformStrafe(double speed) {
-        float forward = mc.player.input.movementForward;
-        float side = mc.player.input.movementSideways;
-        float yaw = mc.player.prevYaw + (mc.player.getYaw() - mc.player.prevYaw) * mc.getTickDelta();
+    public static Vector2d transformStrafe(double speed) {
+        float forward = Math.signum(MeteorClient.mc.player.input.getMoveVector().y);
+        float side = Math.signum(MeteorClient.mc.player.input.getMoveVector().x);
+        float yaw = MeteorClient.mc.player.getYRot(MeteorClient.mc.getDeltaTracker().getGameTimeDeltaPartialTick(true));
 
-        double velX, velZ;
+        if (forward == 0.0f && side == 0.0f) return new Vector2d();
 
-        if (forward == 0.0f && side == 0.0f) return new Vector2d(0, 0);
+        float strafe = 90 * side;
+        if (forward != 0) strafe *= forward * 0.5f;
 
-        else if (forward != 0.0f) {
-            if (side >= 1.0f) {
-                yaw += (float) (forward > 0.0f ? -45 : 45);
-                side = 0.0f;
-            } else if (side <= -1.0f) {
-                yaw += (float) (forward > 0.0f ? 45 : -45);
-                side = 0.0f;
-            }
+        yaw = yaw - strafe;
+        if (forward < 0) yaw -= 180;
+        double yawRadians = Math.toRadians(yaw);
 
-            if (forward > 0.0f)
-                forward = 1.0f;
-
-            else if (forward < 0.0f)
-                forward = -1.0f;
-        }
-
-        double mx = Math.cos(Math.toRadians(yaw + 90.0f));
-        double mz = Math.sin(Math.toRadians(yaw + 90.0f));
-
-        velX = (double) forward * speed * mx + (double) side * speed * mz;
-        velZ = (double) forward * speed * mz - (double) side * speed * mx;
-
-        return new Vector2d(velX, velZ);
+        return new Vector2d(-Math.sin(yawRadians) * speed, Math.cos(yawRadians) * speed);
     }
 
     @Override
     public void onTick() {
-        distance = Math.sqrt((mc.player.getX() - mc.player.prevX) * (mc.player.getX() - mc.player.prevX) + (mc.player.getZ() - mc.player.prevZ) * (mc.player.getZ() - mc.player.prevZ));
+        distance = Math.sqrt((mc.player.getX() - mc.player.xo) * (mc.player.getX() - mc.player.xo) + (mc.player.getZ() - mc.player.zo) * (mc.player.getZ() - mc.player.zo));
     }
 }

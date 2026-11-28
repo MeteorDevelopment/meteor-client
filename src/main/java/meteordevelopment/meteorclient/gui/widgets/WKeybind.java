@@ -14,7 +14,7 @@ public class WKeybind extends WHorizontalList {
     public Runnable action;
     public Runnable actionOnSet;
 
-    private WLabel label;
+    private WButton button;
 
     private final Keybind keybind;
     private final Keybind defaultValue;
@@ -27,12 +27,10 @@ public class WKeybind extends WHorizontalList {
 
     @Override
     public void init() {
-        label = add(theme.label("")).widget();
-
-        WButton set = add(theme.button("Set")).widget();
-        set.action = () -> {
+        button = add(theme.button("")).widget();
+        button.action = () -> {
             listening = true;
-            label.set("...");
+            button.set("...");
 
             if (actionOnSet != null) actionOnSet.run();
         };
@@ -40,9 +38,20 @@ public class WKeybind extends WHorizontalList {
         refreshLabel();
     }
 
-    public boolean onAction(boolean isKey, int value) {
-        if (listening && keybind.canBindTo(isKey, value)) {
-            keybind.set(isKey, value);
+    public boolean onClear() {
+        if (listening) {
+            keybind.reset();
+            reset();
+
+            return true;
+        }
+
+        return false;
+    }
+
+    public boolean onAction(boolean isKey, int value, int modifiers) {
+        if (listening && keybind.canBindTo(isKey, value, modifiers)) {
+            keybind.set(isKey, value, modifiers);
             reset();
 
             return true;
@@ -62,9 +71,10 @@ public class WKeybind extends WHorizontalList {
         if (Modules.get().isBinding()) {
             Modules.get().setModuleToBind(null);
         }
+        if (action != null) action.run();
     }
 
     private void refreshLabel() {
-        label.set(keybind.toString());
+        button.set(keybind.toString());
     }
 }

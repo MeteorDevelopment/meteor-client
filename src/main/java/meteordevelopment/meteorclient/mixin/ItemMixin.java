@@ -7,9 +7,9 @@ package meteordevelopment.meteorclient.mixin;
 
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.render.TooltipDataEvent;
-import net.minecraft.client.item.TooltipData;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.inventory.tooltip.TooltipComponent;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -18,10 +18,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import java.util.Optional;
 
 @Mixin(Item.class)
-public class ItemMixin {
-    @Inject(method = "getTooltipData", at=@At("HEAD"), cancellable = true)
-    private void onTooltipData(ItemStack stack, CallbackInfoReturnable<Optional<TooltipData>> cir) {
-        TooltipDataEvent event = MeteorClient.EVENT_BUS.post(TooltipDataEvent.get(stack));
+public abstract class ItemMixin {
+    @Inject(method = "getTooltipImage", at = @At("HEAD"), cancellable = true)
+    private void onTooltipData(ItemStack itemStack, CallbackInfoReturnable<Optional<TooltipComponent>> cir) {
+        TooltipDataEvent event = MeteorClient.EVENT_BUS.post(TooltipDataEvent.get(itemStack));
         if (event.tooltipData != null) {
             cir.setReturnValue(Optional.of(event.tooltipData));
         }

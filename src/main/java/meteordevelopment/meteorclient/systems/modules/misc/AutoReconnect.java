@@ -9,14 +9,15 @@ import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.objects.ObjectObjectImmutablePair;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.world.ServerConnectBeginEvent;
+import meteordevelopment.meteorclient.settings.BoolSetting;
 import meteordevelopment.meteorclient.settings.DoubleSetting;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.client.network.ServerAddress;
-import net.minecraft.client.network.ServerInfo;
+import net.minecraft.client.multiplayer.resolver.ServerAddress;
+import net.minecraft.client.multiplayer.ServerData;
 
 public class AutoReconnect extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -30,7 +31,14 @@ public class AutoReconnect extends Module {
         .build()
     );
 
-    public Pair<ServerAddress, ServerInfo> lastServerConnection;
+    public final Setting<Boolean> button = sgGeneral.add(new BoolSetting.Builder()
+        .name("hide-buttons")
+        .description("Will hide the buttons related to Auto Reconnect.")
+        .defaultValue(false)
+        .build()
+    );
+
+    public Pair<ServerAddress, ServerData> lastServerConnection;
 
     public AutoReconnect() {
         super(Categories.Misc, "auto-reconnect", "Automatically reconnects when disconnected from a server.");

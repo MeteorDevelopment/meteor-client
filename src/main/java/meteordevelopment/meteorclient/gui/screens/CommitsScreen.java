@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.gui.screens;
 
+import com.mojang.blaze3d.Blaze3D;
 import meteordevelopment.meteorclient.addons.GithubRepo;
 import meteordevelopment.meteorclient.addons.MeteorAddon;
 import meteordevelopment.meteorclient.gui.GuiTheme;
@@ -13,14 +14,16 @@ import meteordevelopment.meteorclient.gui.widgets.containers.WHorizontalList;
 import meteordevelopment.meteorclient.gui.widgets.containers.WTable;
 import meteordevelopment.meteorclient.utils.network.Http;
 import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
-import net.minecraft.util.Util;
 
+import java.net.URI;
+import java.net.http.HttpResponse;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 
 public class CommitsScreen extends WindowScreen {
     private final MeteorAddon addon;
     private Commit[] commits;
+    private int statusCode;
 
     public CommitsScreen(GuiTheme theme, MeteorAddon addon) {
         super(theme, "Commits for " + addon.name);
@@ -32,13 +35,24 @@ public class CommitsScreen extends WindowScreen {
 
         MeteorExecutor.execute(() -> {
             GithubRepo repo = addon.getRepo();
-            Response res = Http.get(String.format("https://api.github.com/repos/%s/compare/%s...%s", repo.getOwnerName(), addon.getCommit(), repo.branch())).sendJson(Response.class);
 
-            if (res != null) {
-                commits = res.commits;
-                taskAfterRender = this::populateWidgets;
+            if (addon.getCommit() == null || addon.getCommit().equals("${commit}")) {
+                statusCode = 404;
+                taskAfterRender = this::populateError;
+                return;
             }
-            else locked = false;
+
+            Http.Request request = Http.get(String.format("https://api.github.com/repos/%s/compare/%s...%s", repo.getOwnerName(), addon.getCommit(), repo.branch()));
+            repo.authenticate(request);
+            HttpResponse<Response> res = request.sendJsonResponse(Response.class);
+
+            if (res.statusCode() == Http.SUCCESS) {
+                commits = res.body().commits;
+                taskAfterRender = this::populateCommits;
+            } else {
+                statusCode = res.statusCode();
+                taskAfterRender = this::populateError;
+            }
         });
     }
 
@@ -47,21 +61,49 @@ public class CommitsScreen extends WindowScreen {
         // Only initialize widgets after data arrives
     }
 
-    private void populateWidgets() {
-        // Top
+    private void populateHeader(String headerMessage) {
         WHorizontalList l = add(theme.horizontalList()).expandX().widget();
 
-        String text = "There are %d new commits";
-        if (commits.length == 1) text = "There is %d new commit";
-        l.add(theme.label(String.format(text, commits.length))).expandX();
+        l.add(theme.label(headerMessage)).expandX();
 
         String website = addon.getWebsite();
-        if (website != null) l.add(theme.button("Website")).widget().action = () -> Util.getOperatingSystem().open(website);
+        if (website != null) l.add(theme.button("Website")).widget().action = () -> Blaze3D.openUri(URI.create(website));
 
         l.add(theme.button("GitHub")).widget().action = () -> {
             GithubRepo repo = addon.getRepo();
-            Util.getOperatingSystem().open(String.format("https://github.com/%s/tree/%s", repo.getOwnerName(), repo.branch()));
+            Blaze3D.openUri(URI.create(String.format("https://github.com/%s/tree/%s", repo.getOwnerName(), repo.branch())));
         };
+    }
+
+    private void populateError() {
+        String errorMessage = switch (statusCode) {
+            case Http.BAD_REQUEST -> "Connection dropped";
+            case Http.UNAUTHORIZED -> "Unauthorized";
+            case Http.FORBIDDEN -> "Rate-limited";
+            case Http.NOT_FOUND -> "Invalid commit hash";
+            default -> "Error Code: " + statusCode;
+        };
+
+        populateHeader("There was an error fetching commits: " + errorMessage);
+
+        if (statusCode == Http.UNAUTHORIZED) {
+            add(theme.horizontalSeparator()).padVertical(theme.scale(8)).expandX();
+            WHorizontalList l = add(theme.horizontalList()).expandX().widget();
+
+            l.add(theme.label("Consider using an authentication token: ")).expandX();
+            l.add(theme.button("Authorization Guide")).widget().action = () -> {
+                Blaze3D.openUri(URI.create("https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens"));
+            };
+        }
+
+        locked = false;
+    }
+
+    private void populateCommits() {
+        // Top
+        String text = "There are %d new commits";
+        if (commits.length == 1) text = "There is %d new commit";
+        populateHeader(String.format(text, commits.length));
 
         // Commits
         if (commits.length > 0) {
@@ -74,7 +116,7 @@ public class CommitsScreen extends WindowScreen {
                 String date = DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(commit.commit.committer.date));
                 t.add(theme.label(date)).top().right().widget().color = theme.textSecondaryColor();
 
-                t.add(theme.label(getMessage(commit))).widget().action = () -> Util.getOperatingSystem().open(String.format("https://github.com/%s/commit/%s", addon.getRepo().getOwnerName(), commit.sha));
+                t.add(theme.label(getMessage(commit))).widget().action = () -> Blaze3D.openUri(URI.create(String.format("https://github.com/%s/commit/%s", addon.getRepo().getOwnerName(), commit.sha)));
                 t.row();
             }
         }

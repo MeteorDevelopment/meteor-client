@@ -30,9 +30,9 @@ import meteordevelopment.meteorclient.systems.accounts.Account;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
+import org.apache.commons.lang3.SystemUtils;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
-import static net.minecraft.client.MinecraftClient.IS_SYSTEM_MAC;
 
 public class MeteorGuiTheme extends GuiTheme {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -51,11 +51,11 @@ public class MeteorGuiTheme extends GuiTheme {
         .name("scale")
         .description("Scale of the GUI.")
         .defaultValue(1)
-        .min(0.75)
-        .sliderRange(0.75, 4)
+        .min(0.1)
+        .sliderRange(0.1, 4)
         .onSliderRelease()
-        .onChanged(aDouble -> {
-            if (mc.currentScreen instanceof WidgetScreen) ((WidgetScreen) mc.currentScreen).invalidate();
+        .onChanged(_ -> {
+            if (mc.gui.screen() instanceof WidgetScreen widgetScreen) widgetScreen.invalidate();
         })
         .build()
     );
@@ -74,13 +74,17 @@ public class MeteorGuiTheme extends GuiTheme {
         .build()
     );
 
+    public final Setting<Boolean> modulesHelpText = sgGeneral.add(new BoolSetting.Builder()
+        .name("modules-help-text")
+        .description("Toggle help text in the modules screen.")
+        .defaultValue(true)
+        .build()
+    );
+
     public final Setting<Boolean> hideHUD = sgGeneral.add(new BoolSetting.Builder()
         .name("hide-HUD")
         .description("Hide HUD when in GUI.")
         .defaultValue(false)
-        .onChanged(v -> {
-            if (mc.currentScreen instanceof WidgetScreen) mc.options.hudHidden = v;
-        })
         .build()
     );
 
@@ -104,11 +108,11 @@ public class MeteorGuiTheme extends GuiTheme {
     // Background
 
     public final ThreeStateColorSetting backgroundColor = new ThreeStateColorSetting(
-            sgBackgroundColors,
-            "background",
-            new SettingColor(20, 20, 20, 200),
-            new SettingColor(30, 30, 30, 200),
-            new SettingColor(40, 40, 40, 200)
+        sgBackgroundColors,
+        "background",
+        new SettingColor(20, 20, 20, 200),
+        new SettingColor(30, 30, 30, 200),
+        new SettingColor(40, 40, 40, 200)
     );
 
     public final Setting<SettingColor> moduleBackground = color(sgBackgroundColors, "module-background", "Color of module background when active.", new SettingColor(50, 50, 50));
@@ -116,11 +120,11 @@ public class MeteorGuiTheme extends GuiTheme {
     // Outline
 
     public final ThreeStateColorSetting outlineColor = new ThreeStateColorSetting(
-            sgOutline,
-            "outline",
-            new SettingColor(0, 0, 0),
-            new SettingColor(10, 10, 10),
-            new SettingColor(20, 20, 20)
+        sgOutline,
+        "outline",
+        new SettingColor(0, 0, 0),
+        new SettingColor(10, 10, 10),
+        new SettingColor(20, 20, 20)
     );
 
     // Separator
@@ -132,24 +136,24 @@ public class MeteorGuiTheme extends GuiTheme {
     // Scrollbar
 
     public final ThreeStateColorSetting scrollbarColor = new ThreeStateColorSetting(
-            sgScrollbar,
-            "Scrollbar",
-            new SettingColor(30, 30, 30, 200),
-            new SettingColor(40, 40, 40, 200),
-            new SettingColor(50, 50, 50, 200)
+        sgScrollbar,
+        "Scrollbar",
+        new SettingColor(30, 30, 30, 200),
+        new SettingColor(40, 40, 40, 200),
+        new SettingColor(50, 50, 50, 200)
     );
 
     // Slider
 
     public final ThreeStateColorSetting sliderHandle = new ThreeStateColorSetting(
-            sgSlider,
-            "slider-handle",
-            new SettingColor(130, 0, 255),
-            new SettingColor(140, 30, 255),
-            new SettingColor(150, 60, 255)
+        sgSlider,
+        "slider-handle",
+        new SettingColor(130, 0, 255),
+        new SettingColor(140, 30, 255),
+        new SettingColor(150, 60, 255)
     );
 
-    public final Setting<SettingColor> sliderLeft = color(sgSlider, "slider-left", "Color of slider left part.", new SettingColor(100,35,170));
+    public final Setting<SettingColor> sliderLeft = color(sgSlider, "slider-left", "Color of slider left part.", new SettingColor(100, 35, 170));
     public final Setting<SettingColor> sliderRight = color(sgSlider, "slider-right", "Color of slider right part.", new SettingColor(50, 50, 50));
 
     // Starscript
@@ -173,11 +177,12 @@ public class MeteorGuiTheme extends GuiTheme {
 
     private Setting<SettingColor> color(SettingGroup group, String name, String description, SettingColor color) {
         return group.add(new ColorSetting.Builder()
-                .name(name + "-color")
-                .description(description)
-                .defaultValue(color)
-                .build());
+            .name(name + "-color")
+            .description(description)
+            .defaultValue(color)
+            .build());
     }
+
     private Setting<SettingColor> color(String name, String description, SettingColor color) {
         return color(sgColors, name, description, color);
     }
@@ -191,7 +196,7 @@ public class MeteorGuiTheme extends GuiTheme {
 
     @Override
     public WLabel label(String text, boolean title, double maxWidth) {
-        if (maxWidth == 0) return w(new WMeteorLabel(text, title));
+        if (maxWidth == 0 && !text.contains("\n")) return w(new WMeteorLabel(text, title));
         return w(new WMeteorMultiLabel(text, title, maxWidth));
     }
 
@@ -211,8 +216,18 @@ public class MeteorGuiTheme extends GuiTheme {
     }
 
     @Override
+    protected WConfirmedButton confirmedButton(String text, String confirmText, GuiTexture texture) {
+        return w(new WMeteorConfirmedButton(text, confirmText, texture));
+    }
+
+    @Override
     public WMinus minus() {
         return w(new WMeteorMinus());
+    }
+
+    @Override
+    public WConfirmedMinus confirmedMinus() {
+        return w(new WMeteorConfirmedMinus());
     }
 
     @Override
@@ -266,8 +281,8 @@ public class MeteorGuiTheme extends GuiTheme {
     }
 
     @Override
-    public WWidget module(Module module) {
-        return w(new WMeteorModule(module));
+    public WWidget module(Module module, String title) {
+        return w(new WMeteorModule(module, title));
     }
 
     @Override
@@ -360,8 +375,8 @@ public class MeteorGuiTheme extends GuiTheme {
     public double scale(double value) {
         double scaled = value * scale.get();
 
-        if (IS_SYSTEM_MAC) {
-            scaled /= (double) mc.getWindow().getWidth() / mc.getWindow().getFramebufferWidth();
+        if (SystemUtils.IS_OS_MAC) {
+            scaled /= (double) mc.getWindow().getWidth() / mc.getWindow().getWidth();
         }
 
         return scaled;
@@ -370,6 +385,11 @@ public class MeteorGuiTheme extends GuiTheme {
     @Override
     public boolean categoryIcons() {
         return categoryIcons.get();
+    }
+
+    @Override
+    public boolean modulesHelpText() {
+        return modulesHelpText.get();
     }
 
     @Override

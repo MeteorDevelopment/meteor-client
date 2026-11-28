@@ -7,11 +7,8 @@ package meteordevelopment.meteorclient.commands.commands;
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import meteordevelopment.meteorclient.commands.Command;
-import net.minecraft.command.CommandSource;
-import net.minecraft.world.GameMode;
-
-import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
-import static meteordevelopment.meteorclient.MeteorClient.mc;
+import net.minecraft.client.multiplayer.ClientSuggestionProvider;
+import net.minecraft.world.level.GameType;
 
 public class GamemodeCommand extends Command {
     public GamemodeCommand() {
@@ -19,10 +16,10 @@ public class GamemodeCommand extends Command {
     }
 
     @Override
-    public void build(LiteralArgumentBuilder<CommandSource> builder) {
-        for (GameMode gameMode : GameMode.values()) {
-            builder.then(literal(gameMode.getName()).executes(context -> {
-                mc.interactionManager.setGameMode(gameMode);
+    public void build(LiteralArgumentBuilder<ClientSuggestionProvider> builder) {
+        for (GameType gameMode : GameType.values()) {
+            builder.then(literal(gameMode.getName()).executes(_ -> {
+                mc.gameMode.setLocalMode(gameMode);
                 return SINGLE_SUCCESS;
             }));
         }

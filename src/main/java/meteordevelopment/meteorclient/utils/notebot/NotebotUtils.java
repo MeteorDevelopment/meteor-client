@@ -8,39 +8,51 @@ package meteordevelopment.meteorclient.utils.notebot;
 import meteordevelopment.meteorclient.utils.misc.Names;
 import meteordevelopment.meteorclient.utils.notebot.instrumentdetect.InstrumentDetectFunction;
 import meteordevelopment.meteorclient.utils.notebot.song.Note;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.NoteBlock;
-import net.minecraft.block.enums.Instrument;
-import net.minecraft.item.Item;
-import net.minecraft.item.Items;
-import net.minecraft.util.math.BlockPos;
-import org.jetbrains.annotations.Nullable;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.NoteBlock;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
+import org.jspecify.annotations.Nullable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class NotebotUtils {
-    public static final EnumMap<Instrument, Item> INSTRUMENT_TO_ITEM = new EnumMap<>(Instrument.class) {{
-        put(Instrument.HARP, Items.DIRT);
-        put(Instrument.BASEDRUM, Items.STONE);
-        put(Instrument.SNARE, Items.SAND);
-        put(Instrument.HAT, Items.GLASS);
-        put(Instrument.BASS, Items.OAK_WOOD);
-        put(Instrument.FLUTE, Items.CLAY);
-        put(Instrument.BELL, Items.GOLD_BLOCK);
-        put(Instrument.GUITAR, Items.WHITE_WOOL);
-        put(Instrument.CHIME, Items.PACKED_ICE);
-        put(Instrument.XYLOPHONE, Items.BONE_BLOCK);
-        put(Instrument.IRON_XYLOPHONE, Items.IRON_BLOCK);
-        put(Instrument.COW_BELL, Items.SOUL_SAND);
-        put(Instrument.DIDGERIDOO, Items.PUMPKIN);
-        put(Instrument.BIT, Items.EMERALD_BLOCK);
-        put(Instrument.BANJO, Items.HAY_BLOCK);
-        put(Instrument.PLING, Items.GLOWSTONE);
-    }};
+    private static Map<NoteBlockInstrument, Item> instrumentItems;
+
+    /**
+     * The item of the first registered block that produces the given instrument when placed under a note block.
+     * Built from the block registry instead of a hand-written map so new/renamed instruments keep working.
+     */
+    public static Item getInstrumentItem(NoteBlockInstrument instrument) {
+        Map<NoteBlockInstrument, Item> items = instrumentItems;
+        if (items == null) instrumentItems = items = buildInstrumentItems();
+        return items.getOrDefault(instrument, Items.AIR);
+    }
+
+    private static Map<NoteBlockInstrument, Item> buildInstrumentItems() {
+        Map<NoteBlockInstrument, Item> items = new EnumMap<>(NoteBlockInstrument.class);
+
+        for (Block block : BuiltInRegistries.BLOCK) {
+            Item item = block.asItem();
+            if (item == Items.AIR) continue;
+            items.putIfAbsent(block.defaultBlockState().instrument(), item);
+        }
+
+        return items;
+    }
 
     public static Note getNoteFromNoteBlock(BlockState noteBlock, BlockPos blockPos, NotebotMode mode, InstrumentDetectFunction instrumentDetectFunction) {
-        Instrument instrument = null;
-        int level = noteBlock.get(NoteBlock.NOTE);
+        NoteBlockInstrument instrument = null;
+        int level = noteBlock.getValue(NoteBlock.NOTE);
         if (mode == NotebotMode.ExactInstruments) {
             instrument = instrumentDetectFunction.detectInstrument(noteBlock, blockPos);
         }
@@ -54,23 +66,23 @@ public class NotebotUtils {
 
     public enum OptionalInstrument {
         None(null),
-        Harp(Instrument.HARP),
-        Basedrum(Instrument.BASEDRUM),
-        Snare(Instrument.SNARE),
-        Hat(Instrument.HAT),
-        Bass(Instrument.BASS),
-        Flute(Instrument.FLUTE),
-        Bell(Instrument.BELL),
-        Guitar(Instrument.GUITAR),
-        Chime(Instrument.CHIME),
-        Xylophone(Instrument.XYLOPHONE),
-        IronXylophone(Instrument.IRON_XYLOPHONE),
-        CowBell(Instrument.COW_BELL),
-        Didgeridoo(Instrument.DIDGERIDOO),
-        Bit(Instrument.BIT),
-        Banjo(Instrument.BANJO),
-        Pling(Instrument.PLING);
-        public static final Map<Instrument, OptionalInstrument> BY_MINECRAFT_INSTRUMENT = new HashMap<>();
+        Harp(NoteBlockInstrument.HARP),
+        Basedrum(NoteBlockInstrument.BASEDRUM),
+        Snare(NoteBlockInstrument.SNARE),
+        Hat(NoteBlockInstrument.HAT),
+        Bass(NoteBlockInstrument.BASS),
+        Flute(NoteBlockInstrument.FLUTE),
+        Bell(NoteBlockInstrument.BELL),
+        Guitar(NoteBlockInstrument.GUITAR),
+        Chime(NoteBlockInstrument.CHIME),
+        Xylophone(NoteBlockInstrument.XYLOPHONE),
+        IronXylophone(NoteBlockInstrument.IRON_XYLOPHONE),
+        CowBell(NoteBlockInstrument.COW_BELL),
+        Didgeridoo(NoteBlockInstrument.DIDGERIDOO),
+        Bit(NoteBlockInstrument.BIT),
+        Banjo(NoteBlockInstrument.BANJO),
+        Pling(NoteBlockInstrument.PLING);
+        public static final Map<NoteBlockInstrument, OptionalInstrument> BY_MINECRAFT_INSTRUMENT = new HashMap<>();
 
         static {
             for (OptionalInstrument optionalInstrument : values()) {
@@ -78,17 +90,17 @@ public class NotebotUtils {
             }
         }
 
-        private final Instrument minecraftInstrument;
+        private final NoteBlockInstrument minecraftInstrument;
 
-        OptionalInstrument(@Nullable Instrument minecraftInstrument) {
+        OptionalInstrument(@Nullable NoteBlockInstrument minecraftInstrument) {
             this.minecraftInstrument = minecraftInstrument;
         }
 
-        public Instrument toMinecraftInstrument() {
+        public NoteBlockInstrument toMinecraftInstrument() {
             return minecraftInstrument;
         }
 
-        public static OptionalInstrument fromMinecraftInstrument(Instrument instrument) {
+        public static OptionalInstrument fromMinecraftInstrument(NoteBlockInstrument instrument) {
             if (instrument != null) {
                 return BY_MINECRAFT_INSTRUMENT.get(instrument);
             } else {
@@ -99,18 +111,25 @@ public class NotebotUtils {
 
     public static List<String> getRequirementString(Collection<Note> notes) {
         List<String> requirements = new ArrayList<>();
-        if (!notes.isEmpty()) {
-            Map<Instrument, Integer> uniqueInstrumentNoteNumbers = new HashMap<>();
-            for (Note note : notes) {
-                uniqueInstrumentNoteNumbers.putIfAbsent(note.getInstrument(), 0);
-                uniqueInstrumentNoteNumbers.computeIfPresent(note.getInstrument(), (instrument, i) -> i + 1);
-            }
-            requirements.add("%d note blocks.".formatted(notes.size()));
-            for (Instrument instrument : uniqueInstrumentNoteNumbers.keySet()) {
-                requirements.add("%d %s blocks. (%s)".formatted(uniqueInstrumentNoteNumbers.get(instrument),
-                    Names.get(INSTRUMENT_TO_ITEM.getOrDefault(instrument, Items.SUSPICIOUS_STEW)), instrument.asString()));
+        if (notes.isEmpty()) return requirements;
+
+        Map<NoteBlockInstrument, Integer> instrumentNoteNumbers = new EnumMap<>(NoteBlockInstrument.class);
+        for (Note note : notes) {
+            NoteBlockInstrument instrument = note.getInstrument();
+            // Instrument is null when the notebot mode does not care about instruments
+            if (instrument != null) instrumentNoteNumbers.merge(instrument, 1, Integer::sum);
+        }
+
+        requirements.add("%d note blocks.".formatted(notes.size()));
+        for (Map.Entry<NoteBlockInstrument, Integer> entry : instrumentNoteNumbers.entrySet()) {
+            Item item = getInstrumentItem(entry.getKey());
+            if (item == Items.AIR) {
+                requirements.add("%d (%s)".formatted(entry.getValue(), entry.getKey().getSerializedName()));
+            } else {
+                requirements.add("%d %s blocks. (%s)".formatted(entry.getValue(), Names.get(item), entry.getKey().getSerializedName()));
             }
         }
+
         return requirements;
     }
 }

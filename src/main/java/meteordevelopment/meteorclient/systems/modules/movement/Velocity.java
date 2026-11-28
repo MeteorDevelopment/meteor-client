@@ -7,8 +7,8 @@ package meteordevelopment.meteorclient.systems.modules.movement;
 
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
-import meteordevelopment.meteorclient.mixin.EntityVelocityUpdateS2CPacketAccessor;
-import meteordevelopment.meteorclient.mixininterface.IVec3d;
+import meteordevelopment.meteorclient.mixin.ClientboundSetEntityMotionPacketAccessor;
+import meteordevelopment.meteorclient.mixininterface.IVec3;
 import meteordevelopment.meteorclient.settings.BoolSetting;
 import meteordevelopment.meteorclient.settings.DoubleSetting;
 import meteordevelopment.meteorclient.settings.Setting;
@@ -16,7 +16,8 @@ import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.network.packet.s2c.play.EntityVelocityUpdateS2CPacket;
+import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
+import net.minecraft.world.phys.Vec3;
 
 public class Velocity extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -126,6 +127,13 @@ public class Velocity extends Module {
         .build()
     );
 
+    public final Setting<Boolean> fishing = sgGeneral.add(new BoolSetting.Builder()
+        .name("fishing")
+        .description("Prevents you from being pulled by fishing rods.")
+        .defaultValue(false)
+        .build()
+    );
+
     public Velocity() {
         super(Categories.Movement, "velocity", "Prevents you from being moved by external forces.");
     }
@@ -133,23 +141,23 @@ public class Velocity extends Module {
     @EventHandler
     private void onTick(TickEvent.Post event) {
         if (!sinking.get()) return;
-        if (mc.options.jumpKey.isPressed() || mc.options.sneakKey.isPressed()) return;
+        if (mc.options.keyJump.isDown() || mc.options.keyShift.isDown()) return;
 
-        if ((mc.player.isTouchingWater() || mc.player.isInLava()) && mc.player.getVelocity().y < 0) {
-            ((IVec3d) mc.player.getVelocity()).setY(0);
+        if ((mc.player.isInWater() || mc.player.isInLava()) && mc.player.getDeltaMovement().y < 0) {
+            ((IVec3) mc.player.getDeltaMovement()).meteor$setY(0);
         }
     }
 
     @EventHandler
     private void onPacketReceive(PacketEvent.Receive event) {
-        if (knockback.get() && event.packet instanceof EntityVelocityUpdateS2CPacket packet
-            && ((EntityVelocityUpdateS2CPacket) event.packet).getId() == mc.player.getId()) {
-            double velX = (packet.getVelocityX() / 8000d - mc.player.getVelocity().x) * knockbackHorizontal.get();
-            double velY = (packet.getVelocityY() / 8000d - mc.player.getVelocity().y) * knockbackVertical.get();
-            double velZ = (packet.getVelocityZ() / 8000d - mc.player.getVelocity().z) * knockbackHorizontal.get();
-            ((EntityVelocityUpdateS2CPacketAccessor) packet).setX((int) (velX * 8000 + mc.player.getVelocity().x * 8000));
-            ((EntityVelocityUpdateS2CPacketAccessor) packet).setY((int) (velY * 8000 + mc.player.getVelocity().y * 8000));
-            ((EntityVelocityUpdateS2CPacketAccessor) packet).setZ((int) (velZ * 8000 + mc.player.getVelocity().z * 8000));
+        if (knockback.get() && event.packet instanceof ClientboundSetEntityMotionPacket packet
+            && packet.id() == mc.player.getId()) {
+            double velX = (packet.movement().x() - mc.player.getDeltaMovement().x) * knockbackHorizontal.get();
+            double velY = (packet.movement().y() - mc.player.getDeltaMovement().y) * knockbackVertical.get();
+            double velZ = (packet.movement().z() - mc.player.getDeltaMovement().z) * knockbackHorizontal.get();
+            ((ClientboundSetEntityMotionPacketAccessor) (Object) packet).meteor$setMovement(
+                new Vec3(velX + mc.player.getDeltaMovement().x, velY + mc.player.getDeltaMovement().y, velZ + mc.player.getDeltaMovement().z)
+            );
         }
     }
 

@@ -5,17 +5,28 @@
 
 package meteordevelopment.meteorclient.utils.render.postprocess;
 
+import com.mojang.blaze3d.buffers.Std140Builder;
+import com.mojang.blaze3d.buffers.Std140SizeCalculator;
 import com.mojang.blaze3d.platform.TextureUtil;
+import com.mojang.renderpearl.api.GpuFormat;
+import com.mojang.renderpearl.api.buffers.GpuBuffer;
+import com.mojang.renderpearl.api.textures.FilterMode;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.game.ResourcePacksReloadedEvent;
+import meteordevelopment.meteorclient.renderer.MeshRenderer;
+import meteordevelopment.meteorclient.renderer.MeteorRenderPipelines;
 import meteordevelopment.meteorclient.renderer.Texture;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.Chams;
 import meteordevelopment.meteorclient.utils.PostInit;
-import meteordevelopment.meteorclient.utils.misc.MeteorIdentifier;
+import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.entity.Entity;
-import net.minecraft.resource.Resource;
+import net.minecraft.client.renderer.DynamicGpuDataStorage;
+import net.minecraft.client.renderer.DynamicGpuDataStorageMapped;
+import net.minecraft.server.packs.resources.Resource;
+import net.minecraft.util.PngInfo;
+import net.minecraft.world.entity.Entity;
+import org.jspecify.annotations.NonNull;
 import org.lwjgl.stb.STBImage;
 import org.lwjgl.system.MemoryStack;
 
@@ -27,12 +38,13 @@ import java.util.Optional;
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class ChamsShader extends EntityShader {
-    private static final String[] FILE_FORMATS = { "png", "jpg" };
+    private static final String[] FILE_FORMATS = {"png", "jpg"};
 
     private static Texture IMAGE_TEX;
     private static Chams chams;
 
     public ChamsShader() {
+        super(MeteorRenderPipelines.POST_IMAGE);
         MeteorClient.EVENT_BUS.subscribe(ChamsShader.class);
     }
 
@@ -41,17 +53,20 @@ public class ChamsShader extends EntityShader {
         try {
             ByteBuffer data = null;
             for (String fileFormat : FILE_FORMATS) {
-                Optional<Resource> optional = mc.getResourceManager().getResource(new MeteorIdentifier("textures/chams." + fileFormat));
-                if (optional.isEmpty() || optional.get().getInputStream() == null) {
-                    continue;
-                }
+                Optional<Resource> optional = mc.getResourceManager().getResource(MeteorClient.identifier("textures/chams." + fileFormat));
+                if (optional.isEmpty()) continue;
 
-                data = TextureUtil.readResource(optional.get().getInputStream());
+                try (var input = optional.get().open()) {
+                    data = TextureUtil.readResource(input).rewind();
+
+                    if (fileFormat.equals("png")) {
+                        PngInfo.validateHeader(data);
+                        data.rewind();
+                    }
+                }
                 break;
             }
             if (data == null) return;
-
-            data.rewind();
 
             try (MemoryStack stack = MemoryStack.stackPush()) {
                 IntBuffer width = stack.mallocInt(1);
@@ -59,17 +74,16 @@ public class ChamsShader extends EntityShader {
                 IntBuffer comp = stack.mallocInt(1);
 
                 STBImage.stbi_set_flip_vertically_on_load(true);
-                ByteBuffer image = STBImage.stbi_load_from_memory(data, width, height, comp, 3);
+                ByteBuffer image = STBImage.stbi_load_from_memory(data, width, height, comp, 4);
 
-                IMAGE_TEX = new Texture();
-                IMAGE_TEX.upload(width.get(0), height.get(0), image, Texture.Format.RGB, Texture.Filter.Nearest, Texture.Filter.Nearest, false);
+                IMAGE_TEX = new Texture(width.get(0), height.get(0), GpuFormat.RGBA8_UNORM, FilterMode.NEAREST, FilterMode.NEAREST);
+                IMAGE_TEX.upload(image);
 
                 STBImage.stbi_image_free(image);
                 STBImage.stbi_set_flip_vertically_on_load(false);
             }
-        }
-        catch (IOException e) {
-            e.printStackTrace();
+        } catch (IOException e) {
+            MeteorClient.LOG.error("Error loading the chams shader", e);
         }
     }
 
@@ -79,12 +93,15 @@ public class ChamsShader extends EntityShader {
     }
 
     @Override
-    protected void setUniforms() {
-        shader.set("u_Color", chams.shaderColor.get());
+    protected void setupPass(MeshRenderer renderer) {
+        Color color = chams.shaderColor.get();
 
-        if (chams.isShader() && chams.shader.get() == Chams.Shader.Image && IMAGE_TEX != null && IMAGE_TEX.isValid()) {
-            IMAGE_TEX.bind(1);
-            shader.set("u_TextureI", 1);
+        renderer.uniform("ImageData", UNIFORM_STORAGE.writeData(new UniformData(
+            color.r / 255f, color.g / 255f, color.b / 255f, color.a / 255f
+        )));
+
+        if (chams.isShader() && chams.shader.get() == Chams.Shader.Image && IMAGE_TEX != null) {
+            renderer.sampler("u_TextureI", IMAGE_TEX.getTextureView(), IMAGE_TEX.getSampler());
         }
     }
 
@@ -98,5 +115,25 @@ public class ChamsShader extends EntityShader {
     public boolean shouldDraw(Entity entity) {
         if (!shouldDraw()) return false;
         return chams.entities.get().contains(entity.getType()) && (entity != mc.player || !chams.ignoreSelfDepth.get());
+    }
+
+    // Uniforms
+
+    private static final int UNIFORM_SIZE = new Std140SizeCalculator()
+        .putVec4()
+        .get();
+
+    private static final DynamicGpuDataStorage<UniformData> UNIFORM_STORAGE = new DynamicGpuDataStorageMapped<>("Meteor - Image UBO", UNIFORM_SIZE, GpuBuffer.USAGE_UNIFORM, 16);
+
+    public static void flipFrame() {
+        UNIFORM_STORAGE.endFrame();
+    }
+
+    private record UniformData(float r, float g, float b, float a) implements DynamicGpuDataStorage.DynamicGpuData {
+        @Override
+        public void write(@NonNull ByteBuffer buffer) {
+            Std140Builder.intoBuffer(buffer)
+                .putVec4(r, g, b, a);
+        }
     }
 }

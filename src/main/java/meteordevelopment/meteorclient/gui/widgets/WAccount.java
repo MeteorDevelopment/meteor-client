@@ -6,11 +6,13 @@
 package meteordevelopment.meteorclient.gui.widgets;
 
 import meteordevelopment.meteorclient.gui.WidgetScreen;
+import meteordevelopment.meteorclient.gui.screens.accounts.AccountInfoScreen;
 import meteordevelopment.meteorclient.gui.widgets.containers.WHorizontalList;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
-import meteordevelopment.meteorclient.gui.widgets.pressable.WMinus;
+import meteordevelopment.meteorclient.gui.widgets.pressable.WConfirmedMinus;
 import meteordevelopment.meteorclient.systems.accounts.Account;
 import meteordevelopment.meteorclient.systems.accounts.Accounts;
+import meteordevelopment.meteorclient.systems.accounts.TokenAccount;
 import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 
@@ -18,7 +20,6 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public abstract class WAccount extends WHorizontalList {
     public Runnable refreshScreenAction;
-
     private final WidgetScreen screen;
     private final Account<?> account;
 
@@ -28,6 +29,7 @@ public abstract class WAccount extends WHorizontalList {
     }
 
     protected abstract Color loggedInColor();
+
     protected abstract Color accountTypeColor();
 
     @Override
@@ -37,11 +39,17 @@ public abstract class WAccount extends WHorizontalList {
 
         // Name
         WLabel name = add(theme.label(account.getUsername())).widget();
-        if (mc.getSession().getUsername().equalsIgnoreCase(account.getUsername())) name.color = loggedInColor();
+        if (mc.getUser().getName().equalsIgnoreCase(account.getUsername())) name.color = loggedInColor();
 
         // Type
         WLabel label = add(theme.label("(" + account.getType() + ")")).expandCellX().right().widget();
         label.color = accountTypeColor();
+
+        // Info
+        if (account instanceof TokenAccount) {
+            WButton info = add(theme.button("Info")).widget();
+            info.action = () -> mc.gui.setScreen(new AccountInfoScreen(theme, account));
+        }
 
         // Login
         WButton login = add(theme.button("Login")).widget();
@@ -51,7 +59,7 @@ public abstract class WAccount extends WHorizontalList {
             screen.locked = true;
 
             MeteorExecutor.execute(() -> {
-                if (account.login()) {
+                if (account.fetchInfo() && account.login()) {
                     name.set(account.getUsername());
 
                     Accounts.get().save();
@@ -66,7 +74,7 @@ public abstract class WAccount extends WHorizontalList {
         };
 
         // Remove
-        WMinus remove = add(theme.minus()).widget();
+        WConfirmedMinus remove = add(theme.confirmedMinus()).widget();
         remove.action = () -> {
             Accounts.get().remove(account);
             if (refreshScreenAction != null) refreshScreenAction.run();

@@ -62,8 +62,8 @@ public class NotebotSongsScreen extends WindowScreen {
 
     private void initSongsTable() {
         AtomicBoolean noSongsFound = new AtomicBoolean(true);
-        try {
-            Files.list(MeteorClient.FOLDER.toPath().resolve("notebot")).forEach(path -> {
+        try (var songs = Files.list(MeteorClient.FOLDER.toPath().resolve("notebot"))) {
+            songs.forEach(path -> {
                 if (SongDecoders.hasDecoder(path)) {
                     String name = path.getFileName().toString();
 
@@ -73,7 +73,7 @@ public class NotebotSongsScreen extends WindowScreen {
                     }
                 }
             });
-        } catch (IOException e) {
+        } catch (IOException _) {
             table.add(theme.label("Missing meteor-client/notebot folder.")).expandCellX();
             table.row();
         }
@@ -89,13 +89,9 @@ public class NotebotSongsScreen extends WindowScreen {
 
         table.add(theme.label(FilenameUtils.getBaseName(path.getFileName().toString()))).expandCellX();
         WButton load = table.add(theme.button("Load")).right().widget();
-        load.action = () -> {
-            notebot.loadSong(path.toFile());
-        };
+        load.action = () -> notebot.loadSong(path.toFile());
         WButton preview = table.add(theme.button("Preview")).right().widget();
-        preview.action = () -> {
-            notebot.previewSong(path.toFile());
-        };
+        preview.action = () -> notebot.previewSong(path.toFile());
         WButton requirements = table.add(theme.button("Requirements")).right().widget();
         requirements.action = () -> {
             List<String> messages = new ArrayList<>();
@@ -106,11 +102,13 @@ public class NotebotSongsScreen extends WindowScreen {
                 messages.add("Failed to decode song.");
             }
 
-            OkPrompt.create()
+            OkPrompt prompt = OkPrompt.create()
                 .title("Message")
-                .messages(messages)
-                .onOk(this::close)
-                .show(false);
+                .dontShowAgainCheckboxVisible(false)
+                .onOk(this::onClose);
+            for (String message : messages) prompt.message(message);
+
+            prompt.show();
         };
 
         table.row();

@@ -5,21 +5,26 @@
 
 package meteordevelopment.meteorclient.systems.modules;
 
-import com.google.common.collect.Ordering;
+import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.datafixers.util.Pair;
-import com.mojang.serialization.Lifecycle;
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.game.GameJoinedEvent;
 import meteordevelopment.meteorclient.events.game.GameLeftEvent;
 import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
 import meteordevelopment.meteorclient.events.meteor.ActiveModulesChangedEvent;
-import meteordevelopment.meteorclient.events.meteor.KeyEvent;
+import meteordevelopment.meteorclient.events.meteor.KeyInputEvent;
 import meteordevelopment.meteorclient.events.meteor.ModuleBindChangedEvent;
-import meteordevelopment.meteorclient.events.meteor.MouseButtonEvent;
+import meteordevelopment.meteorclient.events.meteor.MouseClickEvent;
+import meteordevelopment.meteorclient.pathing.BaritoneUtils;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.System;
 import meteordevelopment.meteorclient.systems.Systems;
+import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.systems.modules.combat.*;
 import meteordevelopment.meteorclient.systems.modules.misc.*;
 import meteordevelopment.meteorclient.systems.modules.misc.swarm.Swarm;
@@ -30,48 +35,35 @@ import meteordevelopment.meteorclient.systems.modules.player.*;
 import meteordevelopment.meteorclient.systems.modules.render.*;
 import meteordevelopment.meteorclient.systems.modules.render.blockesp.BlockESP;
 import meteordevelopment.meteorclient.systems.modules.render.marker.Marker;
-import meteordevelopment.meteorclient.systems.modules.world.Timer;
 import meteordevelopment.meteorclient.systems.modules.world.*;
+import meteordevelopment.meteorclient.systems.modules.world.Timer;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.Keybind;
-import meteordevelopment.meteorclient.utils.misc.MeteorIdentifier;
 import meteordevelopment.meteorclient.utils.misc.ValueComparableMap;
 import meteordevelopment.meteorclient.utils.misc.input.Input;
 import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.SimpleRegistry;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.registry.entry.RegistryEntryList;
-import net.minecraft.registry.tag.TagKey;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.random.Random;
-import org.jetbrains.annotations.Nullable;
-import org.lwjgl.glfw.GLFW;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
+import org.jspecify.annotations.Nullable;
 
 import java.io.File;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Stream;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class Modules extends System<Modules> {
-    public static final ModuleRegistry REGISTRY = new ModuleRegistry();
-
     private static final List<Category> CATEGORIES = new ArrayList<>();
 
-    private final List<Module> modules = new ArrayList<>();
-    private final Map<Class<? extends Module>, Module> moduleInstances = new HashMap<>();
-    private final Map<Category, List<Module>> groups = new HashMap<>();
+    private final Map<Class<? extends Module>, Module> moduleInstances = new Reference2ReferenceOpenHashMap<>();
+    private final Map<Category, List<Module>> groups = new Reference2ReferenceOpenHashMap<>();
 
-    private final List<Module> active = new ArrayList<>();
-    private Module moduleToBind;
+    private final Set<Module> active = new ReferenceOpenHashSet<>();
+    private @Nullable Module moduleToBind;
+    private boolean awaitingKeyRelease = false;
 
     public Modules() {
         super("modules");
@@ -93,7 +85,7 @@ public class Modules extends System<Modules> {
 
     @Override
     public void load(File folder) {
-        for (Module module : modules) {
+        for (Module module : getAll()) {
             for (SettingGroup group : module.settings) {
                 for (Setting<?> setting : group) setting.reset();
             }
@@ -106,11 +98,11 @@ public class Modules extends System<Modules> {
         for (List<Module> modules : groups.values()) {
             modules.sort(Comparator.comparing(o -> o.title));
         }
-        modules.sort(Comparator.comparing(o -> o.title));
     }
 
     public static void registerCategory(Category category) {
-        if (!Categories.REGISTERING) throw new RuntimeException("Modules.registerCategory - Cannot register category outside of onRegisterCategories callback.");
+        if (!Categories.REGISTERING)
+            throw new RuntimeException("Modules.registerCategory - Cannot register category outside of onRegisterCategories callback.");
 
         CATEGORIES.add(category);
     }
@@ -119,19 +111,18 @@ public class Modules extends System<Modules> {
         return CATEGORIES;
     }
 
-    public static Category getCategoryByHash(int hash) {
-        for (Category category : CATEGORIES) {
-            if (category.hashCode() == hash) return category;
-        }
-
-        return null;
-    }
-
     @SuppressWarnings("unchecked")
+    @Nullable
     public <T extends Module> T get(Class<T> klass) {
         return (T) moduleInstances.get(klass);
     }
 
+    @SuppressWarnings("unused")
+    public <T extends Module> Optional<T> getOptional(Class<T> klass) {
+        return Optional.ofNullable(get(klass));
+    }
+
+    @Nullable
     public Module get(String name) {
         for (Module module : moduleInstances.values()) {
             if (module.name.equalsIgnoreCase(name)) return module;
@@ -146,40 +137,50 @@ public class Modules extends System<Modules> {
     }
 
     public List<Module> getGroup(Category category) {
-        return groups.computeIfAbsent(category, category1 -> new ArrayList<>());
+        return groups.computeIfAbsent(category, _ -> new ArrayList<>());
     }
 
     public Collection<Module> getAll() {
         return moduleInstances.values();
     }
 
-    public List<Module> getList() {
-        return modules;
-    }
 
     public int getCount() {
-        return moduleInstances.values().size();
+        return moduleInstances.size();
     }
 
-    public List<Module> getActive() {
-        synchronized (active) {
-            return active;
-        }
+    public Collection<Module> getActive() {
+        return active;
     }
 
-    public Set<Module> searchTitles(String text) {
-        Map<Module, Integer> modules = new ValueComparableMap<>(Ordering.natural());
+    public List<Pair<Module, String>> searchTitles(String text) {
+        Object2IntMap<Pair<Module, String>> modules = new Object2IntOpenHashMap<>();
 
         for (Module module : this.moduleInstances.values()) {
-            int score = Utils.searchLevenshteinDefault(module.title, text, false);
-            modules.put(module, modules.getOrDefault(module, 0) + score);
+            String title = module.title;
+            int score = Utils.searchLevenshteinDefault(title, text, false);
+
+            if (Config.get().moduleAliases.get()) {
+                for (String alias : module.aliases) {
+                    int aliasScore = Utils.searchLevenshteinDefault(alias, text, false);
+                    if (aliasScore < score) {
+                        title = module.title + " (" + alias + ")";
+                        score = aliasScore;
+                    }
+                }
+            }
+
+            modules.put(Pair.of(module, title), score);
         }
 
-        return modules.keySet();
+        List<Pair<Module, String>> l = new ArrayList<>(modules.keySet());
+        l.sort(Comparator.comparingInt(modules::getInt));
+
+        return l;
     }
 
     public Set<Module> searchSettingTitles(String text) {
-        Map<Module, Integer> modules = new ValueComparableMap<>(Ordering.natural());
+        Map<Module, Integer> modules = new ValueComparableMap<>(Comparator.naturalOrder());
 
         for (Module module : this.moduleInstances.values()) {
             int lowest = Integer.MAX_VALUE;
@@ -197,8 +198,7 @@ public class Modules extends System<Modules> {
 
     void addActive(Module module) {
         synchronized (active) {
-            if (!active.contains(module)) {
-                active.add(module);
+            if (active.add(module)) {
                 MeteorClient.EVENT_BUS.post(ActiveModulesChangedEvent.get());
             }
         }
@@ -214,8 +214,16 @@ public class Modules extends System<Modules> {
 
     // Binding
 
-    public void setModuleToBind(Module moduleToBind) {
+    public void setModuleToBind(@Nullable Module moduleToBind) {
         this.moduleToBind = moduleToBind;
+    }
+
+    /***
+     * @see meteordevelopment.meteorclient.commands.commands.BindCommand
+     * For ensuring we don't instantly bind the module to the enter key.
+     */
+    public void awaitKeyRelease() {
+        this.awaitingKeyRelease = true;
     }
 
     public boolean isBinding() {
@@ -223,27 +231,32 @@ public class Modules extends System<Modules> {
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
-    private void onKeyBinding(KeyEvent event) {
-        if (event.action == KeyAction.Press && onBinding(true, event.key)) event.cancel();
+    private void onKeyBinding(KeyInputEvent event) {
+        if (event.action == KeyAction.Release && onBinding(true, event.key(), event.modifiers())) event.cancel();
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
-    private void onButtonBinding(MouseButtonEvent event) {
-        if (event.action == KeyAction.Press && onBinding(false, event.button)) event.cancel();
+    private void onButtonBinding(MouseClickEvent event) {
+        if (event.action == KeyAction.Release && onBinding(false, event.button(), 0)) event.cancel();
     }
 
-    private boolean onBinding(boolean isKey, int value) {
+    private boolean onBinding(boolean isKey, int value, int modifiers) {
         if (!isBinding()) return false;
 
-        if (moduleToBind.keybind.canBindTo(isKey, value)) {
-            moduleToBind.keybind.set(isKey, value);
-            moduleToBind.info("Bound to (highlight)%s(default).", moduleToBind.keybind);
+        if (awaitingKeyRelease) {
+            if (!isKey || (value != InputConstants.KEY_RETURN && value != InputConstants.KEY_NUMPADENTER)) return false;
+
+            awaitingKeyRelease = false;
+            return false;
         }
-        else if (value == GLFW.GLFW_KEY_ESCAPE) {
+
+        if (moduleToBind.keybind.canBindTo(isKey, value, modifiers)) {
+            moduleToBind.keybind.set(isKey, value, modifiers);
+            moduleToBind.info("Bound to (highlight)%s(default).", moduleToBind.keybind);
+        } else if (value == InputConstants.KEY_ESCAPE) {
             moduleToBind.keybind.set(Keybind.none());
             moduleToBind.info("Removed bind.");
-        }
-        else return false;
+        } else return false;
 
         MeteorClient.EVENT_BUS.post(ModuleBindChangedEvent.get(moduleToBind));
         moduleToBind = null;
@@ -252,24 +265,37 @@ public class Modules extends System<Modules> {
     }
 
     @EventHandler(priority = EventPriority.HIGH)
-    private void onKey(KeyEvent event) {
+    private void onKey(KeyInputEvent event) {
         if (event.action == KeyAction.Repeat) return;
-        onAction(true, event.key, event.action == KeyAction.Press);
+        onAction(true, event.key(), event.modifiers(), event.action == KeyAction.Press);
     }
 
     @EventHandler(priority = EventPriority.HIGH)
-    private void onMouseButton(MouseButtonEvent event) {
+    private void onMouseClick(MouseClickEvent event) {
         if (event.action == KeyAction.Repeat) return;
-        onAction(false, event.button, event.action == KeyAction.Press);
+        onAction(false, event.button(), 0, event.action == KeyAction.Press);
     }
 
-    private void onAction(boolean isKey, int value, boolean isPress) {
-        if (mc.currentScreen == null && !Input.isKeyPressed(GLFW.GLFW_KEY_F3)) {
-            for (Module module : moduleInstances.values()) {
-                if (module.keybind.matches(isKey, value) && (isPress || module.toggleOnBindRelease)) {
-                    module.toggle();
-                    module.sendToggledMsg();
-                }
+    private void onAction(boolean isKey, int value, int modifiers, boolean isPress) {
+        if (mc.gui.screen() != null || Input.isKeyPressed(InputConstants.KEY_F3)) return;
+
+        // A bind with modifiers takes precedence over one without, so pressing Ctrl + G does not
+        // also toggle a module bound to plain G.
+        boolean modifierBindMatched = false;
+
+        for (Module module : moduleInstances.values()) {
+            if (module.keybind.hasMods() && module.keybind.matches(isKey, value, modifiers)) {
+                modifierBindMatched = true;
+                break;
+            }
+        }
+
+        for (Module module : moduleInstances.values()) {
+            if (modifierBindMatched && !module.keybind.hasMods()) continue;
+
+            if (module.keybind.matches(isKey, value, modifiers) && (isPress || (module.toggleOnBindRelease && module.isActive()))) {
+                module.toggle();
+                module.sendToggledMsg();
             }
         }
     }
@@ -291,7 +317,7 @@ public class Modules extends System<Modules> {
     @EventHandler
     private void onGameJoined(GameJoinedEvent event) {
         synchronized (active) {
-            for (Module module : modules) {
+            for (Module module : getAll()) {
                 if (module.isActive() && !module.runInMainMenu) {
                     MeteorClient.EVENT_BUS.subscribe(module);
                     module.onActivate();
@@ -303,7 +329,7 @@ public class Modules extends System<Modules> {
     @EventHandler
     private void onGameLeft(GameLeftEvent event) {
         synchronized (active) {
-            for (Module module : modules) {
+            for (Module module : getAll()) {
                 if (module.isActive() && !module.runInMainMenu) {
                     MeteorClient.EVENT_BUS.unsubscribe(module);
                     module.onDeactivate();
@@ -314,19 +340,19 @@ public class Modules extends System<Modules> {
 
     public void disableAll() {
         synchronized (active) {
-            for (Module module : modules) {
-                if (module.isActive()) module.toggle();
+            for (Module module : getAll()) {
+                module.disable();
             }
         }
     }
 
     @Override
-    public NbtCompound toTag() {
-        NbtCompound tag = new NbtCompound();
+    public CompoundTag toTag() {
+        CompoundTag tag = new CompoundTag();
 
-        NbtList modulesTag = new NbtList();
+        ListTag modulesTag = new ListTag();
         for (Module module : getAll()) {
-            NbtCompound moduleTag = module.toTag();
+            CompoundTag moduleTag = module.toTag();
             if (moduleTag != null) modulesTag.add(moduleTag);
         }
         tag.put("modules", modulesTag);
@@ -335,13 +361,13 @@ public class Modules extends System<Modules> {
     }
 
     @Override
-    public Modules fromTag(NbtCompound tag) {
+    public Modules fromTag(CompoundTag tag) {
         disableAll();
 
-        NbtList modulesTag = tag.getList("modules", 10);
-        for (NbtElement moduleTagI : modulesTag) {
-            NbtCompound moduleTag = (NbtCompound) moduleTagI;
-            Module module = get(moduleTag.getString("name"));
+        ListTag modulesTag = tag.getListOrEmpty("modules");
+        for (Tag moduleTagI : modulesTag) {
+            CompoundTag moduleTag = (CompoundTag) moduleTagI;
+            Module module = get(moduleTag.getStringOr("name", ""));
             if (module != null) module.fromTag(moduleTag);
         }
 
@@ -373,7 +399,6 @@ public class Modules extends System<Modules> {
 
         // Add the module
         moduleInstances.put(module.getClass(), module);
-        modules.add(module);
         getGroup(module.category).add(module);
 
         // Register color settings for the module
@@ -385,10 +410,12 @@ public class Modules extends System<Modules> {
         add(new AntiAnvil());
         add(new AntiBed());
         add(new ArrowDodge());
+        add(new AttributeSwap());
         add(new AutoAnvil());
         add(new AutoArmor());
         add(new AutoCity());
         add(new AutoEXP());
+        add(new AutoLog());
         add(new AutoTotem());
         add(new AutoTrap());
         add(new AutoWeapon());
@@ -411,29 +438,34 @@ public class Modules extends System<Modules> {
     }
 
     private void initPlayer() {
+        add(new AirPlace());
+        add(new AntiAFK());
         add(new AntiHunger());
         add(new AutoEat());
+        add(new AutoClicker());
         add(new AutoFish());
         add(new AutoGap());
         add(new AutoMend());
         add(new AutoReplenish());
+        add(new AutoRespawn());
         add(new AutoTool());
+        add(new BreakDelay());
         add(new ChestSwap());
         add(new EXPThrower());
         add(new FakePlayer());
         add(new FastUse());
         add(new GhostHand());
+        add(new InstantRebreak());
         add(new LiquidInteract());
         add(new MiddleClickExtra());
-        add(new BreakDelay());
+        add(new Multitask());
+        add(new NameProtect());
         add(new NoInteract());
         add(new NoMiningTrace());
         add(new NoRotate());
-        add(new OffhandCrash());
-        add(new PacketMine());
+        add(new NoStatusEffects());
         add(new Portals());
         add(new PotionSaver());
-        add(new PotionSpoof());
         add(new Reach());
         add(new Rotation());
         add(new SpeedMine());
@@ -442,17 +474,15 @@ public class Modules extends System<Modules> {
     private void initMovement() {
         add(new AirJump());
         add(new Anchor());
-        add(new AntiAFK());
         add(new AntiVoid());
         add(new AutoJump());
         add(new AutoWalk());
+        add(new AutoWasp());
         add(new Blink());
-        add(new BoatFly());
         add(new ClickTP());
         add(new ElytraBoost());
         add(new ElytraFly());
         add(new EntityControl());
-        add(new EntitySpeed());
         add(new FastClimb());
         add(new Flight());
         add(new GUIMove());
@@ -476,8 +506,11 @@ public class Modules extends System<Modules> {
     }
 
     private void initRender() {
+        add(new BetterTab());
         add(new BetterTooltips());
+        add(new BlockESP());
         add(new BlockSelection());
+        add(new Blur());
         add(new BossStack());
         add(new Breadcrumbs());
         add(new BreakIndicators());
@@ -498,27 +531,23 @@ public class Modules extends System<Modules> {
         add(new Marker());
         add(new Nametags());
         add(new NoRender());
-        add(new BlockESP());
+        add(new PopChams());
         add(new StorageESP());
         add(new TimeChanger());
         add(new Tracers());
         add(new Trail());
         add(new Trajectories());
-        add(new UnfocusedCPU());
+        add(new TunnelESP());
         add(new VoidESP());
         add(new WallHack());
         add(new WaypointsModule());
+        add(new WeatherChanger());
         add(new Xray());
         add(new Zoom());
-        add(new Blur());
-        add(new PopChams());
-        add(new TunnelESP());
     }
 
     private void initWorld() {
-        add(new AirPlace());
         add(new Ambience());
-        add(new Collisions());
         add(new AutoBreed());
         add(new AutoBrewer());
         add(new AutoMount());
@@ -527,194 +556,42 @@ public class Modules extends System<Modules> {
         add(new AutoSign());
         add(new AutoSmelter());
         add(new BuildHeight());
+        add(new Collisions());
         add(new EChestFarmer());
         add(new EndermanLook());
-        add(new Excavator());
         add(new Flamethrower());
-        add(new InfinityMiner());
+        add(new HighwayBuilder());
         add(new LiquidFiller());
-        add(new MountBypass());
         add(new NoGhostBlocks());
         add(new Nuker());
+        add(new PacketMine());
         add(new StashFinder());
         add(new SpawnProofer());
         add(new Timer());
         add(new VeinMiner());
-        add(new HighwayBuilder());
+
+        if (BaritoneUtils.IS_AVAILABLE) {
+            add(new Excavator());
+            add(new InfinityMiner());
+        }
     }
 
     private void initMisc() {
-        add(new Swarm());
         add(new AntiPacketKick());
-        add(new AutoClicker());
-        add(new AutoLog());
         add(new AutoReconnect());
-        add(new AutoRespawn());
         add(new BetterBeacons());
         add(new BetterChat());
-        add(new BetterTab());
         add(new BookBot());
         add(new DiscordPresence());
+        add(new InventoryTweaks());
         add(new MessageAura());
-        add(new MiddleClickFriend());
-        add(new NameProtect());
         add(new Notebot());
         add(new Notifier());
         add(new PacketCanceller());
+        add(new PacketLogger());
+        add(new ServerSpoof());
         add(new SoundBlocker());
         add(new Spam());
-        add(new ServerSpoof());
-        add(new InventoryTweaks());
-    }
-
-    public static class ModuleRegistry extends SimpleRegistry<Module> {
-        public ModuleRegistry() {
-            super(RegistryKey.ofRegistry(new MeteorIdentifier("modules")), Lifecycle.stable());
-        }
-
-        @Override
-        public int size() {
-            return Modules.get().getAll().size();
-        }
-
-        @Override
-        public Identifier getId(Module entry) {
-            return null;
-        }
-
-        @Override
-        public Optional<RegistryKey<Module>> getKey(Module entry) {
-            return Optional.empty();
-        }
-
-        @Override
-        public int getRawId(Module entry) {
-            return 0;
-        }
-
-        @Override
-        public Module get(RegistryKey<Module> key) {
-            return null;
-        }
-
-        @Override
-        public Module get(Identifier id) {
-            return null;
-        }
-
-        @Override
-        public Lifecycle getEntryLifecycle(Module object) {
-            return null;
-        }
-
-        @Override
-        public Lifecycle getLifecycle() {
-            return null;
-        }
-
-        @Override
-        public Set<Identifier> getIds() {
-            return null;
-        }
-        @Override
-        public boolean containsId(Identifier id) {
-            return false;
-        }
-
-        @Nullable
-        @Override
-        public Module get(int index) {
-            return null;
-        }
-
-        @Override
-        public Iterator<Module> iterator() {
-            return new ModuleIterator();
-        }
-
-        @Override
-        public boolean contains(RegistryKey<Module> key) {
-            return false;
-        }
-
-        @Override
-        public Set<Map.Entry<RegistryKey<Module>, Module>> getEntrySet() {
-            return null;
-        }
-
-        @Override
-        public Set<RegistryKey<Module>> getKeys() {
-            return null;
-        }
-
-        @Override
-        public Optional<RegistryEntry.Reference<Module>> getRandom(Random random) {
-            return Optional.empty();
-        }
-
-        @Override
-        public Registry<Module> freeze() {
-            return null;
-        }
-
-        @Override
-        public RegistryEntry.Reference<Module> createEntry(Module value) {
-            return null;
-        }
-
-        @Override
-        public Optional<RegistryEntry.Reference<Module>> getEntry(int rawId) {
-            return Optional.empty();
-        }
-
-        @Override
-        public Optional<RegistryEntry.Reference<Module>> getEntry(RegistryKey<Module> key) {
-            return Optional.empty();
-        }
-
-        @Override
-        public Stream<RegistryEntry.Reference<Module>> streamEntries() {
-            return null;
-        }
-
-        @Override
-        public Optional<RegistryEntryList.Named<Module>> getEntryList(TagKey<Module> tag) {
-            return Optional.empty();
-        }
-
-        @Override
-        public RegistryEntryList.Named<Module> getOrCreateEntryList(TagKey<Module> tag) {
-            return null;
-        }
-
-        @Override
-        public Stream<Pair<TagKey<Module>, RegistryEntryList.Named<Module>>> streamTagsAndEntries() {
-            return null;
-        }
-
-        @Override
-        public Stream<TagKey<Module>> streamTags() {
-            return null;
-        }
-
-        @Override
-        public void clearTags() {}
-
-        @Override
-        public void populateTags(Map<TagKey<Module>, List<RegistryEntry<Module>>> tagEntries) {}
-
-        private static class ModuleIterator implements Iterator<Module> {
-            private final Iterator<Module> iterator = Modules.get().getAll().iterator();
-
-            @Override
-            public boolean hasNext() {
-                return iterator.hasNext();
-            }
-
-            @Override
-            public Module next() {
-                return iterator.next();
-            }
-        }
+        add(new Swarm());
     }
 }

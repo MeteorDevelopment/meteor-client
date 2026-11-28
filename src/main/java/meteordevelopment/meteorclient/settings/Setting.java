@@ -9,17 +9,17 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.IGetter;
 import meteordevelopment.meteorclient.utils.misc.ISerializable;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.registry.Registry;
-import net.minecraft.util.Identifier;
+import net.minecraft.core.Registry;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.Identifier;
+import org.jspecify.annotations.Nullable;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
 
 public abstract class Setting<T> implements IGetter<T>, ISerializable<T> {
-    private static final List<String> NO_SUGGESTIONS = new ArrayList<>(0);
+    private static final List<String> NO_SUGGESTIONS = List.of();
 
     public final String name, title, description;
     private final IVisible visible;
@@ -107,15 +107,15 @@ public abstract class Setting<T> implements IGetter<T>, ISerializable<T> {
         return null;
     }
 
-    public List<String> getSuggestions() {
+    public Iterable<String> getSuggestions() {
         return NO_SUGGESTIONS;
     }
 
-    protected abstract NbtCompound save(NbtCompound tag);
+    protected abstract CompoundTag save(CompoundTag tag);
 
     @Override
-    public NbtCompound toTag() {
-        NbtCompound tag = new NbtCompound();
+    public CompoundTag toTag() {
+        CompoundTag tag = new CompoundTag();
 
         tag.putString("name", name);
         save(tag);
@@ -123,10 +123,10 @@ public abstract class Setting<T> implements IGetter<T>, ISerializable<T> {
         return tag;
     }
 
-    protected abstract T load(NbtCompound tag);
+    protected abstract T load(CompoundTag tag);
 
     @Override
-    public T fromTag(NbtCompound tag) {
+    public T fromTag(CompoundTag tag) {
         T value = load(tag);
         onChanged();
 
@@ -151,17 +151,19 @@ public abstract class Setting<T> implements IGetter<T>, ISerializable<T> {
         return Objects.hash(name);
     }
 
+    @Nullable
     public static <T> T parseId(Registry<T> registry, String name) {
         name = name.trim();
 
         Identifier id;
-        if (name.contains(":")) id = new Identifier(name);
-        else id = new Identifier("minecraft", name);
-        if (registry.containsId(id)) return registry.get(id);
+        if (name.contains(":")) id = Identifier.parse(name);
+        else id = Identifier.withDefaultNamespace(name);
+        if (registry.containsKey(id)) return registry.getValue(id);
 
         return null;
     }
 
+    @SuppressWarnings("unchecked")
     public abstract static class SettingBuilder<B, V, S> {
         protected String name = "undefined", description = "";
         protected V defaultValue;

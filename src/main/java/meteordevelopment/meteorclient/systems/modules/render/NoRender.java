@@ -5,16 +5,21 @@
 
 package meteordevelopment.meteorclient.systems.modules.render;
 
+import meteordevelopment.meteorclient.events.render.RenderBlockEntityEvent;
 import meteordevelopment.meteorclient.events.world.ChunkOcclusionEvent;
 import meteordevelopment.meteorclient.events.world.ParticleEvent;
+import meteordevelopment.meteorclient.mixin.BlockEntityRenderStateAccessor;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.particle.ParticleType;
-import net.minecraft.particle.ParticleTypes;
+import net.minecraft.core.particles.ParticleType;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.level.block.AbstractBannerBlock;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.EntityBlock;
 
 import java.util.List;
 import java.util.Set;
@@ -140,6 +145,12 @@ public class NoRender extends Module {
         .defaultValue(false)
         .build()
     );
+    private final Setting<Boolean> noTitle = sgHUD.add(new BoolSetting.Builder()
+        .name("title")
+        .description("Disables rendering of the title.")
+        .defaultValue(false)
+        .build()
+    );
 
     private final Setting<Boolean> noHeldItemName = sgHUD.add(new BoolSetting.Builder()
         .name("held-item-name")
@@ -174,6 +185,13 @@ public class NoRender extends Module {
     private final Setting<Boolean> noWeather = sgWorld.add(new BoolSetting.Builder()
         .name("weather")
         .description("Disables rendering of weather.")
+        .defaultValue(false)
+        .build()
+    );
+
+    private final Setting<Boolean> noWorldBorder = sgWorld.add(new BoolSetting.Builder()
+        .name("world-border")
+        .description("Disables rendering of the world border.")
         .defaultValue(false)
         .build()
     );
@@ -213,23 +231,9 @@ public class NoRender extends Module {
         .build()
     );
 
-    private final Setting<Boolean> noBlockBreakParticles = sgWorld.add(new BoolSetting.Builder()
-        .name("block-break-particles")
-        .description("Disables rendering of block-break particles.")
-        .defaultValue(false)
-        .build()
-    );
-
     private final Setting<Boolean> noBlockBreakOverlay = sgWorld.add(new BoolSetting.Builder()
         .name("block-break-overlay")
         .description("Disables rendering of block-break overlay.")
-        .defaultValue(false)
-        .build()
-    );
-
-    private final Setting<Boolean> noSkylightUpdates = sgWorld.add(new BoolSetting.Builder()
-        .name("skylight-updates")
-        .description("Disables rendering of skylight updates.")
         .defaultValue(false)
         .build()
     );
@@ -252,13 +256,20 @@ public class NoRender extends Module {
         .name("cave-culling")
         .description("Disables Minecraft's cave culling algorithm.")
         .defaultValue(false)
-        .onChanged(b -> mc.worldRenderer.reload())
+        .onChanged(_ -> mc.levelExtractor.allChanged())
         .build()
     );
 
     private final Setting<Boolean> noMapMarkers = sgWorld.add(new BoolSetting.Builder()
         .name("map-markers")
         .description("Disables markers on maps.")
+        .defaultValue(false)
+        .build()
+    );
+
+    private final Setting<Boolean> noMapContents = sgWorld.add(new BoolSetting.Builder()
+        .name("map-contents")
+        .description("Disable rendering of maps.")
         .defaultValue(false)
         .build()
     );
@@ -292,9 +303,16 @@ public class NoRender extends Module {
 
     private final Setting<Boolean> noTextureRotations = sgWorld.add(new BoolSetting.Builder()
         .name("texture-rotations")
-        .description("Changes texture rotations and model offsets to use a random value instead of the block position.")
+        .description("Changes texture rotations and model offsets to use a constant value instead of the block position.")
         .defaultValue(false)
-        .onChanged(b -> mc.worldRenderer.reload())
+        .onChanged(_ -> mc.levelExtractor.allChanged())
+        .build()
+    );
+
+    private final Setting<List<Block>> blockEntities = sgWorld.add(new BlockListSetting.Builder()
+        .name("block-entities")
+        .description("Block entities (chest, shulker block, etc.) to not render.")
+        .filter(block -> block instanceof EntityBlock && !(block instanceof AbstractBannerBlock))
         .build()
     );
 
@@ -361,12 +379,16 @@ public class NoRender extends Module {
 
     @Override
     public void onActivate() {
-        if (noCaveCulling.get()) mc.worldRenderer.reload();
+        if (noCaveCulling.get() || noTextureRotations.get()) {
+            mc.levelExtractor.allChanged();
+        }
     }
 
     @Override
     public void onDeactivate() {
-        if (noCaveCulling.get()) mc.worldRenderer.reload();
+        if (noCaveCulling.get() || noTextureRotations.get()) {
+            mc.levelExtractor.allChanged();
+        }
     }
 
     // Overlay
@@ -437,6 +459,10 @@ public class NoRender extends Module {
         return isActive() && noCrosshair.get();
     }
 
+    public boolean noTitle() {
+        return isActive() && noTitle.get();
+    }
+
     public boolean noHeldItemName() {
         return isActive() && noHeldItemName.get();
     }
@@ -459,6 +485,10 @@ public class NoRender extends Module {
         return isActive() && noWeather.get();
     }
 
+    public boolean noWorldBorder() {
+        return isActive() && noWorldBorder.get();
+    }
+
     public boolean noBlindness() {
         return isActive() && noBlindness.get();
     }
@@ -479,16 +509,12 @@ public class NoRender extends Module {
         return isActive() && noSignText.get();
     }
 
-    public boolean noBlockBreakParticles() {
-        return isActive() && noBlockBreakParticles.get();
+    public boolean noParticle(ParticleType<?> type) {
+        return isActive() && particles.get().contains(type);
     }
 
     public boolean noBlockBreakOverlay() {
         return isActive() && noBlockBreakOverlay.get();
-    }
-
-    public boolean noSkylightUpdates() {
-        return isActive() && noSkylightUpdates.get();
     }
 
     public boolean noBeaconBeams() {
@@ -506,6 +532,10 @@ public class NoRender extends Module {
 
     public boolean noMapMarkers() {
         return isActive() && noMapMarkers.get();
+    }
+
+    public boolean noMapContents() {
+        return isActive() && noMapContents.get();
     }
 
     public BannerRenderMode getBannerRenderMode() {
@@ -530,6 +560,11 @@ public class NoRender extends Module {
 
     public boolean noTextureRotations() {
         return isActive() && noTextureRotations.get();
+    }
+
+    @EventHandler
+    private void onRenderBlockEntity(RenderBlockEntityEvent event) {
+        if (blockEntities.get().contains(((BlockEntityRenderStateAccessor) event.blockEntityState).meteor$getBlockState().getBlock())) event.cancel();
     }
 
     // Entity
