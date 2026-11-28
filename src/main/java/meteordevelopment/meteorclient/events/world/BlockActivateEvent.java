@@ -5,7 +5,7 @@
 
 package meteordevelopment.meteorclient.events.world;
 
-import net.minecraft.block.BlockState;
+import net.minecraft.world.level.block.state.BlockState;
 
 public class BlockActivateEvent {
     private static final BlockActivateEvent INSTANCE = new BlockActivateEvent();

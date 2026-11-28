@@ -8,19 +8,21 @@ package meteordevelopment.meteorclient.systems.hud;
 import meteordevelopment.meteorclient.events.meteor.CustomFontChangedEvent;
 import meteordevelopment.meteorclient.events.render.Render2DEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
+import meteordevelopment.meteorclient.gui.WidgetScreen;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.System;
 import meteordevelopment.meteorclient.systems.Systems;
 import meteordevelopment.meteorclient.systems.hud.elements.*;
+import meteordevelopment.meteorclient.systems.hud.elements.keyboard.KeyboardHud;
 import meteordevelopment.meteorclient.systems.hud.screens.HudEditorScreen;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.Keybind;
 import meteordevelopment.meteorclient.utils.misc.NbtUtils;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import org.jetbrains.annotations.NotNull;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
+import org.jspecify.annotations.NonNull;
 
 import java.util.*;
 
@@ -45,15 +47,22 @@ public class Hud extends System<Hud> implements Iterable<HudElement> {
         .name("custom-font")
         .description("Text will use custom font.")
         .defaultValue(true)
-        .onChanged(aBoolean -> {
+        .onChanged(_ -> {
             for (HudElement element : elements) element.onFontChanged();
         })
         .build()
     );
 
+    private final Setting<Boolean> hideInMenus = sgGeneral.add(new BoolSetting.Builder()
+        .name("hide-in-menus")
+        .description("Hides the meteor hud when in inventory screens or game menus.")
+        .defaultValue(false)
+        .build()
+    );
+
     private final Setting<Double> textScale = sgGeneral.add(new DoubleSetting.Builder()
         .name("text-scale")
-        .description("Scale of text if not overriden by the element.")
+        .description("Scale of text if not overridden by the element.")
         .defaultValue(1)
         .min(0.5)
         .sliderRange(0.5, 3)
@@ -86,6 +95,7 @@ public class Hud extends System<Hud> implements Iterable<HudElement> {
     );
 
     // Keybindings
+    @SuppressWarnings("unused")
     private final Setting<Keybind> keybind = sgKeybind.add(new KeybindSetting.Builder()
         .name("bind")
         .defaultValue(Keybind.none())
@@ -120,6 +130,8 @@ public class Hud extends System<Hud> implements Iterable<HudElement> {
         register(ModuleInfosHud.INFO);
         register(PotionTimersHud.INFO);
         register(CombatHud.INFO);
+        register(MapHud.INFO);
+        register(KeyboardHud.INFO);
 
         // Default config
         if (isFirstInit) resetToDefaultElements();
@@ -152,13 +164,13 @@ public class Hud extends System<Hud> implements Iterable<HudElement> {
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    public void add(HudElementInfo.Preset preset, int x, int y, XAnchor xAnchor, YAnchor yAnchor) {
+    public void add(HudElementInfo.@NonNull Preset preset, int x, int y, XAnchor xAnchor, YAnchor yAnchor) {
         HudElement element = preset.info.create();
         preset.callback.accept(element);
         add(element, x, y, xAnchor, yAnchor);
     }
 
-    public void add(HudElementInfo<?>.Preset preset, int x, int y) {
+    public void add(HudElementInfo<?>.@NonNull Preset preset, int x, int y) {
         add(preset, x, y, null, null);
     }
 
@@ -199,32 +211,44 @@ public class Hud extends System<Hud> implements Iterable<HudElement> {
     @EventHandler
     private void onTick(TickEvent.Post event) {
         if (Utils.isLoading()) return;
-        if (!(active || HudEditorScreen.isOpen())) return;
 
         if (resetToDefaultElements) {
             resetToDefaultElementsImpl();
             resetToDefaultElements = false;
         }
 
+        if (!(active || HudEditorScreen.isOpen())) return;
+
         for (HudElement element : elements) {
-            if (element.isActive()) element.tick(HudRenderer.INSTANCE);
+            if (element.isActive() || element.isInEditor()) {
+                element.tick(HudRenderer.INSTANCE);
+            }
         }
     }
 
     @EventHandler
     private void onRender(Render2DEvent event) {
         if (Utils.isLoading()) return;
-        if (!(active && ((!mc.options.hudHidden && !mc.options.debugEnabled) || HudEditorScreen.isOpen()))) return;
 
-        HudRenderer.INSTANCE.begin();
+        if (!(active || HudEditorScreen.isOpen()) || shouldHideHud()) return;
+        if ((mc.gameRenderer.gameRenderState().guiRenderState.isHudHidden || mc.debugEntries.isOverlayVisible()) && !HudEditorScreen.isOpen())
+            return;
+
+        HudRenderer.INSTANCE.begin(event.graphics);
 
         for (HudElement element : elements) {
             element.updatePos();
 
-            if (element.isActive()) element.render(HudRenderer.INSTANCE);
+            if (element.isActive() || element.isInEditor()) {
+                element.render(HudRenderer.INSTANCE);
+            }
         }
 
         HudRenderer.INSTANCE.end();
+    }
+
+    private boolean shouldHideHud() {
+        return hideInMenus.get() && mc.gui.screen() != null && !(mc.gui.screen() instanceof WidgetScreen);
     }
 
     @EventHandler
@@ -242,7 +266,7 @@ public class Hud extends System<Hud> implements Iterable<HudElement> {
         return textScale.get();
     }
 
-    @NotNull
+    @NonNull
     @Override
     public Iterator<HudElement> iterator() {
         return elements.iterator();
@@ -251,8 +275,8 @@ public class Hud extends System<Hud> implements Iterable<HudElement> {
     // Serialization
 
     @Override
-    public NbtCompound toTag() {
-        NbtCompound tag = new NbtCompound();
+    public CompoundTag toTag() {
+        CompoundTag tag = new CompoundTag();
 
         tag.putInt("__version__", 1);
 
@@ -264,26 +288,27 @@ public class Hud extends System<Hud> implements Iterable<HudElement> {
     }
 
     @Override
-    public Hud fromTag(NbtCompound tag) {
+    public Hud fromTag(CompoundTag tag) {
         if (!tag.contains("__version__")) {
             resetToDefaultElements();
             return this;
         }
 
-        active = tag.getBoolean("active");
-        settings.fromTag(tag.getCompound("settings"));
+        tag.getBoolean("active").ifPresent(active1 -> active = active1);
+        settings.fromTag(tag.getCompoundOrEmpty("settings"));
 
         // Elements
         elements.clear();
 
-        for (NbtElement e : tag.getList("elements", NbtElement.COMPOUND_TYPE)) {
-            NbtCompound c = (NbtCompound) e;
-            if (!c.contains("name")) continue;
+        for (Tag e : tag.getListOrEmpty("elements")) {
+            CompoundTag c = (CompoundTag) e;
+            if (c.getString("name").isEmpty()) continue;
 
-            HudElementInfo<?> info = infos.get(c.getString("name"));
+            HudElementInfo<?> info = infos.get(c.getString("name").get());
             if (info != null) {
                 HudElement element = info.create();
                 element.fromTag(c);
+                element.settings.registerColorSettings(null);
                 elements.add(element);
             }
         }

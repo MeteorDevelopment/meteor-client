@@ -8,17 +8,27 @@ package meteordevelopment.meteorclient.systems;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.utils.files.StreamUtils;
 import meteordevelopment.meteorclient.utils.misc.ISerializable;
-import net.minecraft.nbt.NbtCompound;
+import net.minecraft.ReportedException;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtIo;
+import org.apache.commons.io.FilenameUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.AtomicMoveNotSupportedException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 
 public abstract class System<T> implements ISerializable<T> {
     private final String name;
     private File file;
 
     protected boolean isFirstInit;
+    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH.mm.ss", Locale.ROOT);
 
     public System(String name) {
         this.name = name;
@@ -29,26 +39,40 @@ public abstract class System<T> implements ISerializable<T> {
         }
     }
 
-    public void init() {}
+    public void init() {
+    }
 
     public void save(File folder) {
         File file = getFile();
         if (file == null) return;
 
-        NbtCompound tag = toTag();
+        CompoundTag tag = toTag();
         if (tag == null) return;
 
+        Path tempFile = null;
         try {
-            File tempFile = File.createTempFile(MeteorClient.MOD_ID, file.getName());
+            tempFile = Files.createTempFile(MeteorClient.MOD_ID, file.getName());
             NbtIo.write(tag, tempFile);
 
             if (folder != null) file = new File(folder, file.getName());
 
-            file.getParentFile().mkdirs();
-            StreamUtils.copy(tempFile, file);
-            tempFile.delete();
+            Files.createDirectories(file.toPath().getParent());
+
+            try {
+                Files.move(tempFile, file.toPath(), StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
+            } catch (AtomicMoveNotSupportedException _) {
+                StreamUtils.copy(tempFile.toFile(), file);
+            }
         } catch (IOException e) {
-            e.printStackTrace();
+            MeteorClient.LOG.error("Error saving {}. Possibly corrupted?", this.name, e);
+        } finally {
+            if (tempFile != null) {
+                try {
+                    Files.deleteIfExists(tempFile);
+                } catch (IOException e) {
+                    MeteorClient.LOG.warn("Failed to delete temporary file '{}'.", tempFile, e);
+                }
+            }
         }
     }
 
@@ -64,10 +88,24 @@ public abstract class System<T> implements ISerializable<T> {
             if (folder != null) file = new File(folder, file.getName());
 
             if (file.exists()) {
-                fromTag(NbtIo.read(file));
+                try {
+                    fromTag(NbtIo.read(file.toPath()));
+                } catch (ReportedException e) {
+                    String backupName = FilenameUtils.removeExtension(file.getName()) + "-" + ZonedDateTime.now().format(DATE_TIME_FORMATTER) + ".backup.nbt";
+                    File backup = new File(file.getParentFile(), backupName);
+
+                    try {
+                        Files.move(file.toPath(), backup.toPath(), StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
+                    } catch (AtomicMoveNotSupportedException _) {
+                        StreamUtils.copy(file, backup);
+                    }
+
+                    MeteorClient.LOG.error("Error loading {}. Possibly corrupted?", this.name, e);
+                    MeteorClient.LOG.info("Saved settings backup to '{}'.", backup);
+                }
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            MeteorClient.LOG.error("Error loading {}. Possibly corrupted?", this.name, e);
         }
     }
 
@@ -84,12 +122,12 @@ public abstract class System<T> implements ISerializable<T> {
     }
 
     @Override
-    public NbtCompound toTag() {
+    public CompoundTag toTag() {
         return null;
     }
 
     @Override
-    public T fromTag(NbtCompound tag) {
+    public T fromTag(CompoundTag tag) {
         return null;
     }
 }

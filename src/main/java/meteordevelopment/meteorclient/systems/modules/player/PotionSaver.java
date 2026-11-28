@@ -12,33 +12,33 @@ import meteordevelopment.meteorclient.settings.StatusEffectListSetting;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
-import net.minecraft.entity.effect.StatusEffect;
+import net.minecraft.world.effect.MobEffect;
 
 import java.util.List;
 
-import static net.minecraft.entity.effect.StatusEffects.*;
+import static net.minecraft.world.effect.MobEffects.*;
 
 public class PotionSaver extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-    private final Setting<List<StatusEffect>> effects = sgGeneral.add(new StatusEffectListSetting.Builder()
+    private final Setting<List<MobEffect>> effects = sgGeneral.add(new StatusEffectListSetting.Builder()
         .name("effects")
         .description("The effects to preserve.")
         .defaultValue(
-            STRENGTH,
-            ABSORPTION,
-            RESISTANCE,
-            FIRE_RESISTANCE,
-            SPEED,
-            HASTE,
-            REGENERATION,
-            WATER_BREATHING,
-            SATURATION,
-            LUCK,
-            SLOW_FALLING,
-            DOLPHINS_GRACE,
-            CONDUIT_POWER,
-            HERO_OF_THE_VILLAGE
+            STRENGTH.value(),
+            ABSORPTION.value(),
+            RESISTANCE.value(),
+            FIRE_RESISTANCE.value(),
+            SPEED.value(),
+            HASTE.value(),
+            REGENERATION.value(),
+            WATER_BREATHING.value(),
+            SATURATION.value(),
+            LUCK.value(),
+            SLOW_FALLING.value(),
+            DOLPHINS_GRACE.value(),
+            CONDUIT_POWER.value(),
+            HERO_OF_THE_VILLAGE.value()
         )
         .build()
     );
@@ -54,7 +54,7 @@ public class PotionSaver extends Module {
         super(Categories.Player, "potion-saver", "Stops potion effects ticking when you stand still.");
     }
 
-    public boolean shouldFreeze(StatusEffect effect) {
-        return isActive() && (!onlyWhenStationary.get() || !PlayerUtils.isMoving()) && !mc.player.getStatusEffects().isEmpty() && effects.get().contains(effect);
+    public boolean shouldFreeze(MobEffect effect) {
+        return isActive() && (!onlyWhenStationary.get() || !PlayerUtils.isMoving()) && !mc.player.getActiveEffects().isEmpty() && effects.get().contains(effect);
     }
 }

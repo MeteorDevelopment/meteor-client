@@ -6,7 +6,11 @@
 package meteordevelopment.meteorclient.gui;
 
 import meteordevelopment.meteorclient.gui.renderer.packer.GuiTexture;
-import meteordevelopment.meteorclient.gui.screens.*;
+import meteordevelopment.meteorclient.gui.screens.ModuleScreen;
+import meteordevelopment.meteorclient.gui.screens.ModulesScreen;
+import meteordevelopment.meteorclient.gui.screens.NotebotSongsScreen;
+import meteordevelopment.meteorclient.gui.screens.ProxiesScreen;
+import meteordevelopment.meteorclient.gui.screens.accounts.AccountsScreen;
 import meteordevelopment.meteorclient.gui.tabs.TabScreen;
 import meteordevelopment.meteorclient.gui.utils.CharFilter;
 import meteordevelopment.meteorclient.gui.utils.SettingsWidgetFactory;
@@ -24,12 +28,11 @@ import meteordevelopment.meteorclient.utils.misc.ISerializable;
 import meteordevelopment.meteorclient.utils.misc.Keybind;
 import meteordevelopment.meteorclient.utils.misc.Names;
 import meteordevelopment.meteorclient.utils.render.color.Color;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.item.ItemStack;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -56,36 +59,57 @@ public abstract class GuiTheme implements ISerializable<GuiTheme> {
     // Widgets
 
     public abstract WWindow window(WWidget icon, String title);
+
     public WWindow window(String title) {
         return window(null, title);
     }
 
     public abstract WLabel label(String text, boolean title, double maxWidth);
+
     public WLabel label(String text, boolean title) {
         return label(text, title, 0);
     }
+
     public WLabel label(String text, double maxWidth) {
         return label(text, false, maxWidth);
     }
+
     public WLabel label(String text) {
         return label(text, false);
     }
 
     public abstract WHorizontalSeparator horizontalSeparator(String text);
+
     public WHorizontalSeparator horizontalSeparator() {
         return horizontalSeparator(null);
     }
+
     public abstract WVerticalSeparator verticalSeparator();
 
     protected abstract WButton button(String text, GuiTexture texture);
+
     public WButton button(String text) {
         return button(text, null);
     }
+
     public WButton button(GuiTexture texture) {
         return button(null, texture);
     }
 
+    protected abstract WConfirmedButton confirmedButton(String text, String confirmText, GuiTexture texture);
+
+    public WConfirmedButton confirmedButton(String text, String confirmText) {
+        return confirmedButton(text, confirmText, null);
+    }
+
+    public WConfirmedButton confirmedButton(GuiTexture texture) {
+        return confirmedButton(null, null, texture);
+    }
+
     public abstract WMinus minus();
+
+    public abstract WConfirmedMinus confirmedMinus();
+
     public abstract WPlus plus();
 
     public abstract WCheckbox checkbox(boolean checked);
@@ -93,32 +117,33 @@ public abstract class GuiTheme implements ISerializable<GuiTheme> {
     public abstract WSlider slider(double value, double min, double max);
 
     public abstract WTextBox textBox(String text, String placeholder, CharFilter filter, Class<? extends WTextBox.Renderer> renderer);
+
     public WTextBox textBox(String text, CharFilter filter, Class<? extends WTextBox.Renderer> renderer) {
         return textBox(text, null, filter, renderer);
     }
+
     public WTextBox textBox(String text, String placeholder, CharFilter filter) {
         return textBox(text, placeholder, filter, null);
     }
+
     public WTextBox textBox(String text, CharFilter filter) {
         return textBox(text, filter, null);
     }
+
     public WTextBox textBox(String text, String placeholder) {
-        return textBox(text, placeholder, (text1, c) -> true, null);
+        return textBox(text, placeholder, (_, _) -> true, null);
     }
+
     public WTextBox textBox(String text) {
-        return textBox(text, (text1, c) -> true, null);
+        return textBox(text, (_, _) -> true, null);
     }
 
     public abstract <T> WDropdown<T> dropdown(T[] values, T value);
-    public <T extends Enum<?>> WDropdown<T> dropdown(T value) {
-        Class<?> klass = value.getClass();
-        T[] values = null;
-        try {
-            values = (T[]) klass.getDeclaredMethod("values").invoke(null);
-        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-            e.printStackTrace();
-        }
 
+    @SuppressWarnings("unchecked")
+    public <T extends Enum<?>> WDropdown<T> dropdown(T value) {
+        Class<?> klass = value.getDeclaringClass();
+        T[] values = (T[]) klass.getEnumConstants();
         return dropdown(values, value);
     }
 
@@ -131,24 +156,32 @@ public abstract class GuiTheme implements ISerializable<GuiTheme> {
     public WVerticalList verticalList() {
         return w(new WVerticalList());
     }
+
     public WHorizontalList horizontalList() {
         return w(new WHorizontalList());
     }
+
     public WTable table() {
         return w(new WTable());
     }
 
     public abstract WSection section(String title, boolean expanded, WWidget headerWidget);
+
     public WSection section(String title, boolean expanded) {
         return section(title, expanded, null);
     }
+
     public WSection section(String title) {
         return section(title, true);
     }
 
     public abstract WAccount account(WidgetScreen screen, Account<?> account);
 
-    public abstract WWidget module(Module module);
+    public WWidget module(Module module) {
+        return module(module, module.title);
+    }
+
+    public abstract WWidget module(Module module, String title);
 
     public abstract WQuad quad(Color color);
 
@@ -159,9 +192,11 @@ public abstract class GuiTheme implements ISerializable<GuiTheme> {
     public WItem item(ItemStack itemStack) {
         return w(new WItem(itemStack));
     }
+
     public WItemWithLabel itemWithLabel(ItemStack stack, String name) {
         return w(new WItemWithLabel(stack, name));
     }
+
     public WItemWithLabel itemWithLabel(ItemStack stack) {
         return itemWithLabel(stack, Names.get(stack.getItem()));
     }
@@ -173,19 +208,27 @@ public abstract class GuiTheme implements ISerializable<GuiTheme> {
     public WIntEdit intEdit(int value, int min, int max, int sliderMin, int sliderMax, boolean noSlider) {
         return w(new WIntEdit(value, min, max, sliderMin, sliderMax, noSlider));
     }
+
     public WIntEdit intEdit(int value, int min, int max, int sliderMin, int sliderMax) {
         return w(new WIntEdit(value, min, max, sliderMin, sliderMax, false));
     }
+
     public WIntEdit intEdit(int value, int min, int max, boolean noSlider) {
         return w(new WIntEdit(value, min, max, 0, 0, noSlider));
+    }
+
+    public WLongEdit longEdit(long value, long min, long max) {
+        return w(new WLongEdit(value, min, max));
     }
 
     public WDoubleEdit doubleEdit(double value, double min, double max, double sliderMin, double sliderMax, int decimalPlaces, boolean noSlider) {
         return w(new WDoubleEdit(value, min, max, sliderMin, sliderMax, decimalPlaces, noSlider));
     }
+
     public WDoubleEdit doubleEdit(double value, double min, double max, double sliderMin, double sliderMax) {
         return w(new WDoubleEdit(value, min, max, sliderMin, sliderMax, 3, false));
     }
+
     public WDoubleEdit doubleEdit(double value, double min, double max) {
         return w(new WDoubleEdit(value, min, max, 0, 10, 3, false));
     }
@@ -205,6 +248,7 @@ public abstract class GuiTheme implements ISerializable<GuiTheme> {
     public WWidget settings(Settings settings, String filter) {
         return settingsFactory.create(this, settings, filter);
     }
+
     public WWidget settings(Settings settings) {
         return settings(settings, "");
     }
@@ -214,6 +258,7 @@ public abstract class GuiTheme implements ISerializable<GuiTheme> {
     public TabScreen modulesScreen() {
         return new ModulesScreen(this);
     }
+
     public boolean isModulesScreen(Screen screen) {
         return screen instanceof ModulesScreen;
     }
@@ -270,11 +315,14 @@ public abstract class GuiTheme implements ISerializable<GuiTheme> {
 
     public abstract boolean categoryIcons();
 
+    public abstract boolean modulesHelpText();
+
     public abstract boolean hideHUD();
 
     public double textWidth(String text, int length, boolean title) {
         return scale(textRenderer().getWidth(text, length, false) * (title ? TITLE_TEXT_SCALE : 1));
     }
+
     public double textWidth(String text) {
         return textWidth(text, text.length(), false);
     }
@@ -282,6 +330,7 @@ public abstract class GuiTheme implements ISerializable<GuiTheme> {
     public double textHeight(boolean title) {
         return scale(textRenderer().getHeight() * (title ? TITLE_TEXT_SCALE : 1));
     }
+
     public double textHeight() {
         return textHeight(false);
     }
@@ -311,15 +360,15 @@ public abstract class GuiTheme implements ISerializable<GuiTheme> {
     // Saving / Loading
 
     @Override
-    public NbtCompound toTag() {
-        NbtCompound tag = new NbtCompound();
+    public CompoundTag toTag() {
+        CompoundTag tag = new CompoundTag();
 
         tag.putString("name", name);
         tag.put("settings", settings.toTag());
 
-        NbtCompound configs = new NbtCompound();
-        for (String id : windowConfigs.keySet()) {
-            configs.put(id, windowConfigs.get(id).toTag());
+        CompoundTag configs = new CompoundTag();
+        for (var entry : windowConfigs.entrySet()) {
+            configs.put(entry.getKey(), entry.getValue().toTag());
         }
         tag.put("windowConfigs", configs);
 
@@ -327,13 +376,14 @@ public abstract class GuiTheme implements ISerializable<GuiTheme> {
     }
 
     @Override
-    public GuiTheme fromTag(NbtCompound tag) {
-        settings.fromTag(tag.getCompound("settings"));
+    public GuiTheme fromTag(CompoundTag tag) {
+        tag.getCompound("settings").ifPresent(settings::fromTag);
 
-        NbtCompound configs = tag.getCompound("windowConfigs");
-        for (String id : configs.getKeys()) {
-            windowConfigs.put(id, new WindowConfig().fromTag(configs.getCompound(id)));
-        }
+        tag.getCompound("windowConfigs").ifPresent(configs -> {
+            for (String id : configs.keySet()) {
+                windowConfigs.put(id, new WindowConfig().fromTag(configs.getCompound(id).get()));
+            }
+        });
 
         return this;
     }

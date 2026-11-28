@@ -5,12 +5,16 @@
 
 package meteordevelopment.meteorclient.systems.modules.render;
 
+import meteordevelopment.meteorclient.MixinPlugin;
 import meteordevelopment.meteorclient.events.world.ChunkOcclusionEvent;
+import meteordevelopment.meteorclient.gui.GuiTheme;
+import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.Block;
+import net.irisshaders.iris.api.v0.IrisApi;
+import net.minecraft.world.level.block.Block;
 
 import java.util.List;
 
@@ -23,9 +27,9 @@ public class WallHack extends Module {
         .defaultValue(0)
         .range(0, 255)
         .sliderMax(255)
-        .onChanged(onChanged -> {
+        .onChanged(_ -> {
             if (this.isActive()) {
-                mc.worldRenderer.reload();
+                mc.levelExtractor.allChanged();
             }
         })
         .build()
@@ -35,8 +39,10 @@ public class WallHack extends Module {
         .name("blocks")
         .description("What blocks should be targeted for Wall Hack.")
         .defaultValue()
-        .onChanged(onChanged -> {
-            if (isActive()) mc.worldRenderer.reload();
+        .onChanged(_ -> {
+            if (isActive()) {
+                mc.levelExtractor.allChanged();
+            }
         })
         .build()
     );
@@ -54,12 +60,20 @@ public class WallHack extends Module {
 
     @Override
     public void onActivate() {
-        mc.worldRenderer.reload();
+        mc.levelExtractor.allChanged();
     }
 
     @Override
     public void onDeactivate() {
-        mc.worldRenderer.reload();
+        mc.levelExtractor.allChanged();
+    }
+
+    @Override
+    public WWidget getWidget(GuiTheme theme) {
+        if (MixinPlugin.isIrisPresent && IrisApi.getInstance().isShaderPackInUse())
+            return theme.label("Warning: Due to shaders in use, opacity is overridden to 0.");
+
+        return null;
     }
 
     @EventHandler

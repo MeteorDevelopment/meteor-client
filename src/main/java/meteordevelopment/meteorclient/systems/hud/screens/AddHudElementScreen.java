@@ -62,15 +62,16 @@ public class AddHudElementScreen extends WindowScreen {
             if (info.hasPresets() && !searchBar.get().isEmpty()) {
                 for (HudElementInfo<?>.Preset preset : info.presets) {
                     String title = info.title + "  -  " + preset.title;
-                    if (Utils.searchTextDefault(title, searchBar.get(), false)) grouped.computeIfAbsent(info.group, hudGroup -> new ArrayList<>()).add(new Item(title, info.description, preset));
+                    if (Utils.searchTextDefault(title, searchBar.get(), false))
+                        grouped.computeIfAbsent(info.group, _ -> new ArrayList<>()).add(new Item(title, info.description, preset));
                 }
-            }
-            else if (Utils.searchTextDefault(info.title, searchBar.get(), false)) grouped.computeIfAbsent(info.group, hudGroup -> new ArrayList<>()).add(new Item(info.title, info.description, info));
+            } else if (Utils.searchTextDefault(info.title, searchBar.get(), false))
+                grouped.computeIfAbsent(info.group, _ -> new ArrayList<>()).add(new Item(info.title, info.description, info));
         }
 
         // Create widgets
         for (HudGroup group : grouped.keySet()) {
-            WSection section = add(theme.section(group.title)).expandX().widget();
+            WSection section = add(theme.section(group.title())).expandX().widget();
 
             for (Item item : grouped.get(group)) {
                 WHorizontalList l = section.add(theme.horizontalList()).expandX().widget();
@@ -78,20 +79,18 @@ public class AddHudElementScreen extends WindowScreen {
                 WLabel title = l.add(theme.label(item.title)).widget();
                 title.tooltip = item.description;
 
-                if (item.object instanceof HudElementInfo.Preset preset) {
+                if (item.object instanceof HudElementInfo<?>.Preset preset) {
                     WPlus add = l.add(theme.plus()).expandCellX().right().widget();
                     add.action = () -> runObject(preset);
 
                     if (firstObject == null) firstObject = preset;
-                }
-                else {
+                } else {
                     HudElementInfo<?> info = (HudElementInfo<?>) item.object;
 
                     if (info.hasPresets()) {
                         WButton open = l.add(theme.button(" > ")).expandCellX().right().widget();
                         open.action = () -> runObject(info);
-                    }
-                    else {
+                    } else {
                         WPlus add = l.add(theme.plus()).expandCellX().right().widget();
                         add.action = () -> runObject(info);
                     }
@@ -103,30 +102,25 @@ public class AddHudElementScreen extends WindowScreen {
     }
 
     private void runObject(Object object) {
-        if (object instanceof HudElementInfo.Preset preset) {
+        if (object == null) return;
+        if (object instanceof HudElementInfo<?>.Preset preset) {
             Hud.get().add(preset, x, y);
-            close();
-        }
-        else {
+            onClose();
+        } else {
             HudElementInfo<?> info = (HudElementInfo<?>) object;
 
             if (info.hasPresets()) {
                 HudElementPresetsScreen screen = new HudElementPresetsScreen(theme, info, x, y);
                 screen.parent = parent;
 
-                mc.setScreen(screen);
-            }
-            else {
+                mc.gui.setScreen(screen);
+            } else {
                 Hud.get().add(info, x, y);
-                close();
+                onClose();
             }
         }
     }
 
-    @Override
-    protected void onRenderBefore(float delta) {
-        HudEditorScreen.renderElements();
+    private record Item(String title, String description, Object object) {
     }
-
-    private record Item(String title, String description, Object object) {}
 }

@@ -5,13 +5,11 @@
 
 package meteordevelopment.meteorclient.systems.modules.movement;
 
-import meteordevelopment.meteorclient.settings.BlockListSetting;
-import meteordevelopment.meteorclient.settings.DoubleSetting;
-import meteordevelopment.meteorclient.settings.Setting;
-import meteordevelopment.meteorclient.settings.SettingGroup;
+import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
-import net.minecraft.block.Block;
+import meteordevelopment.meteorclient.utils.misc.ListMode;
+import net.minecraft.world.level.block.Block;
 
 import java.util.List;
 
@@ -27,13 +25,29 @@ public class Slippy extends Module {
         .build()
     );
 
+    public final Setting<ListMode> listMode = sgGeneral.add(new EnumSetting.Builder<ListMode>()
+        .name("list-mode")
+        .description("The mode to select blocks.")
+        .defaultValue(ListMode.Blacklist)
+        .build()
+    );
+
     public final Setting<List<Block>> ignoredBlocks = sgGeneral.add(new BlockListSetting.Builder()
         .name("ignored-blocks")
         .description("Decide which blocks not to slip on")
+        .visible(() -> listMode.get() == ListMode.Blacklist)
+        .build()
+    );
+
+    public final Setting<List<Block>> allowedBlocks = sgGeneral.add(new BlockListSetting.Builder()
+        .name("allowed-blocks")
+        .description("Decide which blocks to slip on")
+        .visible(() -> listMode.get() == ListMode.Whitelist)
         .build()
     );
 
     public Slippy() {
         super(Categories.Movement, "slippy", "Changes the base friction level of blocks.");
     }
+
 }

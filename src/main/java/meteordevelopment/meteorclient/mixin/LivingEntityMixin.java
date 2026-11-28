@@ -5,109 +5,142 @@
 
 package meteordevelopment.meteorclient.mixin;
 
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
+import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import meteordevelopment.meteorclient.MeteorClient;
-import meteordevelopment.meteorclient.events.entity.DamageEvent;
+import meteordevelopment.meteorclient.events.entity.DropItemsEvent;
 import meteordevelopment.meteorclient.events.entity.player.CanWalkOnFluidEvent;
 import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.meteorclient.systems.modules.movement.HighJump;
+import meteordevelopment.meteorclient.systems.modules.movement.Sprint;
+import meteordevelopment.meteorclient.systems.modules.movement.elytrafly.ElytraFlightModes;
 import meteordevelopment.meteorclient.systems.modules.movement.elytrafly.ElytraFly;
-import meteordevelopment.meteorclient.systems.modules.player.OffhandCrash;
-import meteordevelopment.meteorclient.systems.modules.player.PotionSpoof;
+import meteordevelopment.meteorclient.systems.modules.movement.elytrafly.modes.Bounce;
+import meteordevelopment.meteorclient.systems.modules.player.NoStatusEffects;
 import meteordevelopment.meteorclient.systems.modules.render.HandView;
 import meteordevelopment.meteorclient.systems.modules.render.NoRender;
-import meteordevelopment.meteorclient.utils.Utils;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.entity.effect.StatusEffect;
-import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.fluid.FluidState;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.Hand;
-import net.minecraft.world.World;
-import org.spongepowered.asm.mixin.Final;
+import net.minecraft.core.Holder;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.util.Prediction;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.material.FluidState;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-
-import java.util.Map;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin extends Entity {
-    @Shadow
-    @Final
-    private Map<StatusEffect, StatusEffectInstance> activeStatusEffects;
-
-    public LivingEntityMixin(EntityType<?> type, World world) {
+    public LivingEntityMixin(EntityType<?> type, Level world) {
         super(type, world);
     }
 
-    @Inject(method = "damage", at = @At("HEAD"))
-    private void onDamageHead(DamageSource source, float amount, CallbackInfoReturnable<Boolean> info) {
-        if (Utils.canUpdate() && world.isClient)
-            MeteorClient.EVENT_BUS.post(DamageEvent.get((LivingEntity) (Object) this, source));
-    }
+    @ModifyReturnValue(method = "canStandOnFluid", at = @At("RETURN"))
+    private boolean onCanWalkOnFluid(boolean original, FluidState fluid) {
+        if ((Object) this != mc.player) return original;
+        CanWalkOnFluidEvent event = MeteorClient.EVENT_BUS.post(CanWalkOnFluidEvent.get(fluid));
 
-    @Inject(method = "canWalkOnFluid", at = @At("HEAD"), cancellable = true)
-    private void onCanWalkOnFluid(FluidState fluidState, CallbackInfoReturnable<Boolean> info) {
-        if ((Object) this != mc.player) return;
-        CanWalkOnFluidEvent event = MeteorClient.EVENT_BUS.post(CanWalkOnFluidEvent.get(fluidState));
-
-        info.setReturnValue(event.walkOnFluid);
-    }
-
-    @Redirect(method = "travel", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;hasNoGravity()Z"))
-    private boolean travelHasNoGravityProxy(LivingEntity self) {
-        if (activeStatusEffects.containsKey(StatusEffects.LEVITATION) && Modules.get().get(PotionSpoof.class).shouldBlock(StatusEffects.LEVITATION)) {
-            return !Modules.get().get(PotionSpoof.class).applyGravity.get();
-        }
-        return self.hasNoGravity();
+        return event.walkOnFluid;
     }
 
     @Inject(method = "spawnItemParticles", at = @At("HEAD"), cancellable = true)
-    private void spawnItemParticles(ItemStack stack, int count, CallbackInfo info) {
+    private void spawnItemParticles(ItemStack itemStack, int count, CallbackInfo ci) {
         NoRender noRender = Modules.get().get(NoRender.class);
-        if (noRender.noEatParticles() && stack.isFood()) info.cancel();
+        if (noRender.noEatParticles() && itemStack.getComponents().has(DataComponents.FOOD)) ci.cancel();
     }
 
-    @Inject(method = "onEquipStack", at = @At("HEAD"), cancellable = true)
-    private void onEquipStack(EquipmentSlot slot, ItemStack oldStack, ItemStack newStack, CallbackInfo info) {
-        if ((Object) this == mc.player && Modules.get().get(OffhandCrash.class).isAntiCrash()) {
-            info.cancel();
-        }
-    }
+    @ModifyVariable(method = "swing", at = @At("HEAD"), argsOnly = true, name = "hand")
+    private InteractionHand setHand(InteractionHand hand) {
+        if ((Object) this != mc.player) return hand;
 
-    @ModifyArg(method = "swingHand(Lnet/minecraft/util/Hand;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;swingHand(Lnet/minecraft/util/Hand;Z)V"))
-    private Hand setHand(Hand hand) {
         HandView handView = Modules.get().get(HandView.class);
-        if ((Object) this == mc.player && handView.isActive()) {
+        if (handView.isActive()) {
             if (handView.swingMode.get() == HandView.SwingMode.None) return hand;
-            return handView.swingMode.get() == HandView.SwingMode.Offhand ? Hand.OFF_HAND : Hand.MAIN_HAND;
+            return handView.swingMode.get() == HandView.SwingMode.Offhand ? InteractionHand.OFF_HAND : InteractionHand.MAIN_HAND;
         }
+
         return hand;
     }
 
-    @ModifyConstant(method = "getHandSwingDuration", constant = @Constant(intValue = 6))
-    private int getHandSwingDuration(int constant) {
-        if ((Object) this != mc.player) return constant;
-        return Modules.get().get(HandView.class).isActive() && mc.options.getPerspective().isFirstPerson() ? Modules.get().get(HandView.class).swingSpeed.get() : constant;
-    }
+    @ModifyReturnValue(method = "isFallFlying", at = @At("RETURN"))
+    private boolean isGlidingHook(boolean original) {
+        if ((Object) this != mc.player) return original;
 
-    @Inject(method = "isFallFlying", at = @At("HEAD"), cancellable = true)
-    private void isFallFlyingHook(CallbackInfoReturnable<Boolean> info) {
-        if ((Object) this == mc.player && Modules.get().get(ElytraFly.class).canPacketEfly()) {
-            info.setReturnValue(true);
+        if (Modules.get().get(ElytraFly.class).canPacketEfly()) {
+            return true;
         }
+
+        return original;
     }
 
-    @Inject(method = "hasStatusEffect", at = @At("HEAD"), cancellable = true)
-    private void hasStatusEffect(StatusEffect effect, CallbackInfoReturnable<Boolean> info) {
-        if (Modules.get().get(PotionSpoof.class).shouldBlock(effect)) info.setReturnValue(false);
+    @Unique
+    private boolean previousElytra = false;
+
+    @Inject(method = "isFallFlying", at = @At("TAIL"), cancellable = true)
+    public void recastOnLand(CallbackInfoReturnable<Boolean> cir) {
+        if ((Object) this != mc.player) return;
+
+        boolean elytra = cir.getReturnValue();
+        ElytraFly elytraFly = Modules.get().get(ElytraFly.class);
+        if (previousElytra && !elytra && elytraFly.isActive() && elytraFly.flightMode.get() == ElytraFlightModes.Bounce) {
+            cir.setReturnValue(Bounce.recastElytra(mc.player));
+        }
+        previousElytra = elytra;
+    }
+
+    @ModifyReturnValue(method = "hasEffect", at = @At("RETURN"))
+    private boolean hasEffect(boolean original, Holder<MobEffect> effect) {
+        if (effect == null || effect.value() == null) return original;
+        if (Modules.get().get(NoStatusEffects.class).shouldBlock(effect.value())) return false;
+
+        return original;
+    }
+
+    @ModifyExpressionValue(method = "jumpFromGround", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;getYRot()F"))
+    private float modifyGetYaw(float original) {
+        if ((Object) this != mc.player) return original;
+        if (!Modules.get().get(Sprint.class).rageSprint()) return original;
+
+        float forward = Math.signum(mc.player.zza);
+        float strafe = 90 * Math.signum(mc.player.xxa);
+        if (forward != 0) strafe *= (forward * 0.5f);
+
+        original -= strafe;
+        if (forward < 0) original -= 180;
+
+        return original;
+    }
+
+    @ModifyConstant(method = "jumpFromGround", constant = @Constant(floatValue = 1.0E-5F))
+    private float modifyJumpConstant(float original) {
+        if ((Object) this != mc.player) return original;
+        if (!Modules.get().isActive(HighJump.class)) return original;
+        return -1;
+    }
+
+    @ModifyExpressionValue(method = "jumpFromGround", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;isSprinting()Z"))
+    private boolean modifyIsSprinting(boolean original) {
+        if ((Object) this != mc.player) return original;
+        if (!Modules.get().get(Sprint.class).rageSprint()) return original;
+
+        // only add the extra velocity if you're actually moving, otherwise you'll jump in place and move forward
+        return original && (Math.abs(mc.player.zza) > 1.0E-5F || Math.abs(mc.player.xxa) > 1.0E-5F);
+    }
+
+    @Inject(method = "drop", at = @At("HEAD"), cancellable = true)
+    private void onDropItem(ItemStack itemStack, boolean thrownFromHand, Prediction prediction, CallbackInfoReturnable<ItemEntity> cir) {
+        if (level().isClientSide() && !itemStack.isEmpty()) {
+            if (MeteorClient.EVENT_BUS.post(DropItemsEvent.get(itemStack)).isCancelled()) cir.setReturnValue(null);
+        }
     }
 }

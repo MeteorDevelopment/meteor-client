@@ -5,7 +5,7 @@
 
 package meteordevelopment.meteorclient.utils.misc.input;
 
-import org.lwjgl.glfw.GLFW;
+import com.mojang.blaze3d.platform.InputConstants;
 
 public enum KeyAction {
     Press,
@@ -13,8 +13,10 @@ public enum KeyAction {
     Release;
 
     public static KeyAction get(int action) {
-        if (action == GLFW.GLFW_PRESS) return Press;
-        else if (action == GLFW.GLFW_RELEASE) return Release;
-        else return Repeat;
+        return switch (action) {
+            case InputConstants.PRESS -> Press;
+            case InputConstants.RELEASE -> Release;
+            default -> Repeat;
+        };
     }
 }

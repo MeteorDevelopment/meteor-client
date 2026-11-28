@@ -6,8 +6,10 @@
 package meteordevelopment.meteorclient.gui.renderer.packer;
 
 import com.mojang.blaze3d.platform.TextureUtil;
-import meteordevelopment.meteorclient.utils.render.ByteTexture;
-import net.minecraft.util.Identifier;
+import com.mojang.renderpearl.api.GpuFormat;
+import com.mojang.renderpearl.api.textures.FilterMode;
+import meteordevelopment.meteorclient.renderer.Texture;
+import net.minecraft.resources.Identifier;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.stb.STBImage;
 import org.lwjgl.stb.STBImageResize;
@@ -31,7 +33,7 @@ public class TexturePacker {
 
     public GuiTexture add(Identifier id) {
         try {
-            InputStream in = mc.getResourceManager().getResource(id).get().getInputStream();
+            InputStream in = mc.getResourceManager().getResource(id).get().open();
             GuiTexture texture = new GuiTexture();
 
             try (MemoryStack stack = MemoryStack.stackPush()) {
@@ -78,7 +80,7 @@ public class TexturePacker {
         int height = (int) (srcHeight * scaleFactor);
 
         ByteBuffer imageBuffer = BufferUtils.createByteBuffer(width * height * 4);
-        STBImageResize.stbir_resize_uint8(srcImageBuffer, srcWidth, srcHeight, 0, imageBuffer, width, height, 0, 4);
+        STBImageResize.stbir_resize_uint8_linear(srcImageBuffer, srcWidth, srcHeight, 0, imageBuffer, width, height, 0, 4);
 
         TextureRegion region = new TextureRegion(width, height);
         texture.add(region);
@@ -86,7 +88,7 @@ public class TexturePacker {
         images.add(new Image(imageBuffer, region, width, height, false));
     }
 
-    public ByteTexture pack() {
+    public Texture pack() {
         // Calculate final width and height and image positions
         int width = 0;
         int height = 0;
@@ -139,7 +141,11 @@ public class TexturePacker {
         }
 
         ((Buffer) buffer).rewind();
-        return new ByteTexture(width, height, buffer, ByteTexture.Format.RGBA, ByteTexture.Filter.Linear, ByteTexture.Filter.Linear);
+
+        Texture texture = new Texture(width, height, GpuFormat.RGBA8_UNORM, FilterMode.LINEAR, FilterMode.LINEAR);
+        texture.upload(buffer);
+
+        return texture;
     }
 
     private static class Image {

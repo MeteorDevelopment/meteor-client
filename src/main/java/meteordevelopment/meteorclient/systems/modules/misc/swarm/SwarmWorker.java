@@ -5,10 +5,10 @@
 
 package meteordevelopment.meteorclient.systems.modules.misc.swarm;
 
-import baritone.api.BaritoneAPI;
-import meteordevelopment.meteorclient.systems.commands.Commands;
+import meteordevelopment.meteorclient.commands.Commands;
+import meteordevelopment.meteorclient.pathing.PathManagers;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
-import net.minecraft.block.Block;
+import net.minecraft.world.level.block.Block;
 
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -41,11 +41,11 @@ public class SwarmWorker extends Thread {
             while (!isInterrupted()) {
                 String read = in.readUTF();
 
-                if (!read.equals("")) {
+                if (read.startsWith("swarm")) {
                     ChatUtils.infoPrefix("Swarm", "Received command: (highlight)%s", read);
 
                     try {
-                        Commands.get().dispatch(read);
+                        Commands.dispatch(read);
                     } catch (Exception e) {
                         ChatUtils.error("Error fetching command.");
                         e.printStackTrace();
@@ -68,7 +68,7 @@ public class SwarmWorker extends Thread {
             e.printStackTrace();
         }
 
-        BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();
+        PathManagers.get().stop();
 
         ChatUtils.infoPrefix("Swarm", "Disconnected from host.");
 
@@ -77,8 +77,10 @@ public class SwarmWorker extends Thread {
 
     public void tick() {
         if (target == null) return;
-        BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();
-        BaritoneAPI.getProvider().getPrimaryBaritone().getMineProcess().mine(target);
+
+        PathManagers.get().stop();
+        PathManagers.get().mine(target);
+
         target = null;
     }
 

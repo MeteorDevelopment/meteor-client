@@ -5,8 +5,20 @@
 
 package meteordevelopment.meteorclient.events.entity.player;
 
-import net.minecraft.fluid.FluidState;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Pose;
+import net.minecraft.world.level.material.FluidState;
 
+/**
+ * As of writing, using any method that gets the players pose within this event will cause a crash.
+ * <p>
+ * Getting the pose calls {@link meteordevelopment.meteorclient.mixin.EntityMixin#modifyGetPose(Pose)},
+ * which calls {@link net.minecraft.world.entity.player.Player#canPlayerFitWithinBlocksAndEntitiesWhen(Pose)}, which
+ * calculates whether there is enough space to fit your bounding box if you change into that pose. This method ends up
+ * calling {@link LivingEntity#canStandOnFluid(FluidState)}, causing this event to fire
+ * again and leading to a stack overflow crash. Introduced in
+ * <a href="https://github.com/MeteorDevelopment/meteor-client/pull/5449">this pull request</a>
+ */
 public class CanWalkOnFluidEvent {
     private static final CanWalkOnFluidEvent INSTANCE = new CanWalkOnFluidEvent();
 

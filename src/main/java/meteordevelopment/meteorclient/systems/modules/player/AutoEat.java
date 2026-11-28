@@ -5,9 +5,11 @@
 
 package meteordevelopment.meteorclient.systems.modules.player;
 
-import baritone.api.BaritoneAPI;
+import it.unimi.dsi.fastutil.booleans.BooleanBinaryOperator;
+import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
 import meteordevelopment.meteorclient.events.entity.player.ItemUseCrosshairTargetEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
+import meteordevelopment.meteorclient.pathing.PathManagers;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
@@ -21,21 +23,24 @@ import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.player.SlotUtils;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
-import net.minecraft.item.Item;
-import net.minecraft.item.Items;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.food.FoodProperties;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class AutoEat extends Module {
-    private static final Class<? extends Module>[] AURAS = new Class[] { KillAura.class, CrystalAura.class, AnchorAura.class, BedAura.class };
+    @SuppressWarnings("unchecked")
+    private static final Class<? extends Module>[] AURAS = new Class[]{KillAura.class, CrystalAura.class, AnchorAura.class, BedAura.class};
 
+    // Settings groups
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgHunger = settings.createGroup("Hunger");
+    private final SettingGroup sgThreshold = settings.createGroup("Threshold");
 
     // General
-
-    private final Setting<List<Item>> blacklist = sgGeneral.add(new ItemListSetting.Builder()
+    public final Setting<List<Item>> blacklist = sgGeneral.add(new ItemListSetting.Builder()
         .name("blacklist")
         .description("Which items to not eat.")
         .defaultValue(
@@ -49,7 +54,8 @@ public class AutoEat extends Module {
             Items.SPIDER_EYE,
             Items.SUSPICIOUS_STEW
         )
-        .filter(Item::isFood)
+        .filter(Utils::isFood)
+        .bypassFilterWhenSavingAndLoading()
         .build()
     );
 
@@ -67,21 +73,53 @@ public class AutoEat extends Module {
         .build()
     );
 
-    // Hunger
+    private final Setting<Boolean> searchInventory = sgGeneral.add(new BoolSetting.Builder()
+        .name("search-inventory")
+        .description("Search the full inventory for food, not only the hotbar.")
+        .defaultValue(false)
+        .build()
+    );
 
-    private final Setting<Integer> hungerThreshold = sgHunger.add(new IntSetting.Builder()
+    private final Setting<Priority> prioritise = sgGeneral.add(new EnumSetting.Builder<Priority>()
+        .name("food-priority")
+        .description("Which aspect of the food to prioritise selecting for.")
+        .defaultValue(Priority.Saturation)
+        .build()
+    );
+
+    // Threshold
+    private final Setting<ThresholdMode> thresholdMode = sgThreshold.add(new EnumSetting.Builder<ThresholdMode>()
+        .name("threshold-mode")
+        .description("The threshold mode to trigger auto eat.\n'Both' == health AND hunger, 'Any' == health OR hunger")
+        .defaultValue(ThresholdMode.Any)
+        .build()
+    );
+
+    private final Setting<Double> healthThreshold = sgThreshold.add(new DoubleSetting.Builder()
+        .name("health-threshold")
+        .description("The level of health you eat at.")
+        .defaultValue(10)
+        .range(1, 19)
+        .sliderRange(1, 19)
+        .visible(() -> thresholdMode.get() != ThresholdMode.Hunger)
+        .build()
+    );
+
+    private final Setting<Integer> hungerThreshold = sgThreshold.add(new IntSetting.Builder()
         .name("hunger-threshold")
         .description("The level of hunger you eat at.")
         .defaultValue(16)
         .range(1, 19)
         .sliderRange(1, 19)
+        .visible(() -> thresholdMode.get() != ThresholdMode.Health)
         .build()
     );
 
+    // Module state
     public boolean eating;
     private int slot, prevSlot;
 
-    private final List<Class<? extends Module>> wasAura = new ArrayList<>();
+    private final List<Class<? extends Module>> wasAura = new ReferenceArrayList<>();
     private boolean wasBaritone = false;
 
     public AutoEat() {
@@ -93,47 +131,44 @@ public class AutoEat extends Module {
         if (eating) stopEating();
     }
 
+    /**
+     * Main tick handler for the module's eating logic
+     */
     @EventHandler(priority = EventPriority.LOW)
     private void onTick(TickEvent.Pre event) {
-        // Skip if Auto Gap is already eating
+        // Don't eat if AutoGap is already eating
+        if (mc.player == null) return;
         if (Modules.get().get(AutoGap.class).isEating()) return;
 
+        // case 1: Already eating
         if (eating) {
-            // If we are eating check if we should still be still eating
-            if (shouldEat()) {
-                // Check if the item in current slot is not food
-                if (!mc.player.getInventory().getStack(slot).isFood()) {
-                    // If not try finding a new slot
-                    int slot = findSlot();
+            // Stop eating if we shouldn't eat anymore
+            if (!shouldEat()) {
+                stopEating();
+                return;
+            }
 
-                    // If no valid slot was found then stop eating
-                    if (slot == -1) {
-                        stopEating();
-                        return;
-                    }
-                    // Otherwise change to the new slot
-                    else {
-                        changeSlot(slot);
-                    }
+            // Check if the item in current slot is no longer edible food
+            if (!isEdible(mc.player.getInventory().getItem(slot))) {
+                int newSlot = findSlot();
+
+                // Stop if no food found
+                if (newSlot == -1) {
+                    stopEating();
+                    return;
                 }
 
-                // Continue eating
-                eat();
+                changeSlot(newSlot);
             }
-            // If we shouldn't be eating anymore then stop
-            else {
-                stopEating();
-            }
-        }
-        else {
-            // If we are not eating check if we should start eating
-            if (shouldEat()) {
-                // Try to find a valid slot
-                slot = findSlot();
 
-                // If slot was found then start eating
-                if (slot != -1) startEating();
-            }
+            // Continue eating the food
+            eat();
+            return;
+        }
+
+        // case 2: Not eating yet but should start
+        if (shouldEat()) {
+            startEating();
         }
     }
 
@@ -143,8 +178,9 @@ public class AutoEat extends Module {
     }
 
     private void startEating() {
-        prevSlot = mc.player.getInventory().selectedSlot;
+        prevSlot = mc.player.getInventory().getSelectedSlot();
         eat();
+        if (!eating) return;
 
         // Pause auras
         wasAura.clear();
@@ -160,14 +196,14 @@ public class AutoEat extends Module {
         }
 
         // Pause baritone
-        if (pauseBaritone.get() && BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing() && !wasBaritone) {
+        if (pauseBaritone.get() && PathManagers.get().isPathing() && !wasBaritone) {
             wasBaritone = true;
-            BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("pause");
+            PathManagers.get().pause();
         }
     }
 
     private void eat() {
-        changeSlot(slot);
+        if (!changeSlot(slot)) return;
         setPressed(true);
         if (!mc.player.isUsingItem()) Utils.rightClick();
 
@@ -175,7 +211,7 @@ public class AutoEat extends Module {
     }
 
     private void stopEating() {
-        changeSlot(prevSlot);
+        if (prevSlot != SlotUtils.OFFHAND) changeSlot(prevSlot);
         setPressed(false);
 
         eating = false;
@@ -183,10 +219,8 @@ public class AutoEat extends Module {
         // Resume auras
         if (pauseAuras.get()) {
             for (Class<? extends Module> klass : AURAS) {
-                Module module = Modules.get().get(klass);
-
-                if (wasAura.contains(klass) && !module.isActive()) {
-                    module.toggle();
+                if (wasAura.contains(klass)) {
+                    Modules.get().get(klass).enable();
                 }
             }
         }
@@ -194,47 +228,128 @@ public class AutoEat extends Module {
         // Resume baritone
         if (pauseBaritone.get() && wasBaritone) {
             wasBaritone = false;
-            BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("resume");
+            PathManagers.get().resume();
         }
     }
 
     private void setPressed(boolean pressed) {
-        mc.options.useKey.setPressed(pressed);
+        mc.options.keyUse.setDown(pressed);
     }
 
-    private void changeSlot(int slot) {
-        InvUtils.swap(slot, false);
-        this.slot = slot;
+    /**
+     * Prepares a slot for eating. Uses offhand or hotbar directly.
+     * Moves a main-inventory item to an empty hotbar slot; returns false if none.
+     */
+    private boolean changeSlot(int slot) {
+        // offhand: use directly
+        if (slot == SlotUtils.OFFHAND) {
+            this.slot = SlotUtils.OFFHAND;
+            return true;
+        }
+
+        // hotbar: select
+        if (SlotUtils.isHotbar(slot)) {
+            InvUtils.swap(slot, false);
+            this.slot = slot;
+            return true;
+        }
+
+        // main inventory: move to empty hotbar, abort if none
+        int emptySlot = InvUtils.find(ItemStack::isEmpty, SlotUtils.HOTBAR_START, SlotUtils.HOTBAR_END).slot();
+        if (emptySlot == -1) return false;
+
+        InvUtils.move().from(slot).toHotbar(emptySlot);
+        InvUtils.swap(emptySlot, false);
+        this.slot = emptySlot;
+        return true;
     }
 
-    private boolean shouldEat() {
-        return mc.player.getHungerManager().getFoodLevel() <= hungerThreshold.get();
+    public boolean shouldEat() {
+        if (mc.player == null) return false;
+        boolean healthLow = mc.player.getHealth() <= healthThreshold.get();
+        boolean hungerLow = mc.player.getFoodData().getFoodLevel() <= hungerThreshold.get();
+        if (!thresholdMode.get().test(healthLow, hungerLow)) return false;
+
+        slot = findSlot();
+        return slot != -1;
     }
 
+    /**
+     * Finds the best slot to eat from, preferring:
+     * offhand => hotbar => main inventory (if allowed).
+     */
     private int findSlot() {
-        int slot = -1;
-        int bestHunger = -1;
+        // prefer offhand
+        if (isEdible(mc.player.getOffhandItem())) return SlotUtils.OFFHAND;
 
-        for (int i = 0; i < 9; i++) {
-            // Skip if item isn't food
-            Item item = mc.player.getInventory().getStack(i).getItem();
-            if (!item.isFood()) continue;
+        // if offhand empty, prefer best in hotbar
+        int slot = findBestFood(SlotUtils.HOTBAR_START, SlotUtils.HOTBAR_END);
+        if (slot != -1) return slot;
+
+        // if allowed, search main inventory
+        if (searchInventory.get()) {
+            return findBestFood(SlotUtils.MAIN_START, SlotUtils.MAIN_END);
+        }
+
+        return -1; // nothing found :(
+    }
+
+    private int findBestFood(int start, int end) {
+        int best = -1;
+        float bestHunger = -1;
+
+        for (int i = start; i <= end; i++) {
+            ItemStack stack = mc.player.getInventory().getItem(i);
+            if (!isEdible(stack)) continue;
+
+            FoodProperties food = stack.get(DataComponents.FOOD);
 
             // Check if hunger value is better
-            int hunger = item.getFoodComponent().getHunger();
+            float hunger = prioritise.get().value(food);
             if (hunger > bestHunger) {
-                // Skip if item is in blacklist
-                if (blacklist.get().contains(item)) continue;
-
-                // Select the current item
-                slot = i;
                 bestHunger = hunger;
+                best = i;
             }
         }
 
-        Item offHandItem = mc.player.getOffHandStack().getItem();
-        if (offHandItem.isFood() && !blacklist.get().contains(offHandItem) && offHandItem.getFoodComponent().getHunger() > bestHunger) slot = SlotUtils.OFFHAND;
+        return best;
+    }
 
-        return slot;
+    private boolean isEdible(ItemStack stack) {
+        if (!Utils.isFood(stack) || blacklist.get().contains(stack.getItem())) return false;
+
+        FoodProperties food = stack.get(DataComponents.FOOD);
+        return food != null && (mc.player.getFoodData().needsFood() || food.canAlwaysEat());
+    }
+
+    public enum ThresholdMode {
+        Health((health, _) -> health),
+        Hunger((_, hunger) -> hunger),
+        Any((health, hunger) -> health || hunger),
+        Both((health, hunger) -> health && hunger);
+
+        private final BooleanBinaryOperator predicate;
+
+        ThresholdMode(BooleanBinaryOperator predicate) {
+            this.predicate = predicate;
+        }
+
+        public boolean test(boolean health, boolean hunger) {
+            return predicate.apply(health, hunger);
+        }
+    }
+
+    public enum Priority {
+        Combined,
+        Hunger,
+        Saturation;
+
+        public float value(FoodProperties food) {
+            return switch (this) {
+                case Combined -> food.nutrition() + food.saturation();
+                case Hunger -> food.nutrition();
+                case Saturation -> food.saturation();
+            };
+        }
     }
 }

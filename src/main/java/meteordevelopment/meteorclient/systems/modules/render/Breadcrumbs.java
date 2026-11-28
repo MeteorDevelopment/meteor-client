@@ -13,7 +13,7 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.misc.Pool;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.world.dimension.DimensionType;
+import net.minecraft.world.level.dimension.DimensionType;
 
 import java.util.ArrayDeque;
 import java.util.Queue;
@@ -62,19 +62,21 @@ public class Breadcrumbs extends Module {
         section = sectionPool.get();
         section.set1();
 
-        lastDimension = mc.world.getDimension();
+        lastDimension = mc.level.dimensionType();
     }
 
     @Override
     public void onDeactivate() {
-        for (Section section : sections) sectionPool.free(section);
+        sectionPool.freeAll(sections);
         sections.clear();
     }
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
-        if (lastDimension != mc.world.getDimension()) {
-            for (Section sec : sections) sectionPool.free(sec);
+        if (!mc.getConnection().hasClientLoaded()) return;
+
+        if (lastDimension != mc.level.dimensionType()) {
+            sectionPool.freeAll(sections);
             sections.clear();
         }
 
@@ -91,7 +93,7 @@ public class Breadcrumbs extends Module {
             section.set1();
         }
 
-        lastDimension = mc.world.getDimension();
+        lastDimension = mc.level.dimensionType();
     }
 
     @EventHandler
@@ -99,6 +101,8 @@ public class Breadcrumbs extends Module {
         int iLast = -1;
 
         for (Section section : sections) {
+            event.renderer.lines.ensureLineCapacity();
+
             if (iLast == -1) {
                 iLast = event.renderer.lines.vec3(section.x1, section.y1, section.z1).color(color.get()).next();
             }
@@ -127,10 +131,6 @@ public class Breadcrumbs extends Module {
             x2 = (float) mc.player.getX();
             y2 = (float) mc.player.getY();
             z2 = (float) mc.player.getZ();
-        }
-
-        public void render(Render3DEvent event) {
-            event.renderer.line(x1, y1, z1, x2, y2, z2, color.get());
         }
     }
 }

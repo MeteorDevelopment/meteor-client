@@ -1,0 +1,55 @@
+/*
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
+ */
+
+package meteordevelopment.meteorclient.commands.commands;
+
+import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
+import meteordevelopment.meteorclient.commands.Command;
+import meteordevelopment.meteorclient.utils.player.FindItemResult;
+import meteordevelopment.meteorclient.utils.player.InvUtils;
+import net.minecraft.client.multiplayer.ClientSuggestionProvider;
+import net.minecraft.commands.arguments.item.ItemArgument;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.game.ServerboundSetCreativeModeSlotPacket;
+import net.minecraft.world.item.ItemStack;
+
+public class GiveCommand extends Command {
+    private static final SimpleCommandExceptionType NOT_IN_CREATIVE = new SimpleCommandExceptionType(Component.literal("You must be in creative mode to use this."));
+    private static final SimpleCommandExceptionType NO_SPACE = new SimpleCommandExceptionType(Component.literal("No space in hotbar."));
+
+    public GiveCommand() {
+        super("give", "Gives you any item.");
+    }
+
+    @Override
+    public void build(LiteralArgumentBuilder<ClientSuggestionProvider> builder) {
+        builder.then(argument("item", ItemArgument.item(REGISTRY_ACCESS)).executes(context -> {
+            if (!mc.player.getAbilities().instabuild) throw NOT_IN_CREATIVE.create();
+
+            ItemStack item = ItemArgument.getItem(context, "item").createItemStack(1);
+            giveItem(item);
+
+            return SINGLE_SUCCESS;
+        }).then(argument("number", IntegerArgumentType.integer(1, 99)).executes(context -> {
+            if (!mc.player.getAbilities().instabuild) throw NOT_IN_CREATIVE.create();
+
+            ItemStack item = ItemArgument.getItem(context, "item").createItemStack(IntegerArgumentType.getInteger(context, "number"));
+            giveItem(item);
+
+            return SINGLE_SUCCESS;
+        })));
+    }
+
+    private void giveItem(ItemStack item) throws CommandSyntaxException {
+        FindItemResult fir = InvUtils.find(ItemStack::isEmpty, 0, 8);
+        if (!fir.found()) throw NO_SPACE.create();
+
+        mc.getConnection().send(new ServerboundSetCreativeModeSlotPacket(36 + fir.slot(), item));
+        mc.player.inventoryMenu.getSlot(36 + fir.slot()).set(item);
+    }
+}

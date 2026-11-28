@@ -7,15 +7,18 @@ package meteordevelopment.meteorclient;
 
 import meteordevelopment.meteorclient.addons.AddonManager;
 import meteordevelopment.meteorclient.addons.MeteorAddon;
-import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
-import meteordevelopment.meteorclient.events.meteor.KeyEvent;
-import meteordevelopment.meteorclient.events.meteor.MouseButtonEvent;
+import meteordevelopment.meteorclient.events.meteor.KeyInputEvent;
+import meteordevelopment.meteorclient.events.meteor.MouseClickEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.gui.GuiThemes;
 import meteordevelopment.meteorclient.gui.WidgetScreen;
 import meteordevelopment.meteorclient.gui.tabs.Tabs;
 import meteordevelopment.meteorclient.systems.Systems;
 import meteordevelopment.meteorclient.systems.config.Config;
+import meteordevelopment.meteorclient.systems.hud.screens.AddHudElementScreen;
+import meteordevelopment.meteorclient.systems.hud.screens.HudEditorScreen;
+import meteordevelopment.meteorclient.systems.hud.screens.HudElementPresetsScreen;
+import meteordevelopment.meteorclient.systems.hud.screens.HudElementScreen;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.misc.DiscordPresence;
@@ -29,15 +32,17 @@ import meteordevelopment.meteorclient.utils.misc.input.KeyBinds;
 import meteordevelopment.meteorclient.utils.network.OnlinePlayers;
 import meteordevelopment.orbit.EventBus;
 import meteordevelopment.orbit.EventHandler;
-import meteordevelopment.orbit.EventPriority;
 import meteordevelopment.orbit.IEventBus;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.metadata.ModMetadata;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.ChatScreen;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.ChatScreen;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.resources.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.spongepowered.asm.mixin.MixinEnvironment;
 
 import java.io.File;
 import java.lang.invoke.MethodHandles;
@@ -46,13 +51,13 @@ public class MeteorClient implements ClientModInitializer {
     public static final String MOD_ID = "meteor-client";
     public static final ModMetadata MOD_META;
     public static final String NAME;
-    public static final  Version VERSION;
-    public static final  String DEV_BUILD;
+    public static final Version VERSION;
+    public static final String BUILD_NUMBER;
 
     public static MeteorClient INSTANCE;
     public static MeteorAddon ADDON;
 
-    public static MinecraftClient mc;
+    public static Minecraft mc;
     public static final IEventBus EVENT_BUS = new EventBus();
     public static final File FOLDER = FabricLoader.getInstance().getGameDir().resolve(MOD_ID).toFile();
     public static final Logger LOG;
@@ -65,9 +70,11 @@ public class MeteorClient implements ClientModInitializer {
 
         String versionString = MOD_META.getVersion().getFriendlyString();
         if (versionString.contains("-")) versionString = versionString.split("-")[0];
+        // When building and running through IntelliJ and not Gradle it doesn't replace the version so just use a dummy
+        if (versionString.equals("${version}")) versionString = "0.0.0";
 
         VERSION = new Version(versionString);
-        DEV_BUILD = MOD_META.getCustomValue(MeteorClient.MOD_ID + ":devbuild").getAsString();
+        BUILD_NUMBER = MOD_META.getCustomValue(MeteorClient.MOD_ID + ":build_number").getAsString();
     }
 
     @Override
@@ -77,23 +84,27 @@ public class MeteorClient implements ClientModInitializer {
             return;
         }
 
-        LOG.info("Initializing {}", NAME);
-
         // Global minecraft client accessor
-        mc = MinecraftClient.getInstance();
+        mc = Minecraft.getInstance();
+
+        if (FabricLoader.getInstance().isDevelopmentEnvironment()) {
+            LOG.info("Force loading mixins");
+            MixinEnvironment.getCurrentEnvironment().audit();
+        }
+
+        LOG.info("Initializing {}", NAME);
 
         // Pre-load
         if (!FOLDER.exists()) {
             FOLDER.getParentFile().mkdirs();
             FOLDER.mkdir();
-            Systems.addPreLoadTask(() -> Modules.get().get(DiscordPresence.class).toggle());
+            Systems.addPreLoadTask(() -> Modules.get().get(DiscordPresence.class).enable());
         }
 
         // Register addons
         AddonManager.init();
 
         // Register event handlers
-        EVENT_BUS.registerLambdaFactory(ADDON.getPackage() , (lookupInMethod, klass) -> (MethodHandles.Lookup) lookupInMethod.invoke(null, klass, MethodHandles.lookup()));
         AddonManager.ADDONS.forEach(addon -> {
             try {
                 EVENT_BUS.registerLambdaFactory(addon.getPackage(), (lookupInMethod, klass) -> (MethodHandles.Lookup) lookupInMethod.invoke(null, klass, MethodHandles.lookup()));
@@ -139,45 +150,45 @@ public class MeteorClient implements ClientModInitializer {
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
-        if (mc.currentScreen == null && mc.getOverlay() == null && KeyBinds.OPEN_COMMANDS.wasPressed()) {
-            mc.setScreen(new ChatScreen(Config.get().prefix.get()));
+        if (mc.gui.screen() == null && mc.gui.overlay() == null && KeyBinds.OPEN_COMMANDS.consumeClick()) {
+            mc.gui.setScreen(new ChatScreen(Config.get().prefix.get(), true));
         }
     }
 
     @EventHandler
-    private void onKey(KeyEvent event) {
-        if (event.action == KeyAction.Press && KeyBinds.OPEN_GUI.matchesKey(event.key, 0)) {
+    private void onKey(KeyInputEvent event) {
+        if (event.action == KeyAction.Press && KeyBinds.OPEN_GUI.matches(event.input)) {
             toggleGui();
         }
     }
 
     @EventHandler
-    private void onMouseButton(MouseButtonEvent event) {
-        if (event.action == KeyAction.Press && KeyBinds.OPEN_GUI.matchesMouse(event.button)) {
+    private void onMouseClick(MouseClickEvent event) {
+        if (event.action == KeyAction.Press && KeyBinds.OPEN_GUI.matchesMouse(event.click)) {
             toggleGui();
         }
     }
 
     private void toggleGui() {
-        if (Utils.canCloseGui()) mc.currentScreen.close();
-        else if (Utils.canOpenGui()) Tabs.get().get(0).openScreen(GuiThemes.get());
+        if (Utils.canCloseGui()) mc.gui.screen().onClose();
+        else if (Utils.canOpenGui()) Tabs.get().getFirst().openScreen(GuiThemes.get());
     }
 
     // Hide HUD
 
-    private boolean wasWidgetScreen, wasHudHiddenRoot;
+    public static boolean shouldHideHud() {
+        if (!GuiThemes.get().hideHUD()) return false;
 
-    @EventHandler(priority = EventPriority.LOWEST)
-    private void onOpenScreen(OpenScreenEvent event) {
-        boolean hideHud = GuiThemes.get().hideHUD();
+        Screen screen = mc.gui.screen();
+        if (!(screen instanceof WidgetScreen)) return false;
 
-        if (hideHud) {
-            if (!wasWidgetScreen) wasHudHiddenRoot = mc.options.hudHidden;
+        return !(screen instanceof HudEditorScreen)
+            && !(screen instanceof AddHudElementScreen)
+            && !(screen instanceof HudElementScreen)
+            && !(screen instanceof HudElementPresetsScreen);
+    }
 
-            if (event.screen instanceof WidgetScreen) mc.options.hudHidden = true;
-            else if (!wasHudHiddenRoot) mc.options.hudHidden = false;
-        }
-
-        wasWidgetScreen = event.screen instanceof WidgetScreen;
+    public static Identifier identifier(String path) {
+        return Identifier.fromNamespaceAndPath(MeteorClient.MOD_ID, path);
     }
 }

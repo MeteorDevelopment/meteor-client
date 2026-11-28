@@ -5,6 +5,11 @@
 
 package meteordevelopment.meteorclient.mixin;
 
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
+import com.llamalad7.mixinextras.injector.ModifyReturnValue;
+import com.llamalad7.mixinextras.sugar.Local;
+import meteordevelopment.meteorclient.MeteorClient;
+import meteordevelopment.meteorclient.events.render.GetFovEvent;
 import meteordevelopment.meteorclient.mixininterface.ICamera;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.CameraTweaks;
@@ -12,99 +17,102 @@ import meteordevelopment.meteorclient.systems.modules.render.FreeLook;
 import meteordevelopment.meteorclient.systems.modules.render.Freecam;
 import meteordevelopment.meteorclient.systems.modules.render.NoRender;
 import meteordevelopment.meteorclient.systems.modules.world.HighwayBuilder;
-import meteordevelopment.meteorclient.utils.Utils;
-import net.minecraft.client.render.Camera;
-import net.minecraft.client.render.CameraSubmersionType;
-import net.minecraft.entity.Entity;
-import net.minecraft.world.BlockView;
+import net.minecraft.client.Camera;
+import net.minecraft.util.Mth;
+import net.minecraft.world.level.material.FogType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArgs;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 
 @Mixin(Camera.class)
 public abstract class CameraMixin implements ICamera {
-    @Shadow private boolean thirdPerson;
+    @Shadow
+    private boolean detached;
 
-    @Shadow protected abstract double clipToSpace(double desiredCameraDistance);
+    @Shadow
+    private float yRot;
+    @Shadow
+    private float xRot;
 
-    @Shadow private float yaw;
-    @Shadow private float pitch;
+    @Shadow
+    protected abstract void setRotation(float yRot, float xRot);
 
-    @Shadow protected abstract void setRotation(float yaw, float pitch);
-
-    @Unique
-    private float tickDelta;
-
-    @Inject(method = "getSubmersionType", at = @At("HEAD"), cancellable = true)
-    private void getSubmergedFluidState(CallbackInfoReturnable<CameraSubmersionType> ci) {
-        if (Modules.get().get(NoRender.class).noLiquidOverlay()) ci.setReturnValue(CameraSubmersionType.NONE);
+    @Inject(method = "getFluidInCamera", at = @At("HEAD"), cancellable = true)
+    private void getSubmergedFluidState(CallbackInfoReturnable<FogType> cir) {
+        if (Modules.get().get(NoRender.class).noLiquidOverlay()) cir.setReturnValue(FogType.NONE);
     }
 
-    @ModifyArgs(method = "update", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/Camera;moveBy(DDD)V", ordinal = 0))
-    private void modifyCameraDistance(Args args) {
-        args.set(0, -clipToSpace(Modules.get().get(CameraTweaks.class).getDistance()));
-        if (Modules.get().isActive(Freecam.class)) {
-            args.set(0, -clipToSpace(0));
-        }
+    @ModifyVariable(method = "getMaxZoom", at = @At("HEAD"), argsOnly = true, name = "cameraDist")
+    private float modifyGetMaxZoom(float cameraDist) {
+        if (Modules.get().get(Freecam.class).isActive()) return 0;
+
+        CameraTweaks cameraTweaks = Modules.get().get(CameraTweaks.class);
+        return cameraTweaks.isActive() ? (float) cameraTweaks.distance : cameraDist;
     }
 
-    @Inject(method = "clipToSpace", at = @At("HEAD"), cancellable = true)
-    private void onClipToSpace(double desiredCameraDistance, CallbackInfoReturnable<Double> info) {
+    @Inject(method = "getMaxZoom", at = @At("HEAD"), cancellable = true)
+    private void onGetMaxZoom(float cameraDist, CallbackInfoReturnable<Float> cir) {
         if (Modules.get().get(CameraTweaks.class).clip()) {
-            info.setReturnValue(desiredCameraDistance);
+            cir.setReturnValue(cameraDist);
         }
     }
 
-    @Inject(method = "update", at = @At("HEAD"))
-    private void onUpdateHead(BlockView area, Entity focusedEntity, boolean thirdPerson, boolean inverseView, float tickDelta, CallbackInfo info) {
-        this.tickDelta = tickDelta;
-    }
-
-    @Inject(method = "update", at = @At("TAIL"))
-    private void onUpdateTail(BlockView area, Entity focusedEntity, boolean thirdPerson, boolean inverseView, float tickDelta, CallbackInfo info) {
+    @Inject(method = "alignWithEntity", at = @At("TAIL"))
+    private void onAlignWithEntityTail(float partialTicks, CallbackInfo ci) {
         if (Modules.get().isActive(Freecam.class)) {
-            this.thirdPerson = true;
+            this.detached = true;
         }
     }
 
-    @ModifyArgs(method = "update", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/Camera;setPos(DDD)V"))
-    private void onUpdateSetPosArgs(Args args) {
+    @ModifyArgs(method = "alignWithEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Camera;setPosition(DDD)V"))
+    private void onAlignSetPosArgs(Args args, @Local(argsOnly = true, name = "partialTicks") float partialTicks) {
         Freecam freecam = Modules.get().get(Freecam.class);
 
         if (freecam.isActive()) {
-            args.set(0, freecam.getX(tickDelta));
-            args.set(1, freecam.getY(tickDelta));
-            args.set(2, freecam.getZ(tickDelta));
+            args.set(0, freecam.getX(partialTicks));
+            args.set(1, freecam.getY(partialTicks));
+            args.set(2, freecam.getZ(partialTicks));
         }
     }
 
-    @ModifyArgs(method = "update", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/Camera;setRotation(FF)V"))
-    private void onUpdateSetRotationArgs(Args args) {
+    @ModifyArgs(method = "alignWithEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Camera;setRotation(FF)V"))
+    private void onAlignSetRotationArgs(Args args, @Local(argsOnly = true, name = "partialTicks") float partialTicks) {
         Freecam freecam = Modules.get().get(Freecam.class);
         FreeLook freeLook = Modules.get().get(FreeLook.class);
 
         if (freecam.isActive()) {
-            args.set(0, (float) freecam.getYaw(tickDelta));
-            args.set(1, (float) freecam.getPitch(tickDelta));
-        }
-        else if (Modules.get().isActive(HighwayBuilder.class)) {
-            args.set(0, yaw);
-            args.set(1, pitch);
-        }
-        else if (freeLook.isActive()) {
+            args.set(0, (float) freecam.getYaw(partialTicks));
+            args.set(1, (float) freecam.getPitch(partialTicks));
+        } else if (Modules.get().isActive(HighwayBuilder.class)) {
+            args.set(0, yRot);
+            args.set(1, xRot);
+        } else if (freeLook.isActive()) {
             args.set(0, freeLook.cameraYaw);
             args.set(1, freeLook.cameraPitch);
         }
     }
 
+    /**
+     * Set as spectator to disable smart culling
+     */
+    @ModifyExpressionValue(method = "extractRenderState", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;isSpectator()Z"))
+    private boolean hookFreeCamDisableSmartCullInBlocks(boolean original) {
+        return original || Modules.get().get(Freecam.class).isActive();
+    }
+
+    @ModifyReturnValue(method = "calculateFov", at = @At("RETURN"))
+    private float modifyFov(float original) {
+        return MeteorClient.EVENT_BUS.post(GetFovEvent.get(original)).fov;
+    }
+
     @Override
-    public void setRot(double yaw, double pitch) {
-        setRotation((float) yaw, (float) Utils.clamp(pitch, -90, 90));
+    public void meteor$setRot(double yaw, double pitch) {
+        setRotation((float) yaw, (float) Mth.clamp(pitch, -90, 90));
     }
 }

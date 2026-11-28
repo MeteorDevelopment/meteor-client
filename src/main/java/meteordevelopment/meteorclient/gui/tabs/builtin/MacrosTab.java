@@ -13,12 +13,12 @@ import meteordevelopment.meteorclient.gui.tabs.TabScreen;
 import meteordevelopment.meteorclient.gui.tabs.WindowTabScreen;
 import meteordevelopment.meteorclient.gui.widgets.containers.WTable;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
-import meteordevelopment.meteorclient.gui.widgets.pressable.WMinus;
+import meteordevelopment.meteorclient.gui.widgets.pressable.WConfirmedMinus;
 import meteordevelopment.meteorclient.settings.Settings;
 import meteordevelopment.meteorclient.systems.macros.Macro;
 import meteordevelopment.meteorclient.systems.macros.Macros;
 import meteordevelopment.meteorclient.utils.misc.NbtUtils;
-import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.screens.Screen;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
@@ -50,7 +50,7 @@ public class MacrosTab extends Tab {
             add(theme.horizontalSeparator()).expandX();
 
             WButton create = add(theme.button("Create")).expandX().widget();
-            create.action = () -> mc.setScreen(new EditMacroScreen(theme, null, this::reload));
+            create.action = () -> mc.gui.setScreen(new EditMacroScreen(theme, null, this::reload));
         }
 
         private void initTable(WTable table) {
@@ -61,9 +61,9 @@ public class MacrosTab extends Tab {
                 table.add(theme.label(macro.name.get() + " (" + macro.keybind.get() + ")"));
 
                 WButton edit = table.add(theme.button(GuiRenderer.EDIT)).expandCellX().right().widget();
-                edit.action = () -> mc.setScreen(new EditMacroScreen(theme, macro, this::reload));
+                edit.action = () -> mc.gui.setScreen(new EditMacroScreen(theme, macro, this::reload));
 
-                WMinus remove = table.add(theme.minus()).widget();
+                WConfirmedMinus remove = table.add(theme.confirmedMinus()).widget();
                 remove.action = () -> {
                     Macros.get().remove(macro);
                     reload();
@@ -98,7 +98,6 @@ public class MacrosTab extends Tab {
         public boolean save() {
             if (value.name.get().isBlank()
                 || value.messages.get().isEmpty()
-                || !value.keybind.get().isSet()
             ) return false;
 
             if (isNew) {

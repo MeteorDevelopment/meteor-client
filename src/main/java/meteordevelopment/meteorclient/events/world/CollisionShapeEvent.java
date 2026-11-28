@@ -5,10 +5,11 @@
 
 package meteordevelopment.meteorclient.events.world;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import meteordevelopment.meteorclient.events.Cancellable;
-import net.minecraft.block.BlockState;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.shape.VoxelShape;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class CollisionShapeEvent extends Cancellable {
     private static final CollisionShapeEvent INSTANCE = new CollisionShapeEvent();
@@ -18,10 +19,17 @@ public class CollisionShapeEvent extends Cancellable {
     public VoxelShape shape;
 
     public static CollisionShapeEvent get(BlockState state, BlockPos pos, VoxelShape shape) {
-        INSTANCE.setCancelled(false);
-        INSTANCE.state = state;
-        INSTANCE.pos = pos;
-        INSTANCE.shape = shape;
-        return INSTANCE;
+        CollisionShapeEvent event = INSTANCE;
+
+        if (!RenderSystem.isOnRenderThread()) {
+            event = new CollisionShapeEvent();
+        }
+
+        event.setCancelled(false);
+        event.state = state;
+        event.pos = pos;
+        event.shape = shape;
+
+        return event;
     }
 }

@@ -1,0 +1,13 @@
+{
+  "name": "devbuilds",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "author": "MineGame159",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "get_number": "node get_number.js",
+    "webhook": "node index.js"
+  }
+}

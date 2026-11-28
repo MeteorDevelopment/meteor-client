@@ -5,50 +5,51 @@
 
 package meteordevelopment.meteorclient.mixin.sodium;
 
-import me.jellysquid.mods.sodium.client.render.chunk.compile.buffers.ChunkModelBuilder;
-import me.jellysquid.mods.sodium.client.render.chunk.compile.pipeline.BlockRenderContext;
-import me.jellysquid.mods.sodium.client.render.chunk.compile.pipeline.BlockRenderer;
-import me.jellysquid.mods.sodium.client.util.color.ColorABGR;
 import meteordevelopment.meteorclient.systems.modules.render.Xray;
+import net.caffeinemc.mods.sodium.client.render.chunk.compile.pipeline.BlockRenderer;
+import net.caffeinemc.mods.sodium.client.render.chunk.terrain.material.DefaultMaterials;
+import net.caffeinemc.mods.sodium.client.render.chunk.terrain.material.Material;
+import net.caffeinemc.mods.sodium.client.render.model.MutableQuadViewImpl;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyVariable;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-
-import java.util.Arrays;
+import org.spongepowered.asm.mixin.injection.ModifyArg;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(value = BlockRenderer.class, remap = false)
-public class SodiumBlockRendererMixin {
-    @Unique private final ThreadLocal<Integer> alphas = new ThreadLocal<>();
-    @Unique private final ThreadLocal<int[]> colors = ThreadLocal.withInitial(() -> new int[4]);
+public abstract class SodiumBlockRendererMixin {
+    @Unique
+    private int xrayAlpha;
 
     @Inject(method = "renderModel", at = @At("HEAD"), cancellable = true)
-    private void onRenderModel(BlockRenderContext ctx, ChunkModelBuilder buffers, CallbackInfoReturnable<Boolean> info) {
-        int alpha = Xray.getAlpha(ctx.state(), ctx.pos());
+    private void onRenderModel(BlockStateModel model, BlockState state, BlockPos pos, BlockPos origin, CallbackInfo ci) {
+        xrayAlpha = Xray.getAlpha(state, pos);
 
-        if (alpha == 0) info.setReturnValue(false);
-        else alphas.set(alpha);
+        // Cancel block rendering when alpha is 0, required for Iris support but unnecessary to check for shaders, we already force be disabled when Xray is enabled
+        if (xrayAlpha == 0) {
+            ci.cancel();
+        }
     }
 
-    // TODO: Looks like Sodium disables transparency on blocks that aren't supposed to be transparent
-    @ModifyVariable(method = "writeGeometry", at = @At("HEAD"), argsOnly = true, index = 6)
-    private int[] onWriteGeometryModifyColors(int[] colors) {
-        int alpha = alphas.get();
-
-        if (alpha != -1) {
-            if (colors == null) {
-                colors = this.colors.get();
-                Arrays.fill(colors, ColorABGR.pack(255, 255, 255, alpha));
-            }
-            else {
-                for (int i = 0; i < colors.length; i++) {
-                    colors[i] = ColorABGR.withAlpha(colors[i], alpha / 255f);
-                }
+    @Inject(method = "bufferQuad", at = @At("HEAD"))
+    private void onBufferQuad(MutableQuadViewImpl quad, float[] brightnesses, Material material, CallbackInfo ci) {
+        if (xrayAlpha != -1) {
+            for (int i = 0; i < 4; i++) {
+                int color = quad.baseColor(i);
+                quad.setColor(i, ((xrayAlpha & 0xFF) << 24) | (color & 0x00FFFFFF));
             }
         }
+    }
 
-        return colors;
+    @ModifyArg(method = "processQuad", at = @At(value = "INVOKE", target = "Lnet/caffeinemc/mods/sodium/client/render/chunk/compile/pipeline/BlockRenderer;bufferQuad(Lnet/caffeinemc/mods/sodium/client/render/model/MutableQuadViewImpl;[FLnet/caffeinemc/mods/sodium/client/render/chunk/terrain/material/Material;)V"), index = 2)
+    private Material modifyMaterial(Material material) {
+        if (xrayAlpha != -1) {
+            return DefaultMaterials.TRANSLUCENT;
+        }
+        return material;
     }
 }

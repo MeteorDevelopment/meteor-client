@@ -5,54 +5,45 @@
 
 package meteordevelopment.meteorclient.systems.modules.render;
 
+import meteordevelopment.meteorclient.MixinPlugin;
 import meteordevelopment.meteorclient.events.render.RenderBlockEntityEvent;
 import meteordevelopment.meteorclient.events.world.AmbientOcclusionEvent;
 import meteordevelopment.meteorclient.events.world.ChunkOcclusionEvent;
+import meteordevelopment.meteorclient.gui.GuiTheme;
+import meteordevelopment.meteorclient.gui.widgets.WWidget;
+import meteordevelopment.meteorclient.mixin.BlockEntityRenderStateAccessor;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.shape.VoxelShapes;
-import net.minecraft.world.BlockView;
+import net.irisshaders.iris.api.v0.IrisApi;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.tags.FluidTags;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.phys.shapes.Shapes;
 
 import java.util.List;
 
 public class Xray extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
+    public static final List<Block> ORES = List.of(Blocks.COAL_ORE, Blocks.DEEPSLATE_COAL_ORE, Blocks.IRON_ORE, Blocks.DEEPSLATE_IRON_ORE, Blocks.GOLD_ORE, Blocks.DEEPSLATE_GOLD_ORE, Blocks.LAPIS_ORE, Blocks.DEEPSLATE_LAPIS_ORE, Blocks.REDSTONE_ORE, Blocks.DEEPSLATE_REDSTONE_ORE, Blocks.DIAMOND_ORE, Blocks.DEEPSLATE_DIAMOND_ORE, Blocks.EMERALD_ORE, Blocks.DEEPSLATE_EMERALD_ORE, Blocks.COPPER_ORE, Blocks.DEEPSLATE_COPPER_ORE, Blocks.NETHER_GOLD_ORE, Blocks.NETHER_QUARTZ_ORE, Blocks.ANCIENT_DEBRIS);
+
     private final Setting<List<Block>> blocks = sgGeneral.add(new BlockListSetting.Builder()
         .name("whitelist")
         .description("Which blocks to show x-rayed.")
-        .defaultValue(
-            Blocks.COAL_ORE,
-            Blocks.DEEPSLATE_COAL_ORE,
-            Blocks.IRON_ORE,
-            Blocks.DEEPSLATE_IRON_ORE,
-            Blocks.GOLD_ORE,
-            Blocks.DEEPSLATE_GOLD_ORE,
-            Blocks.LAPIS_ORE,
-            Blocks.DEEPSLATE_LAPIS_ORE,
-            Blocks.REDSTONE_ORE,
-            Blocks.DEEPSLATE_REDSTONE_ORE,
-            Blocks.DIAMOND_ORE,
-            Blocks.DEEPSLATE_DIAMOND_ORE,
-            Blocks.EMERALD_ORE,
-            Blocks.DEEPSLATE_EMERALD_ORE,
-            Blocks.COPPER_ORE,
-            Blocks.DEEPSLATE_COPPER_ORE,
-            Blocks.NETHER_GOLD_ORE,
-            Blocks.NETHER_QUARTZ_ORE,
-            Blocks.ANCIENT_DEBRIS
-        )
-        .onChanged(v -> {
-            if (isActive()) mc.worldRenderer.reload();
+        .defaultValue(ORES)
+        .onChanged(_ -> {
+            if (isActive()) {
+                mc.levelExtractor.allChanged();
+            }
         })
         .build()
     );
@@ -63,18 +54,34 @@ public class Xray extends Module {
         .defaultValue(25)
         .range(0, 255)
         .sliderMax(255)
-        .onChanged(onChanged -> {
-            if (isActive()) mc.worldRenderer.reload();
+        .onChanged(_ -> {
+            if (isActive()) {
+                mc.levelExtractor.allChanged();
+            }
+        })
+        .build()
+    );
+
+    private final Setting<FluidOpacity> fluidOpacity = sgGeneral.add(new EnumSetting.Builder<FluidOpacity>()
+        .name("fluid-opacity")
+        .description("Which fluids should use xray opacity.")
+        .defaultValue(FluidOpacity.Both)
+        .onChanged(_ -> {
+            if (isActive()) {
+                mc.levelExtractor.allChanged();
+            }
         })
         .build()
     );
 
     private final Setting<Boolean> exposedOnly = sgGeneral.add(new BoolSetting.Builder()
-        .name("exposed only")
+        .name("exposed-only")
         .description("Show only exposed ores.")
         .defaultValue(false)
-        .onChanged(onChanged -> {
-            if (isActive()) mc.worldRenderer.reload();
+        .onChanged(_ -> {
+            if (isActive()) {
+                mc.levelExtractor.allChanged();
+            }
         })
         .build());
 
@@ -84,17 +91,26 @@ public class Xray extends Module {
 
     @Override
     public void onActivate() {
-        mc.worldRenderer.reload();
+        mc.levelExtractor.allChanged();
     }
 
     @Override
     public void onDeactivate() {
-        mc.worldRenderer.reload();
+        mc.levelExtractor.allChanged();
+    }
+
+    @Override
+    public WWidget getWidget(GuiTheme theme) {
+        if (MixinPlugin.isIrisPresent && IrisApi.getInstance().isShaderPackInUse())
+            return theme.label("Warning: Due to shaders in use, opacity is overridden to 0.");
+
+        return null;
     }
 
     @EventHandler
     private void onRenderBlockEntity(RenderBlockEntityEvent event) {
-        if (isBlocked(event.blockEntity.getCachedState().getBlock(), event.blockEntity.getPos())) event.cancel();
+        BlockState state = ((BlockEntityRenderStateAccessor) event.blockEntityState).meteor$getBlockState();
+        if (getAlpha(state, event.blockEntityState.blockPos) == 0) event.cancel();
     }
 
     @EventHandler
@@ -107,11 +123,11 @@ public class Xray extends Module {
         event.lightLevel = 1;
     }
 
-    public boolean modifyDrawSide(BlockState state, BlockView view, BlockPos pos, Direction facing, boolean returns) {
+    public boolean modifyDrawSide(BlockState state, BlockGetter view, BlockPos pos, Direction facing, boolean returns) {
         if (!returns && !isBlocked(state.getBlock(), pos)) {
-            BlockPos adjPos = pos.offset(facing);
+            BlockPos adjPos = pos.relative(facing);
             BlockState adjState = view.getBlockState(adjPos);
-            return adjState.getCullingFace(view , adjPos,  facing.getOpposite()) != VoxelShapes.fullCube() || adjState.getBlock() != state.getBlock() || BlockUtils.isExposed(adjPos);
+            return adjState.getFaceOcclusionShape(facing.getOpposite()) != Shapes.block() || adjState.getBlock() != state.getBlock() || !adjState.isSolidRender() || isBlocked(adjState.getBlock(), adjPos);
         }
 
         return returns;
@@ -124,19 +140,53 @@ public class Xray extends Module {
     public static int getAlpha(BlockState state, BlockPos pos) {
         WallHack wallHack = Modules.get().get(WallHack.class);
         Xray xray = Modules.get().get(Xray.class);
+        Block block = state.getBlock();
 
-        if (wallHack.isActive() && wallHack.blocks.get().contains(state.getBlock())) {
+        if (wallHack.isActive() && wallHack.blocks.get().contains(block)) {
+            if (MixinPlugin.isIrisPresent && IrisApi.getInstance().isShaderPackInUse()) return 0;
+
             int alpha;
 
             if (xray.isActive()) alpha = xray.opacity.get();
             else alpha = wallHack.opacity.get();
 
             return alpha;
-        }
-        else if (xray.isActive() && !wallHack.isActive() && xray.isBlocked(state.getBlock(), pos)) {
-            return xray.opacity.get();
+        } else if (xray.isActive() && !wallHack.isActive() && xray.isBlocked(block, pos)) {
+            return (MixinPlugin.isIrisPresent && IrisApi.getInstance().isShaderPackInUse()) ? 0 : xray.opacity.get();
         }
 
         return -1;
+    }
+
+    public static int getFluidAlpha(FluidState state, BlockPos pos) {
+        WallHack wallHack = Modules.get().get(WallHack.class);
+        Xray xray = Modules.get().get(Xray.class);
+        Block fluidBlock = state.createLegacyBlock().getBlock();
+
+        if (wallHack.isActive() && wallHack.blocks.get().contains(fluidBlock)) {
+            if (MixinPlugin.isIrisPresent && IrisApi.getInstance().isShaderPackInUse()) return 0;
+
+            return xray.isActive() ? xray.opacity.get() : wallHack.opacity.get();
+        } else if (xray.isActive() && !wallHack.isActive() && xray.shouldApplyFluidOpacity(state) && xray.isBlocked(fluidBlock, pos)) {
+            return (MixinPlugin.isIrisPresent && IrisApi.getInstance().isShaderPackInUse()) ? 0 : xray.opacity.get();
+        }
+
+        return -1;
+    }
+
+    private boolean shouldApplyFluidOpacity(FluidState state) {
+        return switch (fluidOpacity.get()) {
+            case None -> false;
+            case Water -> state.is(FluidTags.WATER);
+            case Lava -> state.is(FluidTags.LAVA);
+            case Both -> state.is(FluidTags.WATER) || state.is(FluidTags.LAVA);
+        };
+    }
+
+    public enum FluidOpacity {
+        None,
+        Water,
+        Lava,
+        Both
     }
 }

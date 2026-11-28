@@ -13,13 +13,14 @@ import meteordevelopment.meteorclient.gui.widgets.pressable.WPlus;
 import meteordevelopment.meteorclient.systems.hud.Hud;
 import meteordevelopment.meteorclient.systems.hud.HudElementInfo;
 import meteordevelopment.meteorclient.utils.Utils;
+import org.jspecify.annotations.Nullable;
 
 public class HudElementPresetsScreen extends WindowScreen {
     private final HudElementInfo<?> info;
     private final int x, y;
 
     private final WTextBox searchBar;
-    private HudElementInfo<?>.Preset firstPreset;
+    private HudElementInfo<?>.@Nullable Preset firstPreset;
 
     public HudElementPresetsScreen(GuiTheme theme, HudElementInfo<?> info, int x, int y) {
         super(theme, "Select preset for " + info.title);
@@ -35,8 +36,9 @@ public class HudElementPresetsScreen extends WindowScreen {
         };
 
         enterAction = () -> {
+            if (firstPreset == null) return;
             Hud.get().add(firstPreset, x, y);
-            close();
+            onClose();
         };
     }
 
@@ -59,15 +61,10 @@ public class HudElementPresetsScreen extends WindowScreen {
             WPlus add = l.add(theme.plus()).expandCellX().right().widget();
             add.action = () -> {
                 Hud.get().add(preset, x, y);
-                close();
+                onClose();
             };
 
             if (firstPreset == null) firstPreset = preset;
         }
-    }
-
-    @Override
-    protected void onRenderBefore(float delta) {
-        HudEditorScreen.renderElements();
     }
 }

@@ -6,10 +6,7 @@
 package meteordevelopment.meteorclient.systems.modules.player;
 
 import meteordevelopment.meteorclient.events.world.TickEvent;
-import meteordevelopment.meteorclient.settings.EnumSetting;
-import meteordevelopment.meteorclient.settings.IntSetting;
-import meteordevelopment.meteorclient.settings.Setting;
-import meteordevelopment.meteorclient.settings.SettingGroup;
+import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
@@ -17,6 +14,13 @@ import meteordevelopment.orbit.EventHandler;
 
 public class AutoClicker extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
+
+    private final Setting<Boolean> inScreens = sgGeneral.add(new BoolSetting.Builder()
+        .name("while-in-screens")
+        .description("Whether to click while a screen is open.")
+        .defaultValue(true)
+        .build()
+    );
 
     private final Setting<Mode> leftClickMode = sgGeneral.add(new EnumSetting.Builder<Mode>()
         .name("mode-left")
@@ -31,7 +35,7 @@ public class AutoClicker extends Module {
         .defaultValue(2)
         .min(0)
         .sliderMax(60)
-        .visible(() -> leftClickMode.get() != Mode.Disabled)
+        .visible(() -> leftClickMode.get() == Mode.Press)
         .build()
     );
 
@@ -48,7 +52,7 @@ public class AutoClicker extends Module {
         .defaultValue(2)
         .min(0)
         .sliderMax(60)
-        .visible(() -> rightClickMode.get() != Mode.Disabled)
+        .visible(() -> rightClickMode.get() == Mode.Press)
         .build()
     );
 
@@ -62,21 +66,24 @@ public class AutoClicker extends Module {
     public void onActivate() {
         rightClickTimer = 0;
         leftClickTimer = 0;
-        mc.options.attackKey.setPressed(false);
-        mc.options.useKey.setPressed(false);
+        mc.options.keyAttack.setDown(false);
+        mc.options.keyUse.setDown(false);
     }
 
     @Override
     public void onDeactivate() {
-        mc.options.attackKey.setPressed(false);
-        mc.options.useKey.setPressed(false);
+        mc.options.keyAttack.setDown(false);
+        mc.options.keyUse.setDown(false);
     }
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
+        if (!inScreens.get() && mc.gui.screen() != null) return;
+
         switch (leftClickMode.get()) {
-            case Disabled -> {}
-            case Hold -> mc.options.attackKey.setPressed(true);
+            case Disabled -> {
+            }
+            case Hold -> mc.options.keyAttack.setDown(true);
             case Press -> {
                 leftClickTimer++;
                 if (leftClickTimer > leftClickDelay.get()) {
@@ -85,9 +92,11 @@ public class AutoClicker extends Module {
                 }
             }
         }
+
         switch (rightClickMode.get()) {
-            case Disabled -> {}
-            case Hold -> mc.options.useKey.setPressed(true);
+            case Disabled -> {
+            }
+            case Hold -> mc.options.keyUse.setDown(true);
             case Press -> {
                 rightClickTimer++;
                 if (rightClickTimer > rightClickDelay.get()) {

@@ -5,22 +5,30 @@
 
 package meteordevelopment.meteorclient.systems.accounts;
 
-import com.mojang.authlib.exceptions.AuthenticationException;
-import com.mojang.authlib.minecraft.MinecraftSessionService;
 import com.mojang.authlib.minecraft.UserApiService;
-import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
-import meteordevelopment.meteorclient.mixin.MinecraftClientAccessor;
-import meteordevelopment.meteorclient.mixin.PlayerSkinProviderAccessor;
+import com.mojang.authlib.services.FriendsService;
+import com.mojang.authlib.services.MinecraftServicesDiscoveryService;
+import com.mojang.authlib.services.ServicesKeyType;
+import meteordevelopment.meteorclient.mixin.FileCacheAccessor;
+import meteordevelopment.meteorclient.mixin.MinecraftAccessor;
+import meteordevelopment.meteorclient.mixin.SkinManagerAccessor;
 import meteordevelopment.meteorclient.utils.misc.ISerializable;
 import meteordevelopment.meteorclient.utils.misc.NbtException;
-import net.minecraft.client.network.SocialInteractionsManager;
-import net.minecraft.client.report.AbuseReportContext;
-import net.minecraft.client.report.ReporterEnvironment;
-import net.minecraft.client.texture.PlayerSkinProvider;
-import net.minecraft.client.util.ProfileKeys;
-import net.minecraft.client.util.Session;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.network.encryption.SignatureVerifier;
+import net.minecraft.client.User;
+import net.minecraft.client.gui.screens.social.PlayerSocialManager;
+import net.minecraft.client.gui.screens.social.RemoteFriendListUpdateHandler;
+import net.minecraft.client.multiplayer.ProfileKeyPairManager;
+import net.minecraft.client.multiplayer.chat.report.ReportEnvironment;
+import net.minecraft.client.multiplayer.chat.report.ReportingContext;
+import net.minecraft.client.renderer.texture.SkinTextureDownloader;
+import net.minecraft.client.resources.SkinManager;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.Services;
+import net.minecraft.util.SignatureValidator;
+import net.minecraft.util.Util;
+
+import java.nio.file.Path;
+import java.util.concurrent.CompletableFuture;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
@@ -30,7 +38,7 @@ public abstract class Account<T extends Account<?>> implements ISerializable<T> 
 
     protected final AccountCache cache;
 
-    public Account(AccountType type, String name) {
+    protected Account(AccountType type, String name) {
         this.type = type;
         this.name = name;
         this.cache = new AccountCache();
@@ -39,8 +47,8 @@ public abstract class Account<T extends Account<?>> implements ISerializable<T> 
     public abstract boolean fetchInfo();
 
     public boolean login() {
-        YggdrasilAuthenticationService authenticationService = new YggdrasilAuthenticationService(((MinecraftClientAccessor) mc).getProxy());
-        applyLoginEnvironment(authenticationService, authenticationService.createMinecraftSessionService());
+        MinecraftServicesDiscoveryService authenticationService = MinecraftServicesDiscoveryService.create(mc.getProxy());
+        applyLoginEnvironment(authenticationService);
 
         return true;
     }
@@ -58,33 +66,34 @@ public abstract class Account<T extends Account<?>> implements ISerializable<T> 
         return cache;
     }
 
-    public static void setSession(Session session) {
-        MinecraftClientAccessor mca = (MinecraftClientAccessor) mc;
-        mca.setSession(session);
-        mc.getSessionProperties().clear();
-        UserApiService apiService;
-        try {
-            apiService = mca.getAuthenticationService().createUserApiService(session.getAccessToken());
-        } catch (AuthenticationException e) {
-            apiService = UserApiService.OFFLINE;
-        }
-        mca.setUserApiService(apiService);
-        mca.setSocialInteractionsManager(new SocialInteractionsManager(mc, apiService));
-        mca.setProfileKeys(ProfileKeys.create(apiService, session, mc.runDirectory.toPath()));
-        mca.setAbuseReportContext(AbuseReportContext.create(ReporterEnvironment.ofIntegratedServer(), apiService));
+    public static void setSession(User session) {
+        MinecraftAccessor mca = (MinecraftAccessor) mc;
+        mca.meteor$setUser(session);
+
+        MinecraftServicesDiscoveryService yggdrasilAuthenticationService = MinecraftServicesDiscoveryService.create(mc.getProxy());
+
+        UserApiService apiService = yggdrasilAuthenticationService.createUserApiService(session.getAccessToken());
+        FriendsService friendsService = yggdrasilAuthenticationService.createFriendsService(session.getAccessToken());
+        RemoteFriendListUpdateHandler remoteFriendListUpdateHandler = new RemoteFriendListUpdateHandler(friendsService, mc);
+        mca.meteor$setUserApiService(apiService);
+        mca.meteor$setPlayerSocialManager(new PlayerSocialManager(mc, apiService, friendsService, remoteFriendListUpdateHandler));
+        mca.meteor$setProfileKeyPairManager(ProfileKeyPairManager.create(apiService, session, mc.gameDirectory.toPath()));
+        mca.meteor$setReportingContext(ReportingContext.create(ReportEnvironment.local(), apiService));
+        mca.meteor$setProfileFuture(CompletableFuture.supplyAsync(() -> mc.services().sessionService().fetchProfile(mc.getUser().getProfileId(), true), Util.ioPool()));
     }
 
-    public static void applyLoginEnvironment(YggdrasilAuthenticationService authService, MinecraftSessionService sessService) {
-        MinecraftClientAccessor mca = (MinecraftClientAccessor) mc;
-        mca.setAuthenticationService(authService);
-        mca.setServicesSignatureVerifier(SignatureVerifier.create(authService.getServicesKey()));
-        mca.setSessionService(sessService);
-        mca.setSkinProvider(new PlayerSkinProvider(mc.getTextureManager(), ((PlayerSkinProviderAccessor) mc.getSkinProvider()).getSkinCacheDir(), sessService));
+    public static void applyLoginEnvironment(MinecraftServicesDiscoveryService authService) {
+        MinecraftAccessor mca = (MinecraftAccessor) mc;
+        SignatureValidator.from(authService.getServicesKeySet(), ServicesKeyType.PROFILE_KEY);
+        SkinManager.TextureCache skinCache = ((SkinManagerAccessor) mc.getSkinManager()).meteor$getSkinTextures();
+        Path skinCachePath = ((FileCacheAccessor) skinCache).meteor$getRoot();
+        mca.meteor$setServices(Services.create(authService, mc.gameDirectory));
+        mca.meteor$setSkinManager(new SkinManager(skinCachePath, mc.services(), new SkinTextureDownloader(mc.getProxy(), mc.getTextureManager(), mc), mc));
     }
 
     @Override
-    public NbtCompound toTag() {
-        NbtCompound tag = new NbtCompound();
+    public CompoundTag toTag() {
+        CompoundTag tag = new CompoundTag();
 
         tag.putString("type", type.name());
         tag.putString("name", name);
@@ -93,12 +102,13 @@ public abstract class Account<T extends Account<?>> implements ISerializable<T> 
         return tag;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    public T fromTag(NbtCompound tag) {
-        if (!tag.contains("name") || !tag.contains("cache")) throw new NbtException();
+    public T fromTag(CompoundTag tag) {
+        if (tag.getString("name").isEmpty() || tag.getCompound("cache").isEmpty()) throw new NbtException();
 
-        name = tag.getString("name");
-        cache.fromTag(tag.getCompound("cache"));
+        name = tag.getString("name").get();
+        cache.fromTag(tag.getCompound("cache").get());
 
         return (T) this;
     }

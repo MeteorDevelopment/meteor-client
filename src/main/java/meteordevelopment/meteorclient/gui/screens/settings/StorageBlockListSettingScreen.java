@@ -5,56 +5,64 @@
 
 package meteordevelopment.meteorclient.gui.screens.settings;
 
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import meteordevelopment.meteorclient.gui.GuiTheme;
+import meteordevelopment.meteorclient.gui.screens.settings.base.CollectionListSettingScreen;
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.StorageBlockListSetting;
-import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.item.Item;
-import net.minecraft.item.Items;
+import meteordevelopment.meteorclient.utils.render.DisplayItemUtils;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.entity.BlockEntityTypes;
 
 import java.util.List;
+import java.util.Map;
 
-public class StorageBlockListSettingScreen extends LeftRightListSettingScreen<BlockEntityType<?>> {
+public class StorageBlockListSettingScreen extends CollectionListSettingScreen<BlockEntityType<?>> {
+    private static final Map<BlockEntityType<?>, BlockEntityTypeInfo> BLOCK_ENTITY_TYPE_INFO_MAP = new Object2ObjectOpenHashMap<>();
+    private static final BlockEntityTypeInfo UNKNOWN = new BlockEntityTypeInfo(Items.BARRIER, "Unknown");
+
+    static {
+        // Map of storage blocks
+        BLOCK_ENTITY_TYPE_INFO_MAP.put(BlockEntityTypes.BARREL, new BlockEntityTypeInfo(Items.BARREL, "Barrel"));
+        BLOCK_ENTITY_TYPE_INFO_MAP.put(BlockEntityTypes.BLAST_FURNACE, new BlockEntityTypeInfo(Items.BLAST_FURNACE, "Blast Furnace"));
+        BLOCK_ENTITY_TYPE_INFO_MAP.put(BlockEntityTypes.BREWING_STAND, new BlockEntityTypeInfo(Items.BREWING_STAND, "Brewing Stand"));
+        BLOCK_ENTITY_TYPE_INFO_MAP.put(BlockEntityTypes.CAMPFIRE, new BlockEntityTypeInfo(Items.CAMPFIRE, "Campfire"));
+        BLOCK_ENTITY_TYPE_INFO_MAP.put(BlockEntityTypes.CHEST, new BlockEntityTypeInfo(Items.CHEST, "Chest"));
+        BLOCK_ENTITY_TYPE_INFO_MAP.put(BlockEntityTypes.CHISELED_BOOKSHELF, new BlockEntityTypeInfo(Items.CHISELED_BOOKSHELF, "Chiseled Bookshelf"));
+        BLOCK_ENTITY_TYPE_INFO_MAP.put(BlockEntityTypes.CRAFTER, new BlockEntityTypeInfo(Items.CRAFTER, "Crafter"));
+        BLOCK_ENTITY_TYPE_INFO_MAP.put(BlockEntityTypes.DISPENSER, new BlockEntityTypeInfo(Items.DISPENSER, "Dispenser"));
+        BLOCK_ENTITY_TYPE_INFO_MAP.put(BlockEntityTypes.DECORATED_POT, new BlockEntityTypeInfo(Items.DECORATED_POT, "Decorated Pot"));
+        BLOCK_ENTITY_TYPE_INFO_MAP.put(BlockEntityTypes.DROPPER, new BlockEntityTypeInfo(Items.DROPPER, "Dropper"));
+        BLOCK_ENTITY_TYPE_INFO_MAP.put(BlockEntityTypes.ENDER_CHEST, new BlockEntityTypeInfo(Items.ENDER_CHEST, "Ender Chest"));
+        BLOCK_ENTITY_TYPE_INFO_MAP.put(BlockEntityTypes.FURNACE, new BlockEntityTypeInfo(Items.FURNACE, "Furnace"));
+        BLOCK_ENTITY_TYPE_INFO_MAP.put(BlockEntityTypes.HOPPER, new BlockEntityTypeInfo(Items.HOPPER, "Hopper"));
+        BLOCK_ENTITY_TYPE_INFO_MAP.put(BlockEntityTypes.SHULKER_BOX, new BlockEntityTypeInfo(Items.SHULKER_BOX, "Shulker Box"));
+        BLOCK_ENTITY_TYPE_INFO_MAP.put(BlockEntityTypes.SMOKER, new BlockEntityTypeInfo(Items.SMOKER, "Smoker"));
+        BLOCK_ENTITY_TYPE_INFO_MAP.put(BlockEntityTypes.TRAPPED_CHEST, new BlockEntityTypeInfo(Items.TRAPPED_CHEST, "Trapped Chest"));
+    }
+
     public StorageBlockListSettingScreen(GuiTheme theme, Setting<List<BlockEntityType<?>>> setting) {
         super(theme, "Select Storage Blocks", setting, setting.get(), StorageBlockListSetting.REGISTRY);
     }
 
     @Override
     protected WWidget getValueWidget(BlockEntityType<?> value) {
-        Item item = Items.BARRIER;
-
-        if (value == BlockEntityType.FURNACE) item = Items.FURNACE;
-        else if (value == BlockEntityType.CHEST) item = Items.CHEST;
-        else if (value == BlockEntityType.TRAPPED_CHEST) item = Items.TRAPPED_CHEST;
-        else if (value == BlockEntityType.ENDER_CHEST) item = Items.ENDER_CHEST;
-        else if (value == BlockEntityType.DISPENSER) item = Items.DISPENSER;
-        else if (value == BlockEntityType.DROPPER) item = Items.DROPPER;
-        else if (value == BlockEntityType.HOPPER) item = Items.HOPPER;
-        else if (value == BlockEntityType.SHULKER_BOX) item = Items.SHULKER_BOX;
-        else if (value == BlockEntityType.BARREL) item = Items.BARREL;
-        else if (value == BlockEntityType.SMOKER) item = Items.SMOKER;
-        else if (value == BlockEntityType.BLAST_FURNACE) item = Items.BLAST_FURNACE;
-
-        return theme.itemWithLabel(item.getDefaultStack(), getValueName(value));
+        BlockEntityTypeInfo info = BLOCK_ENTITY_TYPE_INFO_MAP.getOrDefault(value, UNKNOWN);
+        return theme.itemWithLabel(DisplayItemUtils.toStack(info.item()), info.name());
     }
 
     @Override
-    protected String getValueName(BlockEntityType<?> value) {
-        String name = "Unknown";
+    protected String[] getValueNames(BlockEntityType<?> value) {
+        return new String[]{
+            BLOCK_ENTITY_TYPE_INFO_MAP.getOrDefault(value, UNKNOWN).name(),
+            BuiltInRegistries.BLOCK_ENTITY_TYPE.getKey(value).toString()
+        };
+    }
 
-        if (value == BlockEntityType.FURNACE) name = "Furnace";
-        else if (value == BlockEntityType.CHEST) name = "Chest";
-        else if (value == BlockEntityType.TRAPPED_CHEST) name = "Trapped Chest";
-        else if (value == BlockEntityType.ENDER_CHEST) name = "Ender Chest";
-        else if (value == BlockEntityType.DISPENSER) name = "Dispenser";
-        else if (value == BlockEntityType.DROPPER) name = "Dropper";
-        else if (value == BlockEntityType.HOPPER) name = "Hopper";
-        else if (value == BlockEntityType.SHULKER_BOX) name = "Shulker Box";
-        else if (value == BlockEntityType.BARREL) name = "Barrel";
-        else if (value == BlockEntityType.SMOKER) name = "Smoker";
-        else if (value == BlockEntityType.BLAST_FURNACE) name = "Blast Furnace";
-
-        return name;
+    private record BlockEntityTypeInfo(Item item, String name) {
     }
 }

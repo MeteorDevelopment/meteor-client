@@ -5,80 +5,72 @@
 
 package meteordevelopment.meteorclient.utils.tooltip;
 
-import net.minecraft.block.entity.BannerBlockEntity;
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.tooltip.TooltipComponent;
-import net.minecraft.client.model.ModelPart;
-import net.minecraft.client.render.DiffuseLighting;
-import net.minecraft.client.render.OverlayTexture;
-import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.render.block.entity.BannerBlockEntityRenderer;
-import net.minecraft.client.render.entity.model.EntityModelLayers;
-import net.minecraft.client.render.item.ItemRenderer;
-import net.minecraft.client.render.model.ModelLoader;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.item.BannerItem;
-import net.minecraft.item.ItemStack;
+import meteordevelopment.meteorclient.mixin.GuiGraphicsExtractorAccessor;
+import meteordevelopment.meteorclient.utils.render.CustomBannerGuiElementRenderState;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
+import net.minecraft.client.model.geom.ModelLayers;
+import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.model.object.banner.BannerFlagModel;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.item.BannerItem;
+import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.entity.BannerPatternLayers;
+import org.jspecify.annotations.NonNull;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
-public class BannerTooltipComponent implements MeteorTooltipData, TooltipComponent {
-    private final ItemStack banner;
-    private final ModelPart bannerField;
+public class BannerTooltipComponent implements MeteorTooltipData, ClientTooltipComponent {
+    private final DyeColor color;
+    private final BannerPatternLayers patterns;
+    private final BannerFlagModel bannerFlag;
 
+    /**
+     * Should only be used when the ItemStack is a banner
+     */
     public BannerTooltipComponent(ItemStack banner) {
-        this.banner = banner;
-        this.bannerField = mc.getEntityModelLoader().getModelPart(EntityModelLayers.BANNER).getChild("flag");
+        this.color = ((BannerItem) banner.getItem()).getColor();
+        this.patterns = banner.getOrDefault(DataComponents.BANNER_PATTERNS, BannerPatternLayers.EMPTY);
+        ModelPart modelPart = mc.getEntityModels().bakeLayer(ModelLayers.STANDING_BANNER_FLAG);
+        this.bannerFlag = new BannerFlagModel(modelPart);
+    }
+
+    public BannerTooltipComponent(DyeColor color, BannerPatternLayers patterns) {
+        this.color = color;
+        this.patterns = patterns;
+        ModelPart modelPart = mc.getEntityModels().bakeLayer(ModelLayers.STANDING_BANNER_FLAG);
+        this.bannerFlag = new BannerFlagModel(modelPart);
     }
 
     @Override
-    public TooltipComponent getComponent() {
+    public ClientTooltipComponent getComponent() {
         return this;
     }
 
     @Override
-    public int getHeight() {
-        return 32 * 5 - 2;
+    public int getHeight(@NonNull Font textRenderer) {
+        return 40 * 2;
     }
 
     @Override
-    public int getWidth(TextRenderer textRenderer) {
-        return 16 * 5;
+    public int getWidth(@NonNull Font textRenderer) {
+        return 20 * 2;
     }
 
     @Override
-    public void drawItems(TextRenderer textRenderer, int x, int y, MatrixStack matrices, ItemRenderer itemRenderer) {
-        DiffuseLighting.disableGuiDepthLighting();
-        matrices.push();
-        matrices.translate(x + 8, y + 8, 0);
+    public void extractImage(@NonNull Font textRenderer, int x, int y, int width, int height, @NonNull GuiGraphicsExtractor graphics) {
+        var centerX = width / 2 - getWidth(null) / 2;
 
-        matrices.push();
-        matrices.translate(0.5, 16, 0);
-        matrices.scale(6, -6, 1);
-        matrices.scale(2, -2, -2);
-        matrices.push();
-        matrices.translate(2.5, 8.5, 0);
-        matrices.scale(5, 5, 5);
-        VertexConsumerProvider.Immediate immediate = mc.getBufferBuilders().getEntityVertexConsumers();
-        this.bannerField.pitch = 0f;
-        this.bannerField.pivotY = -32f;
-        BannerBlockEntityRenderer.renderCanvas(
-            matrices,
-            immediate,
-            0xF000F0,
-            OverlayTexture.DEFAULT_UV,
-            this.bannerField,
-            ModelLoader.BANNER_BASE,
-            true,
-            BannerBlockEntity.getPatternsFromNbt(
-                ((BannerItem) this.banner.getItem()).getColor(),
-                BannerBlockEntity.getPatternListNbt(this.banner)
-            )
-        );
-        matrices.pop();
-        matrices.pop();
-        immediate.draw();
-        matrices.pop();
-        DiffuseLighting.enableGuiDepthLighting();
+        GuiGraphicsExtractorAccessor contextAccessor = (GuiGraphicsExtractorAccessor) graphics;
+
+        contextAccessor.getGuiRenderState().addPicturesInPictureState(new CustomBannerGuiElementRenderState(
+            bannerFlag, color, patterns,
+            centerX + x, y,
+            centerX + x + getWidth(null), y + getHeight(null),
+            contextAccessor.getScissorStack().peek(),
+            16 * 2
+        ));
     }
 }

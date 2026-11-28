@@ -7,18 +7,20 @@ package meteordevelopment.meteorclient.settings;
 
 import meteordevelopment.meteorclient.gui.utils.CharFilter;
 import meteordevelopment.meteorclient.gui.widgets.input.WTextBox;
-import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.CompoundTag;
 
 import java.util.function.Consumer;
 
 public class StringSetting extends Setting<String> {
+    public final String placeholder;
     public final Class<? extends WTextBox.Renderer> renderer;
     public final CharFilter filter;
     public final boolean wide;
 
-    public StringSetting(String name, String description, String defaultValue, Consumer<String> onChanged, Consumer<Setting<String>> onModuleActivated, IVisible visible, Class<? extends WTextBox.Renderer> renderer, CharFilter filter, boolean wide) {
+    public StringSetting(String name, String description, String defaultValue, Consumer<String> onChanged, Consumer<Setting<String>> onModuleActivated, IVisible visible, String placeholder, Class<? extends WTextBox.Renderer> renderer, CharFilter filter, boolean wide) {
         super(name, description, defaultValue, onChanged, onModuleActivated, visible);
 
+        this.placeholder = placeholder;
         this.renderer = renderer;
         this.filter = filter;
         this.wide = wide;
@@ -31,30 +33,40 @@ public class StringSetting extends Setting<String> {
 
     @Override
     protected boolean isValueValid(String value) {
+        if (filter == null) return true;
+        for (int i = 0; i < value.length(); i++) {
+            if (!filter.filter(value, value.charAt(i))) return false;
+        }
         return true;
     }
 
     @Override
-    public NbtCompound save(NbtCompound tag) {
+    public CompoundTag save(CompoundTag tag) {
         tag.putString("value", get());
 
         return tag;
     }
 
     @Override
-    public String load(NbtCompound tag) {
-        set(tag.getString("value"));
+    public String load(CompoundTag tag) {
+        set(tag.getStringOr("value", ""));
 
         return get();
     }
 
     public static class Builder extends SettingBuilder<Builder, String, StringSetting> {
+        private String placeholder;
         private Class<? extends WTextBox.Renderer> renderer;
         private CharFilter filter;
         private boolean wide;
 
         public Builder() {
-            super(null);
+            super("");
+        }
+
+        public Builder placeholder(String placeholder) {
+            this.placeholder = placeholder;
+            return this;
         }
 
         public Builder renderer(Class<? extends WTextBox.Renderer> renderer) {
@@ -74,7 +86,7 @@ public class StringSetting extends Setting<String> {
 
         @Override
         public StringSetting build() {
-            return new StringSetting(name, description, defaultValue, onChanged, onModuleActivated, visible, renderer, filter, wide);
+            return new StringSetting(name, description, defaultValue, onChanged, onModuleActivated, visible, placeholder, renderer, filter, wide);
         }
     }
 }

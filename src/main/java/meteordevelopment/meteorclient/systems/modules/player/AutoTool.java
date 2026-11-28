@@ -12,18 +12,23 @@ import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.meteorclient.systems.modules.render.Xray;
 import meteordevelopment.meteorclient.systems.modules.world.InfinityMiner;
+import meteordevelopment.meteorclient.utils.Utils;
+import meteordevelopment.meteorclient.utils.misc.ListMode;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
-import net.minecraft.block.BambooBlock;
-import net.minecraft.block.BambooSaplingBlock;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.enchantment.Enchantments;
-import net.minecraft.item.*;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ShearsItem;
+import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.world.level.block.*;
+import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.List;
 import java.util.function.Predicate;
@@ -45,6 +50,13 @@ public class AutoTool extends Module {
         .name("silk-touch-for-ender-chest")
         .description("Mines Ender Chests only with the Silk Touch enchantment.")
         .defaultValue(true)
+        .build()
+    );
+
+    private final Setting<Boolean> fortuneForOresCrops = sgGeneral.add(new BoolSetting.Builder()
+        .name("fortune-for-ores-and-crops")
+        .description("Mines Ores and crops only with the Fortune enchantment.")
+        .defaultValue(false)
         .build()
     );
 
@@ -117,7 +129,7 @@ public class AutoTool extends Module {
     private void onTick(TickEvent.Post event) {
         if (Modules.get().isActive(InfinityMiner.class)) return;
 
-        if (switchBack.get() && !mc.options.attackKey.isPressed() && wasPressed && InvUtils.previousSlot != -1) {
+        if (switchBack.get() && !mc.options.keyAttack.isDown() && wasPressed && InvUtils.previousSlot != -1) {
             InvUtils.swapBack();
             wasPressed = false;
             return;
@@ -130,30 +142,31 @@ public class AutoTool extends Module {
             ticks--;
         }
 
-        wasPressed = mc.options.attackKey.isPressed();
+        wasPressed = mc.options.keyAttack.isDown();
     }
 
     @EventHandler(priority = EventPriority.HIGH)
     private void onStartBreakingBlock(StartBreakingBlockEvent event) {
         if (Modules.get().isActive(InfinityMiner.class)) return;
+        if (mc.player.isCreative()) return;
 
         // Get blockState
-        BlockState blockState = mc.world.getBlockState(event.blockPos);
+        BlockState blockState = mc.level.getBlockState(event.blockPos);
         if (!BlockUtils.canBreak(event.blockPos, blockState)) return;
 
         // Check if we should switch to a better tool
-        ItemStack currentStack = mc.player.getMainHandStack();
+        ItemStack currentStack = mc.player.getMainHandItem();
 
         double bestScore = -1;
         bestSlot = -1;
 
         for (int i = 0; i < 9; i++) {
-            ItemStack itemStack = mc.player.getInventory().getStack(i);
+            ItemStack itemStack = mc.player.getInventory().getItem(i);
 
-            if (listMode.get() == ListMode.Whitelist && !whitelist.get().contains(itemStack.getItem())) continue;
-            if (listMode.get() == ListMode.Blacklist && blacklist.get().contains(itemStack.getItem())) continue;
+            boolean itemInList = (listMode.get() == ListMode.Whitelist ? whitelist.get() : blacklist.get()).contains(itemStack.getItem());
+            if (!listMode.get().allows(itemInList)) continue;
 
-            double score = getScore(itemStack, blockState, silkTouchForEnderChest.get(), prefer.get(), itemStack2 -> !shouldStopUsing(itemStack2));
+            double score = getScore(itemStack, blockState, silkTouchForEnderChest.get(), fortuneForOresCrops.get(), prefer.get(), itemStack2 -> !shouldStopUsing(itemStack2));
             if (score < 0) continue;
 
             if (score > bestScore) {
@@ -162,7 +175,7 @@ public class AutoTool extends Module {
             }
         }
 
-        if ((bestSlot != -1 && (bestScore > getScore(currentStack, blockState, silkTouchForEnderChest.get(), prefer.get(), itemStack -> !shouldStopUsing(itemStack))) || shouldStopUsing(currentStack) || !isTool(currentStack))) {
+        if ((bestSlot != -1 && (bestScore > getScore(currentStack, blockState, silkTouchForEnderChest.get(), fortuneForOresCrops.get(), prefer.get(), itemStack -> !shouldStopUsing(itemStack))) || shouldStopUsing(currentStack) || !isTool(currentStack))) {
             ticks = switchDelay.get();
 
             if (ticks == 0) InvUtils.swap(bestSlot, true);
@@ -170,49 +183,66 @@ public class AutoTool extends Module {
         }
 
         // Anti break
-        currentStack = mc.player.getMainHandStack();
+        currentStack = mc.player.getMainHandItem();
 
         if (shouldStopUsing(currentStack) && isTool(currentStack)) {
-            mc.options.attackKey.setPressed(false);
+            mc.options.keyAttack.setDown(false);
             event.cancel();
         }
     }
 
     private boolean shouldStopUsing(ItemStack itemStack) {
-        return antiBreak.get() && (itemStack.getMaxDamage() - itemStack.getDamage()) < (itemStack.getMaxDamage() * breakDurability.get() / 100);
+        return antiBreak.get() && (itemStack.getMaxDamage() - itemStack.getDamageValue()) < (itemStack.getMaxDamage() * breakDurability.get() / 100);
     }
 
-    public static double getScore(ItemStack itemStack, BlockState state, boolean silkTouchEnderChest, EnchantPreference enchantPreference, Predicate<ItemStack> good) {
-        if (!itemStack.isSuitableFor(state) || !good.test(itemStack) || !isTool(itemStack)) return -1;
+    public static double getScore(ItemStack itemStack, BlockState state, boolean silkTouchEnderChest, boolean fortuneOre, EnchantPreference enchantPreference, Predicate<ItemStack> good) {
+        if (!good.test(itemStack) || !isTool(itemStack)) return -1;
+        if (!itemStack.isCorrectToolForDrops(state) &&
+            !(itemStack.is(ItemTags.SWORDS) && (state.getBlock() instanceof BambooStalkBlock || state.getBlock() instanceof BambooSaplingBlock)) &&
+            !(itemStack.getItem() instanceof ShearsItem && state.getBlock() instanceof LeavesBlock || state.is(BlockTags.WOOL)))
+            return -1;
 
         if (silkTouchEnderChest
             && state.getBlock() == Blocks.ENDER_CHEST
-            && EnchantmentHelper.getLevel(Enchantments.SILK_TOUCH, itemStack) == 0) {
+            && !Utils.hasEnchantments(itemStack, Enchantments.SILK_TOUCH)) {
+            return -1;
+        }
+
+        if (fortuneOre
+            && isFortunable(state.getBlock())
+            && !Utils.hasEnchantments(itemStack, Enchantments.FORTUNE)) {
             return -1;
         }
 
         double score = 0;
 
-        score += itemStack.getMiningSpeedMultiplier(state) * 1000;
-        score += EnchantmentHelper.getLevel(Enchantments.UNBREAKING, itemStack);
-        score += EnchantmentHelper.getLevel(Enchantments.EFFICIENCY, itemStack);
-        score += EnchantmentHelper.getLevel(Enchantments.MENDING, itemStack);
+        score += itemStack.getDestroySpeed(state) * 1000;
+        score += Utils.getEnchantmentLevel(itemStack, Enchantments.UNBREAKING);
+        score += Utils.getEnchantmentLevel(itemStack, Enchantments.EFFICIENCY);
+        score += Utils.getEnchantmentLevel(itemStack, Enchantments.MENDING);
 
-        if (enchantPreference == EnchantPreference.Fortune) score += EnchantmentHelper.getLevel(Enchantments.FORTUNE, itemStack);
-        if (enchantPreference == EnchantPreference.SilkTouch) score += EnchantmentHelper.getLevel(Enchantments.SILK_TOUCH, itemStack);
+        if (enchantPreference == EnchantPreference.Fortune)
+            score += Utils.getEnchantmentLevel(itemStack, Enchantments.FORTUNE);
+        if (enchantPreference == EnchantPreference.SilkTouch)
+            score += Utils.getEnchantmentLevel(itemStack, Enchantments.SILK_TOUCH);
 
-        if (itemStack.getItem() instanceof SwordItem item && (state.getBlock() instanceof BambooBlock || state.getBlock() instanceof BambooSaplingBlock))
-            score += 9000 + (item.getMaterial().getMiningLevel() * 1000);
-
+        if (itemStack.is(ItemTags.SWORDS) && (state.getBlock() instanceof BambooStalkBlock || state.getBlock() instanceof BambooSaplingBlock))
+            score += 9000 + (itemStack.get(DataComponents.TOOL).getMiningSpeed(state) * 1000);
 
         return score;
     }
 
     public static boolean isTool(Item item) {
-        return item instanceof ToolItem || item instanceof ShearsItem;
+        return isTool(item.getDefaultInstance());
     }
+
     public static boolean isTool(ItemStack itemStack) {
-        return isTool(itemStack.getItem());
+        return itemStack.is(ItemTags.AXES) || itemStack.is(ItemTags.HOES) || itemStack.is(ItemTags.PICKAXES) || itemStack.is(ItemTags.SHOVELS) || itemStack.getItem() instanceof ShearsItem;
+    }
+
+    private static boolean isFortunable(Block block) {
+        if (block == Blocks.ANCIENT_DEBRIS) return false;
+        return Xray.ORES.contains(block) || block instanceof CropBlock;
     }
 
     public enum EnchantPreference {
@@ -221,8 +251,4 @@ public class AutoTool extends Module {
         SilkTouch
     }
 
-    public enum ListMode {
-        Whitelist,
-        Blacklist
-    }
 }

@@ -13,8 +13,8 @@ import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.utils.misc.ISerializable;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.world.Dimension;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.nbt.NbtCompound;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.nbt.CompoundTag;
 
 public abstract class BaseMarker implements ISerializable<BaseMarker> {
     public final Settings settings = new Settings();
@@ -24,14 +24,12 @@ public abstract class BaseMarker implements ISerializable<BaseMarker> {
     public final Setting<String> name = sgBase.add(new StringSetting.Builder()
         .name("name")
         .description("Custom name for this marker.")
-        .defaultValue("")
         .build()
     );
 
     protected final Setting<String> description = sgBase.add(new StringSetting.Builder()
         .name("description")
         .description("Custom description for this marker.")
-        .defaultValue("")
         .build()
     );
 
@@ -55,9 +53,11 @@ public abstract class BaseMarker implements ISerializable<BaseMarker> {
         dimension.set(PlayerUtils.getDimension());
     }
 
-    protected void render(Render3DEvent event) {}
+    protected void render(Render3DEvent event) {
+    }
 
-    protected void tick() {}
+    protected void tick() {
+    }
 
     public Screen getScreen(GuiTheme theme) {
         return new MarkerScreen(theme, this);
@@ -92,15 +92,15 @@ public abstract class BaseMarker implements ISerializable<BaseMarker> {
     }
 
     @Override
-    public NbtCompound toTag() {
-        NbtCompound tag = new NbtCompound();
+    public CompoundTag toTag() {
+        CompoundTag tag = new CompoundTag();
         tag.put("settings", settings.toTag());
         return tag;
     }
 
     @Override
-    public BaseMarker fromTag(NbtCompound tag) {
-        NbtCompound settingsTag = (NbtCompound) tag.get("settings");
+    public BaseMarker fromTag(CompoundTag tag) {
+        CompoundTag settingsTag = (CompoundTag) tag.get("settings");
         if (settingsTag != null) settings.fromTag(settingsTag);
 
         return this;

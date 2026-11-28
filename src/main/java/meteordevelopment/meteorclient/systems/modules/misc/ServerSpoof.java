@@ -5,25 +5,31 @@
 
 package meteordevelopment.meteorclient.systems.modules.misc;
 
-import io.netty.buffer.Unpooled;
-import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
-import meteordevelopment.meteorclient.mixin.CustomPayloadC2SPacketAccessor;
+import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.utils.Utils;
+import meteordevelopment.meteorclient.utils.misc.text.RunnableClickEvent;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.packet.c2s.play.CustomPayloadC2SPacket;
-import net.minecraft.network.packet.s2c.play.ResourcePackSendS2CPacket;
-import net.minecraft.text.ClickEvent;
-import net.minecraft.text.HoverEvent;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Identifier;
-import org.apache.commons.lang3.StringUtils;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.protocol.common.ClientboundResourcePackPushPacket;
+import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
+import net.minecraft.network.protocol.common.ServerboundResourcePackPacket;
+import net.minecraft.network.protocol.common.custom.BrandPayload;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.Identifier;
+import org.apache.commons.lang3.Strings;
 
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.List;
 
 public class ServerSpoof extends Module {
@@ -61,58 +67,103 @@ public class ServerSpoof extends Module {
     private final Setting<List<String>> channels = sgGeneral.add(new StringListSetting.Builder()
         .name("channels")
         .description("If the channel contains the keyword, this outgoing channel will be blocked.")
-        .defaultValue("minecraft:register")
+        .defaultValue("fabric", "minecraft:register")
         .visible(blockChannels::get)
         .build()
     );
 
+    private MutableComponent msg;
+    public boolean silentAcceptResourcePack = false;
+
     public ServerSpoof() {
         super(Categories.Misc, "server-spoof", "Spoof client brand, resource pack and channels.");
 
-        MeteorClient.EVENT_BUS.subscribe(new Listener());
+        runInMainMenu = true;
     }
 
-    private class Listener {
-        @EventHandler
-        private void onPacketSend(PacketEvent.Send event) {
-            if (!isActive()) return;
-            if (!(event.packet instanceof CustomPayloadC2SPacket)) return;
-            CustomPayloadC2SPacketAccessor packet = (CustomPayloadC2SPacketAccessor) event.packet;
-            Identifier id = packet.getChannel();
+    @EventHandler
+    private void onPacketSend(PacketEvent.Send event) {
+        if (!isActive()) return;
 
-            if (spoofBrand.get() && id.equals(CustomPayloadC2SPacket.BRAND))
-                packet.setData(new PacketByteBuf(Unpooled.buffer()).writeString(brand.get()));
+        if (event.packet instanceof ServerboundCustomPayloadPacket(CustomPacketPayload payload)) {
+            Identifier id = payload.type().id();
 
             if (blockChannels.get()) {
                 for (String channel : channels.get()) {
-                    if (StringUtils.containsIgnoreCase(channel, id.toString())) {
+                    if (Strings.CI.contains(id.toString(), channel)) {
                         event.cancel();
                         return;
                     }
                 }
             }
+
+            if (spoofBrand.get() && id.equals(BrandPayload.TYPE.id())) {
+                ServerboundCustomPayloadPacket spoofedPacket = new ServerboundCustomPayloadPacket(new BrandPayload(brand.get()));
+
+                event.sendSilently(spoofedPacket);
+                event.cancel();
+            }
         }
 
-        @EventHandler
-        private void onPacketRecieve(PacketEvent.Receive event) {
-            if (!isActive()) return;
+        // we want to accept the pack silently to prevent the server detecting you bypassed it when logging in
+        if (silentAcceptResourcePack && event.packet instanceof ServerboundResourcePackPacket) event.cancel();
+    }
 
-            if (resourcePack.get()) {
-                if (!(event.packet instanceof ResourcePackSendS2CPacket packet)) return;
-                event.cancel();
-                MutableText msg = Text.literal("This server has ");
-                msg.append(packet.isRequired() ? "a required " : "an optional ");
-                MutableText link = Text.literal("resource pack");
-                link.setStyle(link.getStyle()
-                    .withColor(Formatting.BLUE)
-                    .withUnderline(true)
-                    .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, packet.getURL()))
-                    .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal("Click to download")))
-                );
-                msg.append(link);
-                msg.append(".");
-                info(msg);
-            }
+    @EventHandler
+    private void onPacketReceive(PacketEvent.Receive event) {
+        if (!isActive() || !resourcePack.get()) return;
+        if (!(event.packet instanceof ClientboundResourcePackPushPacket packet)) return;
+
+        event.cancel();
+        event.connection.send(new ServerboundResourcePackPacket(packet.id(), ServerboundResourcePackPacket.Action.ACCEPTED));
+        event.connection.send(new ServerboundResourcePackPacket(packet.id(), ServerboundResourcePackPacket.Action.DOWNLOADED));
+        event.connection.send(new ServerboundResourcePackPacket(packet.id(), ServerboundResourcePackPacket.Action.SUCCESSFULLY_LOADED));
+
+        msg = Component.literal("This server has ");
+        msg.append(packet.required() ? "a required " : "an optional ").append("resource pack. ");
+
+        MutableComponent link = Component.literal("[Open URL]");
+        link.setStyle(link.getStyle()
+            .withColor(ChatFormatting.BLUE)
+            .withUnderlined(true)
+            .withClickEvent(new ClickEvent.OpenUrl(URI.create(packet.url())))
+            .withHoverEvent(new HoverEvent.ShowText(Component.literal("Click to open the pack url")))
+        );
+
+        MutableComponent acceptance = Component.literal("[Accept Pack]");
+        acceptance.setStyle(acceptance.getStyle()
+            .withColor(ChatFormatting.DARK_GREEN)
+            .withUnderlined(true)
+            .withClickEvent(new RunnableClickEvent(() -> {
+                URL url = getParsedResourcePackUrl(packet.url());
+                if (url == null) error("Invalid resource pack URL: " + packet.url());
+                else {
+                    silentAcceptResourcePack = true;
+                    mc.getDownloadedPackSource().pushPack(packet.id(), url, packet.hash());
+                }
+            }))
+            .withHoverEvent(new HoverEvent.ShowText(Component.literal("Click to accept and apply the pack.")))
+        );
+
+        msg.append(link).append(" ");
+        msg.append(acceptance).append(".");
+    }
+
+    @EventHandler
+    private void onTick(TickEvent.Pre event) {
+        if (!isActive() || !Utils.canUpdate() || msg == null) return;
+
+        info(msg);
+        msg = null;
+    }
+
+    private static URL getParsedResourcePackUrl(String url) {
+        try {
+            URL uRL = new URI(url).toURL();
+            String string = uRL.getProtocol();
+            return !"http".equals(string) && !"https".equals(string) ? null : uRL;
+        } catch (MalformedURLException | URISyntaxException _) {
+            return null;
         }
     }
 }

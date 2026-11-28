@@ -5,25 +5,21 @@
 
 package meteordevelopment.meteorclient.systems.modules.world;
 
-import meteordevelopment.meteorclient.mixininterface.IAbstractFurnaceScreenHandler;
-import meteordevelopment.meteorclient.settings.BoolSetting;
-import meteordevelopment.meteorclient.settings.ItemListSetting;
-import meteordevelopment.meteorclient.settings.Setting;
-import meteordevelopment.meteorclient.settings.SettingGroup;
+import meteordevelopment.meteorclient.mixininterface.IAbstractFurnaceMenu;
+import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
-import net.minecraft.block.entity.AbstractFurnaceBlockEntity;
-import net.minecraft.inventory.SimpleInventory;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.recipe.RecipeType;
-import net.minecraft.screen.AbstractFurnaceScreenHandler;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.inventory.AbstractFurnaceMenu;
+import net.minecraft.world.inventory.ContainerInput;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.RecipePropertySet;
 
 import java.util.List;
-import java.util.Map;
 
 public class AutoSmelter extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -34,6 +30,15 @@ public class AutoSmelter extends Module {
         .defaultValue(Items.COAL, Items.CHARCOAL)
         .filter(this::fuelItemFilter)
         .bypassFilterWhenSavingAndLoading()
+        .build()
+    );
+
+    private final Setting<Integer> fuelItemsPerRefill = sgGeneral.add(new IntSetting.Builder()
+        .name("fuel-items-per-refill")
+        .description("How many fuel items to put into the furnace each time it refills")
+        .defaultValue(64)
+        .range(1, 64)
+        .sliderRange(1, 16)
         .build()
     );
 
@@ -53,26 +58,29 @@ public class AutoSmelter extends Module {
         .build()
     );
 
-    private Map<Item, Integer> fuelTimeMap;
+    private final Setting<Boolean> autoClose = sgGeneral.add(new BoolSetting.Builder()
+        .name("auto-close")
+        .defaultValue(false)
+        .build()
+    );
 
     public AutoSmelter() {
         super(Categories.World, "auto-smelter", "Automatically smelts items from your inventory");
     }
 
     private boolean fuelItemFilter(Item item) {
-        if (!Utils.canUpdate() && fuelTimeMap == null) return false;
+        if (!Utils.canUpdate()) return false;
 
-        if (fuelTimeMap == null) fuelTimeMap = AbstractFurnaceBlockEntity.createFuelTimeMap();
-        return fuelTimeMap.containsKey(item);
+        return item.getDefaultInstance().has(DataComponents.COOKING_FUEL);
     }
 
     private boolean smeltableItemFilter(Item item) {
-        return mc.world != null && mc.world.getRecipeManager().getFirstMatch(RecipeType.SMELTING, new SimpleInventory(item.getDefaultStack()), mc.world).isPresent();
+        return mc.level != null && mc.level.recipeAccess().propertySet(RecipePropertySet.FURNACE_INPUT).test(item.getDefaultInstance());
     }
 
-    public void tick(AbstractFurnaceScreenHandler c) {
+    public void tick(AbstractFurnaceMenu c) {
         // Limit actions to happen every n ticks
-        if (mc.player.age % 10 == 0) return;
+        if (mc.player.tickCount % 10 == 0) return;
 
         // Check for fuel
         checkFuel(c);
@@ -82,17 +90,19 @@ public class AutoSmelter extends Module {
 
         // Insert new items
         insertItems(c);
+
+        if (autoClose.get()) mc.gui.setScreen(null);
     }
 
-    private void insertItems(AbstractFurnaceScreenHandler c) {
-        ItemStack inputItemStack = c.slots.get(0).getStack();
+    private void insertItems(AbstractFurnaceMenu c) {
+        ItemStack inputItemStack = c.slots.getFirst().getItem();
         if (!inputItemStack.isEmpty()) return;
 
         int slot = -1;
 
         for (int i = 3; i < c.slots.size(); i++) {
-            ItemStack item = c.slots.get(i).getStack();
-            if (!((IAbstractFurnaceScreenHandler) c).isItemSmeltable(item)) continue;
+            ItemStack item = c.slots.get(i).getItem();
+            if (!((IAbstractFurnaceMenu) c).meteor$canSmelt(item)) continue;
             if (!smeltableItems.get().contains(item.getItem())) continue;
             if (!smeltableItemFilter(item.getItem())) continue;
 
@@ -106,18 +116,21 @@ public class AutoSmelter extends Module {
             return;
         }
 
+        if (slot == -1) return;
+
         InvUtils.move().fromId(slot).toId(0);
+        c.slots.getFirst().getItem().isEmpty();
     }
 
-    private void checkFuel(AbstractFurnaceScreenHandler c) {
-        ItemStack fuelStack = c.slots.get(1).getStack();
+    private void checkFuel(AbstractFurnaceMenu c) {
+        ItemStack fuelStack = c.slots.get(1).getItem();
 
-        if (c.getFuelProgress() > 0) return;
+        if (c.getLitProgress() > 0) return;
         if (!fuelStack.isEmpty()) return;
 
         int slot = -1;
         for (int i = 3; i < c.slots.size(); i++) {
-            ItemStack item = c.slots.get(i).getStack();
+            ItemStack item = c.slots.get(i).getItem();
             if (!fuelItems.get().contains(item.getItem())) continue;
             if (!fuelItemFilter(item.getItem())) continue;
 
@@ -131,14 +144,39 @@ public class AutoSmelter extends Module {
             return;
         }
 
-        InvUtils.move().fromId(slot).toId(1);
+        if (slot == -1) return;
+
+        ItemStack sourceStack = c.slots.get(slot).getItem();
+        int moveCount = Math.min(fuelItemsPerRefill.get(), Math.min(sourceStack.getCount(), c.slots.get(1).getMaxStackSize(sourceStack)));
+
+        if (moveCount <= 0) return;
+
+        moveFuelItems(c, slot, moveCount);
     }
 
-    private void takeResults(AbstractFurnaceScreenHandler c) {
-        ItemStack resultStack = c.slots.get(2).getStack();
+    private void moveFuelItems(AbstractFurnaceMenu c, int fromId, int amount) {
+        if (amount <= 0 || mc.player == null || mc.gameMode == null) return;
+        if (!mc.player.containerMenu.getCarried().isEmpty()) return;
+
+        mc.gameMode.handleContainerInput(c.containerId, fromId, 0, ContainerInput.PICKUP, mc.player);
+
+        for (int i = 0; i < amount; i++) {
+            if (mc.player.containerMenu.getCarried().isEmpty()) break;
+            mc.gameMode.handleContainerInput(c.containerId, 1, 1, ContainerInput.PICKUP, mc.player);
+        }
+
+        if (!mc.player.containerMenu.getCarried().isEmpty()) {
+            mc.gameMode.handleContainerInput(c.containerId, fromId, 0, ContainerInput.PICKUP, mc.player);
+        }
+
+        c.slots.get(1).getItem().isEmpty();
+    }
+
+    private void takeResults(AbstractFurnaceMenu c) {
+        ItemStack resultStack = c.slots.get(2).getItem();
         if (resultStack.isEmpty()) return;
 
-        InvUtils.quickMove().slotId(2);
+        InvUtils.shiftClick().slotId(2);
 
         if (!resultStack.isEmpty()) {
             error("Your inventory is full. Disabling.");

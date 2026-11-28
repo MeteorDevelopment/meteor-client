@@ -1,0 +1,388 @@
+/*
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
+ */
+
+package meteordevelopment.meteorclient.commands.commands;
+
+import baritone.api.BaritoneAPI;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import meteordevelopment.meteorclient.MeteorClient;
+import meteordevelopment.meteorclient.commands.Command;
+import meteordevelopment.meteorclient.events.entity.EntityRemovedEvent;
+import meteordevelopment.meteorclient.events.packets.PacketEvent;
+import meteordevelopment.meteorclient.pathing.BaritoneUtils;
+import meteordevelopment.meteorclient.pathing.PathManagers;
+import meteordevelopment.meteorclient.utils.player.ChatUtils;
+import meteordevelopment.meteorclient.utils.player.InvUtils;
+import meteordevelopment.orbit.EventHandler;
+import net.minecraft.client.multiplayer.ClientSuggestionProvider;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.component.DataComponentMap;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
+import net.minecraft.world.entity.EntityTypes;
+import net.minecraft.world.entity.projectile.EyeOfEnder;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.LodestoneTracker;
+import net.minecraft.world.item.component.MapDecorations;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.phys.Vec3;
+import org.jspecify.annotations.Nullable;
+
+import java.util.List;
+
+public class LocateCommand extends Command {
+    private Vec3 firstStart, firstEnd;
+    private Vec3 secondStart, secondEnd;
+
+    private final List<Block> netherFortressBlocks = List.of(
+        Blocks.NETHER_BRICKS,
+        Blocks.NETHER_BRICK_FENCE,
+        Blocks.NETHER_WART
+    );
+
+    private final List<Block> monumentBlocks = List.of(
+        Blocks.PRISMARINE_BRICKS,
+        Blocks.SEA_LANTERN,
+        Blocks.DARK_PRISMARINE
+    );
+
+    private final List<Block> strongholdBlocks = List.of(
+        Blocks.END_PORTAL_FRAME
+    );
+
+    private final List<Block> endCityBlocks = List.of(
+        Blocks.PURPUR_BLOCK,
+        Blocks.PURPUR_PILLAR,
+        Blocks.PURPUR_SLAB,
+        Blocks.PURPUR_STAIRS,
+        Blocks.END_STONE_BRICKS,
+        Blocks.END_ROD
+    );
+
+    public LocateCommand() {
+        super("locate", "Locates structures", "loc");
+    }
+
+    @Override
+    public void build(LiteralArgumentBuilder<ClientSuggestionProvider> builder) {
+        // Overworld structures
+
+        builder.then(literal("buried_treasure").executes(_ -> {
+            ItemStack stack = mc.player.getInventory().getSelectedItem();
+            if (stack.getItem() != Items.FILLED_MAP
+                || stack.get(DataComponents.ITEM_NAME) == null
+                || !stack.get(DataComponents.ITEM_NAME).getString().equals(Component.translatable("item.minecraft.buried_treasure_map").getString())) {
+                error("You need to hold a (highlight)buried treasure map(default)!");
+                return SINGLE_SUCCESS;
+            }
+
+            MapDecorations mapDecorationsComponent = stack.get(DataComponents.MAP_DECORATIONS);
+            if (mapDecorationsComponent == null) {
+                error("Couldn't locate the map icons!");
+                return SINGLE_SUCCESS;
+            }
+
+            for (MapDecorations.Entry decoration : mapDecorationsComponent.decorations().values()) {
+                if (decoration.type().value().assetId().toString().equals("minecraft:red_x")) {
+                    Vec3 coords = new Vec3(decoration.x(), 62, decoration.z());
+                    MutableComponent text = Component.literal("Buried Treasure located at ");
+                    text.append(ChatUtils.formatCoords(coords));
+                    text.append(".");
+                    info(text);
+                    return SINGLE_SUCCESS;
+                }
+            }
+
+            error("Couldn't locate the buried treasure!");
+            return SINGLE_SUCCESS;
+        }));
+
+        builder.then(literal("mansion").executes(_ -> {
+            ItemStack stack = mc.player.getInventory().getSelectedItem();
+            if (stack.getItem() != Items.FILLED_MAP
+                || stack.get(DataComponents.ITEM_NAME) == null
+                || !stack.get(DataComponents.ITEM_NAME).getString().equals(Component.translatable("item.minecraft.woodland_mansion_map").getString())) {
+                error("You need to hold a (highlight)woodland mansion map(default)!");
+                return SINGLE_SUCCESS;
+            }
+
+            MapDecorations mapDecorationsComponent = stack.get(DataComponents.MAP_DECORATIONS);
+            if (mapDecorationsComponent == null) {
+                error("Couldn't locate the map icons!");
+                return SINGLE_SUCCESS;
+            }
+
+            for (MapDecorations.Entry decoration : mapDecorationsComponent.decorations().values()) {
+                if (decoration.type().value().assetId().toString().equals("minecraft:woodland_mansion")) {
+                    Vec3 coords = new Vec3(decoration.x(), 62, decoration.z());
+                    MutableComponent text = Component.literal("Mansion located at ");
+                    text.append(ChatUtils.formatCoords(coords));
+                    text.append(".");
+                    info(text);
+                    return SINGLE_SUCCESS;
+                }
+            }
+
+            error("Couldn't locate the mansion!");
+            return SINGLE_SUCCESS;
+        }));
+
+        builder.then(literal("monument").executes(_ -> {
+            ItemStack stack = mc.player.getInventory().getSelectedItem();
+            if (stack.getItem() == Items.FILLED_MAP
+                && stack.get(DataComponents.ITEM_NAME) != null
+                && stack.get(DataComponents.ITEM_NAME).getString().equals(Component.translatable("item.minecraft.ocean_monument_map").getString())) {
+
+                MapDecorations mapDecorationsComponent = stack.get(DataComponents.MAP_DECORATIONS);
+                if (mapDecorationsComponent == null) {
+                    error("Couldn't locate the map icons!");
+                    return SINGLE_SUCCESS;
+                }
+
+                for (MapDecorations.Entry decoration : mapDecorationsComponent.decorations().values()) {
+                    if (decoration.type().value().assetId().toString().equals("minecraft:ocean_monument")) {
+                        Vec3 coords = new Vec3(decoration.x(), 62, decoration.z());
+                        MutableComponent text = Component.literal("Monument located at ");
+                        text.append(ChatUtils.formatCoords(coords));
+                        text.append(".");
+                        info(text);
+                        return SINGLE_SUCCESS;
+                    }
+                }
+
+                error("Couldn't locate the monument!");
+                return SINGLE_SUCCESS;
+            }
+
+            // If the player is not holding a valid map, try to locate the monument using Baritone
+            if (BaritoneUtils.IS_AVAILABLE) {
+                Vec3 coords = findByBlockList(monumentBlocks);
+                if (coords == null) {
+                    error("No monument found. Try using an (highlight)ocean monument map(default) for more success.");
+                    return SINGLE_SUCCESS;
+                }
+                MutableComponent text = Component.literal("Monument located at ");
+                text.append(ChatUtils.formatCoords(coords));
+                text.append(".");
+                info(text);
+                return SINGLE_SUCCESS;
+            }
+
+            error("Locating this structure without an (highlight)ocean monument map(default) requires Baritone.");
+            return SINGLE_SUCCESS;
+        }));
+
+        builder.then(literal("stronghold").executes(_ -> {
+            boolean foundEye = InvUtils.testInHotbar(Items.ENDER_EYE);
+
+            if (foundEye) {
+                if (BaritoneUtils.IS_AVAILABLE) PathManagers.get().follow(EyeOfEnder.class::isInstance);
+                firstStart = null;
+                firstEnd = null;
+                secondStart = null;
+                secondEnd = null;
+                MeteorClient.EVENT_BUS.subscribe(this);
+                info("Please throw the first Eye of Ender");
+            } else if (BaritoneUtils.IS_AVAILABLE) {
+                Vec3 coords = findByBlockList(strongholdBlocks);
+                if (coords == null) {
+                    error("No stronghold found nearby. You can use (highlight)Ender Eyes(default) for more success.");
+                    return SINGLE_SUCCESS;
+                }
+                MutableComponent text = Component.literal("Stronghold located at ");
+                text.append(ChatUtils.formatCoords(coords));
+                text.append(".");
+                info(text);
+            } else {
+                error("No Eyes of Ender found in hotbar.");
+            }
+
+            return SINGLE_SUCCESS;
+        }));
+
+        // Nether structures
+
+        builder.then(literal("nether_fortress").executes(_ -> {
+            if (mc.level.dimension() != Level.NETHER) {
+                error("You need to be in the nether to locate a nether fortress.");
+                return SINGLE_SUCCESS;
+            }
+
+            if (!BaritoneUtils.IS_AVAILABLE) {
+                error("Locating this structure requires Baritone.");
+                return SINGLE_SUCCESS;
+            }
+
+            Vec3 coords = findByBlockList(netherFortressBlocks);
+            if (coords == null) {
+                error("No nether fortress found.");
+                return SINGLE_SUCCESS;
+            }
+            MutableComponent text = Component.literal("Fortress located at ");
+            text.append(ChatUtils.formatCoords(coords));
+            text.append(".");
+            info(text);
+            return SINGLE_SUCCESS;
+        }));
+
+        // End structures
+
+        builder.then(literal("end_city").executes(_ -> {
+            if (mc.level.dimension() != Level.END) {
+                error("You need to be in the end to locate an end city.");
+                return SINGLE_SUCCESS;
+            }
+
+            if (!BaritoneUtils.IS_AVAILABLE) {
+                error("Locating this structure requires Baritone.");
+                return SINGLE_SUCCESS;
+            }
+
+            Vec3 coords = findByBlockList(endCityBlocks);
+            if (coords == null) {
+                error("No end city found.");
+                return SINGLE_SUCCESS;
+            }
+            MutableComponent text = Component.literal("End city located at ");
+            text.append(ChatUtils.formatCoords(coords));
+            text.append(".");
+            info(text);
+            return SINGLE_SUCCESS;
+        }));
+
+        // Misc structures
+
+        builder.then(literal("lodestone").executes(_ -> {
+            ItemStack stack = mc.player.getInventory().getSelectedItem();
+            if (stack.getItem() != Items.COMPASS) {
+                error("You need to hold a (highlight)lodestone(default) compass!");
+                return SINGLE_SUCCESS;
+            }
+            DataComponentMap components = stack.getComponents();
+            if (components == null) {
+                error("Couldn't get the components data. Are you holding a (highlight)lodestone(default) compass?");
+                return SINGLE_SUCCESS;
+            }
+            LodestoneTracker lodestoneTrackerComponent = components.get(DataComponents.LODESTONE_TRACKER);
+            if (lodestoneTrackerComponent == null) {
+                error("Couldn't get the components data. Are you holding a (highlight)lodestone(default) compass?");
+                return SINGLE_SUCCESS;
+            }
+
+            if (lodestoneTrackerComponent.target().isEmpty()) {
+                error("Couldn't get the lodestone's target!");
+                return SINGLE_SUCCESS;
+            }
+
+            Vec3 coords = Vec3.atLowerCornerOf(lodestoneTrackerComponent.target().get().pos());
+            MutableComponent text = Component.literal("Lodestone located at ");
+            text.append(ChatUtils.formatCoords(coords));
+            text.append(".");
+            info(text);
+            return SINGLE_SUCCESS;
+        }));
+
+        builder.then(literal("cancel").executes(_ -> {
+            cancel();
+            return SINGLE_SUCCESS;
+        }));
+    }
+
+    private void cancel() {
+        warning("Locate canceled");
+        MeteorClient.EVENT_BUS.unsubscribe(this);
+    }
+
+    private @Nullable Vec3 findByBlockList(List<Block> blockList) {
+        List<BlockPos> posList = BaritoneAPI.getProvider().getWorldScanner().scanChunkRadius(BaritoneAPI.getProvider().getPrimaryBaritone().getPlayerContext(), blockList, 64, 10, 32);
+        if (posList.isEmpty()) {
+            return null;
+        }
+        if (posList.size() < 3) {
+            warning("Only %d block(s) found. This search might be a false positive.", posList.size());
+        }
+        return new Vec3(posList.getFirst().getX(), posList.getFirst().getY(), posList.getFirst().getZ());
+    }
+
+    @EventHandler
+    private void onReadPacket(PacketEvent.Receive event) {
+        if (event.packet instanceof ClientboundAddEntityPacket packet && packet.getType() == EntityTypes.EYE_OF_ENDER) {
+            firstPosition(packet.getX(), packet.getY(), packet.getZ());
+        }
+    }
+
+    @EventHandler
+    private void onRemoveEntity(EntityRemovedEvent event) {
+        if (event.entity instanceof EyeOfEnder eye) {
+            lastPosition(eye.getX(), eye.getY(), eye.getZ());
+        }
+    }
+
+    private void firstPosition(double x, double y, double z) {
+        Vec3 pos = new Vec3(x, y, z);
+        if (this.firstStart == null) {
+            this.firstStart = pos;
+        } else {
+            this.secondStart = pos;
+        }
+    }
+
+    private void lastPosition(double x, double y, double z) {
+        info("%s Eye of Ender's trajectory saved.", (this.firstEnd == null) ? "First" : "Second");
+        Vec3 pos = new Vec3(x, y, z);
+        if (this.firstEnd == null) {
+            this.firstEnd = pos;
+            info("Please throw the second Eye Of Ender from a different location.");
+        } else {
+            this.secondEnd = pos;
+            findStronghold();
+        }
+    }
+
+    private void findStronghold() {
+        PathManagers.get().stop();
+
+        if (this.firstStart == null || this.firstEnd == null || this.secondStart == null || this.secondEnd == null) {
+            error("Missing position data");
+            cancel();
+            return;
+        }
+
+        final double[] start = new double[]{this.secondStart.x, this.secondStart.z, this.secondEnd.x, this.secondEnd.z};
+        final double[] end = new double[]{this.firstStart.x, this.firstStart.z, this.firstEnd.x, this.firstEnd.z};
+        final double[] intersection = calcIntersection(start, end);
+        if (Double.isNaN(intersection[0]) || Double.isNaN(intersection[1]) || Double.isInfinite(intersection[0]) || Double.isInfinite(intersection[1])) {
+            error("Unable to calculate intersection.");
+            cancel();
+            return;
+        }
+
+        MeteorClient.EVENT_BUS.unsubscribe(this);
+        Vec3 coords = new Vec3(intersection[0], 0, intersection[1]);
+        MutableComponent text = Component.literal("Stronghold roughly located at ");
+        text.append(ChatUtils.formatCoords(coords));
+        text.append(".");
+        info(text);
+    }
+
+    private double[] calcIntersection(double[] line, double[] line2) {
+        final double a1 = line[3] - line[1];
+        final double b1 = line[0] - line[2];
+        final double c1 = a1 * line[0] + b1 * line[1];
+
+        final double a2 = line2[3] - line2[1];
+        final double b2 = line2[0] - line2[2];
+        final double c2 = a2 * line2[0] + b2 * line2[1];
+
+        final double delta = a1 * b2 - a2 * b1;
+
+        return new double[]{(b2 * c1 - b1 * c2) / delta, (a1 * c2 - a2 * c1) / delta};
+    }
+}

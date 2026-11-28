@@ -6,26 +6,31 @@
 package meteordevelopment.meteorclient.systems.waypoints;
 
 import meteordevelopment.meteorclient.MeteorClient;
-import meteordevelopment.meteorclient.renderer.GL;
 import meteordevelopment.meteorclient.renderer.Renderer2D;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.utils.misc.ISerializable;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.meteorclient.utils.world.Dimension;
-import net.minecraft.client.texture.AbstractTexture;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.client.renderer.texture.AbstractTexture;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.UUIDUtil;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 
 import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
 
 public class Waypoint implements ISerializable<Waypoint> {
     public final Settings settings = new Settings();
 
     private final SettingGroup sgVisual = settings.createGroup("Visual");
     private final SettingGroup sgPosition = settings.createGroup("Position");
+
+    public enum NearAction {
+        Disabled, Hide, Delete
+    }
 
     public Setting<String> name = sgVisual.add(new StringSetting.Builder()
         .name("name")
@@ -39,7 +44,7 @@ public class Waypoint implements ISerializable<Waypoint> {
         .description("The icon of the waypoint.")
         .defaultValue("Square")
         .supplier(() -> Waypoints.BUILTIN_ICONS)
-        .onChanged(v -> validateIcon())
+        .onChanged(_ -> validateIcon())
         .build()
     );
 
@@ -67,14 +72,14 @@ public class Waypoint implements ISerializable<Waypoint> {
     public Setting<Double> scale = sgVisual.add(new DoubleSetting.Builder()
         .name("scale")
         .description("The scale of the waypoint.")
-        .defaultValue(1)
+        .defaultValue(1.5)
         .build()
     );
 
     public Setting<BlockPos> pos = sgPosition.add(new BlockPosSetting.Builder()
         .name("location")
         .description("The location of the waypoint.")
-        .defaultValue(BlockPos.ORIGIN)
+        .defaultValue(BlockPos.ZERO)
         .build()
     );
 
@@ -93,9 +98,40 @@ public class Waypoint implements ISerializable<Waypoint> {
         .build()
     );
 
-    private Waypoint() {}
-    public Waypoint(NbtElement tag) {
-        fromTag((NbtCompound) tag);
+    public Setting<NearAction> actionWhenNear = sgPosition.add(new EnumSetting.Builder<NearAction>()
+        .name("action-when-near")
+        .description("Action to be performed when the player is near.")
+        .defaultValue(NearAction.Disabled)
+        .build()
+    );
+
+    public Setting<Integer> actionWhenNearDistance = sgPosition.add(new IntSetting.Builder()
+        .name("action-when-near-distance")
+        .description("How close (in blocks) the player has to be for the near action to be performed.")
+        .defaultValue(8)
+        .sliderRange(0, 32)
+        .visible(() -> actionWhenNear.get() != NearAction.Disabled)
+        .build()
+    );
+
+    public final UUID uuid;
+    public final long createdAt;
+
+    // 1 second cooldown for waypoint actions
+    final int waypointActionCooldown = 1000;
+
+    private Waypoint() {
+        uuid = UUID.randomUUID();
+        createdAt = System.currentTimeMillis();
+    }
+
+    public Waypoint(Tag tag) {
+        CompoundTag nbt = (CompoundTag) tag;
+
+        uuid = nbt.read("uuid", UUIDUtil.CODEC).orElse(UUID.randomUUID());
+        createdAt = System.currentTimeMillis();
+
+        fromTag(nbt);
     }
 
     public void renderIcon(double x, double y, double a, double size) {
@@ -105,10 +141,9 @@ public class Waypoint implements ISerializable<Waypoint> {
         int preA = color.get().a;
         color.get().a *= a;
 
-        GL.bindTexture(texture.getGlId());
         Renderer2D.TEXTURE.begin();
         Renderer2D.TEXTURE.texQuad(x, y, size, size, color.get());
-        Renderer2D.TEXTURE.render(null);
+        Renderer2D.TEXTURE.render(texture.getTextureView(), texture.getSampler());
 
         color.get().a = preA;
     }
@@ -127,6 +162,13 @@ public class Waypoint implements ISerializable<Waypoint> {
         };
     }
 
+    public boolean actionWhenNearCheck(int distance) {
+        // Add cooldown to near check, to account for death event inaccuracies
+        if ((System.currentTimeMillis() - createdAt) < waypointActionCooldown) return false;
+
+        return actionWhenNearDistance.get() >= distance;
+    }
+
     private void validateIcon() {
         Map<String, AbstractTexture> icons = Waypoints.get().icons;
 
@@ -138,7 +180,7 @@ public class Waypoint implements ISerializable<Waypoint> {
 
     public static class Builder {
         private String name = "", icon = "";
-        private BlockPos pos = BlockPos.ORIGIN;
+        private BlockPos pos = BlockPos.ZERO;
         private Dimension dimension = Dimension.Overworld;
 
         public Builder name(String name) {
@@ -174,18 +216,19 @@ public class Waypoint implements ISerializable<Waypoint> {
     }
 
     @Override
-    public NbtCompound toTag() {
-        NbtCompound tag = new NbtCompound();
+    public CompoundTag toTag() {
+        CompoundTag tag = new CompoundTag();
 
+        tag.store("uuid", UUIDUtil.CODEC, uuid);
         tag.put("settings", settings.toTag());
 
         return tag;
     }
 
     @Override
-    public Waypoint fromTag(NbtCompound tag) {
+    public Waypoint fromTag(CompoundTag tag) {
         if (tag.contains("settings")) {
-            settings.fromTag(tag.getCompound("settings"));
+            settings.fromTag(tag.getCompoundOrEmpty("settings"));
         }
 
         return this;
@@ -196,6 +239,16 @@ public class Waypoint implements ISerializable<Waypoint> {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Waypoint waypoint = (Waypoint) o;
-        return Objects.equals(waypoint.name.get(), this.name.get());
+        return Objects.equals(uuid, waypoint.uuid);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(uuid);
+    }
+
+    @Override
+    public String toString() {
+        return name.get();
     }
 }

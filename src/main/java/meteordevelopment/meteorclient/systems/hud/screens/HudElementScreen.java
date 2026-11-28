@@ -7,6 +7,8 @@ package meteordevelopment.meteorclient.systems.hud.screens;
 
 import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.WindowScreen;
+import meteordevelopment.meteorclient.gui.utils.Cell;
+import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.gui.widgets.containers.WContainer;
 import meteordevelopment.meteorclient.gui.widgets.containers.WHorizontalList;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WCheckbox;
@@ -19,7 +21,6 @@ import meteordevelopment.meteorclient.systems.hud.HudElement;
 import meteordevelopment.meteorclient.systems.hud.XAnchor;
 import meteordevelopment.meteorclient.systems.hud.YAnchor;
 import meteordevelopment.meteorclient.utils.misc.NbtUtils;
-import net.minecraft.nbt.NbtCompound;
 
 import static meteordevelopment.meteorclient.utils.Utils.getWindowWidth;
 
@@ -88,6 +89,15 @@ public class HudElementScreen extends WindowScreen {
 
         add(theme.horizontalSeparator()).expandX();
 
+        // Custom widget
+        WWidget widget = element.getWidget(theme);
+
+        if (widget != null) {
+            Cell<WWidget> cell = add(widget);
+            if (widget instanceof WContainer) cell.expandX();
+            add(theme.horizontalSeparator()).expandX();
+        }
+
         // Bottom
         WHorizontalList bottomList = add(theme.horizontalList()).expandX().widget();
 
@@ -102,7 +112,7 @@ public class HudElementScreen extends WindowScreen {
         WMinus remove = bottomList.add(theme.minus()).expandCellX().right().widget();
         remove.action = () -> {
             element.remove();
-            close();
+            onClose();
         };
     }
 
@@ -118,25 +128,13 @@ public class HudElementScreen extends WindowScreen {
     }
 
     @Override
-    protected void onRenderBefore(float delta) {
-        HudEditorScreen.renderElements();
-    }
-
-    @Override
     public boolean toClipboard() {
-        return NbtUtils.toClipboard(element.info.title, element.toTag());
+        return NbtUtils.toClipboard(element);
     }
 
     @Override
     public boolean fromClipboard() {
-        NbtCompound clipboard = NbtUtils.fromClipboard(element.toTag());
-
-        if (clipboard != null) {
-            element.fromTag(clipboard);
-            return true;
-        }
-
-        return false;
+        return NbtUtils.fromClipboard(element);
     }
 
 }

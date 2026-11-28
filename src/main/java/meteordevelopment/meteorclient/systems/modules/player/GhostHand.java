@@ -6,17 +6,17 @@
 package meteordevelopment.meteorclient.systems.modules.player;
 
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
-import meteordevelopment.meteorclient.events.world.TickEvent;
+import meteordevelopment.meteorclient.events.entity.player.DoItemUseEvent;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
-import meteordevelopment.meteorclient.utils.Utils;
+import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.util.Hand;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.Set;
 
@@ -28,29 +28,31 @@ public class GhostHand extends Module {
     }
 
     @EventHandler
-    private void onTick(TickEvent.Pre event) {
-        if (!mc.options.useKey.isPressed() || mc.player.isSneaking()) return;
+    private void onTick(DoItemUseEvent event) {
+        if (!mc.options.keyUse.isDown() || mc.player.isShiftKeyDown()) return;
 
-        for (BlockEntity blockEntity : Utils.blockEntities()) {
-            if (BlockPos.ofFloored(mc.player.raycast(mc.interactionManager.getReachDistance(), mc.getTickDelta(), false).getPos()).equals(blockEntity.getPos())) return;
-        }
+        if (mc.level.getBlockState(BlockPos.containing(mc.player.pick(mc.player.blockInteractionRange(), mc.getDeltaTracker().getGameTimeDeltaPartialTick(true), false).getLocation())).hasBlockEntity())
+            return;
 
-        Vec3d direction = new Vec3d(0, 0, 0.1)
-                .rotateX(-(float) Math.toRadians(mc.player.getPitch()))
-                .rotateY(-(float) Math.toRadians(mc.player.getYaw()));
+        Vec3 direction = new Vec3(0, 0, 0.1)
+            .xRot(-(float) Math.toRadians(mc.player.getXRot()))
+            .yRot(-(float) Math.toRadians(mc.player.getYRot()));
 
         posList.clear();
 
-        for (int i = 1; i < mc.interactionManager.getReachDistance() * 10; i++) {
-            BlockPos pos = BlockPos.ofFloored(mc.player.getCameraPosVec(mc.getTickDelta()).add(direction.multiply(i)));
+        for (int i = 1; i < mc.player.blockInteractionRange() * 10; i++) {
+            BlockPos pos = BlockPos.containing(mc.player.getEyePosition(mc.getDeltaTracker().getGameTimeDeltaPartialTick(true)).add(direction.scale(i)));
 
-            if (posList.contains(pos)) continue;
-            posList.add(pos);
+            if (!posList.add(pos)) continue;
 
-            for (BlockEntity blockEntity : Utils.blockEntities()) {
-                if (blockEntity.getPos().equals(pos)) {
-                    mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5), Direction.UP, pos, true));
-                    return;
+            if (mc.level.getBlockState(pos).hasBlockEntity()) {
+                for (InteractionHand hand : InteractionHand.values()) {
+                    InteractionResult result = BlockUtils.interact(new BlockHitResult(new Vec3(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5), Direction.UP, pos, true), hand, true);
+
+                    if (result instanceof InteractionResult.Success || result instanceof InteractionResult.Fail) {
+                        event.cancel();
+                        return;
+                    }
                 }
             }
         }

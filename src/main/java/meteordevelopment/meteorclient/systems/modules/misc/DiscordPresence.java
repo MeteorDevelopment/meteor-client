@@ -7,6 +7,8 @@ package meteordevelopment.meteorclient.systems.modules.misc;
 
 //Created by squidoodly
 
+import com.mojang.blaze3d.Blaze3D;
+import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
 import meteordevelopment.discordipc.DiscordIPC;
 import meteordevelopment.discordipc.RichPresence;
 import meteordevelopment.meteorclient.MeteorClient;
@@ -23,19 +25,19 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.MeteorStarscript;
 import meteordevelopment.orbit.EventHandler;
-import meteordevelopment.starscript.Script;
-import net.minecraft.client.gui.screen.*;
-import net.minecraft.client.gui.screen.multiplayer.MultiplayerScreen;
-import net.minecraft.client.gui.screen.option.*;
-import net.minecraft.client.gui.screen.pack.PackScreen;
-import net.minecraft.client.gui.screen.world.CreateWorldScreen;
-import net.minecraft.client.gui.screen.world.EditGameRulesScreen;
-import net.minecraft.client.gui.screen.world.EditWorldScreen;
-import net.minecraft.client.gui.screen.world.SelectWorldScreen;
-import net.minecraft.client.realms.gui.screen.RealmsScreen;
-import net.minecraft.util.Pair;
-import net.minecraft.util.Util;
+import net.minecraft.client.gui.screens.*;
+import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
+import net.minecraft.client.gui.screens.options.*;
+import net.minecraft.client.gui.screens.options.controls.ControlsScreen;
+import net.minecraft.client.gui.screens.packs.PackSelectionScreen;
+import net.minecraft.client.gui.screens.worldselection.AbstractGameRulesScreen;
+import net.minecraft.client.gui.screens.worldselection.CreateWorldScreen;
+import net.minecraft.client.gui.screens.worldselection.EditWorldScreen;
+import net.minecraft.client.gui.screens.worldselection.SelectWorldScreen;
+import net.minecraft.realms.RealmsScreen;
+import org.meteordev.starscript.Script;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -54,7 +56,7 @@ public class DiscordPresence extends Module {
         .name("line-1-messages")
         .description("Messages used for the first line.")
         .defaultValue("{player}", "{server}")
-        .onChanged(strings -> recompileLine1())
+        .onChanged(_ -> recompileLine1())
         .renderer(StarscriptTextBoxRenderer.class)
         .build()
     );
@@ -81,7 +83,7 @@ public class DiscordPresence extends Module {
         .name("line-2-messages")
         .description("Messages used for the second line.")
         .defaultValue("Meteor on Crack!", "{round(server.tps, 1)} TPS", "Playing on {server.difficulty} difficulty.", "{server.player_count} Players online")
-        .onChanged(strings -> recompileLine2())
+        .onChanged(_ -> recompileLine2())
         .renderer(StarscriptTextBoxRenderer.class)
         .build()
     );
@@ -113,7 +115,7 @@ public class DiscordPresence extends Module {
     private final List<Script> line2Scripts = new ArrayList<>();
     private int line2Ticks, line2I;
 
-    public static final List<Pair<String, String>> customStates = new ArrayList<>();
+    public static final Object2ObjectLinkedOpenHashMap<String, String> customStates = new Object2ObjectLinkedOpenHashMap<>();
 
     static {
         registerCustomState("com.terraformersmc.modmenu.gui", "Browsing mods");
@@ -126,21 +128,18 @@ public class DiscordPresence extends Module {
         runInMainMenu = true;
     }
 
-    /** Registers a custom state to be used when the current screen is a class in the specified package. */
+    /**
+     * Registers a custom state to be used when the current screen is a class in the specified package.
+     */
     public static void registerCustomState(String packageName, String state) {
-        for (var pair : customStates) {
-            if (pair.getLeft().equals(packageName)) {
-                pair.setRight(state);
-                return;
-            }
-        }
-
-        customStates.add(new Pair<>(packageName, state));
+        customStates.put(packageName, state);
     }
 
-    /** The package name must match exactly to the one provided through {@link #registerCustomState(String, String)}. */
+    /**
+     * The package name must match exactly to the one provided through {@link #registerCustomState(String, String)}.
+     */
     public static void unregisterCustomState(String packageName) {
-        customStates.removeIf(pair -> pair.getLeft().equals(packageName));
+        customStates.remove(packageName);
     }
 
     @Override
@@ -150,7 +149,7 @@ public class DiscordPresence extends Module {
         rpc.setStart(System.currentTimeMillis() / 1000L);
 
         String largeText = "%s %s".formatted(MeteorClient.NAME, MeteorClient.VERSION);
-        if (!MeteorClient.DEV_BUILD.isEmpty()) largeText += " Dev Build: " + MeteorClient.DEV_BUILD;
+        if (!MeteorClient.BUILD_NUMBER.isEmpty()) largeText += " Build: " + MeteorClient.BUILD_NUMBER;
         rpc.setLargeImage("meteor_client", largeText);
 
         currentSmallImage = SmallImage.Snail;
@@ -202,13 +201,12 @@ public class DiscordPresence extends Module {
             update = true;
 
             ticks = 0;
-        }
-        else ticks++;
+        } else ticks++;
 
         if (Utils.canUpdate()) {
             // Line 1
             if (line1Ticks >= line1UpdateDelay.get() || forceUpdate) {
-                if (line1Scripts.size() > 0) {
+                if (!line1Scripts.isEmpty()) {
                     int i = Utils.random(0, line1Scripts.size());
                     if (line1SelectMode.get() == SelectMode.Sequential) {
                         if (line1I >= line1Scripts.size()) line1I = 0;
@@ -225,7 +223,7 @@ public class DiscordPresence extends Module {
 
             // Line 2
             if (line2Ticks >= line2UpdateDelay.get() || forceUpdate) {
-                if (line2Scripts.size() > 0) {
+                if (!line2Scripts.isEmpty()) {
                     int i = Utils.random(0, line2Scripts.size());
                     if (line2SelectMode.get() == SelectMode.Sequential) {
                         if (line2I >= line2Scripts.size()) line2I = 0;
@@ -239,30 +237,32 @@ public class DiscordPresence extends Module {
 
                 line2Ticks = 0;
             } else line2Ticks++;
-        }
-        else {
+        } else {
             if (!lastWasInMainMenu) {
-                rpc.setDetails(MeteorClient.NAME + " " + (MeteorClient.DEV_BUILD.isEmpty() ? MeteorClient.VERSION : MeteorClient.VERSION + " " + MeteorClient.DEV_BUILD));
+                rpc.setDetails(MeteorClient.NAME + " " + (MeteorClient.BUILD_NUMBER.isEmpty() ? MeteorClient.VERSION : MeteorClient.VERSION + " " + MeteorClient.BUILD_NUMBER));
 
-                if (mc.currentScreen instanceof TitleScreen) rpc.setState("Looking at title screen");
-                else if (mc.currentScreen instanceof SelectWorldScreen) rpc.setState("Selecting world");
-                else if (mc.currentScreen instanceof CreateWorldScreen || mc.currentScreen instanceof EditGameRulesScreen) rpc.setState("Creating world");
-                else if (mc.currentScreen instanceof EditWorldScreen) rpc.setState("Editing world");
-                else if (mc.currentScreen instanceof LevelLoadingScreen) rpc.setState("Loading world");
-                else if (mc.currentScreen instanceof MultiplayerScreen) rpc.setState("Selecting server");
-                else if (mc.currentScreen instanceof AddServerScreen) rpc.setState("Adding server");
-                else if (mc.currentScreen instanceof ConnectScreen || mc.currentScreen instanceof DirectConnectScreen) rpc.setState("Connecting to server");
-                else if (mc.currentScreen instanceof WidgetScreen) rpc.setState("Browsing Meteor's GUI");
-                else if (mc.currentScreen instanceof OptionsScreen || mc.currentScreen instanceof SkinOptionsScreen || mc.currentScreen instanceof SoundOptionsScreen || mc.currentScreen instanceof VideoOptionsScreen || mc.currentScreen instanceof ControlsOptionsScreen || mc.currentScreen instanceof LanguageOptionsScreen || mc.currentScreen instanceof ChatOptionsScreen || mc.currentScreen instanceof PackScreen || mc.currentScreen instanceof AccessibilityOptionsScreen) rpc.setState("Changing options");
-                else if (mc.currentScreen instanceof CreditsScreen) rpc.setState("Reading credits");
-                else if (mc.currentScreen instanceof RealmsScreen) rpc.setState("Browsing Realms");
+                if (mc.gui.screen() instanceof TitleScreen) rpc.setState("Looking at title screen");
+                else if (mc.gui.screen() instanceof SelectWorldScreen) rpc.setState("Selecting world");
+                else if (mc.gui.screen() instanceof CreateWorldScreen || mc.gui.screen() instanceof AbstractGameRulesScreen)
+                    rpc.setState("Creating world");
+                else if (mc.gui.screen() instanceof EditWorldScreen) rpc.setState("Editing world");
+                else if (mc.gui.screen() instanceof LevelLoadingScreen) rpc.setState("Loading world");
+                else if (mc.gui.screen() instanceof JoinMultiplayerScreen) rpc.setState("Selecting server");
+                else if (mc.gui.screen() instanceof ManageServerScreen) rpc.setState("Adding server");
+                else if (mc.gui.screen() instanceof ConnectScreen || mc.gui.screen() instanceof DirectJoinServerScreen)
+                    rpc.setState("Connecting to server");
+                else if (mc.gui.screen() instanceof WidgetScreen) rpc.setState("Browsing Meteor's GUI");
+                else if (mc.gui.screen() instanceof OptionsScreen || mc.gui.screen() instanceof SkinCustomizationScreen || mc.gui.screen() instanceof SoundOptionsScreen || mc.gui.screen() instanceof VideoSettingsScreen || mc.gui.screen() instanceof ControlsScreen || mc.gui.screen() instanceof LanguageSelectScreen || mc.gui.screen() instanceof ChatOptionsScreen || mc.gui.screen() instanceof PackSelectionScreen || mc.gui.screen() instanceof AccessibilityOptionsScreen)
+                    rpc.setState("Changing options");
+                else if (mc.gui.screen() instanceof WinScreen) rpc.setState("Reading credits");
+                else if (mc.gui.screen() instanceof RealmsScreen) rpc.setState("Browsing Realms");
                 else {
                     boolean setState = false;
-                    if (mc.currentScreen != null) {
-                        String className = mc.currentScreen.getClass().getName();
-                        for (var pair : customStates) {
-                            if (className.startsWith(pair.getLeft())) {
-                                rpc.setState(pair.getRight());
+                    if (mc.gui.screen() != null) {
+                        String className = mc.gui.screen().getClass().getName();
+                        for (var entry : customStates.object2ObjectEntrySet()) {
+                            if (className.startsWith(entry.getKey())) {
+                                rpc.setState(entry.getValue());
                                 setState = true;
                                 break;
                             }
@@ -289,7 +289,7 @@ public class DiscordPresence extends Module {
     @Override
     public WWidget getWidget(GuiTheme theme) {
         WButton help = theme.button("Open documentation.");
-        help.action = () -> Util.getOperatingSystem().open("https://github.com/MeteorDevelopment/meteor-client/wiki/Starscript");
+        help.action = () -> Blaze3D.openUri(URI.create("https://github.com/MeteorDevelopment/meteor-client/wiki/Starscript"));
 
         return help;
     }

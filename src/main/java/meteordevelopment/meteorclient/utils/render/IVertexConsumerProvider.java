@@ -5,8 +5,11 @@
 
 package meteordevelopment.meteorclient.utils.render;
 
-import net.minecraft.client.render.VertexConsumerProvider;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import net.minecraft.client.renderer.rendertype.RenderType;
 
-public interface IVertexConsumerProvider extends VertexConsumerProvider {
-    void setOffset(double offsetX, double offsetY, double offsetZ);
+public interface IVertexConsumerProvider {
+    VertexConsumer getBuffer(RenderType layer);
+
+    void setOffset(int offsetX, int offsetY, int offsetZ);
 }

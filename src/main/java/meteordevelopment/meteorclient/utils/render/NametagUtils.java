@@ -6,11 +6,12 @@
 package meteordevelopment.meteorclient.utils.render;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.meteorclient.systems.modules.render.Zoom;
 import meteordevelopment.meteorclient.utils.Utils;
-import net.minecraft.client.util.math.MatrixStack;
-import org.joml.Matrix4f;
-import org.joml.Vector3d;
-import org.joml.Vector4f;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.util.Mth;
+import org.joml.*;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
@@ -20,21 +21,24 @@ public class NametagUtils {
     private static final Vector4f pmMat4 = new Vector4f();
     private static final Vector3d camera = new Vector3d();
     private static final Vector3d cameraNegated = new Vector3d();
-    private static Matrix4f model;
-    private static Matrix4f projection;
+    private static final Matrix4f model = new Matrix4f();
+    private static final Matrix4f projection = new Matrix4f();
     private static double windowScale;
 
     public static double scale;
 
-    public static void onRender(MatrixStack matrices, Matrix4f projection) {
-        model = new Matrix4f(matrices.peek().getPositionMatrix());
-        NametagUtils.projection = projection;
+    private NametagUtils() {
+    }
 
-        Utils.set(camera, mc.gameRenderer.getCamera().getPos());
+    public static void onRender(Matrix4fc modelView) {
+        model.set(modelView);
+        NametagUtils.projection.set(RenderUtils.projection);
+
+        Utils.set(camera, mc.gameRenderer.mainCamera().position());
         cameraNegated.set(camera);
         cameraNegated.negate();
 
-        windowScale = mc.getWindow().calculateScaleFactor(1, false);
+        windowScale = mc.getWindow().calculateScale(1, false);
     }
 
     public static boolean to2D(Vector3d pos, double scale) {
@@ -42,7 +46,12 @@ public class NametagUtils {
     }
 
     public static boolean to2D(Vector3d pos, double scale, boolean distanceScaling) {
-        NametagUtils.scale = scale;
+        return to2D(pos, scale, distanceScaling, false);
+    }
+
+    public static boolean to2D(Vector3d pos, double scale, boolean distanceScaling, boolean allowBehind) {
+        Zoom zoom = Modules.get().get(Zoom.class);
+        NametagUtils.scale = scale * zoom.getScaling();
         if (distanceScaling) {
             NametagUtils.scale *= getScale(pos);
         }
@@ -52,33 +61,58 @@ public class NametagUtils {
         vec4.mul(model, mmMat4);
         mmMat4.mul(projection, pmMat4);
 
-        if (pmMat4.w <= 0.0f) return false;
+        boolean behind = pmMat4.w <= 0.f;
+
+        if (behind && !allowBehind) return false;
 
         toScreen(pmMat4);
-        double x = pmMat4.x * mc.getWindow().getFramebufferWidth();
-        double y = pmMat4.y * mc.getWindow().getFramebufferHeight();
+        double x = pmMat4.x * mc.getWindow().getWidth();
+        double y = pmMat4.y * mc.getWindow().getHeight();
+
+        if (behind) {
+            x = mc.getWindow().getWidth() - x;
+            y = mc.getWindow().getHeight() - y;
+        }
 
         if (Double.isInfinite(x) || Double.isInfinite(y)) return false;
 
-        pos.set(x / windowScale, mc.getWindow().getFramebufferHeight() - y / windowScale, pmMat4.z);
+        pos.set(x / windowScale, mc.getWindow().getHeight() - y / windowScale, allowBehind ? pmMat4.w : pmMat4.z);
         return true;
     }
 
     public static void begin(Vector3d pos) {
-        MatrixStack matrices = RenderSystem.getModelViewStack();
+        Matrix4fStack matrices = RenderSystem.getModelViewStack();
+        begin(matrices, pos);
+    }
 
-        matrices.push();
-        matrices.translate(pos.x, pos.y, 0);
+    public static void begin(Vector3d pos, GuiGraphicsExtractor graphics) {
+        begin(pos);
+
+        Matrix3x2fStack matrices = graphics.pose();
+        matrices.pushMatrix();
+        matrices.scale(1.0f / mc.getWindow().getGuiScale());
+        matrices.translate((float) pos.x, (float) pos.y);
+        matrices.scale((float) scale, (float) scale);
+    }
+
+    private static void begin(Matrix4fStack matrices, Vector3d pos) {
+        matrices.pushMatrix();
+        matrices.translate((float) pos.x, (float) pos.y, 0);
         matrices.scale((float) scale, (float) scale, 1);
     }
 
     public static void end() {
-        RenderSystem.getModelViewStack().pop();
+        RenderSystem.getModelViewStack().popMatrix();
+    }
+
+    public static void end(GuiGraphicsExtractor graphics) {
+        end();
+        graphics.pose().popMatrix();
     }
 
     private static double getScale(Vector3d pos) {
         double dist = camera.distance(pos);
-        return Utils.clamp(1 - dist * 0.01, 0.5, Integer.MAX_VALUE);
+        return Mth.clamp(1 - dist * 0.01, 0.5, Integer.MAX_VALUE);
     }
 
     private static void toScreen(Vector4f vec) {

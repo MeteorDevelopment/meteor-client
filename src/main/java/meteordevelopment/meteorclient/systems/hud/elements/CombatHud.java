@@ -6,6 +6,9 @@
 package meteordevelopment.meteorclient.systems.hud.elements;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import it.unimi.dsi.fastutil.objects.ObjectIntImmutablePair;
+import it.unimi.dsi.fastutil.objects.ObjectIntPair;
 import meteordevelopment.meteorclient.renderer.Renderer2D;
 import meteordevelopment.meteorclient.renderer.text.TextRenderer;
 import meteordevelopment.meteorclient.settings.*;
@@ -20,25 +23,26 @@ import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.meteorclient.utils.entity.SortPriority;
 import meteordevelopment.meteorclient.utils.entity.TargetUtils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
-import meteordevelopment.meteorclient.utils.render.RenderUtils;
+import meteordevelopment.meteorclient.utils.render.DisplayItemUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
-import net.minecraft.client.gui.screen.ingame.InventoryScreen;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.BedItem;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.item.SwordItem;
-import net.minecraft.registry.Registries;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.core.Holder;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.tags.EnchantmentTags;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.enchantment.ItemEnchantments;
+import org.joml.Matrix4fStack;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
@@ -50,18 +54,13 @@ public class CombatHud extends HudElement {
 
     public static final HudElementInfo<CombatHud> INFO = new HudElementInfo<>(Hud.GROUP, "combat", "Displays information about your combat target.", CombatHud::new);
 
-    private static final MatrixStack MATRICES = new MatrixStack();
-
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-
-    private final Setting<Double> scale = sgGeneral.add(new DoubleSetting.Builder()
-        .name("scale")
-        .description("The scale.")
-        .defaultValue(2)
-        .min(1)
-        .sliderRange(1, 5)
-        .build()
-    );
+    private final SettingGroup sgEnchantments = settings.createGroup("Enchantments");
+    private final SettingGroup sgHealth = settings.createGroup("Health");
+    private final SettingGroup sgDistance = settings.createGroup("Distance");
+    private final SettingGroup sgPing = settings.createGroup("Ping");
+    private final SettingGroup sgScale = settings.createGroup("Scale");
+    private final SettingGroup sgBackground = settings.createGroup("Background");
 
     private final Setting<Double> range = sgGeneral.add(new DoubleSetting.Builder()
         .name("range")
@@ -72,42 +71,55 @@ public class CombatHud extends HudElement {
         .build()
     );
 
-    private final Setting<Boolean> displayPing = sgGeneral.add(new BoolSetting.Builder()
-        .name("ping")
-        .description("Shows the player's ping.")
-        .defaultValue(true)
+    // Health
+
+    private final Setting<SettingColor> healthColor1 = sgHealth.add(new ColorSetting.Builder()
+        .name("health-stage-1")
+        .description("The color on the left of the health gradient.")
+        .defaultValue(new SettingColor(255, 15, 15))
         .build()
     );
 
-    private final Setting<Boolean> displayDistance = sgGeneral.add(new BoolSetting.Builder()
-        .name("distance")
-        .description("Shows the distance between you and the player.")
-        .defaultValue(true)
+    private final Setting<SettingColor> healthColor2 = sgHealth.add(new ColorSetting.Builder()
+        .name("health-stage-2")
+        .description("The color in the middle of the health gradient.")
+        .defaultValue(new SettingColor(255, 150, 15))
         .build()
     );
 
-    private final Setting<List<Enchantment>> displayedEnchantments = sgGeneral.add(new EnchantmentListSetting.Builder()
+    private final Setting<SettingColor> healthColor3 = sgHealth.add(new ColorSetting.Builder()
+        .name("health-stage-3")
+        .description("The color on the right of the health gradient.")
+        .defaultValue(new SettingColor(15, 255, 15))
+        .build()
+    );
+
+    // Enchantments
+
+    private final Setting<Set<ResourceKey<Enchantment>>> displayedEnchantments = sgEnchantments.add(new EnchantmentListSetting.Builder()
         .name("displayed-enchantments")
         .description("The enchantments that are shown on nametags.")
-        .defaultValue(getDefaultEnchantments())
+        .vanillaDefaults()
         .build()
     );
 
-    private final Setting<SettingColor> backgroundColor = sgGeneral.add(new ColorSetting.Builder()
-        .name("background-color")
-        .description("Color of background.")
-        .defaultValue(new SettingColor(0, 0, 0, 64))
-        .build()
-    );
-
-    private final Setting<SettingColor> enchantmentTextColor = sgGeneral.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> enchantmentTextColor = sgEnchantments.add(new ColorSetting.Builder()
         .name("enchantment-color")
         .description("Color of enchantment text.")
         .defaultValue(new SettingColor(255, 255, 255))
         .build()
     );
 
-    private final Setting<SettingColor> pingColor1 = sgGeneral.add(new ColorSetting.Builder()
+    // Ping
+
+    private final Setting<Boolean> displayPing = sgPing.add(new BoolSetting.Builder()
+        .name("ping")
+        .description("Shows the player's ping.")
+        .defaultValue(true)
+        .build()
+    );
+
+    private final Setting<SettingColor> pingColor1 = sgPing.add(new ColorSetting.Builder()
         .name("ping-stage-1")
         .description("Color of ping text when under 75.")
         .defaultValue(new SettingColor(15, 255, 15))
@@ -115,7 +127,7 @@ public class CombatHud extends HudElement {
         .build()
     );
 
-    private final Setting<SettingColor> pingColor2 = sgGeneral.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> pingColor2 = sgPing.add(new ColorSetting.Builder()
         .name("ping-stage-2")
         .description("Color of ping text when between 75 and 200.")
         .defaultValue(new SettingColor(255, 150, 15))
@@ -123,7 +135,7 @@ public class CombatHud extends HudElement {
         .build()
     );
 
-    private final Setting<SettingColor> pingColor3 = sgGeneral.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> pingColor3 = sgPing.add(new ColorSetting.Builder()
         .name("ping-stage-3")
         .description("Color of ping text when over 200.")
         .defaultValue(new SettingColor(255, 15, 15))
@@ -131,7 +143,16 @@ public class CombatHud extends HudElement {
         .build()
     );
 
-    private final Setting<SettingColor> distColor1 = sgGeneral.add(new ColorSetting.Builder()
+    // Distance
+
+    private final Setting<Boolean> displayDistance = sgDistance.add(new BoolSetting.Builder()
+        .name("distance")
+        .description("Shows the distance between you and the player.")
+        .defaultValue(true)
+        .build()
+    );
+
+    private final Setting<SettingColor> distColor1 = sgDistance.add(new ColorSetting.Builder()
         .name("distance-stage-1")
         .description("The color when a player is within 10 blocks of you.")
         .defaultValue(new SettingColor(255, 15, 15))
@@ -139,7 +160,7 @@ public class CombatHud extends HudElement {
         .build()
     );
 
-    private final Setting<SettingColor> distColor2 = sgGeneral.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> distColor2 = sgDistance.add(new ColorSetting.Builder()
         .name("distance-stage-2")
         .description("The color when a player is within 50 blocks of you.")
         .defaultValue(new SettingColor(255, 150, 15))
@@ -147,7 +168,7 @@ public class CombatHud extends HudElement {
         .build()
     );
 
-    private final Setting<SettingColor> distColor3 = sgGeneral.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> distColor3 = sgDistance.add(new ColorSetting.Builder()
         .name("distance-stage-3")
         .description("The color when a player is greater then 50 blocks away from you.")
         .defaultValue(new SettingColor(15, 255, 15))
@@ -155,36 +176,54 @@ public class CombatHud extends HudElement {
         .build()
     );
 
-    private final Setting<SettingColor> healthColor1 = sgGeneral.add(new ColorSetting.Builder()
-        .name("health-stage-1")
-        .description("The color on the left of the health gradient.")
-        .defaultValue(new SettingColor(255, 15, 15))
+    // Scale
+
+    public final Setting<Boolean> customScale = sgScale.add(new BoolSetting.Builder()
+        .name("custom-scale")
+        .description("Applies a custom scale to this hud element.")
+        .defaultValue(false)
+        .onChanged(_ -> calculateSize())
         .build()
     );
 
-    private final Setting<SettingColor> healthColor2 = sgGeneral.add(new ColorSetting.Builder()
-        .name("health-stage-2")
-        .description("The color in the middle of the health gradient.")
-        .defaultValue(new SettingColor(255, 150, 15))
+    public final Setting<Double> scale = sgScale.add(new DoubleSetting.Builder()
+        .name("scale")
+        .description("Custom scale.")
+        .visible(customScale::get)
+        .defaultValue(2)
+        .onChanged(_ -> calculateSize())
+        .min(0.5)
+        .sliderRange(0.5, 3)
         .build()
     );
 
-    private final Setting<SettingColor> healthColor3 = sgGeneral.add(new ColorSetting.Builder()
-        .name("health-stage-3")
-        .description("The color on the right of the health gradient.")
-        .defaultValue(new SettingColor(15, 255, 15))
+    // Background
+
+    public final Setting<Boolean> background = sgBackground.add(new BoolSetting.Builder()
+        .name("background")
+        .description("Displays background.")
+        .defaultValue(false)
         .build()
     );
 
-    private PlayerEntity playerEntity;
+    public final Setting<SettingColor> backgroundColor = sgBackground.add(new ColorSetting.Builder()
+        .name("background-color")
+        .description("Color used for the background.")
+        .visible(background::get)
+        .defaultValue(new SettingColor(25, 25, 25, 50))
+        .build()
+    );
+
+    private Player playerEntity;
 
     public CombatHud() {
         super(INFO);
+
+        calculateSize();
     }
 
-    @Override
-    public void tick(HudRenderer renderer) {
-        setSize(175 * scale.get(), 95 * scale.get());
+    private void calculateSize() {
+        setSize(175 * getScale(), 95 * getScale());
     }
 
     @Override
@@ -202,32 +241,41 @@ public class CombatHud extends HudElement {
 
             if (playerEntity == null && !isInEditor()) return;
 
-            // Background
-            Renderer2D.COLOR.begin();
-            Renderer2D.COLOR.quad(x, y, getWidth(), getHeight(), backgroundColor.get());
-            Renderer2D.COLOR.render(null);
+            if (background.get()) {
+                Renderer2D.COLOR.begin();
+                Renderer2D.COLOR.quad(x, y, getWidth(), getHeight(), backgroundColor.get());
+            }
 
-            if (playerEntity == null) return;
+            if (playerEntity == null) {
+                if (isInEditor()) {
+                    renderer.line(x, y, x + getWidth(), y + getHeight(), Color.GRAY);
+                    renderer.line(x + getWidth(), y, x, y + getHeight(), Color.GRAY);
+                    Renderer2D.COLOR.render(); // I know, ill fix it soon
+                }
+                return;
+            }
+            Renderer2D.COLOR.render();
 
             // Player Model
-            InventoryScreen.drawEntity(
-                MATRICES,
-                (int) (x + (25 * scale.get())),
-                (int) (y + (66 * scale.get())),
-                (int) (30 * scale.get()),
-                -MathHelper.wrapDegrees(playerEntity.prevYaw + (playerEntity.getYaw() - playerEntity.prevYaw) * mc.getTickDelta()),
-                -playerEntity.getPitch(), playerEntity
+            renderer.entity(
+                playerEntity,
+                (int) (x + 5 * getScale()),
+                (int) (y + 10 * getScale()),
+                (int) (50 * getScale()),
+                (int) (60 * getScale()),
+                -Mth.wrapDegrees(playerEntity.yRotO + (playerEntity.getYRot() - playerEntity.yRotO) * mc.getDeltaTracker().getGameTimeDeltaPartialTick(true)),
+                -playerEntity.getXRot()
             );
 
             // Moving pos to past player model
-            x += 50 * scale.get();
-            y += 5 * scale.get();
+            x += 50 * getScale();
+            y += 5 * getScale();
 
             // Setting up texts
             String breakText = " | ";
 
             // Name
-            String nameText = playerEntity.getEntityName();
+            String nameText = playerEntity.getName().getString();
             Color nameColor = PlayerUtils.getPlayerColor(playerEntity, primaryColor);
 
             // Ping
@@ -257,8 +305,7 @@ public class CombatHud extends HudElement {
             if (Friends.get().isFriend(playerEntity)) {
                 friendText = "Friend";
                 friendColor = Config.get().friendColor.get();
-            }
-            else {
+            } else {
                 boolean naked = true;
 
                 for (int position = 3; position >= 0; position--) {
@@ -270,17 +317,16 @@ public class CombatHud extends HudElement {
                 if (naked) {
                     friendText = "Naked";
                     friendColor = GREEN;
-                }
-                else {
+                } else {
                     boolean threat = false;
 
                     for (int position = 5; position >= 0; position--) {
                         ItemStack itemStack = getItem(position);
 
-                        if (itemStack.getItem() instanceof SwordItem
+                        if (itemStack.is(ItemTags.SWORDS)
                             || itemStack.getItem() == Items.END_CRYSTAL
                             || itemStack.getItem() == Items.RESPAWN_ANCHOR
-                            || itemStack.getItem() instanceof BedItem) threat = true;
+                            || itemStack.is(ItemTags.BEDS)) threat = true;
                     }
 
                     if (threat) {
@@ -290,7 +336,7 @@ public class CombatHud extends HudElement {
                 }
             }
 
-            TextRenderer.get().begin(0.45 * scale.get(), false, true);
+            TextRenderer.get().begin(renderer.graphics, 0.45 * getScale(), false, true);
 
             double breakWidth = TextRenderer.get().getWidth(breakText);
             double pingWidth = TextRenderer.get().getWidth(pingText);
@@ -318,48 +364,44 @@ public class CombatHud extends HudElement {
             TextRenderer.get().end();
 
             // Moving pos down for armor
-            y += 10 * scale.get();
+            y += 10 * getScale();
 
             double armorX;
             double armorY;
             int slot = 5;
 
             // Drawing armor
-            MatrixStack matrices = RenderSystem.getModelViewStack();
+            Matrix4fStack matrices = RenderSystem.getModelViewStack();
 
-            matrices.push();
-            matrices.scale(scale.get().floatValue(), scale.get().floatValue(), 1);
+            matrices.pushMatrix();
+            matrices.scale((float) getScale(), (float) getScale(), 1);
 
-            x /= scale.get();
-            y /= scale.get();
-
-            TextRenderer.get().begin(0.35, false, true);
+            TextRenderer.get().begin(renderer.graphics, 0.35, false, true);
 
             for (int position = 0; position < 6; position++) {
-                armorX = x + position * 20;
+                armorX = x + (position * 20 * getScale());
                 armorY = y;
 
                 ItemStack itemStack = getItem(slot);
 
-                RenderUtils.drawItem(itemStack, (int) armorX, (int) armorY, true);
+                renderer.item(itemStack, (int) (armorX), (int) (armorY), (float) getScale(), true);
 
-                armorY += 18;
+                armorY = (y / getScale()) + 18;
 
-                Map<Enchantment, Integer> enchantments = EnchantmentHelper.get(itemStack);
-                Map<Enchantment, Integer> enchantmentsToShow = new HashMap<>();
+                ItemEnchantments enchantments = EnchantmentHelper.getEnchantmentsForCrafting(itemStack);
+                List<ObjectIntPair<Holder<Enchantment>>> enchantmentsToShow = new ArrayList<>();
 
-                for (Enchantment enchantment : displayedEnchantments.get()) {
-                    if (enchantments.containsKey(enchantment)) {
-                        enchantmentsToShow.put(enchantment, enchantments.get(enchantment));
+                for (Object2IntMap.Entry<Holder<Enchantment>> entry : enchantments.entrySet()) {
+                    if (entry.getKey().is(displayedEnchantments.get()::contains)) {
+                        enchantmentsToShow.add(new ObjectIntImmutablePair<>(entry.getKey(), entry.getIntValue()));
                     }
                 }
 
-                for (Enchantment enchantment : enchantmentsToShow.keySet()) {
-                    String enchantName = Utils.getEnchantSimpleName(enchantment, 3) + " " + enchantmentsToShow.get(enchantment);
+                for (ObjectIntPair<Holder<Enchantment>> entry : enchantmentsToShow) {
+                    String enchantName = Utils.getEnchantSimpleName(entry.left(), 3) + " " + entry.rightInt();
 
-                    double enchX = (armorX + 8) - (TextRenderer.get().getWidth(enchantName) / 2);
-
-                    TextRenderer.get().render(enchantName, enchX, armorY, enchantment.isCursed() ? RED : enchantmentTextColor.get());
+                    double enchX = (((x / getScale()) + position * 20) + 8) - (TextRenderer.get().getWidth(enchantName) / 2);
+                    TextRenderer.get().render(enchantName, enchX, armorY, entry.left().is(EnchantmentTags.CURSE) ? RED : enchantmentTextColor.get());
                     armorY += TextRenderer.get().getHeight();
                 }
                 slot--;
@@ -367,20 +409,20 @@ public class CombatHud extends HudElement {
 
             TextRenderer.get().end();
 
-            y = (int) (this.y + 75 * scale.get());
+            y = (int) (this.y + 75 * getScale());
             x = this.x;
 
             // Health bar
 
-            x /= scale.get();
-            y /= scale.get();
+            x /= getScale();
+            y /= getScale();
 
             x += 5;
             y += 5;
 
             Renderer2D.COLOR.begin();
             Renderer2D.COLOR.boxLines(x, y, 165, 11, BLACK);
-            Renderer2D.COLOR.render(null);
+            Renderer2D.COLOR.render();
 
             x += 2;
             y += 2;
@@ -404,21 +446,21 @@ public class CombatHud extends HudElement {
             Renderer2D.COLOR.begin();
             Renderer2D.COLOR.quad(x, y, healthWidth, 7, healthColor1.get(), healthColor2.get(), healthColor2.get(), healthColor1.get());
             Renderer2D.COLOR.quad(x + healthWidth, y, absorbWidth, 7, healthColor2.get(), healthColor3.get(), healthColor3.get(), healthColor2.get());
-            Renderer2D.COLOR.render(null);
+            Renderer2D.COLOR.render();
 
-            matrices.pop();
+            matrices.popMatrix();
         });
     }
 
     private ItemStack getItem(int i) {
         if (isInEditor()) {
             return switch (i) {
-                case 0 -> Items.END_CRYSTAL.getDefaultStack();
-                case 1 -> Items.NETHERITE_BOOTS.getDefaultStack();
-                case 2 -> Items.NETHERITE_LEGGINGS.getDefaultStack();
-                case 3 -> Items.NETHERITE_CHESTPLATE.getDefaultStack();
-                case 4 -> Items.NETHERITE_HELMET.getDefaultStack();
-                case 5 -> Items.TOTEM_OF_UNDYING.getDefaultStack();
+                case 0 -> DisplayItemUtils.toStack(Items.NETHERITE_BOOTS);
+                case 1 -> DisplayItemUtils.toStack(Items.NETHERITE_LEGGINGS);
+                case 2 -> DisplayItemUtils.toStack(Items.NETHERITE_CHESTPLATE);
+                case 3 -> DisplayItemUtils.toStack(Items.NETHERITE_HELMET);
+                case 4 -> DisplayItemUtils.toStack(Items.TOTEM_OF_UNDYING);
+                case 5 -> DisplayItemUtils.toStack(Items.END_CRYSTAL);
                 default -> ItemStack.EMPTY;
             };
         }
@@ -426,19 +468,17 @@ public class CombatHud extends HudElement {
         if (playerEntity == null) return ItemStack.EMPTY;
 
         return switch (i) {
-            case 4 -> playerEntity.getOffHandStack();
-            case 5 -> playerEntity.getMainHandStack();
-            default -> playerEntity.getInventory().getArmorStack(i);
+            case 5 -> playerEntity.getMainHandItem();
+            case 4 -> playerEntity.getOffhandItem();
+            case 3 -> playerEntity.getItemBySlot(EquipmentSlot.HEAD);
+            case 2 -> playerEntity.getItemBySlot(EquipmentSlot.CHEST);
+            case 1 -> playerEntity.getItemBySlot(EquipmentSlot.LEGS);
+            case 0 -> playerEntity.getItemBySlot(EquipmentSlot.FEET);
+            default -> ItemStack.EMPTY;
         };
     }
 
-    public static List<Enchantment> getDefaultEnchantments() {
-        List<Enchantment> enchantments = new ArrayList<>();
-
-        for (Enchantment enchantment : Registries.ENCHANTMENT) {
-            enchantments.add(enchantment);
-        }
-
-        return enchantments;
+    private double getScale() {
+        return customScale.get() ? scale.get() : Hud.get().getTextScale();
     }
 }

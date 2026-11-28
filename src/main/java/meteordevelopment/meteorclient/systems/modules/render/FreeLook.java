@@ -5,15 +5,15 @@
 
 package meteordevelopment.meteorclient.systems.modules.render;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
-import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.input.Input;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.client.option.Perspective;
-import org.lwjgl.glfw.GLFW;
+import net.minecraft.client.CameraType;
+import net.minecraft.util.Mth;
 
 public class FreeLook extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -22,49 +22,49 @@ public class FreeLook extends Module {
     // General
 
     public final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
-            .name("mode")
-            .description("Which entity to rotate.")
-            .defaultValue(Mode.Player)
-            .build()
+        .name("mode")
+        .description("Which entity to rotate.")
+        .defaultValue(Mode.Player)
+        .build()
     );
 
-    public final Setting<Boolean> togglePerpective = sgGeneral.add(new BoolSetting.Builder()
-            .name("toggle-perspective")
-            .description("Changes your perspective on toggle.")
-            .defaultValue(true)
-            .build()
+    public final Setting<Boolean> togglePerspective = sgGeneral.add(new BoolSetting.Builder()
+        .name("toggle-perspective")
+        .description("Changes your perspective on toggle.")
+        .defaultValue(true)
+        .build()
     );
 
     public final Setting<Double> sensitivity = sgGeneral.add(new DoubleSetting.Builder()
-            .name("camera-sensitivity")
-            .description("How fast the camera moves in camera mode.")
-            .defaultValue(8)
-            .min(0)
-            .sliderMax(10)
-            .build()
+        .name("camera-sensitivity")
+        .description("How fast the camera moves in camera mode.")
+        .defaultValue(8)
+        .min(0)
+        .sliderMax(10)
+        .build()
     );
 
     // Arrows
 
     public final Setting<Boolean> arrows = sgArrows.add(new BoolSetting.Builder()
-            .name("arrows-control-opposite")
-            .description("Allows you to control the other entities rotation with the arrow keys.")
-            .defaultValue(true)
-            .build()
+        .name("arrows-control-opposite")
+        .description("Allows you to control the other entities rotation with the arrow keys.")
+        .defaultValue(true)
+        .build()
     );
 
     private final Setting<Double> arrowSpeed = sgArrows.add(new DoubleSetting.Builder()
-            .name("arrow-speed")
-            .description("Rotation speed with arrow keys.")
-            .defaultValue(4)
-            .min(0)
-            .build()
+        .name("arrow-speed")
+        .description("Rotation speed with arrow keys.")
+        .defaultValue(4)
+        .min(0)
+        .build()
     );
 
     public float cameraYaw;
     public float cameraPitch;
 
-    private Perspective prePers;
+    private CameraType prePers;
 
     public FreeLook() {
         super(Categories.Render, "free-look", "Allows more rotation options in third person.");
@@ -72,20 +72,21 @@ public class FreeLook extends Module {
 
     @Override
     public void onActivate() {
-        cameraYaw = mc.player.getYaw();
-        cameraPitch = mc.player.getPitch();
-        prePers = mc.options.getPerspective();
+        cameraYaw = mc.player.getYRot();
+        cameraPitch = mc.player.getXRot();
+        prePers = mc.options.getCameraType();
 
-        if (prePers != Perspective.THIRD_PERSON_BACK &&  togglePerpective.get()) mc.options.setPerspective(Perspective.THIRD_PERSON_BACK);
+        if (prePers != CameraType.THIRD_PERSON_BACK && togglePerspective.get())
+            mc.options.setCameraType(CameraType.THIRD_PERSON_BACK);
     }
 
     @Override
     public void onDeactivate() {
-        if (mc.options.getPerspective() != prePers && togglePerpective.get()) mc.options.setPerspective(prePers);
+        if (prePers != null && mc.options.getCameraType() != prePers && togglePerspective.get()) mc.options.setCameraType(prePers);
     }
 
     public boolean playerMode() {
-        return isActive() && mc.options.getPerspective() == Perspective.THIRD_PERSON_BACK && mode.get() == Mode.Player;
+        return isActive() && mc.options.getCameraType() == CameraType.THIRD_PERSON_BACK && mode.get() == Mode.Player;
     }
 
     public boolean cameraMode() {
@@ -98,29 +99,29 @@ public class FreeLook extends Module {
             for (int i = 0; i < (arrowSpeed.get() * 2); i++) {
                 switch (mode.get()) {
                     case Player -> {
-                        if (Input.isKeyPressed(GLFW.GLFW_KEY_LEFT)) cameraYaw -= 0.5;
-                        if (Input.isKeyPressed(GLFW.GLFW_KEY_RIGHT)) cameraYaw += 0.5;
-                        if (Input.isKeyPressed(GLFW.GLFW_KEY_UP)) cameraPitch -= 0.5;
-                        if (Input.isKeyPressed(GLFW.GLFW_KEY_DOWN)) cameraPitch += 0.5;
+                        if (Input.isKeyPressed(InputConstants.KEY_LEFT)) cameraYaw -= 0.5;
+                        if (Input.isKeyPressed(InputConstants.KEY_RIGHT)) cameraYaw += 0.5;
+                        if (Input.isKeyPressed(InputConstants.KEY_UP)) cameraPitch -= 0.5;
+                        if (Input.isKeyPressed(InputConstants.KEY_DOWN)) cameraPitch += 0.5;
                     }
                     case Camera -> {
-                        float yaw = mc.player.getYaw();
-                        float pitch = mc.player.getPitch();
+                        float yaw = mc.player.getYRot();
+                        float pitch = mc.player.getXRot();
 
-                        if (Input.isKeyPressed(GLFW.GLFW_KEY_LEFT)) yaw -= 0.5;
-                        if (Input.isKeyPressed(GLFW.GLFW_KEY_RIGHT)) yaw += 0.5;
-                        if (Input.isKeyPressed(GLFW.GLFW_KEY_UP)) pitch -= 0.5;
-                        if (Input.isKeyPressed(GLFW.GLFW_KEY_DOWN)) pitch += 0.5;
+                        if (Input.isKeyPressed(InputConstants.KEY_LEFT)) yaw -= 0.5;
+                        if (Input.isKeyPressed(InputConstants.KEY_RIGHT)) yaw += 0.5;
+                        if (Input.isKeyPressed(InputConstants.KEY_UP)) pitch -= 0.5;
+                        if (Input.isKeyPressed(InputConstants.KEY_DOWN)) pitch += 0.5;
 
-                        mc.player.setYaw(yaw);
-                        mc.player.setPitch(pitch);
+                        mc.player.setYRot(yaw);
+                        mc.player.setXRot(pitch);
                     }
                 }
             }
         }
 
-        mc.player.setPitch(Utils.clamp(mc.player.getPitch(), -90, 90));
-        cameraPitch = Utils.clamp(cameraPitch, -90, 90);
+        mc.player.setXRot(Mth.clamp(mc.player.getXRot(), -90, 90));
+        cameraPitch = Mth.clamp(cameraPitch, -90, 90);
     }
 
     public enum Mode {

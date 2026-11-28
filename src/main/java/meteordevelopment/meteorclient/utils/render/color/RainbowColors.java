@@ -32,6 +32,9 @@ public class RainbowColors {
 
     public static final RainbowColor GLOBAL = new RainbowColor();
 
+    private RainbowColors() {
+    }
+
     @PostInit
     public static void init() {
         MeteorClient.EVENT_BUS.subscribe(RainbowColors.class);
@@ -84,7 +87,7 @@ public class RainbowColors {
             waypoint.color.get().update();
         }
 
-        if (mc.currentScreen instanceof WidgetScreen) {
+        if (mc.gui.screen() instanceof WidgetScreen) {
             for (SettingGroup group : GuiThemes.get().settings) {
                 for (Setting<?> setting : group) {
                     if (setting instanceof ColorSetting) ((SettingColor) setting.get()).update();

@@ -5,8 +5,6 @@
 
 package meteordevelopment.meteorclient.systems.modules.misc;
 
-//Updated by squidoodly 24/07/2020
-
 import meteordevelopment.meteorclient.events.entity.EntityAddedEvent;
 import meteordevelopment.meteorclient.settings.BoolSetting;
 import meteordevelopment.meteorclient.settings.Setting;
@@ -17,23 +15,23 @@ import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.world.entity.player.Player;
 
 public class MessageAura extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<String> message = sgGeneral.add(new StringSetting.Builder()
-            .name("message")
-            .description("The specified message sent to the player.")
-            .defaultValue("Meteor on Crack!")
-            .build()
+        .name("message")
+        .description("The specified message sent to the player.")
+        .defaultValue("Meteor on Crack!")
+        .build()
     );
 
     private final Setting<Boolean> ignoreFriends = sgGeneral.add(new BoolSetting.Builder()
-            .name("ignore-friends")
-            .description("Will not send any messages to people friended.")
-            .defaultValue(false)
-            .build()
+        .name("ignore-friends")
+        .description("Will not send any messages to people friended.")
+        .defaultValue(false)
+        .build()
     );
 
     public MessageAura() {
@@ -42,10 +40,10 @@ public class MessageAura extends Module {
 
     @EventHandler
     private void onEntityAdded(EntityAddedEvent event) {
-        if (!(event.entity instanceof PlayerEntity) || event.entity.getUuid().equals(mc.player.getUuid())) return;
+        if (!(event.entity instanceof Player) || event.entity.getUUID().equals(mc.player.getUUID())) return;
 
-        if (!ignoreFriends.get() || (ignoreFriends.get() && !Friends.get().isFriend((PlayerEntity)event.entity))) {
-            ChatUtils.sendPlayerMsg("/msg " + event.entity.getEntityName() + " " + message.get());
+        if (!ignoreFriends.get() || (ignoreFriends.get() && !Friends.get().isFriend((Player) event.entity))) {
+            ChatUtils.sendPlayerMsg("/msg " + event.entity.getName().getString() + " " + message.get());
         }
     }
 }

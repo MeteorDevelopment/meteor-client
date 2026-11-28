@@ -9,8 +9,8 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
 import meteordevelopment.meteorclient.utils.notebot.song.Note;
 import meteordevelopment.meteorclient.utils.notebot.song.Song;
-import net.minecraft.block.enums.Instrument;
-import org.jetbrains.annotations.NotNull;
+import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
+import org.jspecify.annotations.NonNull;
 
 import java.io.*;
 
@@ -26,23 +26,25 @@ public class NBSSongDecoder extends SongDecoder {
 
     /**
      * Parses a Song from a Note Block Studio project file (.nbs)
-     * @see Song
+     *
      * @param songFile .nbs file
      * @return Song object representing a Note Block Studio project
+     * @see Song
      */
     @Override
-    @NotNull
+    @NonNull
     public Song parse(File songFile) throws Exception {
         return parse(new FileInputStream(songFile));
     }
 
     /**
      * Parses a Song from an InputStream and a Note Block Studio project file (.nbs)
-     * @see Song
+     *
      * @param inputStream of a .nbs file
      * @return Song object representing the given .nbs file
+     * @see Song
      */
-    @NotNull
+    @NonNull
     private Song parse(InputStream inputStream) throws Exception {
         Multimap<Integer, Note> notesMap = MultimapBuilder.linkedHashKeys().arrayListValues().build();
 
@@ -80,20 +82,15 @@ public class NBSSongDecoder extends SongDecoder {
         double tick = -1;
         while (true) {
             short jumpTicks = readShort(dataInputStream); // jumps till next tick
-            //System.out.println("Jumps to next tick: " + jumpTicks);
             if (jumpTicks == 0) {
                 break;
             }
             tick += jumpTicks * (20f / speed);
-            //System.out.println("Tick: " + tick);
-            short layer = -1;
             while (true) {
                 short jumpLayers = readShort(dataInputStream); // jumps till next layer
                 if (jumpLayers == 0) {
                     break;
                 }
-                layer += jumpLayers;
-                //System.out.println("Layer: " + layer);
                 byte instrument = dataInputStream.readByte();
 
                 byte key = dataInputStream.readByte();
@@ -103,7 +100,7 @@ public class NBSSongDecoder extends SongDecoder {
                     readShort(dataInputStream); // note block pitch
                 }
 
-                Instrument inst = fromNBSInstrument(instrument);
+                NoteBlockInstrument inst = fromNBSInstrument(instrument);
 
                 // Probably a custom instrument. Ignore this note
                 if (inst == null) continue;
@@ -118,9 +115,6 @@ public class NBSSongDecoder extends SongDecoder {
 
     /**
      * Sets a note at a tick in a song
-     * @param ticks
-     * @param note
-     * @param notesMap
      */
     private static void setNote(int ticks, Note note, Multimap<Integer, Note> notesMap) {
         notesMap.put(ticks, note);
@@ -161,24 +155,24 @@ public class NBSSongDecoder extends SongDecoder {
     }
 
     // Magic Values (https://opennbs.org/nbs)
-    private static Instrument fromNBSInstrument(int instrument) {
+    private static NoteBlockInstrument fromNBSInstrument(int instrument) {
         return switch (instrument) {
-            case 0 -> Instrument.HARP;
-            case 1 -> Instrument.BASS;
-            case 2 -> Instrument.BASEDRUM;
-            case 3 -> Instrument.SNARE;
-            case 4 -> Instrument.HAT;
-            case 5 -> Instrument.GUITAR;
-            case 6 -> Instrument.FLUTE;
-            case 7 -> Instrument.BELL;
-            case 8 -> Instrument.CHIME;
-            case 9 -> Instrument.XYLOPHONE;
-            case 10 -> Instrument.IRON_XYLOPHONE;
-            case 11 -> Instrument.COW_BELL;
-            case 12 -> Instrument.DIDGERIDOO;
-            case 13 -> Instrument.BIT;
-            case 14 -> Instrument.BANJO;
-            case 15 -> Instrument.PLING;
+            case 0 -> NoteBlockInstrument.HARP;
+            case 1 -> NoteBlockInstrument.BASS;
+            case 2 -> NoteBlockInstrument.BASEDRUM;
+            case 3 -> NoteBlockInstrument.SNARE;
+            case 4 -> NoteBlockInstrument.HAT;
+            case 5 -> NoteBlockInstrument.GUITAR;
+            case 6 -> NoteBlockInstrument.FLUTE;
+            case 7 -> NoteBlockInstrument.BELL;
+            case 8 -> NoteBlockInstrument.CHIME;
+            case 9 -> NoteBlockInstrument.XYLOPHONE;
+            case 10 -> NoteBlockInstrument.IRON_XYLOPHONE;
+            case 11 -> NoteBlockInstrument.COW_BELL;
+            case 12 -> NoteBlockInstrument.DIDGERIDOO;
+            case 13 -> NoteBlockInstrument.BIT;
+            case 14 -> NoteBlockInstrument.BANJO;
+            case 15 -> NoteBlockInstrument.PLING;
             default -> null;
         };
     }

@@ -13,18 +13,20 @@ import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.network.packet.s2c.play.WorldTimeUpdateS2CPacket;
+import net.minecraft.network.protocol.game.ClientboundSetTimePacket;
+import net.minecraft.world.clock.ClockNetworkState;
+
+import java.util.Map;
 
 public class TimeChanger extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Double> time = sgGeneral.add(new DoubleSetting.Builder()
-            .name("time")
-            .description("The specified time to be set.")
-            .defaultValue(0)
-            .sliderMin(-20000)
-            .sliderMax(20000)
-            .build()
+        .name("time")
+        .description("The specified time to be set.")
+        .defaultValue(0)
+        .sliderRange(-20000, 20000)
+        .build()
     );
 
     long oldTime;
@@ -35,24 +37,45 @@ public class TimeChanger extends Module {
 
     @Override
     public void onActivate() {
-        oldTime = mc.world.getTime();
+        if (mc.level != null) oldTime = mc.level.getDefaultClockTime();
     }
 
     @Override
     public void onDeactivate() {
-        mc.world.setTimeOfDay(oldTime);
+        if (mc.level == null) return;
+
+        mc.level.dimensionType().defaultClock().ifPresent(clock -> {
+            mc.level.clockManager().handleUpdates(mc.level.getGameTime(), Map.of(clock, new ClockNetworkState(oldTime, 0f, 1f)));
+            mc.level.environmentAttributes().invalidateTickCache();
+        });
     }
 
     @EventHandler
     private void onPacketReceive(PacketEvent.Receive event) {
-        if (event.packet instanceof WorldTimeUpdateS2CPacket) {
-            oldTime = ((WorldTimeUpdateS2CPacket) event.packet).getTime();
+        if (event.packet instanceof ClientboundSetTimePacket packet) {
+            if (mc.level == null) return;
+
+            mc.execute(() -> {
+                if (mc.level != null) {
+                    mc.level.setTimeFromServer(packet.gameTime());
+                    mc.level.dimensionType().defaultClock().ifPresent(clock -> {
+                        ClockNetworkState state = packet.clockUpdates().get(clock);
+                        if (state != null) oldTime = state.totalTicks();
+                    });
+                }
+            });
             event.cancel();
         }
     }
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
-        mc.world.setTimeOfDay(time.get().longValue());
+        if (mc.level == null) return;
+
+        long customTime = time.get().longValue();
+        mc.level.dimensionType().defaultClock().ifPresent(clock -> {
+            mc.level.clockManager().handleUpdates(mc.level.getGameTime(), Map.of(clock, new ClockNetworkState(customTime, 0f, 0f)));
+            mc.level.environmentAttributes().invalidateTickCache();
+        });
     }
 }

@@ -6,39 +6,45 @@
 package meteordevelopment.meteorclient.utils.entity.fakeplayer;
 
 import com.mojang.authlib.GameProfile;
-import net.minecraft.client.network.OtherClientPlayerEntity;
-import net.minecraft.client.network.PlayerListEntry;
-import net.minecraft.entity.player.PlayerEntity;
-import org.jetbrains.annotations.Nullable;
+import meteordevelopment.meteorclient.mixin.AbstractClientPlayerAccessor;
+import meteordevelopment.meteorclient.mixin.EntityAccessor;
+import net.minecraft.client.multiplayer.PlayerInfo;
+import net.minecraft.client.player.RemotePlayer;
+import net.minecraft.world.entity.player.Player;
+import org.jspecify.annotations.Nullable;
 
 import java.util.UUID;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
-public class FakePlayerEntity extends OtherClientPlayerEntity {
-    public boolean doNotPush, hideWhenInsideCamera;
+public class FakePlayerEntity extends RemotePlayer {
+    /**
+     * Disables entity push with this fake player
+     */
+    public boolean doNotPush;
+    /**
+     * Stops rendering the fake player when you are inside it
+     */
+    public boolean hideWhenInsideCamera;
+    /**
+     * Prevents you from interacting with the fake player; will also prevent TargetUtils selecting it as a target
+     */
+    public boolean noHit;
 
-    public FakePlayerEntity(PlayerEntity player, String name, float health, boolean copyInv) {
-        super(mc.world, new GameProfile(UUID.randomUUID(), name));
+    public FakePlayerEntity(Player player, String name, float health, boolean copyInv) {
+        super(mc.level, new GameProfile(UUID.randomUUID(), name));
 
-        copyPositionAndRotation(player);
+        copyPosition(player);
 
-        prevYaw = getYaw();
-        prevPitch = getPitch();
-        headYaw = player.headYaw;
-        prevHeadYaw = headYaw;
-        bodyYaw = player.bodyYaw;
-        prevBodyYaw = bodyYaw;
+        yRotO = getYRot();
+        xRotO = getXRot();
+        yHeadRot = player.yHeadRot;
+        yHeadRotO = yHeadRot;
+        yBodyRot = player.yBodyRot;
+        yBodyRotO = yBodyRot;
 
-        Byte playerModel = player.getDataTracker().get(PlayerEntity.PLAYER_MODEL_PARTS);
-        dataTracker.set(PlayerEntity.PLAYER_MODEL_PARTS, playerModel);
-
-        getAttributes().setFrom(player.getAttributes());
+        getAttributes().assignAllValues(player.getAttributes());
         setPose(player.getPose());
-
-        capeX = getX();
-        capeY = getY();
-        capeZ = getZ();
 
         if (health <= 20) {
             setHealth(health);
@@ -47,26 +53,33 @@ public class FakePlayerEntity extends OtherClientPlayerEntity {
             setAbsorptionAmount(health - 20);
         }
 
-        if (copyInv) getInventory().clone(player.getInventory());
+        if (copyInv) getInventory().replaceWith(player.getInventory());
+    }
+
+    @Override
+    public int getId() {
+        return ((EntityAccessor) this).meteor$getId();
     }
 
     public void spawn() {
         unsetRemoved();
-        mc.world.addEntity(getId(), this);
+        mc.level.addEntity(this);
     }
 
     public void despawn() {
-        mc.world.removeEntity(getId(), RemovalReason.DISCARDED);
+        mc.level.removeEntity(getId(), RemovalReason.DISCARDED);
         setRemoved(RemovalReason.DISCARDED);
     }
 
     @Nullable
     @Override
-    protected PlayerListEntry getPlayerListEntry() {
-        if (playerListEntry == null) {
-            playerListEntry = mc.getNetworkHandler().getPlayerListEntry(mc.player.getUuid());
+    protected PlayerInfo getPlayerInfo() {
+        PlayerInfo entry = super.getPlayerInfo();
+
+        if (entry == null) {
+            ((AbstractClientPlayerAccessor) this).meteor$setPlayerInfo(mc.getConnection().getPlayerInfo(mc.player.getUUID()));
         }
 
-        return playerListEntry;
+        return entry;
     }
 }

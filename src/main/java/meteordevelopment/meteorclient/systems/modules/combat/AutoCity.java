@@ -11,7 +11,6 @@ import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
-import meteordevelopment.meteorclient.systems.modules.world.PacketMine;
 import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.meteorclient.utils.entity.SortPriority;
 import meteordevelopment.meteorclient.utils.entity.TargetUtils;
@@ -19,16 +18,16 @@ import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.player.Rotations;
+import meteordevelopment.meteorclient.utils.player.SwingMode;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Items;
-import net.minecraft.network.packet.c2s.play.HandSwingC2SPacket;
-import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
-import net.minecraft.util.Hand;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Items;
 
 public class AutoCity extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -131,7 +130,7 @@ public class AutoCity extends Module {
         .build()
     );
 
-    private PlayerEntity target;
+    private Player target;
     private BlockPos targetPos;
     private FindItemResult pick;
     private float progress;
@@ -150,15 +149,15 @@ public class AutoCity extends Module {
         }
 
         targetPos = EntityUtils.getCityBlock(target);
-        if (targetPos == null || PlayerUtils.distanceTo(targetPos) > breakRange.get()) {
+        if (targetPos == null || PlayerUtils.squaredDistanceTo(targetPos) > Math.pow(breakRange.get(), 2)) {
             if (chatInfo.get()) error("Couldn't find a good block, disabling.");
             toggle();
             return;
         }
 
         if (support.get()) {
-            BlockPos supportPos = targetPos.down();
-            if (!(PlayerUtils.distanceTo(supportPos) > placeRange.get())) {
+            BlockPos supportPos = targetPos.below();
+            if (PlayerUtils.squaredDistanceTo(supportPos) <= Math.pow(placeRange.get(), 2)) {
                 BlockUtils.place(supportPos, InvUtils.findInHotbar(Items.OBSIDIAN), rotate.get(), 0, true);
             }
         }
@@ -187,7 +186,7 @@ public class AutoCity extends Module {
             return;
         }
 
-        if (PlayerUtils.distanceTo(targetPos) > breakRange.get()) {
+        if (PlayerUtils.squaredDistanceTo(targetPos) > Math.pow(breakRange.get(), 2)) {
             if (chatInfo.get()) error("Couldn't find a target, disabling.");
             toggle();
             return;
@@ -200,7 +199,7 @@ public class AutoCity extends Module {
                 toggle();
                 return;
             }
-            progress += BlockUtils.getBreakDelta(pick.slot(), mc.world.getBlockState(targetPos));
+            progress += BlockUtils.getBreakDelta(pick.slot(), mc.level.getBlockState(targetPos));
             if (progress < 1.0f) return;
         }
 
@@ -212,12 +211,12 @@ public class AutoCity extends Module {
         InvUtils.swap(pick.slot(), switchMode.get() == SwitchMode.Silent);
         if (rotate.get()) Rotations.rotate(Rotations.getYaw(targetPos), Rotations.getPitch(targetPos));
 
-        Direction direction = (mc.player.getY() > targetPos.getY()) ? Direction.UP : Direction.DOWN;
-        if (!done) mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, targetPos, direction));
-        mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, targetPos, direction));
+        Direction direction = BlockUtils.getDirection(targetPos);
+        if (!done)
+            mc.gameMode.startPrediction(mc.level, sequence -> new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK, targetPos, direction, sequence));
+        mc.gameMode.startPrediction(mc.level, sequence -> new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.STOP_DESTROY_BLOCK, targetPos, direction, sequence));
 
-        if (swingHand.get()) mc.player.swingHand(Hand.MAIN_HAND);
-        else mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
+        SwingMode.of(swingHand.get()).attackSwing(InteractionHand.MAIN_HAND);
 
         if (switchMode.get() == SwitchMode.Silent) InvUtils.swapBack();
     }

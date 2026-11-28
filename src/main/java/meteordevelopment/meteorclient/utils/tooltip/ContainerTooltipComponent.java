@@ -5,60 +5,54 @@
 
 package meteordevelopment.meteorclient.utils.tooltip;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import meteordevelopment.meteorclient.utils.misc.MeteorIdentifier;
+import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.utils.render.RenderUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.DrawableHelper;
-import net.minecraft.client.gui.tooltip.TooltipComponent;
-import net.minecraft.client.render.GameRenderer;
-import net.minecraft.client.render.item.ItemRenderer;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.collection.DefaultedList;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.item.ItemStack;
+import org.jspecify.annotations.NonNull;
 
-public class ContainerTooltipComponent implements TooltipComponent, MeteorTooltipData {
-    private static final Identifier TEXTURE_CONTAINER_BACKGROUND = new MeteorIdentifier("textures/container.png");
+public class ContainerTooltipComponent implements ClientTooltipComponent, MeteorTooltipData {
+    private static final Identifier TEXTURE_CONTAINER_BACKGROUND = MeteorClient.identifier("textures/container.png");
 
-    private final DefaultedList<ItemStack> items;
+    private final ItemStack[] items;
     private final Color color;
 
-    public ContainerTooltipComponent(DefaultedList<ItemStack> items, Color color) {
+    public ContainerTooltipComponent(ItemStack[] items, Color color) {
         this.items = items;
         this.color = color;
     }
 
     @Override
-    public TooltipComponent getComponent() {
+    public ClientTooltipComponent getComponent() {
         return this;
     }
 
     @Override
-    public int getHeight() {
+    public int getHeight(@NonNull Font textRenderer) {
         return 67;
     }
 
     @Override
-    public int getWidth(TextRenderer textRenderer) {
+    public int getWidth(@NonNull Font textRenderer) {
         return 176;
     }
 
     @Override
-    public void drawItems(TextRenderer textRenderer, int x, int y, MatrixStack matrices, ItemRenderer itemRenderer) {
-
+    public void extractImage(@NonNull Font font, int x, int y, int width, int height, GuiGraphicsExtractor graphics) {
         // Background
-        RenderSystem.setShader(GameRenderer::getPositionTexProgram);
-        RenderSystem.setShaderColor(color.r / 255f, color.g / 255f, color.b / 255f, color.a / 255f);
-        RenderSystem.setShaderTexture(0, TEXTURE_CONTAINER_BACKGROUND);
-        DrawableHelper.drawTexture(matrices, x, y, 0, 0, 0, 176, 67, 176, 67);
+        graphics.blit(RenderPipelines.GUI_TEXTURED, TEXTURE_CONTAINER_BACKGROUND, x, y, 0, 0, 176, 67, 176, 67, color.getPacked());
 
-        //Contents
+        // Contents
         int row = 0;
         int i = 0;
+
         for (ItemStack itemStack : items) {
-            RenderUtils.drawItem(itemStack, x + 8 + i * 18, y + 7 + row * 18, true);
+            RenderUtils.drawItem(graphics, itemStack, x + 8 + i * 18, y + 7 + row * 18, 1, true, null, false);
 
             i++;
             if (i >= 9) {

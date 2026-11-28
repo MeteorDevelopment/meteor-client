@@ -19,8 +19,8 @@ import meteordevelopment.meteorclient.utils.entity.SortPriority;
 import meteordevelopment.meteorclient.utils.entity.TargetUtils;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.player.Player;
 
 public class CityESP extends Module {
     private final SettingGroup sgRender = settings.createGroup("Render");
@@ -28,24 +28,24 @@ public class CityESP extends Module {
     // Render
 
     private final Setting<ShapeMode> shapeMode = sgRender.add(new EnumSetting.Builder<ShapeMode>()
-            .name("shape-mode")
-            .description("How the shapes are rendered.")
-            .defaultValue(ShapeMode.Both)
-            .build()
+        .name("shape-mode")
+        .description("How the shapes are rendered.")
+        .defaultValue(ShapeMode.Both)
+        .build()
     );
 
     private final Setting<SettingColor> sideColor = sgRender.add(new ColorSetting.Builder()
-            .name("side-color")
-            .description("The side color of the rendering.")
-            .defaultValue(new SettingColor(225, 0, 0, 75))
-            .build()
+        .name("side-color")
+        .description("The side color of the rendering.")
+        .defaultValue(new SettingColor(225, 0, 0, 75))
+        .build()
     );
 
     private final Setting<SettingColor> lineColor = sgRender.add(new ColorSetting.Builder()
-            .name("line-color")
-            .description("The line color of the rendering.")
-            .defaultValue(new SettingColor(225, 0, 0, 255))
-            .build()
+        .name("line-color")
+        .description("The line color of the rendering.")
+        .defaultValue(new SettingColor(225, 0, 0, 255))
+        .build()
     );
 
     private BlockPos target;
@@ -56,9 +56,9 @@ public class CityESP extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
-        PlayerEntity targetEntity = TargetUtils.getPlayerTarget(mc.interactionManager.getReachDistance() + 2, SortPriority.LowestDistance);
+        Player targetEntity = TargetUtils.getPlayerTarget(mc.player.blockInteractionRange() + 2, SortPriority.LowestDistance);
 
-        if (TargetUtils.isBadTarget(targetEntity, mc.interactionManager.getReachDistance() + 2)) {
+        if (TargetUtils.isBadTarget(targetEntity, mc.player.blockInteractionRange() + 2)) {
             target = null;
         } else {
             target = EntityUtils.getCityBlock(targetEntity);

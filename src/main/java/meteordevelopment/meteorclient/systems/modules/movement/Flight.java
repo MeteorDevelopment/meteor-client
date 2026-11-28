@@ -8,20 +8,21 @@ package meteordevelopment.meteorclient.systems.modules.movement;
 import com.google.common.collect.Streams;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
-import meteordevelopment.meteorclient.mixin.ClientPlayerEntityAccessor;
-import meteordevelopment.meteorclient.mixin.PlayerMoveC2SPacketAccessor;
-import meteordevelopment.meteorclient.mixin.PlayerPositionLookS2CPacketAccessor;
+import meteordevelopment.meteorclient.mixin.ClientboundPlayerPositionPacketAccessor;
+import meteordevelopment.meteorclient.mixin.LocalPlayerAccessor;
+import meteordevelopment.meteorclient.mixin.ServerboundMovePlayerPacketAccessor;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.utils.Utils;
+import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.AbstractBlock;
-import net.minecraft.entity.Entity;
-import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
-import net.minecraft.network.packet.s2c.play.PlayerPositionLookS2CPacket;
-import net.minecraft.server.network.ServerPlayNetworkHandler;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.network.protocol.game.ClientboundPlayerAbilitiesPacket;
+import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket;
+import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
+import net.minecraft.world.entity.PositionMoveRotation;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 
 public class Flight extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -32,7 +33,7 @@ public class Flight extends Module {
         .description("The mode for Flight.")
         .defaultValue(Mode.Abilities)
         .onChanged(mode -> {
-            if (!isActive()) return;
+            if (!isActive() || !Utils.canUpdate()) return;
             abilitiesOff();
         })
         .build()
@@ -53,8 +54,13 @@ public class Flight extends Module {
         .build()
     );
 
-
-    // Anti Kick
+    private final Setting<Boolean> noSneak = sgGeneral.add(new BoolSetting.Builder()
+        .name("no-sneak")
+        .description("Prevents you from sneaking while flying.")
+        .defaultValue(false)
+        .visible(() -> mode.get() == Mode.Velocity)
+        .build()
+    );
 
     private final Setting<Boolean> antiRubberbanding = sgAntiKick.add(new BoolSetting.Builder()
         .name("anti-rubberbanding")
@@ -82,7 +88,7 @@ public class Flight extends Module {
 
     private final Setting<Integer> offTime = sgAntiKick.add(new IntSetting.Builder()
         .name("off-time")
-        .description("The amount of delay, in milliseconds, to fly down a bit to reset floating ticks.")
+        .description("The amount of delay, in ticks, to fly down a bit to reset floating ticks.")
         .defaultValue(1)
         .min(1)
         .sliderRange(1, 20)
@@ -104,8 +110,8 @@ public class Flight extends Module {
     public void onActivate() {
         if (mode.get() == Mode.Abilities && !mc.player.isSpectator()) {
             mc.player.getAbilities().flying = true;
-            if (mc.player.getAbilities().creativeMode) return;
-            mc.player.getAbilities().allowFlying = true;
+            if (mc.player.getAbilities().instabuild) return;
+            mc.player.getAbilities().mayfly = true;
         }
     }
 
@@ -118,9 +124,9 @@ public class Flight extends Module {
 
     @EventHandler
     private void onPreTick(TickEvent.Pre event) {
-        float currentYaw = mc.player.getYaw();
-        if (mc.player.fallDistance >= 3f && currentYaw == lastYaw && mc.player.getVelocity().length() < 0.003d) {
-            mc.player.setYaw(currentYaw + (flip ? 1 : -1));
+        float currentYaw = mc.player.getYRot();
+        if (mc.player.fallDistance >= 3f && currentYaw == lastYaw && mc.player.getDeltaMovement().length() < 0.003d) {
+            mc.player.setYRot(currentYaw + (flip ? 1 : -1));
             flip = !flip;
         }
         lastYaw = currentYaw;
@@ -136,7 +142,7 @@ public class Flight extends Module {
 
             if (antiKickMode.get() == AntiKickMode.Packet) {
                 // Resend movement packets
-                ((ClientPlayerEntityAccessor) mc.player).setTicksSinceLastPositionPacketSent(20);
+                ((LocalPlayerAccessor) mc.player).meteor$setPositionReminder(20);
             }
         } else if (delayLeft <= 0) {
             boolean shouldReturn = false;
@@ -148,7 +154,7 @@ public class Flight extends Module {
                 }
             } else if (antiKickMode.get() == AntiKickMode.Packet && offLeft == offTime.get()) {
                 // Resend movement packets
-                ((ClientPlayerEntityAccessor) mc.player).setTicksSinceLastPositionPacketSent(20);
+                ((LocalPlayerAccessor) mc.player).meteor$setPositionReminder(20);
             }
 
             offLeft--;
@@ -156,102 +162,142 @@ public class Flight extends Module {
             if (shouldReturn) return;
         }
 
-        if (mc.player.getYaw() != lastYaw) mc.player.setYaw(lastYaw);
+        if (mc.player.getYRot() != lastYaw) mc.player.setYRot(lastYaw);
 
         switch (mode.get()) {
             case Velocity -> {
-                // TODO: deal with underwater movement, find a way to "spoof" not being in water
-
                 mc.player.getAbilities().flying = false;
-                mc.player.setVelocity(0, 0, 0);
-                Vec3d initialVelocity = mc.player.getVelocity();
-                if (mc.options.jumpKey.isPressed())
-                    mc.player.setVelocity(initialVelocity.add(0, speed.get() * (verticalSpeedMatch.get() ? 10f : 5f), 0));
-                if (mc.options.sneakKey.isPressed())
-                    mc.player.setVelocity(initialVelocity.subtract(0, speed.get() * (verticalSpeedMatch.get() ? 10f : 5f), 0));
+                mc.player.setDeltaMovement(0, 0, 0);
+                Vec3 playerVelocity = mc.player.getDeltaMovement();
+                if (mc.options.keyJump.isDown())
+                    playerVelocity = playerVelocity.add(0, speed.get() * (verticalSpeedMatch.get() ? 10f : 5f), 0);
+                if (mc.options.keyShift.isDown())
+                    playerVelocity = playerVelocity.subtract(0, speed.get() * (verticalSpeedMatch.get() ? 10f : 5f), 0);
+                mc.player.setDeltaMovement(playerVelocity);
+                if (noSneak.get()) {
+                    mc.player.setOnGround(false);
+                }
             }
             case Abilities -> {
                 if (mc.player.isSpectator()) return;
-                mc.player.getAbilities().setFlySpeed(speed.get().floatValue());
+                mc.player.getAbilities().setFlyingSpeed(speed.get().floatValue());
                 mc.player.getAbilities().flying = true;
-                if (mc.player.getAbilities().creativeMode) return;
-                mc.player.getAbilities().allowFlying = true;
+                if (mc.player.getAbilities().instabuild) return;
+                mc.player.getAbilities().mayfly = true;
             }
         }
     }
 
-    private void antiKickPacket(PlayerMoveC2SPacket packet, double currentY) {
+    private void antiKickPacket(ServerboundMovePlayerPacket packet, double currentY) {
         // maximum time we can be "floating" is 80 ticks, so 4 seconds max
         if (this.delayLeft <= 0 && this.lastPacketY != Double.MAX_VALUE &&
-            shouldFlyDown(currentY, this.lastPacketY) && isEntityOnAir(mc.player)) {
+            shouldFlyDown(currentY, this.lastPacketY) && EntityUtils.isOnAir(mc.player)) {
             // actual check is for >= -0.03125D, but we have to do a bit more than that
             // due to the fact that it's a bigger or *equal* to, and not just a bigger than
-            ((PlayerMoveC2SPacketAccessor) packet).setY(lastPacketY - 0.03130D);
+            ((ServerboundMovePlayerPacketAccessor) packet).meteor$setY(lastPacketY - 0.03130D);
         } else {
             lastPacketY = currentY;
         }
     }
 
     /**
-     * @see ServerPlayNetworkHandler#onPlayerMove(PlayerMoveC2SPacket)
+     * @see net.minecraft.network.protocol.game.ServerGamePacketListener#handleMovePlayer(ServerboundMovePlayerPacket)
      */
     @EventHandler
     private void onSendPacket(PacketEvent.Send event) {
-        if (!(event.packet instanceof PlayerMoveC2SPacket packet)) return;
+        if (!(event.packet instanceof ServerboundMovePlayerPacket packet)) return;
 
         if (antiKickMode.get() == AntiKickMode.Packet) {
             double currentY = packet.getY(Double.MAX_VALUE);
             if (currentY != Double.MAX_VALUE) {
                 antiKickPacket(packet, currentY);
             } else {
-                // if the packet is a LookAndOnGround packet or an OnGroundOnly packet then we need to
-                // make it a Full packet or a PositionAndOnGround packet respectively, so it has a Y value
-                PlayerMoveC2SPacket fullPacket;
-                if (packet.changesLook()) {
-                    fullPacket = new PlayerMoveC2SPacket.Full(
+                // if the packet is a Rot packet or an StatusOnly packet then we need to
+                // make it a PosRot packet or a Pos packet respectively, so it has a Y value
+                ServerboundMovePlayerPacket fullPacket;
+                if (packet.hasRotation()) {
+                    fullPacket = new ServerboundMovePlayerPacket.PosRot(
                         mc.player.getX(),
                         mc.player.getY(),
                         mc.player.getZ(),
-                        packet.getYaw(0),
-                        packet.getPitch(0),
-                        packet.isOnGround()
+                        packet.getYRot(0),
+                        packet.getXRot(0),
+                        packet.isOnGround(),
+                        mc.player.horizontalCollision
                     );
                 } else {
-                    fullPacket = new PlayerMoveC2SPacket.PositionAndOnGround(
+                    fullPacket = new ServerboundMovePlayerPacket.Pos(
                         mc.player.getX(),
                         mc.player.getY(),
                         mc.player.getZ(),
-                        packet.isOnGround()
+                        packet.isOnGround(),
+                        mc.player.horizontalCollision
                     );
                 }
                 event.cancel();
                 antiKickPacket(fullPacket, mc.player.getY());
-                mc.getNetworkHandler().sendPacket(fullPacket);
+                mc.getConnection().send(fullPacket);
             }
         } else if (antiKickMode.get() == AntiKickMode.Ground) {
-            if (!packet.changesPosition()) return;
+            if (!packet.hasPosition()) return;
 
-            Box adjustBox = mc.player.getBoundingBox().stretch(0, mc.world.getBottomY(), 0).expand(0.0625);
+            double currentY = packet.getY(Double.MAX_VALUE);
+            ((ServerboundMovePlayerPacketAccessor) packet).meteor$setOnGround(true);
 
-            ((PlayerMoveC2SPacketAccessor) packet).setOnGround(true);
-            Streams.stream(mc.world.getBlockCollisions(mc.player, adjustBox))
-                .mapToDouble(voxelShape -> voxelShape.getBoundingBox().maxY)
-                .max().ifPresent(d -> ((PlayerMoveC2SPacketAccessor) packet).setY(d));
+            double collisionTopY = getCollisionTopY();
+            if (!Double.isNaN(collisionTopY)) {
+                // Never spoof a position above the player's actual one.
+                ((ServerboundMovePlayerPacketAccessor) packet).meteor$setY(Math.min(collisionTopY, currentY));
+            }
         }
     }
 
     @EventHandler
     private void onPacketReceive(PacketEvent.Receive event) {
-        if (antiRubberbanding.get() && event.packet instanceof PlayerPositionLookS2CPacket packet) {
-            mc.player.setPosition(packet.getX(), packet.getY(), packet.getZ());
+        if (!antiRubberbanding.get() || !(event.packet instanceof ClientboundPlayerPositionPacket packet)) return;
+        if (mc.player == null || mc.level == null) return;
 
-            Box adjustBox = mc.player.getBoundingBox().stretch(0, mc.world.getBottomY(), 0).expand(0.0625);
+        Vec3 pos = packet.change().position();
+        mc.player.setPos(pos.x, pos.y, pos.z);
 
-            Streams.stream(mc.world.getBlockCollisions(mc.player, adjustBox))
-                .mapToDouble(voxelShape -> voxelShape.getBoundingBox().maxY)
-                .max()
-                .ifPresent(d -> ((PlayerPositionLookS2CPacketAccessor) packet).setY(Math.max(mc.player.prevY, d)));
-        }
+        double collisionTopY = getCollisionTopY();
+        if (Double.isNaN(collisionTopY)) return;
+
+        double y = Math.max(mc.player.yOld, Math.min(collisionTopY, pos.y));
+        if (y == pos.y) return;
+
+        PositionMoveRotation change = packet.change();
+        ((ClientboundPlayerPositionPacketAccessor) (Object) packet).meteor$setChange(new PositionMoveRotation(
+            new Vec3(pos.x, y, pos.z),
+            change.deltaMovement(),
+            change.yRot(),
+            change.xRot()
+        ));
+    }
+
+    /**
+     * The highest collision top between the bottom of the world and the player, or {@code NaN} if there is none.
+     */
+    private double getCollisionTopY() {
+        if (mc.player == null || mc.level == null) return Double.NaN;
+
+        AABB box = mc.player.getBoundingBox();
+        AABB adjustBox = box.expandTowards(0, Math.min(0, mc.level.getMinY() - box.maxY), 0).inflate(0.0625);
+
+        return Streams.stream(mc.level.getBlockCollisions(mc.player, adjustBox))
+            .mapToDouble(shape -> shape.bounds().maxY)
+            .max()
+            .orElse(Double.NaN);
+    }
+
+    @EventHandler
+    private void onReceivePacket(PacketEvent.Receive event) {
+        if (!(event.packet instanceof ClientboundPlayerAbilitiesPacket packet) || mode.get() != Mode.Abilities) return;
+        event.cancel(); // Cancel packet, so fly won't be toggled
+
+        mc.player.getAbilities().invulnerable = packet.isInvulnerable();
+        mc.player.getAbilities().instabuild = packet.canInstabuild();
+        mc.player.getAbilities().setWalkingSpeed(packet.getWalkingSpeed());
     }
 
     private boolean shouldFlyDown(double currentY, double lastY) {
@@ -262,21 +308,20 @@ public class Flight extends Module {
 
     private void abilitiesOff() {
         mc.player.getAbilities().flying = false;
-        mc.player.getAbilities().setFlySpeed(0.05f);
-        if (mc.player.getAbilities().creativeMode) return;
-        mc.player.getAbilities().allowFlying = false;
+        mc.player.getAbilities().setFlyingSpeed(0.05f);
+        if (mc.player.getAbilities().instabuild) return;
+        mc.player.getAbilities().mayfly = false;
     }
 
-    // Copied from ServerPlayNetworkHandler#isEntityOnAir
-    private boolean isEntityOnAir(Entity entity) {
-        return entity.world.getStatesInBox(entity.getBoundingBox().expand(0.0625).stretch(0.0, -0.55, 0.0)).allMatch(AbstractBlock.AbstractBlockState::isAir);
-    }
-
-    public float getOffGroundSpeed() {
+    public float getFlyingSpeed() {
         // All the multiplication below is to get the speed to roughly match the speed you get when using vanilla fly
 
         if (!isActive() || mode.get() != Mode.Velocity) return -1;
         return speed.get().floatValue() * (mc.player.isSprinting() ? 15f : 10f);
+    }
+
+    public boolean noSneak() {
+        return isActive() && mode.get() == Mode.Velocity && noSneak.get();
     }
 
     public enum Mode {

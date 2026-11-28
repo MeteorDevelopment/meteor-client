@@ -17,11 +17,11 @@ public class HighJump extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Double> multiplier = sgGeneral.add(new DoubleSetting.Builder()
-            .name("jump-multiplier")
-            .description("Jump height multiplier.")
-            .defaultValue(1)
-            .min(0)
-            .build()
+        .name("jump-multiplier")
+        .description("Jump height multiplier.")
+        .defaultValue(1)
+        .min(0)
+        .build()
     );
 
     public HighJump() {
