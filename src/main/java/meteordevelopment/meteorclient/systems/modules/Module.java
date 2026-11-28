@@ -36,6 +36,11 @@ public abstract class Module implements ISerializable<Module>, Comparable<Module
     public final String[] aliases;
     public final Color color;
 
+    /**
+     * Whether this module is a cheat, see {@link ModuleTiers}.
+     */
+    public final ModuleTier tier;
+
     public final MeteorAddon addon;
     public final Settings settings = new Settings();
 
@@ -61,6 +66,7 @@ public abstract class Module implements ISerializable<Module>, Comparable<Module
         this.description = description;
         this.aliases = aliases;
         this.color = Color.fromHsv(Utils.random(0.0, 360.0), 0.35, 1);
+        this.tier = ModuleTiers.get(getClass());
 
         String classname = this.getClass().getName();
         for (MeteorAddon addon : AddonManager.ADDONS) {
@@ -89,6 +95,12 @@ public abstract class Module implements ISerializable<Module>, Comparable<Module
 
     public void toggle() {
         if (!active) {
+            // Cheats do not exist on servers until everyone agreed to them
+            if (!isAvailable()) {
+                CheatGate.get().reportBlocked(this);
+                return;
+            }
+
             active = true;
             Modules.get().addActive(this);
 
@@ -146,6 +158,13 @@ public abstract class Module implements ISerializable<Module>, Comparable<Module
 
     public boolean isActive() {
         return active;
+    }
+
+    /**
+     * Whether the module may be used right now, see {@link CheatGate}.
+     */
+    public boolean isAvailable() {
+        return CheatGate.isAvailable(this);
     }
 
     public String getInfoString() {

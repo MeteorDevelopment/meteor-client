@@ -30,6 +30,7 @@ public class Config extends System<Config> {
     private final SettingGroup sgModules = settings.createGroup("Modules");
     private final SettingGroup sgChat = settings.createGroup("Chat");
     private final SettingGroup sgMisc = settings.createGroup("Misc");
+    private final SettingGroup sgCheatGate = settings.createGroup("Cheat Gate");
 
     // Visual
 
@@ -191,6 +192,33 @@ public class Config extends System<Config> {
         .name("use-team-color")
         .description("Uses player's team color for rendering things like esp and tracers.")
         .defaultValue(true)
+        .build()
+    );
+
+    // Cheat Gate
+
+    public final Setting<Boolean> cheatGate = sgCheatGate.add(new BoolSetting.Builder()
+        .name("cheat-gate")
+        .description("Hides cheat modules on servers until every player online agreed to them in chat. Cheats are always available in singleplayer.")
+        .defaultValue(true)
+        .build()
+    );
+
+    public final Setting<String> cheatKeyword = sgCheatGate.add(new StringSetting.Builder()
+        .name("cheat-keyword")
+        .description("The word every player has to type in chat to unlock cheats.")
+        .defaultValue("cheat")
+        .visible(cheatGate::get)
+        .build()
+    );
+
+    public final Setting<Integer> cheatConsentWindow = sgCheatGate.add(new IntSetting.Builder()
+        .name("consent-window")
+        .description("How many seconds a players message counts towards unlocking cheats. 0 means it never expires.")
+        .defaultValue(300)
+        .min(0)
+        .sliderMax(900)
+        .visible(cheatGate::get)
         .build()
     );
 
