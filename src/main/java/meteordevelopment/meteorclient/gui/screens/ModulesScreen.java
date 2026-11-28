@@ -69,8 +69,9 @@ public class ModulesScreen extends TabScreen {
      * Modules shrink to the screen instead of running over its edge. On a small window the titles get shortened.
      */
     protected double maxWindowWidth() {
+        // Ein Viertel des Bildschirms pro Fenster, damit neben dem GUI noch Welt sichtbar bleibt
         double available = getWindowWidth() - theme.scale(8) * 2;
-        return Math.max(theme.scale(96), Math.min(available, theme.scale(220)));
+        return Math.max(theme.scale(110), Math.min(available, getWindowWidth() / 4.0));
     }
 
     protected double maxTitleWidth() {
@@ -86,6 +87,7 @@ public class ModulesScreen extends TabScreen {
     protected WWindow createCategory(WContainer c, Category category, List<Module> moduleList) {
         WWindow w = theme.window(category.name);
         w.id = category.name;
+        w.maxWidth = maxWindowWidth();
         w.padding = 0;
         w.spacing = 0;
 
@@ -144,6 +146,7 @@ public class ModulesScreen extends TabScreen {
     protected WWindow createSearch(WContainer c) {
         WWindow w = theme.window("Search");
         w.id = "search";
+        w.maxWidth = maxWindowWidth();
         searchWindow = w;
 
         if (theme.categoryIcons()) {

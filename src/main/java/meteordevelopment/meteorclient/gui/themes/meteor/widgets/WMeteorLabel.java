@@ -17,7 +17,7 @@ public class WMeteorLabel extends WLabel implements MeteorWidget {
     @Override
     protected void onRender(GuiRenderer renderer, double mouseX, double mouseY, double delta) {
         if (!text.isEmpty()) {
-            renderer.text(text, x, y, color != null ? color : (title ? theme().titleTextColor.get() : theme().textColor.get()), title);
+            renderer.text(getDisplay(), x, y, color != null ? color : (title ? theme().titleTextColor.get() : theme().textColor.get()), (title ? 1.25 : 1) * textScale);
         }
     }
 }
