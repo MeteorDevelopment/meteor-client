@@ -157,6 +157,8 @@ public class Modules extends System<Modules> {
         Object2IntMap<Pair<Module, String>> modules = new Object2IntOpenHashMap<>();
 
         for (Module module : this.moduleInstances.values()) {
+            if (!module.isAvailable()) continue;
+
             String title = module.title;
             int score = Utils.searchLevenshteinDefault(title, text, false);
 
@@ -183,6 +185,8 @@ public class Modules extends System<Modules> {
         Map<Module, Integer> modules = new ValueComparableMap<>(Comparator.naturalOrder());
 
         for (Module module : this.moduleInstances.values()) {
+            if (!module.isAvailable()) continue;
+
             int lowest = Integer.MAX_VALUE;
             for (SettingGroup sg : module.settings) {
                 for (Setting<?> setting : sg) {

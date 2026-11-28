@@ -18,6 +18,7 @@ import meteordevelopment.meteorclient.gui.widgets.containers.WWindow;
 import meteordevelopment.meteorclient.gui.widgets.input.WTextBox;
 import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.systems.modules.Category;
+import meteordevelopment.meteorclient.systems.modules.CheatGate;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.utils.misc.NbtUtils;
@@ -198,7 +199,7 @@ public class ModulesScreen extends TabScreen {
         List<Module> modules = new ArrayList<>();
 
         for (Module module : Modules.get().getAll()) {
-            if (module.favorite) {
+            if (module.favorite && CheatGate.isAvailable(module)) {
                 modules.add(module);
             }
         }
@@ -237,7 +238,7 @@ public class ModulesScreen extends TabScreen {
             List<Module> moduleList = new ArrayList<>();
             for (Category category : Modules.loopCategories()) {
                 for (Module module : Modules.get().getGroup(category)) {
-                    if (!Config.get().hiddenModules.get().contains(module)) {
+                    if (!Config.get().hiddenModules.get().contains(module) && CheatGate.isAvailable(module)) {
                         moduleList.add(module);
                     }
                 }
