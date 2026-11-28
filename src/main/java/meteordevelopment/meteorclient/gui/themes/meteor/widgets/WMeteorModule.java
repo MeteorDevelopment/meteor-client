@@ -24,6 +24,7 @@ public class WMeteorModule extends WPressable implements MeteorWidget {
     private double titleWidth;
     private final double maxTitleWidth;
     private String displayTitle;
+    private double titleScale = 1;
 
     private double animationProgress1;
 
@@ -56,10 +57,15 @@ public class WMeteorModule extends WPressable implements MeteorWidget {
         if (titleWidth == 0) {
             titleWidth = theme.textWidth(title);
 
-            // Fenster sollen auf jeden Bildschirm passen, lieber ein gekürzter Titel als ein abgeschnittener
+            // Fenster sollen auf jeden Bildschirm passen: erst die Schrift verkleinern, dann kürzen
             if (maxTitleWidth > 0 && titleWidth > maxTitleWidth) {
-                displayTitle = truncate(title, maxTitleWidth);
-                titleWidth = theme.textWidth(displayTitle);
+                titleScale = Math.max(0.7, maxTitleWidth / titleWidth);
+                titleWidth *= titleScale;
+
+                if (titleWidth > maxTitleWidth) {
+                    displayTitle = truncate(title, maxTitleWidth / titleScale);
+                    titleWidth = theme.textWidth(displayTitle) * titleScale;
+                }
             }
         }
 
@@ -111,6 +117,6 @@ public class WMeteorModule extends WPressable implements MeteorWidget {
             x += w - titleWidth;
         }
 
-        renderer.text(displayTitle == null ? title : displayTitle, x, y + pad, theme.textColor.get(), false);
+        renderer.text(displayTitle == null ? title : displayTitle, x, y + pad, theme.textColor.get(), titleScale);
     }
 }
