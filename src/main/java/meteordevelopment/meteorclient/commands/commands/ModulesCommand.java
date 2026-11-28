@@ -7,6 +7,7 @@ package meteordevelopment.meteorclient.commands.commands;
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import meteordevelopment.meteorclient.commands.Command;
+import meteordevelopment.meteorclient.systems.modules.CheatGate;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
@@ -28,7 +29,9 @@ public class ModulesCommand extends Command {
 
             Modules.loopCategories().forEach(category -> {
                 MutableText categoryMessage = Text.literal("");
-                Modules.get().getGroup(category).forEach(module -> categoryMessage.append(getModuleText(module)));
+                Modules.get().getGroup(category).forEach(module -> {
+                    if (CheatGate.isAvailable(module)) categoryMessage.append(getModuleText(module));
+                });
                 ChatUtils.sendMsg(category.name, categoryMessage);
             });
 

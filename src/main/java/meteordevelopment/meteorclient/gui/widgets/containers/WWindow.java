@@ -8,6 +8,7 @@ package meteordevelopment.meteorclient.gui.widgets.containers;
 import meteordevelopment.meteorclient.gui.renderer.GuiRenderer;
 import meteordevelopment.meteorclient.gui.utils.Cell;
 import meteordevelopment.meteorclient.gui.utils.WindowConfig;
+import meteordevelopment.meteorclient.gui.widgets.WLabel;
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WTriangle;
 import net.minecraft.client.gui.Click;
@@ -21,6 +22,7 @@ import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_RIGHT;
 
 public abstract class WWindow extends WVerticalList {
     public double padding = 8;
+    public double maxWidth;
     public Consumer<WContainer> beforeHeaderInit;
     public String id;
 
@@ -44,6 +46,14 @@ public abstract class WWindow extends WVerticalList {
     public WWindow(WWidget icon, String title) {
         this.icon = icon;
         this.title = title;
+    }
+
+    @Override
+    protected void onCalculateSize() {
+        super.onCalculateSize();
+
+        // Fenster nie breiter als erlaubt, sonst laeuft die Kopfzeile ueber den Bildschirm
+        if (maxWidth > 0 && width > maxWidth) width = maxWidth;
     }
 
     @Override
@@ -157,7 +167,11 @@ public abstract class WWindow extends WVerticalList {
                 beforeHeaderInit.accept(this);
             }
 
-            add(theme.label(title, true)).expandCellX().center().pad(4);
+            WLabel titleLabel = theme.label(title, true);
+            // Platz fuer Icon, Pfeil und Raender lassen, der Titel bekommt den Rest
+            if (maxWidth > 0) titleLabel.maxWidth = Math.max(theme.scale(24), maxWidth - theme.scale(78));
+
+            add(titleLabel).expandCellX().center().pad(4);
 
             triangle = add(theme.triangle()).pad(4).right().centerY().widget();
             triangle.action = () -> setExpanded(!expanded);
@@ -176,6 +190,10 @@ public abstract class WWindow extends WVerticalList {
 
         @Override
         protected void onCalculateSize() {
+            super.onCalculateSize();
+
+            // Kopfzeile bleibt im Fenster
+            if (maxWidth > 0 && width > maxWidth) width = maxWidth;
             width = 0;
             height = 0;
 

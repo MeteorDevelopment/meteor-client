@@ -24,6 +24,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 
+import java.util.Comparator;
 import java.util.List;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
@@ -120,19 +121,21 @@ public class GuiRenderer {
         r.render();
         rTex.render("u_Texture", TEXTURE.getGlTextureView(), TEXTURE.getSampler());
 
-        // Normal text
-        theme.textRenderer().begin(theme.scale(1));
-        for (TextOperation text : texts) {
-            if (!text.title) text.run(textPool);
-        }
-        theme.textRenderer().end();
+        // Text, nach Schriftgroesse gruppiert, damit kleiner Text nicht das ganze Fenster verkleinert
+        texts.sort(Comparator.comparingDouble(operation -> operation.scale));
 
-        // Title text
-        theme.textRenderer().begin(theme.scale(1.25));
+        double currentScale = -1;
         for (TextOperation text : texts) {
-            if (text.title) text.run(textPool);
+            if (text.scale != currentScale) {
+                if (currentScale != -1) theme.textRenderer().end();
+
+                theme.textRenderer().begin(theme.scale(text.scale));
+                currentScale = text.scale;
+            }
+
+            text.run(textPool);
         }
-        theme.textRenderer().end();
+        if (currentScale != -1) theme.textRenderer().end();
 
         texts.clear();
 
@@ -245,7 +248,11 @@ public class GuiRenderer {
     }
 
     public void text(String text, double x, double y, Color color, boolean title) {
-        texts.add(getOp(textPool, x, y, color).set(text, theme.textRenderer(), title));
+        text(text, x, y, color, title ? 1.25 : 1);
+    }
+
+    public void text(String text, double x, double y, Color color, double scale) {
+        texts.add(getOp(textPool, x, y, color).set(text, theme.textRenderer(), scale));
     }
 
     public void texture(double x, double y, double width, double height, double rotation, Texture texture) {

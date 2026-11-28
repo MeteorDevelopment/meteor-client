@@ -12,10 +12,12 @@ import meteordevelopment.meteorclient.gui.utils.Cell;
 import meteordevelopment.meteorclient.gui.widgets.containers.WContainer;
 import meteordevelopment.meteorclient.gui.widgets.containers.WSection;
 import meteordevelopment.meteorclient.gui.widgets.containers.WVerticalList;
+import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.gui.widgets.containers.WWindow;
 import meteordevelopment.meteorclient.gui.widgets.input.WTextBox;
 import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.systems.modules.Category;
+import meteordevelopment.meteorclient.systems.modules.CheatGate;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.utils.misc.NbtUtils;
@@ -57,11 +59,31 @@ public class ModulesScreen extends TabScreen {
         controller.refresh();
     }
 
+    // Size
+
+    /**
+     * Modules shrink to the screen instead of running over its edge. On a small window the titles get shortened.
+     */
+    protected double maxWindowWidth() {
+        // Ein Viertel des Bildschirms pro Fenster, damit neben dem GUI noch Welt sichtbar bleibt
+        double available = getWindowWidth() - theme.scale(8) * 2;
+        return Math.max(theme.scale(110), Math.min(available, getWindowWidth() / 4.0));
+    }
+
+    protected double maxTitleWidth() {
+        return maxWindowWidth() - theme.scale(24);
+    }
+
+    protected WWidget module(Module module, String title) {
+        return theme.module(module, title, maxTitleWidth());
+    }
+
     // Category
 
     protected WWindow createCategory(WContainer c, Category category, List<Module> moduleList) {
         WWindow w = theme.window(category.name);
         w.id = category.name;
+        w.maxWidth = maxWindowWidth();
         w.padding = 0;
         w.spacing = 0;
 
@@ -75,7 +97,7 @@ public class ModulesScreen extends TabScreen {
         w.view.spacing = 0;
 
         for (Module module : moduleList) {
-            w.add(theme.module(module)).expandX();
+            w.add(module(module, module.title)).expandX();
         }
 
         return w;
@@ -95,7 +117,7 @@ public class ModulesScreen extends TabScreen {
                 int count = 0;
                 for (Pair<Module, String> p : modules) {
                     if (count >= Config.get().moduleSearchCount.get() || count >= modules.size()) break;
-                    section.add(theme.module(p.getLeft(), p.getRight())).expandX();
+                    section.add(module(p.getLeft(), p.getRight())).expandX();
                     count++;
                 }
             }
@@ -110,7 +132,7 @@ public class ModulesScreen extends TabScreen {
                 int count = 0;
                 for (Module module : settings) {
                     if (count >= Config.get().moduleSearchCount.get() || count >= settings.size()) break;
-                    section.add(theme.module(module)).expandX();
+                    section.add(module(module, module.title)).expandX();
                     count++;
                 }
             }
@@ -120,6 +142,7 @@ public class ModulesScreen extends TabScreen {
     protected WWindow createSearch(WContainer c) {
         WWindow w = theme.window("Search");
         w.id = "search";
+        w.maxWidth = maxWindowWidth();
         searchWindow = w;
 
         if (theme.categoryIcons()) {
@@ -194,7 +217,7 @@ public class ModulesScreen extends TabScreen {
         List<Module> modules = new ArrayList<>();
 
         for (Module module : Modules.get().getAll()) {
-            if (module.favorite) {
+            if (module.favorite && CheatGate.isAvailable(module)) {
                 modules.add(module);
             }
         }
@@ -202,7 +225,7 @@ public class ModulesScreen extends TabScreen {
         modules.sort((o1, o2) -> String.CASE_INSENSITIVE_ORDER.compare(o1.name, o2.name));
 
         for (Module module : modules) {
-            w.add(theme.module(module)).expandX();
+            w.add(module(module, module.title)).expandX();
         }
 
         return !modules.isEmpty();
@@ -233,7 +256,7 @@ public class ModulesScreen extends TabScreen {
             List<Module> moduleList = new ArrayList<>();
             for (Category category : Modules.loopCategories()) {
                 for (Module module : Modules.get().getGroup(category)) {
-                    if (!Config.get().hiddenModules.get().contains(module)) {
+                    if (!Config.get().hiddenModules.get().contains(module) && CheatGate.isAvailable(module)) {
                         moduleList.add(module);
                     }
                 }
@@ -270,35 +293,34 @@ public class ModulesScreen extends TabScreen {
             double pad = theme.scale(4);
             double h = theme.scale(40);
 
+            double windowWidth = getWindowWidth();
+            double windowHeight = getWindowHeight();
+
             double x = this.x + pad;
             double y = this.y;
+            double rowHeight = 0;
 
             for (Cell<?> cell : cells) {
-                double windowWidth = getWindowWidth();
-                double windowHeight = getWindowHeight();
-
-                if (x + cell.width > windowWidth) {
-                    x = x + pad;
-                    y += h;
+                // Neue Zeile, wenn das Fenster nicht mehr auf den Bildschirm passt
+                if (x > this.x + pad && x + cell.width > windowWidth) {
+                    x = this.x + pad;
+                    y += rowHeight + pad;
+                    rowHeight = 0;
                 }
 
-                if (x > windowWidth) {
-                    x = windowWidth / 2.0 - cell.width / 2.0;
-                    if (x < 0) x = 0;
-                }
-                if (y > windowHeight) {
-                    y = windowHeight / 2.0 - cell.height / 2.0;
-                    if (y < 0) y = 0;
-                }
+                // Zu breit für den Bildschirm, dann mittig setzen
+                if (x + cell.width > windowWidth) x = Math.max(this.x + pad, windowWidth / 2.0 - cell.width / 2.0);
 
                 cell.x = x;
-                cell.y = y;
+                cell.y = Math.min(y, Math.max(this.y, windowHeight - cell.height));
+                if (cell.y < this.y) cell.y = this.y;
 
                 cell.width = cell.widget().width;
                 cell.height = cell.widget().height;
 
                 cell.alignWidget();
 
+                rowHeight = Math.max(rowHeight, cell.height);
                 x += cell.width + pad;
             }
         }

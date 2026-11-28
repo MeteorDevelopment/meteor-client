@@ -12,12 +12,12 @@ public class TextOperation extends GuiRenderOperation<TextOperation> {
     private String text;
     private TextRenderer renderer;
 
-    public boolean title;
+    public double scale = 1;
 
-    public TextOperation set(String text, TextRenderer renderer, boolean title) {
+    public TextOperation set(String text, TextRenderer renderer, double scale) {
         this.text = text;
         this.renderer = renderer;
-        this.title = title;
+        this.scale = scale;
 
         return this;
     }

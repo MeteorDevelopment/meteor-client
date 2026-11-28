@@ -26,6 +26,13 @@
 ### Installation
 Follow the [guide](https://meteorclient.com/faq/installation) on the wiki.
 
+## Cheat gate
+Every module is classified as `LEGIT`, `BORDERLINE` or `CHEAT` in `systems/modules/ModuleTiers.java`. On servers the
+cheat tier is hidden and gets disabled, so you cannot see or toggle `Flight`, `Reach`, `KillAura`, `Freecam`, ... while
+playing with other people, everything else keeps working. Cheats come back on a server as soon as every player that is
+online typed the keyword `cheat` in chat, so the whole server agrees on them. Keyword, time window and the gate itself
+are configurable in `Config > Cheat Gate`. In singleplayer nothing is ever hidden.
+
 ## Contributions
 We will review and help with all reasonable pull requests as long as the guidelines below are met.
 
