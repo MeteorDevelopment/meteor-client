@@ -54,6 +54,7 @@
     "ChunkAccessAccessor",
     "ChunkBorderRendererMixin",
     "ClientboundExplodePacketMixin",
+    "ClientboundPlayerPositionPacketAccessor",
     "ClientboundSetEntityMotionPacketAccessor",
     "ClientChunkCacheAccessor",
     "ClientChunkMapAccessor",
